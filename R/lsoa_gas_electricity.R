@@ -1,13 +1,36 @@
-dowload_lsoa_electric <- function(){
+dowload_gas_electric <- function(path = file.path(data_path(),"gas_electric")){
+  if(!dir.exists(path)){
+    dir.create(path)
+  } else {
+    fls = list.files(path, pattern = "xlsx")
+    if(length(fls) > 3){
+      return(path)
+    }
+  }
 
   url_elec = "https://assets.publishing.service.gov.uk/media/63a2ea3fd3bf7f375b61c12d/LSOA_domestic_elec_2010-21.xlsx"
+  download.file(url_elec, file.path(path,"lsoa_elec_dom.xlsx"), mode = "wb")
 
-  dir.create(file.path(tempdir(),"gaselec"))
-  download.file(url_elec, file.path(tempdir(),"gaselec","lsoa_elec.xlsx"), mode = "wb")
+  url_elec = "https://assets.publishing.service.gov.uk/media/63a2e9e58fa8f5390dfdf56b/MSOA_non-domestic_elec_2010-21.xlsx"
+  download.file(url_elec, file.path(path,"msoa_elec_nondom.xlsx"), mode = "wb")
+
+  url_gas = "https://assets.publishing.service.gov.uk/media/63a2ef098fa8f53913e8071b/LSOA_domestic_gas_2010-21.xlsx"
+  download.file(url_gas, file.path(path,"lsoa_gas_dom.xlsx"), mode = "wb")
+
+  url_gas = "https://assets.publishing.service.gov.uk/media/63a31f44e90e075870e2cf0f/MSOA_non-domestic_gas_2010-21.xlsx"
+  download.file(url_gas, file.path(path,"msoa_gas_nondom.xlsx"), mode = "wb")
+
+  return(path)
+
+}
+
+
+
+load_lsoa_electric <- function(path){
 
   elec = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(tempdir(),"gaselec","lsoa_elec.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"lsoa_elec_dom.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -30,16 +53,13 @@ dowload_lsoa_electric <- function(){
 
 
 
-dowload_msoa_electric_nondom <- function(){
+load_msoa_electric_nondom <- function(path){
 
-  url_elec = "https://assets.publishing.service.gov.uk/media/63a2e9e58fa8f5390dfdf56b/MSOA_non-domestic_elec_2010-21.xlsx"
 
-  dir.create(file.path(tempdir(),"gaselec"))
-  download.file(url_elec, file.path(tempdir(),"gaselec","msoa_elec.xlsx"), mode = "wb")
 
   elec = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(tempdir(),"gaselec","msoa_elec.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"msoa_elec_nondom.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -61,16 +81,13 @@ dowload_msoa_electric_nondom <- function(){
 
 
 
-dowload_lsoa_gas <- function(){
+load_lsoa_gas <- function(path){
 
-  url_gas = "https://assets.publishing.service.gov.uk/media/63a2ef098fa8f53913e8071b/LSOA_domestic_gas_2010-21.xlsx"
 
-  dir.create(file.path(tempdir(),"gaselec"))
-  download.file(url_gas, file.path(tempdir(),"gaselec","lsoa_gas.xlsx"), mode = "wb")
 
   gas = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(tempdir(),"gaselec","lsoa_gas.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"lsoa_gas_dom.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -93,16 +110,11 @@ dowload_lsoa_gas <- function(){
 
 
 
-dowload_msoa_gas_nondom <- function(){
-
-  url_gas = "https://assets.publishing.service.gov.uk/media/63a31f44e90e075870e2cf0f/MSOA_non-domestic_gas_2010-21.xlsx"
-
-  dir.create(file.path(tempdir(),"gaselec"))
-  download.file(url_gas, file.path(tempdir(),"gaselec","msoa_gas.xlsx"), mode = "wb")
+load_msoa_gas_nondom <- function(path){
 
   gas = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(tempdir(),"gaselec","msoa_elec.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"msoa_elec_nondom.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]

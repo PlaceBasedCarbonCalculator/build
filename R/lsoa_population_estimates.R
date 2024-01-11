@@ -4,6 +4,11 @@
 dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
   if(!dir.exists(path)){
     dir.create(path)
+  } else {
+    fls = list.files(path)
+    if(length(fls) > 10){
+      return(path)
+    }
   }
 
   base_url = "https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/"
@@ -20,17 +25,17 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
   url_2011 = "mid2011/rftmid2011lsoatable.zip"
   url_200211 = "mid2002tomid2011persons/rftlsoaunformattedtablepersons.zip"
 
-  download.file(paste0(base_url,url_2020), destfile = file.path(path,"pop2020.xlsx"))
-  download.file(paste0(base_url,url_2019), destfile = file.path(path,"pop2019.zip"))
-  download.file(paste0(base_url,url_2018), destfile = file.path(path,"pop2018.zip"))
-  download.file(paste0(base_url,url_2017), destfile = file.path(path,"pop2017.zip"))
-  download.file(paste0(base_url,url_2016), destfile = file.path(path,"pop2016.zip"))
-  download.file(paste0(base_url,url_2015), destfile = file.path(path,"pop2015.zip"))
-  download.file(paste0(base_url,url_2014), destfile = file.path(path,"pop2014.zip"))
-  download.file(paste0(base_url,url_2013), destfile = file.path(path,"pop2013.zip"))
-  download.file(paste0(base_url,url_2012), destfile = file.path(path,"pop2012.zip"))
-  download.file(paste0(base_url,url_2011), destfile = file.path(path,"pop2011.zip"))
-  download.file(paste0(base_url,url_200211), destfile = file.path(path,"pop200211.zip"))
+  download.file(paste0(base_url,url_2020), destfile = file.path(path,"pop2020.xlsx"), mode = "wb")
+  download.file(paste0(base_url,url_2019), destfile = file.path(path,"pop2019.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2018), destfile = file.path(path,"pop2018.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2017), destfile = file.path(path,"pop2017.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2016), destfile = file.path(path,"pop2016.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2015), destfile = file.path(path,"pop2015.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2014), destfile = file.path(path,"pop2014.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2013), destfile = file.path(path,"pop2013.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2012), destfile = file.path(path,"pop2012.zip"), mode = "wb")
+  download.file(paste0(base_url,url_2011), destfile = file.path(path,"pop2011.zip"), mode = "wb")
+  download.file(paste0(base_url,url_200211), destfile = file.path(path,"pop200211.zip"), mode = "wb")
 }
 
 
@@ -38,21 +43,17 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
 build_lsoa_population <- function(path = file.path(data_path(),"population")){
 
   # 2020
-  dir.create(file.path(tempdir(),"pop"))
-  unzip(file.path(path,"sape22dt2mid2020lsoasyoaestimatesunformatted.zip"),
-        exdir = "tmp")
-  pop20 <- readxl::read_excel("tmp/SAPE22DT2-mid-2020-lsoa-syoa-estimates-unformatted.xlsx",
+  pop20 <- readxl::read_excel(file.path(path,"pop2020.xlsx"),
                               sheet = "Mid-2020 Persons")
-  unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop20 <- as.data.frame(pop20)
   names(pop20) <- pop20[4,]
   pop20 <- pop20[5:nrow(pop20),]
 
   # 2019
   dir.create(file.path(tempdir(),"pop"))
-  unzip(file.path(path,"sape22dt2mid2019lsoasyoaestimatesunformatted.zip"),
-        exdir = "tmp")
-  pop19 <- readxl::read_excel("tmp/SAPE22DT2-mid-2019-lsoa-syoa-estimates-unformatted.xlsx",
+  unzip(file.path(path,"pop2019.zip"),
+        exdir = file.path(tempdir(),"pop"))
+  pop19 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE22DT2-mid-2019-lsoa-syoa-estimates-unformatted.xlsx"),
                               sheet = "Mid-2019 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop19 <- as.data.frame(pop19)
@@ -62,8 +63,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2018
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2018.zip"),
-        exdir = "tmp")
-  pop18 <- readxl::read_excel("tmp/SAPE21DT1a-mid-2018-on-2019-LA-lsoa-syoa-estimates-formatted.xlsx",
+        exdir = file.path(tempdir(),"pop"))
+  pop18 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE21DT1a-mid-2018-on-2019-LA-lsoa-syoa-estimates-formatted.xlsx"),
                               sheet = "Mid-2018 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop18 <- as.data.frame(pop18)
@@ -73,8 +74,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2017
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2017.zip"),
-        exdir = "tmp")
-  pop17 <- readxl::read_excel("tmp/SAPE20DT1-mid-2017-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop17 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2017-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2017 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop17 <- as.data.frame(pop17)
@@ -84,8 +85,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2016
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2016.zip"),
-        exdir = "tmp")
-  pop16 <- readxl::read_excel("tmp/SAPE20DT1-mid-2016-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop16 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2016-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2016 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop16 <- as.data.frame(pop16)
@@ -95,8 +96,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2015
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2015.zip"),
-        exdir = "tmp")
-  pop15 <- readxl::read_excel("tmp/SAPE20DT1-mid-2015-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop15 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2015-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2015 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop15 <- as.data.frame(pop15)
@@ -106,8 +107,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2014
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2014.zip"),
-        exdir = "tmp")
-  pop14 <- readxl::read_excel("tmp/SAPE20DT1-mid-2014-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop14 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2014-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2014 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop14 <- as.data.frame(pop14)
@@ -117,8 +118,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2013
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2013.zip"),
-        exdir = "tmp")
-  pop13 <- readxl::read_excel("tmp/SAPE20DT1-mid-2013-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop13 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2013-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2013 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop13 <- as.data.frame(pop13)
@@ -128,8 +129,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2012
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2012.zip"),
-        exdir = "tmp")
-  pop12 <- readxl::read_excel("tmp/SAPE20DT1-mid-2012-lsoa-syoa-estimates-formatted.XLS",
+        exdir = file.path(tempdir(),"pop"))
+  pop12 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE20DT1-mid-2012-lsoa-syoa-estimates-formatted.XLS"),
                               sheet = "Mid-2012 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop12 <- as.data.frame(pop12)
@@ -139,8 +140,8 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   # 2011
   dir.create(file.path(tempdir(),"pop"))
   unzip(file.path(path,"pop2011.zip"),
-        exdir = "tmp")
-  pop11 <- readxl::read_excel("tmp/mid-2011-lsoa-quinary-estimates.xls",
+        exdir = file.path(tempdir(),"pop"))
+  pop11 <- readxl::read_excel(file.path(tempdir(),"pop/mid-2011-lsoa-quinary-estimates.xls"),
                               sheet = "Mid-2011 Persons")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop11 <- as.data.frame(pop11)
@@ -149,25 +150,25 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
 
   # 2002 - 2011
   dir.create(file.path(tempdir(),"pop"))
-  unzip(file.path(path,"pop2002-2011.zip"),
-        exdir = "tmp")
-  pop02 <- readxl::read_excel("tmp/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls",
+  unzip(file.path(path,"pop200211.zip"),
+        exdir = file.path(tempdir(),"pop"))
+  pop02 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls"),
                               sheet = "Mid-2002")
-  pop03 <- readxl::read_excel("tmp/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls",
+  pop03 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls"),
                               sheet = "Mid-2003")
-  pop04 <- readxl::read_excel("tmp/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls",
+  pop04 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls"),
                               sheet = "Mid-2004")
-  pop05 <- readxl::read_excel("tmp/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls",
+  pop05 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls"),
                               sheet = "Mid-2005")
-  pop06 <- readxl::read_excel("tmp/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls",
+  pop06 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1a-LSOA-syoa-unformatted-persons-mid2002-to-mid2006.xls"),
                               sheet = "Mid-2006")
-  pop07 <- readxl::read_excel("tmp/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls",
+  pop07 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls"),
                               sheet = "Mid-2007")
-  pop08 <- readxl::read_excel("tmp/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls",
+  pop08 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls"),
                               sheet = "Mid-2008")
-  pop09 <- readxl::read_excel("tmp/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls",
+  pop09 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls"),
                               sheet = "Mid-2009")
-  pop10 <- readxl::read_excel("tmp/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls",
+  pop10 <- readxl::read_excel(file.path(tempdir(),"pop/SAPE8DT1b-LSOA-syoa-unformatted-persons-mid2007-to-mid2010.xls"),
                               sheet = "Mid-2010")
   unlink(file.path(tempdir(),"pop"), recursive = TRUE)
   pop02 <- as.data.frame(pop02)
@@ -182,19 +183,26 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
 
   pop_02_10 <- list(pop02, pop03, pop04, pop05, pop06, pop07, pop08, pop09, pop10)
   names(pop_02_10) <- c(2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010)
-  pop_02_10 <- bind_rows(pop_02_10, .id = "year")
+  pop_02_10 <- dplyr::bind_rows(pop_02_10, .id = "year")
   names(pop_02_10)[96] = c("90+")
   names(pop_02_10)[6:95] <- gsub("p","",names(pop_02_10)[6:95] )
 
-  pop_2012_2020 <- list(pop12, pop13, pop14, pop15, pop16, pop17, pop18, pop19, pop20)
-  names(pop_2012_2020) <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018)
-  pop_2012_2020 <- bind_rows(pop_2012_2020, .id = "year")
+  pop_2012_2018 <- list(pop12, pop13, pop14, pop15, pop16, pop17, pop18)
+  names(pop_2012_2018) <- c(2012, 2013, 2014, 2015, 2016, 2017, 2018)
+  pop_2012_2018 <- dplyr::bind_rows(pop_2012_2018, .id = "year")
+
+  pop_2019_2020 <- list(pop19, pop20)
+  names(pop_2019_2020) <- c(2019, 2020)
+  pop_2019_2020 <- dplyr::bind_rows(pop_2019_2020, .id = "year")
 
   pop_02_10 <- pop_02_10[,c("year","LSOA11CD","all_ages",as.character(0:89),"90+")]
-  pop_2012_2020 <- pop_2012_2020[,c("year","Area Codes" ,"All Ages",as.character(0:89),"90+")]
-  names(pop_2012_2020)[1:3] <- c("year","LSOA11CD","all_ages")
+  pop_2012_2018 <- pop_2012_2018[,c("year","Area Codes" ,"All Ages",as.character(0:89),"90+")]
+  pop_2019_2020 <- pop_2019_2020[,c("year","LSOA Code" ,"All Ages",as.character(0:89),"90+")]
 
-  pop_non_2011 <- rbind(pop_02_10, pop_2012_2020)
+  names(pop_2012_2018)[1:3] <- c("year","LSOA11CD","all_ages")
+  names(pop_2019_2020)[1:3] <- c("year","LSOA11CD","all_ages")
+
+  pop_non_2011 <- rbind(pop_02_10, pop_2012_2018, pop_2019_2020)
 
   pop_non_2011 <- pop_non_2011[substr(pop_non_2011$LSOA11CD,1,3) %in% c("E01","W01"),]
   pop_non_2011$`90+` <- as.numeric(pop_non_2011$`90+`)
@@ -235,7 +243,7 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
   pop11 <- pop11[substr(pop11$LSOA11CD,1,3) %in% c("E01","W01"),]
 
 
-  pop_final <- bind_rows(list(pop_all, pop11))
+  pop_final <- dplyr::bind_rows(list(pop_all, pop11))
   pop_final$year <- as.numeric(pop_final$year)
 
   pop_final <- pop_final[order(pop_final$LSOA11CD,pop_final$year),]
