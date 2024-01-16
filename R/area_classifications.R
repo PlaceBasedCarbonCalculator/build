@@ -1,4 +1,4 @@
-download_area_classifications = function(path = file.path(data_path(),"area_classifications")){
+download_area_classifications = function(path){
   if(!dir.exists(path)){
     dir.create(path)
   } else {
@@ -14,10 +14,10 @@ download_area_classifications = function(path = file.path(data_path(),"area_clas
 }
 
 
-load_area_classifications = function(path = file.path(data_path(),"area_classifications")){
+load_area_classifications = function(path){
 
   dir.create(file.path(tempdir(),"area_classifications"))
-  unzip(file.path(data_path(),"area_classifications","2011censusdata.zip"),
+  unzip(file.path(path,"2011censusdata.zip"),
         exdir = file.path(tempdir(),"area_classifications"))
 
   classif <- readxl::read_xls(file.path(tempdir(),"area_classifications","2011_Census_Data.xls"))

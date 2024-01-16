@@ -78,3 +78,52 @@ read_centroids <- function(path){
   names(bounds)[1:2] = c("LSOA11CD","LSOA11NM")
   bounds
 }
+
+read_postcodes <- function(path){
+  dir.create(file.path(tempdir(),"postcodes"))
+  unzip(path, exdir = file.path(tempdir(),"postcodes"))
+
+  zips <- list.files(file.path(tempdir(),"postcodes","codepoint-poly_4637385"),
+                      recursive = TRUE, pattern = ".zip", full.names = TRUE)
+  postcode_areas <- list()
+  postcodes <- list()
+  for(i in 1:length(zips)){
+    dir.create(file.path(tempdir(),"postcodes2"))
+    unzip(zips[i], exdir = file.path(tempdir(),"postcodes2"))
+    fl <- list.files(file.path(tempdir(),"postcodes2"), full.names = TRUE, pattern = ".shp")
+    if(length(fl) != 1){
+      stop("Multiple files")
+    }
+    pc <- sf::read_sf(fl)
+    pc <- pc[,c("POSTCODE","PC_AREA","geometry")]
+    postcodes[[i]] <- pc
+    rm(pc, fl)
+    unlink(file.path(tempdir(),"postcodes2"), recursive = TRUE)
+  }
+
+  postcodes <- bind_sf(postcodes)
+  postcodes
+}
+
+make_postcode_areas <- function(postcodes){
+  postcodes <- dplyr::group_by(postcodes, PC_AREA)
+  postcodes <- dplyr::summarise(postcodes)
+  postcodes
+}
+
+load_LSOA_2011_2021_lookup <- function(path){
+  file_path = file.path(path, "LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Lookup_for_England_and_Wales_(Version_2).csv")
+  lookup = readr::read_csv(file_path)
+  lookup = lookup[,c("LSOA11CD","LSOA21CD","LSOA21NM","CHGIND","LAD22CD","LAD22NM")]
+  lookup
+}
+
+# Bind list of SF data frames together using faster data.table::rbindlist
+bind_sf = function(x) {
+  if (length(x) == 0) stop("Empty list")
+  geom_name = attr(x[[1]], "sf_column")
+  x = data.table::rbindlist(x, use.names = FALSE)
+  x[[geom_name]] = sf::st_sfc(x[[geom_name]], recompute_bbox = TRUE)
+  x = sf::st_as_sf(x)
+  x
+}

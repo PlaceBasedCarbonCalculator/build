@@ -26,7 +26,7 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
   d125 <- readr::read_csv(file.path(path,"df_VEH0125.csv"))
 
   d125_long <- tidyr::pivot_longer(d125,
-                            cols = names(d125)[6:59],
+                            cols = names(d125)[6:ncol(d125)],
                             names_to = "quarter",
                             values_to = "count")
 

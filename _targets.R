@@ -5,6 +5,7 @@
 
 # Load packages required to define the pipeline:
 library(targets)
+library(sf)
 # library(tarchetypes) # Load other packages as needed.
 
 # Set target options:
@@ -63,8 +64,9 @@ tar_target(parameters, {
 
 # Download Input Datasets -------------------------------------------------
 tar_target(population,{
-  dowload_lsoa_population(path = file.path(parameters$path_data,"population"))
-  pop = build_lsoa_population()
+  path = file.path(parameters$path_data,"population")
+  dowload_lsoa_population(path)
+  pop = build_lsoa_population(path)
   pop
 }),
 
@@ -113,6 +115,15 @@ tar_target(bounds_lsoa21_super_generalised,{
 tar_target(centroids_lsoa11,{
   read_centroids(dl_boundaries)
 }),
+tar_target(bounds_postcodes,{
+  read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20200826.zip"))
+}),
+tar_target(bounds_postcode_area,{
+  make_postcode_areas(bounds_postcodes)
+}),
+tar_target(lookup_lsoa_2011_21,{
+  load_LSOA_2011_2021_lookup(dl_boundaries)
+}),
 
 # Contextual Data
 tar_target(dl_area_classifications,{
@@ -126,13 +137,18 @@ tar_target(area_classifications,{
 
 
 
-# Car Stats
+# Car Registation Statititics
 tar_target(dl_vehicle_registrations,{
   download_dft_vehicle_registrations(path = file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(vehicle_registrations,{
-  # Long running target ~4 hours
-  #load_dft_vehicle_registrations(dl_vehicle_registrations)
+  # Long running target ~1 hour
+  load_dft_vehicle_registrations(dl_vehicle_registrations)
+}),
+# Car Emissions
+tar_target(car_emissions,{
+  # Long running target ~1 hour
+  load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
 }),
 
 # EPCs
@@ -141,15 +157,21 @@ tar_target(vehicle_registrations,{
 
 # Travel to Work
 tar_target(travel2work,{
-  load_travel2work(path = file.path(parameters$path_secure_data,"LSOA Flow Data/Public/WM12EW[CT0489]_lsoa.zip"))
-})
-
+  load_travel2work(path = file.path(parameters$path_secure_data,"LSOA Flow Data/Public/WM12EW[CT0489]_lsoa.zip"),
+                   cents = centroids_lsoa11)
+}),
 
 # Travel to School
+tar_target(dl_pct,{
+  download_pct(path = file.path(parameters$path_data,"pct"))
+}),
 
 # Other Travel
 
 # Consumption
+tar_target(dl_consumption,{
+  download_pct(path = file.path(parameters$path_data,"pct"))
+})
 
 # Flights
 
