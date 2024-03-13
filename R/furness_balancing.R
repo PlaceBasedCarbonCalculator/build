@@ -35,7 +35,7 @@ round_half_random <- function(x) {
 
 
 # Furness method balancing
-furness_partial <- function(mat, rsum, csum, n = 100){
+furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE){
 
   rname <- rownames(mat)
   cname <- colnames(mat)
@@ -81,21 +81,93 @@ furness_partial <- function(mat, rsum, csum, n = 100){
 
 
   # Check
-  if(!all(rowSums(mat_fin) == rsum)){
-    print("\n")
-    print(mat)
-    print(rsum)
-    print(csum)
-    stop("Rows don't match ",i)
+  if(check){
+    if(!all(rowSums(mat_fin) == rsum)){
+      print("\n")
+      print(mat)
+      print(rsum)
+      print(csum)
+      stop("Rows don't match ",i)
+    }
+    if(!all(colSums(mat_fin) == csum)){
+      print("\n")
+      print(mat)
+      print(rsum)
+      print(csum)
+      stop("Cols don't match ",i)
+    }
   }
-  if(!all(colSums(mat_fin) == csum)){
-    print("\n")
-    print(mat)
-    print(rsum)
-    print(csum)
-    stop("Cols don't match ",i)
-  }
+
 
   return(mat_fin)
 }
 
+distribute <- function(total, bins) {
+  # Calculate the base value for each bin
+  base_value <- total %/% bins
+
+  # Calculate the remainder
+  remainder <- total %% bins
+
+  # Create a vector with the base value repeated 'bins' times
+  result <- rep(base_value, bins)
+
+  # Distribute the remainder over the first 'remainder' bins
+  if(remainder > 0){
+    result[seq(1, remainder)] <- result[seq(1, remainder)] + 1
+  }
+
+  return(result)
+}
+
+
+# Furness method balancing
+furness_incomplete <- function(mat, rsum, csum, tt){
+
+  rname <- rownames(mat)
+  cname <- colnames(mat)
+
+  # Generate combinations of number that sum to total
+  n_gaps = sum(is.na(mat))
+  combinations = generate_combinations(tt - sum(mat, na.rm = TRUE), n_gaps)
+
+  combinations_mat <- list()
+  na_indices <- which(is.na(mat))
+  for(i in seq(1, length(combinations))){
+    mat_sub <- mat
+    mat_sub[na_indices] <- combinations[[i]]
+
+    rsum_mat <- rowSums(mat_sub)
+    csum_mat <- colSums(mat_sub)
+
+    if(!all(rsum_mat == rsum, na.rm = TRUE)){
+      mat_sub <- NULL
+    }
+    if(!all(csum_mat == csum, na.rm = TRUE)){
+      mat_sub <- NULL
+    }
+    combinations_mat[[i]] <- mat_sub
+  }
+
+  combinations_mat <- combinations_mat[lengths(combinations_mat) > 0]
+  mat_fin <- combinations_mat[[sample(seq_along(combinations_mat), 1)]]
+
+  return(mat_fin)
+}
+
+
+generate_combinations <- function(t, n, prefix = numeric()) {
+  result <- list()
+  if (n == 1) {
+    if (t > 0) {
+      result <- list(c(prefix, t))
+    }
+  } else {
+    if (n < 1 || t <= 0) return(list())
+    for (i in t:1) {
+      temp <- generate_combinations(t - i, n - 1, c(prefix, i))
+      result <- c(result, temp)
+    }
+  }
+  return(result)
+}

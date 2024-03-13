@@ -79,6 +79,13 @@ read_centroids <- function(path){
   bounds
 }
 
+read_centroids_oa21 <- function(path){
+  file_path = file.path(path, "Output_Areas_2021_PWC_V3_-4067204786746319875.gpkg")
+  bounds <- read_bounds(file_path)
+  bounds <- bounds[,c("OA21CD")]
+  bounds
+}
+
 read_postcodes <- function(path){
   dir.create(file.path(tempdir(),"postcodes"))
   unzip(path, exdir = file.path(tempdir(),"postcodes"))

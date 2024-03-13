@@ -63,11 +63,16 @@ tar_target(parameters, {
 }),
 
 # Download Input Datasets -------------------------------------------------
+# Population
 tar_target(population,{
   path = file.path(parameters$path_data,"population")
   dowload_lsoa_population(path)
   pop = build_lsoa_population(path)
   pop
+}),
+
+tar_target(population_oa21,{
+  load_oa_population(path = file.path(parameters$path_data,"population"))
 }),
 
 # Gas and Electricity
@@ -115,6 +120,9 @@ tar_target(bounds_lsoa21_super_generalised,{
 tar_target(centroids_lsoa11,{
   read_centroids(dl_boundaries)
 }),
+tar_target(centroids_oa21,{
+  read_centroids_oa21(dl_boundaries)
+}),
 tar_target(bounds_postcodes,{
   read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20200826.zip"))
 }),
@@ -123,6 +131,11 @@ tar_target(bounds_postcode_area,{
 }),
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
+}),
+
+tar_target(poi,{
+  read_os_poi(path = file.path(parameters$path_secure_data,"OS/Points of Intrest/2023/Download_2300307.zip"),
+              path_types = file.path(parameters$path_data,"poi/poi_types.csv"))
 }),
 
 # Contextual Data
@@ -137,17 +150,24 @@ tar_target(area_classifications,{
 
 
 
-# Car Registation Statititics
+# Car Registration Statistics
 tar_target(dl_vehicle_registrations,{
   download_dft_vehicle_registrations(path = file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(vehicle_registrations,{
-  # Long running target ~1 hour
+  # Long running target ~2 hour
   load_dft_vehicle_registrations(dl_vehicle_registrations)
+}),
+tar_target(ulev_registrations,{
+  # Long running target ~2 hour
+  load_dft_ulev_registrations(dl_vehicle_registrations)
+}),
+tar_target(ev_registrations,{
+  # Long running target ~2 hour
+  load_dft_ev_registrations(dl_vehicle_registrations)
 }),
 # Car Emissions
 tar_target(car_emissions,{
-  # Long running target ~1 hour
   load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
 }),
 
@@ -170,12 +190,69 @@ tar_target(dl_pct,{
 
 # Consumption
 tar_target(dl_consumption,{
-  download_pct(path = file.path(parameters$path_data,"pct"))
+  download_consumption_footprint(path = file.path(parameters$path_data,"consumption"))
+}),
+
+# Accessibility Analysis
+tar_target(access_poi_circle_15min,{
+  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 5)# 15 min * 20mph
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_circle_30min,{
+  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 10)
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_circle_45min,{
+  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 15)
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_circle_60min,{
+  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 20)
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(lookup_oa2021_lsoa2011,{
+  oa2021tolsoa2011(centroids_oa21, centroids_lsoa11)
+}),
+
+tar_target(access_poi_iso_15min,{
+  zones = ons_isochrones[ons_isochrones$iso_cutoff == 900,] # 15 min
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_iso_30min,{
+  zones = ons_isochrones[ons_isochrones$iso_cutoff == 1800,]
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_iso_45min,{
+  zones = ons_isochrones[ons_isochrones$iso_cutoff == 2700,]
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+tar_target(access_poi_iso_60min,{
+  zones = ons_isochrones[ons_isochrones$iso_cutoff == 3600,]
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21)
+}),
+
+
+# Isochrones
+
+tar_target(ons_isochrones,{
+  load_ons_isochrones(path = file.path(parameters$path_secure_data,"ONS Isochrones"))
 })
+
+
 
 # Flights
 
-# Isochrones
 
 # Transit Stops
 

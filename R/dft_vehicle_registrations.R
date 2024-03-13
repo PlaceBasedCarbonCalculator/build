@@ -40,9 +40,6 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
 
   # Tests c(10624, 74860, 74862, 27538)
   d125_clean = pbapply::pblapply(d125_list, fill_gaps)
-  #saveRDS(d125_clean, "data/DfT LSOA/df_VEH0125_list.Rds")
-
-  #d125_clean = readRDS("data/DfT LSOA/df_VEH0125_list.Rds")
   d125_clean = data.table::rbindlist(d125_clean)
 
 
@@ -56,7 +53,66 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
 }
 
 
+load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
+
+  d135 <- readr::read_csv(file.path(path,"df_VEH0135.csv"))
+
+  d135_long <- tidyr::pivot_longer(d135,
+                                   cols = names(d135)[5:ncol(d135)],
+                                   names_to = "quarter",
+                                   values_to = "count")
+
+  d135_long <- d135_long[grepl("Q1",d135_long$quarter),]
+  d135_long$LSOA11NM <- NULL
+  d135_list <- dplyr::group_by(d135_long, LSOA11CD, quarter)
+  d135_list <- dplyr::group_split(d135_list)
+
+  # Tests c(10624, 74860, 74862, 27538)
+  d135_clean = pbapply::pblapply(d135_list, fill_gaps_135)
+  d135_clean = data.table::rbindlist(d135_clean)
+
+
+  d135_wide = tidyr::pivot_wider(d135_clean,
+                                 id_cols = c("LSOA11CD","quarter"),
+                                 names_from = c("Fuel","Keepership",),
+                                 values_from = "count"
+  )
+  d135_wide
+
+}
+
+
+load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
+
+  d145 <- readr::read_csv(file.path(path,"df_VEH0145.csv"))
+
+  d145_long <- tidyr::pivot_longer(d145,
+                                   cols = names(d145)[5:ncol(d145)],
+                                   names_to = "quarter",
+                                   values_to = "count")
+
+  d145_long <- d145_long[grepl("Q1",d145_long$quarter),]
+  d145_long$LSOA11NM <- NULL
+  d145_list <- dplyr::group_by(d145_long, LSOA11CD, quarter)
+  d145_list <- dplyr::group_split(d145_list)
+
+  # Tests c(10624, 74860, 74862, 27538)
+  d145_clean = pbapply::pblapply(d145_list, fill_gaps_135)
+  d145_clean = data.table::rbindlist(d145_clean)
+
+
+  d145_wide = tidyr::pivot_wider(d145_clean,
+                                 id_cols = c("LSOA11CD","quarter"),
+                                 names_from = c("Fuel","Keepership",),
+                                 values_from = "count"
+  )
+  d145_wide
+
+}
+
+
 fill_gaps = function(x){
+  incomplete = FALSE
   suppressWarnings(x$count2 <- as.numeric(x$count))
   if(all(is.na(x$count2))){
     # No Data
@@ -77,12 +133,30 @@ fill_gaps = function(x){
   x_others = x[!(x$BodyType == "Total" | x$Keepership == "Total"),]
 
   if(any(is.na(x_totals$count2))){
-    # Missing Totals
-    x_others$count2 = ifelse(x_others$count == "[c]",1,x_others$count2)
-    x_others$count = x_others$count2
-    x_others$count2 = NULL
-    return(x_others)
+    tt = x_totals$count2[x_totals$BodyType == "Total" & x_totals$Keepership == "Total"]
+
+    if(is.na(tt)){
+      # Overall Total is between 1 and 4
+      # Missing Totals
+      x_others$count2 = ifelse(x_others$count == "[c]",1,x_others$count2)
+      x_others$count = x_others$count2
+      x_others$count2 = NULL
+
+      #check
+      if(sum(x_others$count) > 4){
+        print(x)
+        stop("Assumed values greater than total ")
+      }
+
+      return(x_others)
+
+    } else {
+      incomplete = TRUE
+    }
+
+
   }
+
 
   # Fill Gaps
   # Make Matrix
@@ -106,7 +180,11 @@ fill_gaps = function(x){
   csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
 
   # Use Furness balancing to fill gaps
-  newmat = furness_partial(mat = y2_mat, rsum, csum)
+  if(incomplete){
+    newmat = furness_incomplete(mat = y2_mat, rsum, csum, tt)
+  } else {
+    newmat = furness_partial(mat = y2_mat, rsum, csum, check = TRUE)
+  }
   newdf = as.data.frame(newmat)
   newdf$BodyType <- rownames(newdf)
   newdf = tidyr::pivot_longer(newdf, cols = c("Company","Private"),names_to = "Keepership", values_to = "count")
@@ -115,8 +193,120 @@ fill_gaps = function(x){
   newdf$quarter = x_others$quarter[1]
   newdf = newdf[,c("LSOA11CD","BodyType","Keepership","LicenceStatus", "quarter","count")]
   return(newdf)
+}
 
 
-  stop(x$LSOA11CD[1]," ",x$quarter[1]," ",x$LicenceStatus[1])
+fill_gaps_135 = function(x){
+
+  incomplete = FALSE
+  suppressWarnings(x$count2 <- as.numeric(x$count))
+  if(all(is.na(x$count2))){
+    # No Data
+    return(NULL)
+  }
+
+  if(all(!is.na(x$count2))){
+    # All Data
+    x$count = x$count2
+    x$count2 = NULL
+    x = x[x$Keepership != "Total",]
+    x = x[x$Fuel != "Total",]
+    return(x)
+  }
+
+  #Missing Data
+  x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
+  x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
+
+  if(any(is.na(x_totals$count2))){
+    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+
+    if(is.na(tt)){
+      # Overall Total is between 1 and 4
+      # Missing Totals
+      x_others$count2 = ifelse(x_others$count == "[c]",1,x_others$count2)
+      x_others$count = x_others$count2
+      x_others$count2 = NULL
+
+      #check
+      if(sum(x_others$count) > 4){
+        print(x)
+        stop("Assumed values greater than total ")
+      }
+
+      return(x_others)
+
+    } else {
+      incomplete = TRUE
+
+      # # Overall Total Know but partial total missing
+      # x_totals_fuel = x_totals[x_totals$Fuel != "Total", ]
+      # x_totals_keep = x_totals[x_totals$Keepership != "Total", ]
+      #
+      # if(anyNA(x_totals_fuel$count2)){
+      #   x_totals_fuel$count2[is.na(x_totals_fuel$count2)] <- distribute(tt - sum(x_totals_fuel$count2, na.rm = TRUE),
+      #                                                                  sum(is.na(x_totals_fuel$count2)))
+      # }
+      # if(anyNA(x_totals_keep$count2)){
+      #   x_totals_keep$count2[is.na(x_totals_keep$count2)] <- distribute(tt - sum(x_totals_keep$count2, na.rm = TRUE),
+      #                                                                   sum(is.na(x_totals_keep$count2)))
+      # }
+      #
+      # x_totals = rbind(x_totals_fuel, x_totals_keep,
+      #                  x_totals[x_totals$Fuel == "Total" & x_totals$Keepership == "Total", ])
+      #
+      # check = FALSE # Disable the check on Furness balancing, as above guesses can be inconsitent
+      # # TODO: come up with a fix for this
+      # # Example
+      # #     ?   5          1   5
+      # # ?   0   ?      2   0   2
+      # # ?   ?   0  --> 2   2!  2
+      # # ?   0   ?      2   0   2
+     }
+
+
+  }
+
+  # Fill Gaps
+  # Make Matrix
+  y = x_others[,c("Fuel","Keepership","count2")]
+  y$id = paste0(y$Fuel, y$Keepership)
+  fuels = unique(y$Fuel)
+  keeperships = unique(y$Keepership)
+  y_missing = data.frame(Fuel = rep(fuels, length(keeperships)),
+                         Keepership = rep(keeperships, each = length(fuels)),
+                         count2 = 0
+  )
+  y_missing$id = paste0(y_missing$Fuel, y_missing$Keepership)
+  y_missing = y_missing[!y_missing$id %in% y$id,]
+  y = rbind(y, y_missing)
+  y$id <- NULL
+  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+  rownames(y2_mat) = y2$Fuel
+  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+  # Use Furness balancing to fill gaps
+  if(incomplete){
+    newmat = furness_incomplete(mat = y2_mat, rsum, csum, tt)
+  } else {
+    newmat = furness_partial(mat = y2_mat, rsum, csum, check = TRUE)
+  }
+
+  newdf = as.data.frame(newmat)
+  newdf$Fuel <- rownames(newdf)
+  newdf = tidyr::pivot_longer(newdf, cols = dplyr::all_of(keeperships), names_to = "Keepership", values_to = "count")
+  newdf$LSOA11CD = x_others$LSOA11CD[1]
+  #newdf$LicenceStatus = x_others$LicenceStatus[1]
+  newdf$quarter = x_others$quarter[1]
+  newdf = newdf[,c("LSOA11CD","Fuel","Keepership", "quarter","count")]
+  return(newdf)
+
+
+
 
 }

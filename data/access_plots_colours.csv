@@ -1,0 +1,43 @@
+groupname,categoryname,count,colour,shape
+"Accommodation, Eating and Drinking",Eating and Drinking,228968,#d9f0a3,15
+"Accommodation, Eating and Drinking",Accommodation,121909,#f7fcb9,15
+Attractions,Historical and Cultural,118173,#a50f15,17
+Attractions,Tourism,71959,#de2d26,17
+Attractions,Recreational,57084,#fb6a4a,17
+Attractions,Botanical and Zoological,26087,#fcae91,17
+Attractions,Landscape Features,6328,#fee5d9,17
+Commercial Services,"Personal, Consumer and Other Services",581609,#000000,19
+Commercial Services,Construction Services,442434,#252525,19
+Commercial Services,Legal and Financial,391201,#525252,19
+Commercial Services,"It, Advertising, Marketing and Media Services",361859,#737373,19
+Commercial Services,Consultancies,221062,#969696,19
+Commercial Services,Repair and Servicing,203919,#bdbdbd,19
+Commercial Services,Property and Development Services,179263,#d9d9d9,19
+Commercial Services,"Transport, Storage and Delivery",174678,#d9d9d9,19
+Commercial Services,Contract Services,152838,#d9d9d9,19
+Commercial Services,Hire Services,133375,#d9d9d9,19
+Commercial Services,Employment and Career Agencies,109036,#d9d9d9,19
+Commercial Services,Engineering Services,98255,#d9d9d9,19
+Commercial Services,Recycling Services,71227,#d9d9d9,19
+Commercial Services,Research and Design,62475,#d9d9d9,19
+Education and Health,Health Practitioners and Establishments,471206,#006d2c,18
+Education and Health,Recreational and Vocational Education,273955,#31a354,18
+Education and Health,"Primary, Secondary and Tertiary Education",155928,#74c476,18
+Education and Health,Health Support Services,94347,#a1d99b,18
+Education and Health,Animal Welfare,92648,#c7e9c0,18
+Education and Health,Education Support Services,27987,#edf8e9,18
+Public Infrastructure,Infrastructure and Facilities,343272,#2171b5,8
+Public Infrastructure,Central and Local Government,264440,#6baed6,8
+Public Infrastructure,Organisations,226139,#bdd7e7,8
+Retail,"Household, Office, Leisure and Garden",959465,#54278f,25
+Retail,"Food, Drink and Multi Item Retail",383229,#756bb1,25
+Retail,Clothing and Accessories,139053,#9e9ac8,25
+Retail,Motoring,95494,#cbc9e2,25
+Sport and Entertainment,Sports Complex,224354,#a63603,23
+Sport and Entertainment,"Venues, Stage and Screen",114119,#e6550d,23
+Sport and Entertainment,Gambling,83473,#fd8d3c,23
+Sport and Entertainment,Sport and Entertainment Support Services,79824,#fdbe85,23
+Sport and Entertainment,Outdoor Pursuits,37241,#feedde,23
+Transport,"Public Transport, Stations and Infrastructure",72571,#ae017e,9
+Transport,Bus Transport,51445,#f768a1,9
+Transport,Road and Rail,33427,#fbb4b9,9
