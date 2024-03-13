@@ -1,6 +1,7 @@
 library(targets)
 library(ggplot2)
 library(dplyr)
+library(sf)
 tar_load(access_poi_circle_30min )
 tar_load(access_poi_iso_30min )
 tar_load(lookup_oa2021_lsoa2011)
@@ -150,7 +151,7 @@ ggplot(ap_crop, aes(x = proximity, y = access, color = lsoa_class_name)) +
 ggsave("plots/access_proximity_LSOAs_15min.png", width = 10, height = 6)
 
 # Map
-bounds = readRDS("D:/OneDrive - University of Leeds/Data/OA Bounadries/GB_LSOA_2011_super_generalised.Rds")
+
 
 acc_sub = acc[acc$classname %in% c("Swimming Pools"),]
 prox_sub = prox[prox$classname %in% c("Swimming Pools"),]
@@ -214,14 +215,15 @@ cols = data.frame(id = c("EA","EB","EC","ED","EE",
 
 ap_crop = left_join(ap_crop, cols, by = c("biv_all" = "id"))
 
-
+bounds = readRDS("D:/OneDrive - University of Leeds/Data/OA Bounadries/GB_LSOA_2011_super_generalised.Rds")
 bounds = left_join(bounds, ap_crop, by = c("code" = "LSOA11CD"))
 bounds = bounds[!is.na(bounds$categoryname),]
 
 library(tmap)
 
 m1 = tm_shape(bounds) +
-  tm_fill(col = "col")
+  tm_fill(col = "col") +
+  tm_scale_bar()
   #tm_borders(col = "black", lwd = 0.01)
 tmap_save(m1, "plots/bivariate_swimming_30min.png", dpi = 300, height = 6, width = 4)
 
