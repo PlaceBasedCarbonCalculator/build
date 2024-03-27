@@ -120,6 +120,9 @@ tar_target(bounds_lsoa21_super_generalised,{
 tar_target(centroids_lsoa11,{
   read_centroids(dl_boundaries)
 }),
+tar_target(centroids_dz11,{
+  read_centroids_dz11(dl_boundaries)
+}),
 tar_target(centroids_oa21,{
   read_centroids_oa21(dl_boundaries)
 }),
@@ -169,6 +172,20 @@ tar_target(ev_registrations,{
 # Car Emissions
 tar_target(car_emissions,{
   load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
+}),
+
+#Car &  Van km (2009-2011 LSOA)
+tar_target(car_km_2009_2011,{
+  read_motoring_along(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3"))
+}),
+
+#TODO: Update to 2023 data
+tar_target(car_km_pc,{
+  read_mot_km_pc(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2021.Rds"))
+}),
+
+tar_target(car_km_lsoa,{
+  extraplote_car_km_trends(car_km_pc, car_km_2009_2011, centroids_lsoa11, centroids_dz11)
 }),
 
 # EPCs

@@ -79,6 +79,17 @@ read_centroids <- function(path){
   bounds
 }
 
+read_centroids_dz11 <- function(path){
+  dir.create(file.path(tempdir(),"dz"))
+  unzip(file.path(path,"SG_DataZoneCent_2011.zip"), exdir = file.path(tempdir(),"dz"))
+  file_path = file.path(tempdir(),"dz", "SG_DataZone_Cent_2011.shp")
+  cents <- sf::read_sf(file_path)
+  unlink(file.path(tempdir(),"dz"), recursive = TRUE)
+  cents <- cents[,c("DataZone","Name")]
+  names(cents)[1:2] = c("LSOA11CD","LSOA11NM")
+  cents
+}
+
 read_centroids_oa21 <- function(path){
   file_path = file.path(path, "Output_Areas_2021_PWC_V3_-4067204786746319875.gpkg")
   bounds <- read_bounds(file_path)
