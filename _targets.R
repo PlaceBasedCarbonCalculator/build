@@ -135,7 +135,17 @@ tar_target(bounds_postcode_area,{
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
 }),
+tar_target(lookup_lsoa_2001_11,{
+  load_LSOA_2001_2011_lookup(dl_boundaries)
+}),
+tar_target(lookup_OA_LSOA_MSOA_classifications,{
+  load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
+}),
 
+
+
+
+# Points of Intrest
 tar_target(poi,{
   read_os_poi(path = file.path(parameters$path_secure_data,"OS/Points of Intrest/2023/Download_2300307.zip"),
               path_types = file.path(parameters$path_data,"poi/poi_types.csv"))
@@ -149,8 +159,24 @@ tar_target(area_classifications,{
   load_area_classifications(dl_area_classifications)
 }),
 
-# Income
+# Census
+tar_target(dl_nomis,{
+  dowload_nomis(path = file.path(parameters$path_data,"nomis"))
+}),
 
+
+# Income
+tar_target(dl_income,{
+  dowload_income_msoa(path = file.path(parameters$path_data,"income"))
+}),
+
+tar_target(income_msoa,{
+  load_msoa_income(path = file.path(parameters$path_data,"income"))
+}),
+
+tar_target(experian_income,{
+  load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
+}),
 
 
 # Car Registration Statistics
@@ -179,9 +205,8 @@ tar_target(car_km_2009_2011,{
   read_motoring_along(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3"))
 }),
 
-#TODO: Update to 2023 data
 tar_target(car_km_pc,{
-  read_mot_km_pc(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2021.Rds"))
+  read_mot_km_pc(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2023.Rds"))
 }),
 
 tar_target(car_km_lsoa,{
@@ -261,7 +286,6 @@ tar_target(access_poi_iso_60min,{
 
 
 # Isochrones
-
 tar_target(ons_isochrones,{
   load_ons_isochrones(path = file.path(parameters$path_secure_data,"ONS Isochrones"))
 })

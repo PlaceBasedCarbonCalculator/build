@@ -1,4 +1,4 @@
-read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2021.Rds")){
+read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2023.Rds")){
   vkm = readRDS(path)
   vkm
 }
@@ -16,7 +16,7 @@ extraplote_car_km_trends = function(car_km_pc, car_km_2009_2011, centroids_lsoa1
 
   #TODO: Update to 2023
   car_km_pc$baseline <- car_km_pc$`2011`
-  car_km_pc[as.character(2005:2021)] <- lapply(car_km_pc[as.character(2005:2021)], function(x){
+  car_km_pc[as.character(2005:2023)] <- lapply(car_km_pc[as.character(2005:2023)], function(x){
     x <- x/car_km_pc$baseline * 1.342153
     x
   })
@@ -41,7 +41,7 @@ extraplote_car_km_trends = function(car_km_pc, car_km_2009_2011, centroids_lsoa1
   #No MOT tests done in City of London (EC & WC)
   #So use us neighbouring W as example
   car_km_2009_2011$PC_AREA[car_km_2009_2011$PC_AREA %in% c("EC","WC")] = "W"
-  car_km_pc <- car_km_pc[,c("PC_AREA",as.character(2006:2021))]
+  car_km_pc <- car_km_pc[,c("PC_AREA",as.character(2006:2023))]
 
   car_km_2009_2011 <- dplyr::left_join(car_km_2009_2011, car_km_pc, by = c("PC_AREA" = "PC_AREA"))
 
@@ -61,6 +61,8 @@ extraplote_car_km_trends = function(car_km_pc, car_km_2009_2011, centroids_lsoa1
   car_km_2009_2011$car_km_19 <- car_km_2009_2011$car_km_11_orig * car_km_2009_2011$`2019`
   car_km_2009_2011$car_km_20 <- car_km_2009_2011$car_km_11_orig * car_km_2009_2011$`2020`
   car_km_2009_2011$car_km_21 <- car_km_2009_2011$car_km_11_orig * car_km_2009_2011$`2021`
+  car_km_2009_2011$car_km_22 <- car_km_2009_2011$car_km_11_orig * car_km_2009_2011$`2022`
+  car_km_2009_2011$car_km_23 <- car_km_2009_2011$car_km_11_orig * car_km_2009_2011$`2023`
 
   car_km_2009_2011$van_km_09 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2009`
   car_km_2009_2011$van_km_10 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2010`
@@ -75,10 +77,12 @@ extraplote_car_km_trends = function(car_km_pc, car_km_2009_2011, centroids_lsoa1
   car_km_2009_2011$van_km_19 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2019`
   car_km_2009_2011$van_km_20 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2020`
   car_km_2009_2011$van_km_21 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2021`
+  car_km_2009_2011$van_km_22 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2022`
+  car_km_2009_2011$van_km_23 <- car_km_2009_2011$van_km_11_orig * car_km_2009_2011$`2023`
 
   car_km_2009_2011 <- car_km_2009_2011[,c("LSOA11","vans_total_09","vans_total_10","vans_total_11",
-                                  paste0("van_km_",10:21),
-                                  paste0("car_km_",10:21))]
+                                  paste0("van_km_",10:23),
+                                  paste0("car_km_",10:23))]
 
   car_km_2009_2011
 

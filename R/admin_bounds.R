@@ -136,6 +136,20 @@ load_LSOA_2011_2021_lookup <- function(path){
   lookup
 }
 
+load_LSOA_2001_2011_lookup <- function(path){
+  file_path = file.path(path, "Lower_Layer_Super_Output_Area_(2001)_to_Lower_Layer_Super_Output_Area_(2011)_to_Local_Authority_District_(2011)_Lookup_in_England_and_Wales.csv")
+  lookup = readr::read_csv(file_path)
+  lookup = lookup[,c("LSOA01CD","LSOA11CD","CHGIND","LAD11CD","LAD11NM")]
+  lookup
+}
+
+load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
+  file_path = file.path(path, "GB_OA_LSOA_MSOA_LAD_Classifications_2017.csv")
+  lookup = readr::read_csv(file_path)
+  lookup = lookup[,c("OA11CD","OAC11CD", "OAC11NM", "LSOA11CD", "SOAC11CD", "SOAC11NM", "MSOA11CD", "LAD17CD", "LAD17NM", "LACCD", "LACNM")]
+  lookup
+}
+
 # Bind list of SF data frames together using faster data.table::rbindlist
 bind_sf = function(x) {
   if (length(x) == 0) stop("Empty list")
