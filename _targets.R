@@ -10,7 +10,7 @@ library(sf)
 
 # Set target options:
 tar_option_set(
-  packages = c("tibble") # packages that your targets need to run
+  packages = c("tibble","sf","readODS","readxl","dplyr","tidyr") # packages that your targets need to run
   # format = "qs", # Optionally set the default storage format. qs is fast.
   #
   # For distributed computing in tar_make(), supply a {crew} controller
@@ -64,7 +64,7 @@ tar_target(parameters, {
 
 # Download Input Datasets -------------------------------------------------
 # Population
-tar_target(population,{
+tar_target(population_2002_2020,{
   path = file.path(parameters$path_data,"population")
   dowload_lsoa_population(path)
   pop = build_lsoa_population(path)
@@ -75,15 +75,45 @@ tar_target(population_oa21,{
   load_oa_population(path = file.path(parameters$path_data,"population"))
 }),
 
+tar_target(population_2021,{
+  load_population_2021(path = file.path(parameters$path_data,"nomis"))
+}),
+
+tar_target(population_scot,{
+  load_scotland_population(path = file.path(parameters$path_data,"population_scotland"))
+}),
+
+tar_target(population,{
+  combine_populations(population_2002_2020, population_2021, population_scot, lookup_lsoa_2011_21)
+}),
+
+tar_target(lsoa_11_21_tools,{
+  lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population_2021)
+}),
+
+
+
 # Gas and Electricity
 tar_target(dl_gas_electric,{
   dowload_gas_electric(path = file.path(parameters$path_data,"gas_electric"))
 }),
-tar_target(domestic_gas,{
+tar_target(domestic_gas_11,{
   load_lsoa_gas(dl_gas_electric)
 }),
-tar_target(domestic_electricity,{
+tar_target(domestic_electricity_11,{
   load_lsoa_electric(dl_gas_electric)
+}),
+tar_target(domestic_gas,{
+  lsoa_gas_to_2021(domestic_gas_11, lsoa_11_21_tools)
+}),
+tar_target(domestic_electricity,{
+  lsoa_electric_to_2021(domestic_electricity_11, lsoa_11_21_tools)
+}),
+tar_target(domestic_gas_emissions,{
+  calculate_gas_emissions(domestic_gas, emissions_factors, population)
+}),
+tar_target(domestic_electricity_emissions,{
+  calculate_electricity_emissions(domestic_electricity, emissions_factors, population)
 }),
 tar_target(nondomestic_gas,{
   load_msoa_gas_nondom(dl_gas_electric)
@@ -110,6 +140,9 @@ tar_target(bounds_westminster,{
 }),
 tar_target(bounds_lsoa21_full,{
   read_bounds_lsoa_full(dl_boundaries)
+}),
+tar_target(bounds_lsoa11_full,{
+  read_bounds_lsoa11_full(dl_boundaries)
 }),
 tar_target(bounds_lsoa21_generalised,{
   read_bounds_lsoa_generalised(dl_boundaries)
@@ -142,10 +175,7 @@ tar_target(lookup_OA_LSOA_MSOA_classifications,{
   load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
 }),
 
-
-
-
-# Points of Intrest
+# Points of Interest
 tar_target(poi,{
   read_os_poi(path = file.path(parameters$path_secure_data,"OS/Points of Intrest/2023/Download_2300307.zip"),
               path_types = file.path(parameters$path_data,"poi/poi_types.csv"))
@@ -176,6 +206,10 @@ tar_target(income_msoa,{
 
 tar_target(experian_income,{
   load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
+}),
+
+tar_target(income_lsoa,{
+  estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
 }),
 
 
@@ -213,9 +247,21 @@ tar_target(car_km_lsoa,{
   extraplote_car_km_trends(car_km_pc, car_km_2009_2011, centroids_lsoa11, centroids_dz11)
 }),
 
-# EPCs
+# TODO: EPCs
 
-# Housing
+# Housing (Age, Building Type, Non-Gas Emissions, heating)
+tar_target(building_age_2011,{
+  load_building_age_2011(path = file.path(parameters$path_secure_data,"CDRC/building age price"))
+}),
+
+tar_target(housing_type_2021,{
+  load_housing_type_2021(path = file.path(parameters$path_data,"nomis"))
+}),
+
+tar_target(central_heating_2021,{
+  load_central_heating_2021(path = file.path(parameters$path_data,"nomis"))
+}),
+
 
 # Travel to Work
 tar_target(travel2work,{
@@ -228,12 +274,22 @@ tar_target(dl_pct,{
   download_pct(path = file.path(parameters$path_data,"pct"))
 }),
 
+#TODO: travel emissions
 # Other Travel
 
 # Consumption
 tar_target(dl_consumption,{
   download_consumption_footprint(path = file.path(parameters$path_data,"consumption"))
 }),
+
+tar_target(consumption_uk,{
+  load_consumption_footprint(dl_consumption)
+}),
+
+tar_target(consumption_income,{
+  load_consumption_income(path = file.path(parameters$path_data,"consumption"))
+}),
+
 
 # Accessibility Analysis
 tar_target(access_poi_circle_15min,{
@@ -284,20 +340,36 @@ tar_target(access_poi_iso_60min,{
   access_counts(zones, poi, centroids_oa21, population_oa21)
 }),
 
-
 # Isochrones
 tar_target(ons_isochrones,{
   load_ons_isochrones(path = file.path(parameters$path_secure_data,"ONS Isochrones"))
-})
-
-
+}),
 
 # Flights
+#TODO: Switch to permanent paths
+tar_target(flights_od,{
+  load_flights_od()
+}),
 
+tar_target(flights_airports,{
+  load_flights_airports(bounds_la = bounds_la)
+}),
+
+tar_target(flights_total_emissions,{
+  get_flights_total_emissions(flights_od, flights_airports)
+}),
+
+tar_target(flights_lsoa_emissions,{
+  get_flights_lsoa_emissions(flights_total_emissions, income_lsoa, population)
+}),
 
 # Transit Stops
 
 # Emissions Footprints
+tar_target(emissions_factors,{
+  load_emissions_factors()
+})
+
 
 # Scenarios
 

@@ -104,32 +104,36 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
 
 
 
-estimate_income = function(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications){
+estimate_income = function(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21){
 
-  #TODO; Finish porting this function
+  lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA11CD","LSOA21CD")]
+  lookup_lsoa_2011_21 = lookup_lsoa_2011_21[!duplicated(lookup_lsoa_2011_21$LSOA21CD),] #TODO: check that is is valid assumption
 
+  lookup_OA_LSOA_MSOA_classifications = lookup_OA_LSOA_MSOA_classifications[,c("LSOA11CD","MSOA11CD")]
+  lookup_OA_LSOA_MSOA_classifications = lookup_OA_LSOA_MSOA_classifications[!duplicated(lookup_OA_LSOA_MSOA_classifications$LSOA11CD),]
 
-  lsoa_income <- left_join(msoa2lsoa, msoa, by = "MSOA11CD")
+  income_msoa = income_msoa[,c("MSOA11","total_annual_income_2020")]
 
-  lsoa_lookup <- lsoa_lookup[lsoa_lookup$LSOA01 %in% income$LSOA01,]
-  lsoa_lookup <- lsoa_lookup[!duplicated(lsoa_lookup$LSOA11),]
+  lookup_lsoa_2001_11 = lookup_lsoa_2001_11[,c("LSOA01CD","LSOA11CD")]
+  lookup_lsoa_2001_11 = lookup_lsoa_2001_11[!duplicated(lookup_lsoa_2001_11$LSOA11CD),]
 
-  lsoa_income <- left_join(lsoa_income, lsoa_lookup, by = c("LSOA11CD" = "LSOA11"))
+  lsoa_income = dplyr::left_join(lookup_OA_LSOA_MSOA_classifications, income_msoa, by = c("MSOA11CD" = "MSOA11"))
+  lsoa_income = dplyr::left_join(lsoa_income, lookup_lsoa_2001_11, by = c("LSOA11CD" = "LSOA11CD"))
+  lsoa_income = dplyr::left_join(lsoa_income, experian_income, by = c("LSOA01CD" = "LSOA01"))
 
-  lsoa_income <- left_join(lsoa_income, income, by = c("LSOA01" = "LSOA01"))
-
-  weightings <- lsoa_income %>%
-    group_by(MSOA11CD) %>%
-    group_split()
+  weightings = dplyr::group_split(lsoa_income, MSOA11CD, .keep = )
 
   income_final <- lapply(weightings, function(x){
-    x$weight <- x$median_household_income / mean(x$median_household_income, na.rm = T)
-    x$income_lsoa <- x$annual_income * x$weight
-    x$income_lsoa[is.na(x$income_lsoa)] <- x$annual_income[1]
+    x$weight <- x$median_household_income / mean(x$median_household_income, na.rm = TRUE)
+    x$income_lsoa <- x$total_annual_income_2020 * x$weight
+    x$income_lsoa[is.na(x$income_lsoa)] <- x$total_annual_income_2020[1]
     x <- x[,c("LSOA11CD","income_lsoa")]
     return(x)
   })
-  income_final <- bind_rows(income_final)
+  income_final <- dplyr::bind_rows(income_final)
 
-  saveRDS(income_final, "data/income/lsoa_income_estimates.Rds")
+  income_final <- dplyr::left_join(lookup_lsoa_2011_21, income_final, by = c("LSOA11CD"))
+  income_final$LSOA11CD = NULL
+
+  income_final
 }

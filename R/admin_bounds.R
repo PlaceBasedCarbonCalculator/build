@@ -159,3 +159,10 @@ bind_sf = function(x) {
   x = sf::st_as_sf(x)
   x
 }
+
+read_bounds_lsoa11_full <- function(path){
+  file_path = file.path(path, "Lower_layer_Super_Output_Areas_Dec_2011_Boundaries_Full_Clipped_BFC_EW_V3_2022_3969098746815328641.gpkg")
+  bounds <- read_bounds(file_path)
+  bounds <- bounds[,c("LSOA11CD","LSOA11NM")]
+  bounds
+}

@@ -41,10 +41,29 @@ dowload_nomis = function(path = file.path(parameters$path_data,"nomis")){
     download.file(url = paste0(baseurl,urls[i]),
                   destfile = file.path(path,urls[i]))
   }
-
-
-
   return(TRUE)
 
-
 }
+
+load_population_2021 = function(path = file.path(parameters$path_data,"nomis")){
+  dat = unzip_nomis(file.path(path,"census2021-ts007a.zip"))
+  names(dat) = c("year","LSOA21NM","LSOA21","all_ages","0-4","5-9","10-14","15-19","20-24",
+                 "25-29","30-34","35-39","40-44","45-49","50-54","55-59",
+                 "60-64","65-69","70-74","75-79","80-84","85+")
+  dat$LSOA21NM = NULL
+  dat
+}
+
+# Helper function to unzip to temp dir and read in LSOA table
+unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
+
+  dir.create(file.path(tempdir(),"nomis"))
+  unzip(file, exdir = file.path(tempdir(),"nomis"))
+  fl = list.files(file.path(tempdir(),"nomis"), pattern = "lsoa.csv", full.names = TRUE)
+  fl = read.csv(fl)
+  unlink(file.path(tempdir(),"nomis"), recursive = TRUE)
+  fl
+}
+
+
+

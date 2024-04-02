@@ -1,0 +1,3 @@
+housing_footprint = function(){
+
+}
