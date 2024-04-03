@@ -19,3 +19,9 @@ load_car_emissions <- function(path){
                                       values_from = c("total_cars","AvgCO2_cars","AvgAge_cars"))
   emissons_wide
 }
+
+calculate_car_emissions = function(car_km_lsoa, car_emissions, population){
+
+
+}
+

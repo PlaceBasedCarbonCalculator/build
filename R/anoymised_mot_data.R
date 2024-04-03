@@ -89,3 +89,41 @@ extraplote_car_km_trends = function(car_km_pc, car_km_2009_2011, centroids_lsoa1
 
 
 }
+
+car_km_11_to_21 = function(car_km_lsoa_11, lsoa_11_21_tools){
+
+  names(car_km_lsoa_11)[1] = "LSOA11CD"
+
+  car_km_S = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
+  car_km_M = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
+  car_km_U = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
+
+  #Unchanged
+  car_km_U = dplyr::left_join(car_km_U, lsoa_11_21_tools$lookup_unchanged, by = "LSOA11CD")
+
+  # Merge
+  car_km_M = dplyr::left_join(car_km_M, lsoa_11_21_tools$lookup_merge, by = "LSOA11CD")
+  car_km_M = dplyr::select(car_km_M, -LSOA11CD)
+  car_km_M = dplyr::group_by(car_km_M, LSOA21CD)
+  car_km_M = dplyr::summarise_all(car_km_M, sum, na.rm = TRUE)
+  car_km_M = dplyr::ungroup(car_km_M)
+
+  #Split
+  car_km_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, car_km_S,
+                                    by = "LSOA11CD", relationship = "many-to-many")
+  car_km_S = as.data.frame(car_km_S)
+  for(i in 5:6){
+    car_km_S[i] = car_km_S[,i ,drop = TRUE] * car_km_S$pop_ratio
+  }
+
+  nms = c("LSOA21CD",paste0("van_km_",10:23),paste0("car_km_",10:23))
+
+  car_km_S = car_km_S[,nms]
+  car_km_M = car_km_M[,nms]
+  car_km_U = car_km_U[,nms]
+
+  final = rbind(car_km_S, car_km_M, car_km_U)
+  final
+
+}
+

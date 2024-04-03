@@ -243,8 +243,12 @@ tar_target(car_km_pc,{
   read_mot_km_pc(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2023.Rds"))
 }),
 
-tar_target(car_km_lsoa,{
+tar_target(car_km_lsoa_11,{
   extraplote_car_km_trends(car_km_pc, car_km_2009_2011, centroids_lsoa11, centroids_dz11)
+}),
+
+tar_target(car_km_lsoa,{
+  car_km_11_to_21(car_km_lsoa_11, lsoa_11_21_tools)
 }),
 
 # TODO: EPCs
@@ -288,6 +292,10 @@ tar_target(consumption_uk,{
 
 tar_target(consumption_income,{
   load_consumption_income(path = file.path(parameters$path_data,"consumption"))
+}),
+
+tar_target(consumption_emissions,{
+  calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa)
 }),
 
 

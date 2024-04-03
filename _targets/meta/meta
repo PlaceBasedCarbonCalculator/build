@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|dabf87dd199035db|||||||||||||||
+.Random.seed|object|b4bc517a89e7a3eb|||||||||||||||
 access_counts|function|2ce053fc43e80f87|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|dd8f99180f005675|485be165ada27072|f48b9d2001c6436b|1222643740||t19787.1100394051s|66b2737f59a7c60e|475672075|rds|local|vector|||556.297||
@@ -25,11 +25,15 @@ bounds_wards|stem|b8fa1f31a69bae5f|b37faa55286577b1|9b0f6ec0c1a787e1|-322400880|
 bounds_westminster|stem|488f79620c0f4a63|3b5ce7420002c1ec|7cf5fb61b70a18cd|669209039||t19734.4746056234s|4a7fcf052fd3a7b3|56876694|rds|local|vector|||2.078||
 build_lsoa_population|function|16788b7cff0945bf|||||||||||||||
 building_age_2011|stem|a669892bc3d258e6|60fa5ef5efc26cf2|69c16df553806754|880289452||t19815.8490953787s|0073a8b669907f90|900667|rds|local|vector|||0.453||
+calcualte_consumption_lsoa|function|4c5f25458fa6e3a5|||||||||||||||
+calculate_consumption_lsoa|function|800260b4d4bc4e38|||||||||||||||
 calculate_electricity_emissions|function|0a2949a91f906c59|||||||||||||||
 calculate_gas_emissions|function|89c5fc6f05317625|||||||||||||||
 car_emissions|stem|4cf2379f3432781c|e61cd4c48fe34999|e37cba6a5208cd29|1401809252||t19734.5163946978s|c26c1aa58fb9903a|3811697|rds|local|vector|||22.5||
+car_km_11_to_21|function|b438fdc46e554949|||||||||||||||
 car_km_2009_2011|stem|133084d4cc6c4425|948f430385624602|eb26707261a952c8|-1996524178||t19809.5678387883s|6d954462d6095d2c|1384156|rds|local|vector|||3.328||
-car_km_lsoa|stem|80e2a287c45a4491|1896b34d4ce4dbac|166cc2debb82a0ad|-1563196007||t19812.8721554959s|b0cb9292e435b479|9081660|rds|local|vector|||2.422||
+car_km_lsoa|stem|637f971acd8e0bde|c6931b646693fe14|00294887dfa0b6d6|-1563196007||t19816.6156680077s|902e0f5dd8cc3a62|7432158|rds|local|vector|||0.359||
+car_km_lsoa_11|stem|80e2a287c45a4491|1896b34d4ce4dbac|166cc2debb82a0ad|1702397539||t19816.6125400742s|b0cb9292e435b479|9081660|rds|local|vector|||2.688||
 car_km_pc|stem|ad2e61b49badd5ff|c3236f367f6e9a7b|436b830a91c9f0f7|-1923925240||t19812.872115393s|c2a182f8cb432e1a|33581292|rds|local|vector|||0.266||
 car_km_pc_2005_2030|stem|33b0fbb6532ebe07|fcc9942102b4c9d5|e62f27878e760686|-485759429||t19809.6126999113s|e0a22a6ecd1ef55e|33579953|rds|local|vector|||0.219||
 central_heating_2021|stem|80775f45d0d9e1db|2b0ce19567d2fc3d|524b363e4603339c|-1718820652||t19815.84906911s|2a57a702ef2212cc|535179|rds|local|vector|||0.375||
@@ -37,8 +41,9 @@ centroids_dz11|stem|f176b36647925a14|067be8e5c17cbb7f|003f5ac66ab777df|-56285236
 centroids_lsoa11|stem|d4da99336969655c|9b6c00c9cfe1b48f|39ffe84c5cfbae11|272958098||t19734.4742162234s|88a9a61a49e75261|604983|rds|local|vector|||0.375||
 centroids_oa21|stem|8846adafbe75cfa0|b65e9e3130abf2a0|04163ebb71d5d0d4|1641376118||t19755.9582132692s|0c178ae9785eec06|3307365|rds|local|vector|||1.438||
 combine_populations|function|ef1693f584505c56|||||||||||||||
+consumption_emissions|stem|b8f7aa8ee930ab5d|3cfaf0167ed30f75|30bd326790cc5e3c|644937076||t19816.5701611795s|1962d1711a0b5645|30182169|rds|local|vector|||1.954||
 consumption_income|stem|bd09abbb6e0269ec|b658594e90abf040|b2a4f7e049d74e65|-446965837||t19815.9760362901s|64cf39f5e2afdc9f|1144|rds|local|vector|||0||
-consumption_uk|stem|0a567cdf8a0907a2|b0c8c184bc408553|59e8a32200e7a658|-1448911560||t19815.975680467s|3a4eabff20174fcb|10084|rds|local|vector|||1.968||
+consumption_uk|stem|556c3dc47a287d26|b0c8c184bc408553|e4fb2ad60eb09aac|-1448911560||t19816.4467213465s|9f9f060d775e3e9a|9818|rds|local|vector|||0.844||
 data_path|function|6d53aa1afdf688d9|||||||||||||||
 data_path_secure|function|200bda2b7006a333|||||||||||||||
 distribute|function|75c3b2060d8ecba9|||||||||||||||
@@ -84,6 +89,7 @@ get_flights_lsoa_emissions|function|6a2ec9e701a12342|||||||||||||||
 get_flights_total_emissions|function|551f59e5d295144d|||||||||||||||
 housing_footprint|function|7f751aef04cd03cd|||||||||||||||
 housing_type_2021|stem|dfe37c74c609f49f|964271eb0b5bf530|043878f6da3aa07c|-659727522||t19815.8490764209s|82d9e12e5b1a2c02|500481|rds|local|vector|||0.453||
+income_bands|function|7c095a6159168132|||||||||||||||
 income_lsoa|stem|68bf24092bbc7f74|6fe3b5a3de5d7df8|647f9869c31e72ed|-1719114136||t19814.8734518521s|8366f0a6831b8a4e|352479|rds|local|vector|||1.875||
 income_msoa|stem|89d1c252cb324d4a|b3880f013af51e9a|23dd1b79349a7300|1646179759||t19812.9666732041s|f7fae3384882a0f9|86788|rds|local|vector|||2.359||
 join_pmtiles|function|f8c5a95910a4018f|||||||||||||||
@@ -91,7 +97,7 @@ load_area_classifications|function|bca57a8cb99e7081|||||||||||||||
 load_building_age_2011|function|d517be5ed7a7787e|||||||||||||||
 load_car_emissions|function|43295b6d87691de6|||||||||||||||
 load_central_heating_2021|function|89f4b778975d749f|||||||||||||||
-load_consumption_footprint|function|494120dfbc7698dc|||||||||||||||
+load_consumption_footprint|function|6c5c4e3d7d92ee36|||||||||||||||
 load_consumption_income|function|ce378323037a60a0|||||||||||||||
 load_dft_ev_registrations|function|d4ed06901bf56df5|||||||||||||||
 load_dft_ulev_registrations|function|36bc1d91df2dc289|||||||||||||||
