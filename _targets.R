@@ -10,7 +10,9 @@ library(sf)
 
 # Set target options:
 tar_option_set(
-  packages = c("tibble","sf","readODS","readxl","dplyr","tidyr") # packages that your targets need to run
+  packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
+               "osmextract","nngeo","pbapply","stplanr","rmapshaper",
+               "igraph") # packages that your targets need to run
   # format = "qs", # Optionally set the default storage format. qs is fast.
   #
   # For distributed computing in tar_make(), supply a {crew} controller
@@ -20,20 +22,6 @@ tar_option_set(
   #
   #   controller = crew::crew_controller_local(workers = 2)
   #
-  # Alternatively, if you want workers to run on a high-performance computing
-  # cluster, select a controller from the {crew.cluster} package. The following
-  # example is a controller for Sun Grid Engine (SGE).
-  #
-  #   controller = crew.cluster::crew_controller_sge(
-  #     workers = 50,
-  #     # Many clusters install R as an environment module, and you can load it
-  #     # with the script_lines argument. To select a specific verison of R,
-  #     # you may need to include a version string, e.g. "module load R/4.3.0".
-  #     # Check with your system administrator if you are unsure.
-  #     script_lines = "module load R"
-  #   )
-  #
-  # Set other options as needed.
 )
 
 # tar_make_clustermq() is an older (pre-{crew}) way to do distributed computing
@@ -76,7 +64,13 @@ tar_target(population_oa21,{
 }),
 
 tar_target(population_2021,{
+  dl_nomis
   load_population_2021(path = file.path(parameters$path_data,"nomis"))
+}),
+
+tar_target(population_2022,{
+  length(population_2002_2020)
+  build_lsoa_population_2022(path = file.path(parameters$path_data,"population"))
 }),
 
 tar_target(population_scot,{
@@ -84,12 +78,15 @@ tar_target(population_scot,{
 }),
 
 tar_target(population,{
-  combine_populations(population_2002_2020, population_2021, population_scot, lookup_lsoa_2011_21)
+  combine_populations(population_2002_2020, population_2021, population_2022, population_scot, lookup_lsoa_2011_21)
 }),
 
 tar_target(lsoa_11_21_tools,{
   lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population_2021)
 }),
+
+
+
 
 
 
@@ -150,6 +147,9 @@ tar_target(bounds_lsoa21_generalised,{
 tar_target(bounds_lsoa21_super_generalised,{
   read_bounds_lsoa_super_generalised(dl_boundaries)
 }),
+tar_target(bounds_dz11,{
+  read_bounds_dz11(dl_boundaries)
+}),
 tar_target(centroids_lsoa11,{
   read_centroids(dl_boundaries)
 }),
@@ -175,11 +175,44 @@ tar_target(lookup_OA_LSOA_MSOA_classifications,{
   load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
 }),
 
+tar_target(bounds_lsoa_GB_full,{
+  combine_lsoa_bounds(bounds_lsoa21_full, bounds_dz11, keep = 1)
+}),
+tar_target(bounds_lsoa_GB_generalised,{
+  combine_lsoa_bounds(bounds_lsoa21_generalised, bounds_dz11, keep = 0.2)
+}),
+tar_target(bounds_lsoa_GB_super_generalised,{
+  combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz11, keep = 0.05)
+}),
+
 # Points of Interest
 tar_target(poi,{
   read_os_poi(path = file.path(parameters$path_secure_data,"OS/Points of Intrest/2023/Download_2300307.zip"),
               path_types = file.path(parameters$path_data,"poi/poi_types.csv"))
 }),
+
+# Land Use
+tar_target(os_land,{
+  zoomstack_sites(dl_os_zoomstack)
+}),
+
+tar_target(os_greenspace,{
+  load_os_greenspace(path = file.path(parameters$path_data,"os_greenspace"))
+}),
+
+tar_target(osm_land,{
+  read_osm_pbf_landuse(path = file.path(parameters$path_data,"osm"))
+}),
+
+tar_target(landcover,{
+  combine_land_use(os_land, os_greenspace, osm_land)
+}),
+
+tar_target(bounds_lsoa_GB_full_landuse,{
+  split_lsoa_landuse(landcover, bounds_lsoa_GB_full)
+}),
+
+
 
 # Contextual Data
 tar_target(dl_area_classifications,{
@@ -201,6 +234,7 @@ tar_target(dl_income,{
 }),
 
 tar_target(income_msoa,{
+  dl_income
   load_msoa_income(path = file.path(parameters$path_data,"income"))
 }),
 
@@ -230,8 +264,14 @@ tar_target(ev_registrations,{
   load_dft_ev_registrations(dl_vehicle_registrations)
 }),
 # Car Emissions
-tar_target(car_emissions,{
+tar_target(car_emissions_11,{
   load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
+}),
+tar_target(car_emissions_perkm,{
+  car_emissions_to_21(car_emissions_11, lsoa_11_21_tools)
+}),
+tar_target(car_emissions,{
+  calculate_car_emissions(car_km_lsoa, car_emissions_perkm, population)
 }),
 
 #Car &  Van km (2009-2011 LSOA)
@@ -259,13 +299,26 @@ tar_target(building_age_2011,{
 }),
 
 tar_target(housing_type_2021,{
+  dl_nomis
   load_housing_type_2021(path = file.path(parameters$path_data,"nomis"))
 }),
 
 tar_target(central_heating_2021,{
+  dl_nomis
   load_central_heating_2021(path = file.path(parameters$path_data,"nomis"))
 }),
 
+tar_target(central_heating_2011,{
+  load_central_heating_2011(path = file.path(parameters$path_data,"nomis","2011"))
+}),
+
+tar_target(central_heating_2011_21,{
+  central_heating_2011_to_2021(central_heating_2011, lsoa_11_21_tools)
+}),
+
+tar_target(other_heating_emissions,{
+  calculate_other_heating(central_heating_2021, central_heating_2011_21, domestic_gas, population)
+}),
 
 # Travel to Work
 tar_target(travel2work,{
@@ -295,7 +348,7 @@ tar_target(consumption_income,{
 }),
 
 tar_target(consumption_emissions,{
-  calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa)
+  calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity)
 }),
 
 
@@ -348,6 +401,21 @@ tar_target(access_poi_iso_60min,{
   access_counts(zones, poi, centroids_oa21, population_oa21)
 }),
 
+#TODO: add the summary data and JSON creation, fucntions in assecc_proximity_funcs.R
+tar_target(access_proximity,{
+  summarise_access_proximity(access_poi_circle_15min,access_poi_iso_15min,
+                             access_poi_circle_30min,access_poi_iso_30min,
+                             access_poi_circle_45min,access_poi_iso_45min,
+                             access_poi_circle_60min,access_poi_iso_60min,
+                             lookup_oa2021_lsoa2011,area_classifications
+  )
+}),
+
+
+
+
+
+
 # Isochrones
 tar_target(ons_isochrones,{
   load_ons_isochrones(path = file.path(parameters$path_secure_data,"ONS Isochrones"))
@@ -376,18 +444,155 @@ tar_target(flights_lsoa_emissions,{
 # Emissions Footprints
 tar_target(emissions_factors,{
   load_emissions_factors()
-})
+}),
 
+tar_target(lsoa_emissions_all,{
+  combine_lsoa_emissions(flights_lsoa_emissions,consumption_emissions,
+                         car_emissions,domestic_electricity_emissions,
+                         domestic_gas_emissions,other_heating_emissions)
+}),
+
+# OS data
+tar_target(dl_os_zoomstack,{
+  download_os_zoomstack(path = file.path(parameters$path_data,"os_zoomstack"))
+}),
+
+tar_target(zoomstack_buildings_lst_4326,{
+  # Long running target ~ 9 hours
+  zoomstack_buildings_lsoa(dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised)
+}),
 
 # Scenarios
 
 # LA Summaries
 
 # Build GeoJSON
+tar_target(lsoa_map_data,{
+  select_map_outputs(lsoa_emissions_all, year = 2020)
+}),
+
+tar_target(zones_high,{
+  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_full)
+}),
+
+tar_target(zones_medium,{
+  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_generalised)
+}),
+
+tar_target(zones_low,{
+  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_super_generalised)
+}),
+
+tar_target(buildings_high,{
+  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$high)
+}),
+
+tar_target(buildings_medium,{
+  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$medium)
+}),
+
+tar_target(buildings_low,{
+  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$low)
+}),
+
+tar_target(buildings_verylow,{
+  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$verylow)
+}),
+
+tar_target(geojson_buildings_high,{
+  make_geojson(buildings_high, "outputdata/buildings_high.geojson")
+}, format = "file"),
+
+tar_target(geojson_buildings_medium,{
+  make_geojson(buildings_medium, "outputdata/buildings_medium.geojson")
+}, format = "file"),
+
+tar_target(geojson_buildings_low,{
+  make_geojson(buildings_low, "outputdata/buildings_low.geojson")
+}, format = "file"),
+
+tar_target(geojson_buildings_verylow,{
+  make_geojson(buildings_verylow, "outputdata/buildings_verylow.geojson")
+}, format = "file"),
+
+tar_target(geojson_zones_high,{
+  make_geojson(zones_high, "outputdata/zones_high.geojson")
+}, format = "file"),
+
+tar_target(geojson_zones_medium,{
+  make_geojson(zones_medium, "outputdata/zones_medium.geojson")
+}, format = "file"),
+
+tar_target(geojson_zones_low,{
+  make_geojson(zones_low, "outputdata/zones_low.geojson")
+}, format = "file"),
 
 # Build PMTiles
+tar_target(pmtiles_zones_high,{
+  make_pmtiles(geojson_zones_high, "zones_high.geojson","zones_high.pmtiles",
+               name = "zones", shared_borders = TRUE, extend_zoom = TRUE,
+               coalesce = TRUE, min_zoom = 12, max_zoom = 13)
+}, format = "file"),
+
+tar_target(pmtiles_zones_medium,{
+  length(pmtiles_zones_high)
+  make_pmtiles(geojson_zones_medium, "zones_medium.geojson","zones_medium.pmtiles",
+               name = "zones", shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 9, max_zoom = 11)
+}, format = "file"),
+
+tar_target(pmtiles_zones_low,{
+  length(pmtiles_zones_medium)
+  make_pmtiles(geojson_zones_low, "zones_low.geojson","zones_low.pmtiles",
+               name = "zones", shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 4, max_zoom = 8)
+}, format = "file"),
+
+tar_target(pmtiles_zones_merge,{
+  length(pmtiles_zones_low)
+  join_pmtiles("zones.pmtiles",
+               c("zones_high.pmtiles","zones_medium.pmtiles","zones_low.pmtiles"))
+}),
+
+
+tar_target(pmtiles_buildings_high,{
+  length(pmtiles_zones_merge)
+  make_pmtiles(geojson_buildings_high, "buildings_high.geojson","buildings_high.pmtiles",
+               name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
+               coalesce = TRUE, min_zoom = 14, max_zoom = 15)
+}, format = "file"),
+
+tar_target(pmtiles_buildings_medium,{
+  length(pmtiles_buildings_high)
+  make_pmtiles(geojson_buildings_medium, "buildings_medium.geojson","buildings_medium.pmtiles",
+               name = "buildings", simplification = 2, shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 10, max_zoom = 13)
+}, format = "file"),
+
+tar_target(pmtiles_buildings_low,{
+  length(pmtiles_buildings_medium)
+  make_pmtiles(geojson_buildings_low, "buildings_low.geojson","buildings_low.pmtiles",
+               name = "buildings", simplification = 1, shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 7, max_zoom = 9)
+}, format = "file"),
+
+tar_target(pmtiles_buildings_verylow,{
+  length(pmtiles_buildings_low)
+  make_pmtiles(geojson_buildings_verylow, "buildings_verylow.geojson","buildings_verylow.pmtiles",
+               name = "buildings", simplification = 1, shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 4, max_zoom = 6)
+}, format = "file"),
+
+tar_target(pmtiles_buildings_merge,{
+  length(pmtiles_buildings_verylow)
+  join_pmtiles("buildings.pmtiles",
+               c("buildings_high.pmtiles","buildings_medium.pmtiles",
+                 "buildings_low.pmtiles","buildings_verylow.pmtiles"))
+}),
 
 # Build JSON
-
+tar_target(build_lsoa_jsons,{
+  export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
+})
 
 )

@@ -6,13 +6,16 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
     dir.create(path)
   } else {
     fls = list.files(path)
-    if(length(fls) > 10){
+    if(length(fls) > 13){
       return(path)
     }
   }
 
   base_url = "https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates/"
 
+
+
+  url_202122 = "mid2021andmid2022/sapelsoasyoatablefinal.xlsx"
   url_2020 = "mid2020sape23dt2/sape23dt2mid2020lsoasyoaestimatesunformatted.xlsx"
   url_2019 = "mid2019sape22dt2/sape22dt2mid2019lsoasyoaestimatesunformatted.zip"
   url_2018 = "mid2018sape21dt1a/sape21dt1amid2018on2019lalsoasyoaestimatesformatted.zip"
@@ -25,6 +28,7 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
   url_2011 = "mid2011/rftmid2011lsoatable.zip"
   url_200211 = "mid2002tomid2011persons/rftlsoaunformattedtablepersons.zip"
 
+  download.file(paste0(base_url,url_202122), destfile = file.path(path,"pop2022.xlsx"), mode = "wb")
   download.file(paste0(base_url,url_2020), destfile = file.path(path,"pop2020.xlsx"), mode = "wb")
   download.file(paste0(base_url,url_2019), destfile = file.path(path,"pop2019.zip"), mode = "wb")
   download.file(paste0(base_url,url_2018), destfile = file.path(path,"pop2018.zip"), mode = "wb")
@@ -253,5 +257,39 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
 }
 
 
+build_lsoa_population_2022 = function(path) {
+  #2022
+  pop22 <- readxl::read_excel(file.path(path,"pop2022.xlsx"),
+                              sheet = "Mid-2022 LSOA 2021")
+  pop22 <- as.data.frame(pop22)
+  names(pop22) <- pop22[3,]
+  pop22 <- pop22[4:nrow(pop22),]
+  pop22[5:ncol(pop22)] <- lapply(pop22[5:ncol(pop22)], as.numeric)
 
+  for(i in 0:90){
+    pop22[paste0("A",i)] = pop22[paste0("M",i)] + pop22[paste0("F",i)]
+  }
+
+  pop22 = pop22[,c("LSOA 2021 Code","Total",paste0("A",0:90))]
+
+  bands = c("0-4","5-9","10-14","15-19","20-24","25-29",
+    "30-34","35-39","40-44","45-49",
+    "50-54","55-59","60-64","65-69",
+    "70-74","75-79","80-84","85-89")
+
+  for(i in 1:length(bands)){
+    bnd = bands[i]
+    b1 = unlist(strsplit(bnd,"-"))
+    b2 = as.numeric(b1[2])
+    b1 = as.numeric(b1[1])
+    pop22[bnd] = rowSums(pop22[paste0("A",b1:b2)], na.rm = TRUE)
+  }
+  pop22["90+"] = pop22$A90
+
+  pop22 = pop22[,c("LSOA 2021 Code","Total",bands,"90+")]
+  names(pop22)[1:2] = c("LSOA21CD","all_ages")
+
+  pop22
+
+}
 

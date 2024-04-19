@@ -51,10 +51,11 @@ load_scotland_population = function(path = file.path(parameters$path_data,"popul
   pops
 }
 
-# Make single population dataset for E,S,W from 2002 to 2021
+# Make single population dataset for E,S,W from 2002 to 2021 + E&W 2022
 # Note this uses 2011 DataZones but 2021 LSOAs
-combine_populations = function(population_2002_2020, population_2021, population_scot, lookup_lsoa_2011_21) {
+combine_populations = function(population_2002_2020, population_2021, population_2022, population_scot, lookup_lsoa_2011_21) {
 
+  #TODO: Get Scotland 2022 population
   population_2002_2020$`85+` = population_2002_2020$`85-89` + population_2002_2020$`90+`
   population_2002_2020$`85-89` = NULL
   population_2002_2020$`90+` = NULL
@@ -152,13 +153,17 @@ combine_populations = function(population_2002_2020, population_2021, population
   population_2002_2020_S = population_2002_2020_S[,nms]
   population_2002_2020_X = population_2002_2020_X[,nms]
 
+  population_2022$year = 2022
+  population_2022$`85+` = population_2022$`85-89` + population_2022$`90+`
+  population_2022 = population_2022[,nms]
+
   names(population_2021)[names(population_2021) == "LSOA21"] = "LSOA21CD"
 
   population_2020_2021 = rbind( population_2002_2020_U,
                                 population_2002_2020_M,
                                 population_2002_2020_S,
                                 population_2002_2020_X,
-                                population_2021)
+                                population_2021, population_2022)
 
   names(population_scot)[names(population_scot) == "LSOA11CD"] = "LSOA21CD"
   population_scot = population_scot[population_scot$year > 2001,]

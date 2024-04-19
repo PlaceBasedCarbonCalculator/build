@@ -54,6 +54,7 @@ read_bounds_lsoa_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_4078143405809415814.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("LSOA21CD","LSOA21NM")]
+  bounds <- sf::st_make_valid(bounds)
   bounds
 }
 
@@ -61,6 +62,7 @@ read_bounds_lsoa_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BGC_V3_2542665517405622314.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("LSOA21CD","LSOA21NM")]
+  bounds <- sf::st_make_valid(bounds)
   bounds
 }
 
@@ -68,6 +70,7 @@ read_bounds_lsoa_super_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BSC_v2_8443070537763669663.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("LSOA21CD","LSOA21NM")]
+  bounds <- sf::st_make_valid(bounds)
   bounds
 }
 
@@ -164,5 +167,16 @@ read_bounds_lsoa11_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_Dec_2011_Boundaries_Full_Clipped_BFC_EW_V3_2022_3969098746815328641.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("LSOA11CD","LSOA11NM")]
+  bounds
+}
+
+
+read_bounds_dz11 <- function(path){
+  dir.create(file.path(tempdir(),"dz"))
+  unzip(file.path(path, "SG_DataZoneBdry_2011.zip"), exdir = file.path(tempdir(),"dz"))
+  bounds <- sf::read_sf(file.path(file.path(tempdir(),"dz","SG_DataZone_Bdry_2011.shp")))
+  unlink(file.path(tempdir(),"dz"), recursive = TRUE)
+  bounds <- bounds[,c("DataZone","geometry")]
+  bounds <- sf::st_make_valid(bounds)
   bounds
 }

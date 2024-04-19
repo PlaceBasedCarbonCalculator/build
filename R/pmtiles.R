@@ -1,7 +1,8 @@
-make_pmtiles = function(geojson = "school_locations.geojson",
+make_pmtiles = function(input = NULL,
+                        geojson = "school_locations.geojson",
                         pmtiles = "schools.pmtiles",
                         name = "schools", layer = name,
-                        output_path = "ouputdata",
+                        output_path = "outputdata",
                         attribution = "UniverstyofLeeds",
                         min_zoom = 6,
                         max_zoom = NA,
@@ -15,12 +16,21 @@ make_pmtiles = function(geojson = "school_locations.geojson",
                         force = TRUE
                         ){
 
+  # Check input
+  if(file.path(output_path, geojson) != file.path(output_path, geojson)){
+    stop("input does not match")
+  }
+
   if(!dir.exists(output_path)){
     stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
   }
 
   if(!file.exists(file.path(output_path, geojson))){
     stop("'",geojson, "' does not exist")
+  }
+
+  if(file.exists(file.path(output_path,pmtiles))){
+    unlink(file.path(output_path,pmtiles))
   }
 
   # TODO: check if extra spaces caused by collapse matter
@@ -52,7 +62,13 @@ make_pmtiles = function(geojson = "school_locations.geojson",
     command_all = paste0(command_start,'"',command_all,'"')
   }
   responce = system(command_all, intern = TRUE)
-  responce
+
+  if(file.exists(file.path(output_path,pmtiles))){
+    return(file.path(output_path,pmtiles))
+  } else {
+    stop(responce)
+  }
+
 }
 
 
@@ -61,7 +77,7 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
                                    'dasymetric_low.pmtiles',
                                    'dasymetric_med.pmtiles',
                                    'dasymetric_high.pmtiles'),
-                        output_path = "ouputdata"
+                        output_path = "outputdata"
                         ){
 
   if(!dir.exists(output_path)){
@@ -74,23 +90,33 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
     }
   }
 
+  if(file.exists(file.path(output_path,output))){
+    unlink(file.path(output_path,output))
+  }
+
 
   command_tippecanoe = paste('tile-join -o',output,'-pk --force',
                           paste(inputs, collapse = " "),
                           collapse = " ")
 
   if(.Platform$OS.type == "unix") {
-    command_cd = 'cd outputdata'
+    command_cd = paste0('cd ',output_path)
     command_all = paste(c(command_cd, command_tippecanoe), collapse = "; ")
   } else {
     # Using WSL
     dir = getwd()
     command_start = 'bash -c '
-    command_cd = paste0('cd /mnt/',tolower(substr(dir,1,1)),substr(dir,3,nchar(dir)),'/outputs')
+    command_cd = paste0('cd /mnt/',tolower(substr(dir,1,1)),substr(dir,3,nchar(dir)),'/',output_path)
     command_all = paste(c(command_cd, command_tippecanoe), collapse = "; ")
     command_all = paste0(command_start,'"',command_all,'"')
   }
   responce = system(command_all, intern = TRUE)
-  responce
+
+  if(file.exists(file.path(output_path,output))){
+    return(file.path(output_path,output))
+  } else {
+    stop(responce)
+  }
+
 
 }
