@@ -452,6 +452,19 @@ tar_target(lsoa_emissions_all,{
                          domestic_gas_emissions,other_heating_emissions)
 }),
 
+# PLEF Forecasts
+tar_target(PLEF,{
+  load_plef(path = file.path(parameters$path_data,"PLEF"))
+}),
+
+tar_target(PLEF_emissions,{
+  forcast_emissions_plef(lsoa_emissions_all, PLEF)
+}),
+
+tar_target(lsoa_emissions_all_forcasts,{
+  dplyr::left_join(lsoa_emissions_all, PLEF_emissions, by = "LSOA21CD")
+}),
+
 # OS data
 tar_target(dl_os_zoomstack,{
   download_os_zoomstack(path = file.path(parameters$path_data,"os_zoomstack"))
@@ -592,7 +605,7 @@ tar_target(pmtiles_buildings_merge,{
 
 # Build JSON
 tar_target(build_lsoa_jsons,{
-  export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
+  export_zone_json(lsoa_emissions_all_forcasts, path = "outputdata/json/zones")
 })
 
 )
