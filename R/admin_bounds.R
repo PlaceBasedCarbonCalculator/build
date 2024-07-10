@@ -154,10 +154,10 @@ load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
 }
 
 # Bind list of SF data frames together using faster data.table::rbindlist
-bind_sf = function(x) {
+bind_sf = function(x, idcol = NULL) {
   if (length(x) == 0) stop("Empty list")
   geom_name = attr(x[[1]], "sf_column")
-  x = data.table::rbindlist(x, use.names = FALSE)
+  x = data.table::rbindlist(x, use.names = FALSE, idcol = idcol)
   x[[geom_name]] = sf::st_sfc(x[[geom_name]], recompute_bbox = TRUE)
   x = sf::st_as_sf(x)
   x

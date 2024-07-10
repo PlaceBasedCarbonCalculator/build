@@ -3,9 +3,9 @@ combine_land_use = function(os_land, os_greenspace, osm_land){
   #OSM start with
   landuse = c("industrial", "retail", "military", "commercial", "landfill","quarry","recreation_ground","railway")
   military = c("danger_area", "shooting_range", "range", "training_area")
-  tourism = c("theme_park","attraction")
+  tourism = c("theme_park","water_park","attraction")
   natural = c("wood","heath","wetland","scrub")
-  leisure = c("golf_course","nature_reserve","water_park","park")
+  leisure = c("golf_course","nature_reserve","theme_park","water_park","park","stadium")
   amenity = c("parking")
 
   osm_land = osm_land[osm_land$landuse %in% landuse |
@@ -43,9 +43,11 @@ combine_land_use = function(os_land, os_greenspace, osm_land){
 
   # Man Made
   lnd_man = osm_land[is.na(osm_land$natural),]
-  lnd_man = lnd_man[,c("landuse","military","tourism")]
+  lnd_man = lnd_man[,c("landuse","military","tourism","amenity","leisure")]
   lnd_man$type = dplyr::if_else(is.na(lnd_man$landuse), lnd_man$military, lnd_man$landuse)
   lnd_man$type = dplyr::if_else(is.na(lnd_man$type), lnd_man$tourism, lnd_man$type)
+  lnd_man$type = dplyr::if_else(is.na(lnd_man$type), lnd_man$leisure, lnd_man$type)
+  lnd_man$type = dplyr::if_else(is.na(lnd_man$type), lnd_man$amenity, lnd_man$type)
   lnd_man = lnd_man[lnd_man$type %in% c(landuse,military,tourism),]
   lnd_man = lnd_man[,"type"]
   lnd_man = rbind(lnd_man, os_land[!os_land$type %in% c("water","greenspace","woodland"),])
@@ -99,16 +101,95 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   if( FALSE){
     # TESTING MODE
-    buff = sf::st_buffer(bounds_lsoa_GB_full[1,],10000)
+    buff = sf::st_buffer(bounds_lsoa_GB_full[bounds_lsoa_GB_full$LSOA21CD == "E01035044",],10000)
+    #buff = sf::st_buffer(sf::st_sfc(sf::st_point(c(210668.20566749386, 554110.83121316193)), crs = 27700),100)
     bounds_lsoa_GB_full = bounds_lsoa_GB_full[buff,]
     landcover = landcover[buff,]
   }
 
+  # Clean polygons
+  # Error when duplicated points in the polygon
+  # TopologyException: side location conflict at 210668.20566749386 554110.83121316193. This can occur if the input geometry is invalid.
+  # TODO: Move this upstream
+  landcover = sf::st_simplify(landcover,preserveTopology = TRUE, dTolerance = 0.1)
+
+  # Resolve overlapping landuse
+  over = sf::st_overlaps(landcover)
+  over = lengths(over) > 0
+  landcover_noover = landcover[!over, ]
+  landcover_over = landcover[over, ]
+
+  rm(landcover)
+
+  # Rank land types
+  landcover_over$type = factor(landcover_over$type,
+   levels =  c("natural","nature_reserve",
+               "landfill","quarry",
+               "danger_area", "shooting_range", "range", "training_area",
+               "industrial", "retail", "military", "commercial","recreation_ground","railway",
+               "attraction",
+               "golf_course","theme_park","water_park","park","stadium",
+               "parking",
+               "Air Transport","Education","Medical Care","Road Transport","Water Transport"
+  ))
+  landcover_over = landcover_over[order(landcover_over$type, decreasing = TRUE),]
+
+  landcover_over$area = as.numeric(sf::st_area(landcover_over))
+  landcover_over_small = landcover_over[landcover_over$area < 1e6,]
+  landcover_over_large = landcover_over[landcover_over$area >= 1e6,]
+  landcover_over_large = remove_small_holes(landcover_over_large)
+
+  landcover_over = rbind(landcover_over_large, landcover_over_small)
+
+  #landcover_over = sf::st_intersection(landcover_over)
+
+  inter = sf::st_intersects(landcover_over)
+  attributes(inter)$class = "list"
+
+  g = igraph::graph_from_adj_list(inter)
+  g = igraph::components(g)
+  memb = g$membership
+  landcover_over$cluster = g$membership
+
+  landcover_over = dplyr::group_split(landcover_over, cluster)
+  landcover_over = purrr::map(landcover_over,try_inter,
+                                    .progress = "Intersecting landcover")
+  landcover_over <- dplyr::bind_rows(landcover_over)
+
+  landcover_over_geom = sf::st_geometry_type(landcover_over)
+  landcover_over_p = landcover_over[landcover_over_geom == "POLYGON",]
+  landcover_over_mp = landcover_over[landcover_over_geom == "MULTIPOLYGON",]
+  landcover_over_gc = landcover_over[landcover_over_geom == "GEOMETRYCOLLECTION",]
+  landcover_over_mp = suppressWarnings(sf::st_cast(landcover_over_mp, "POLYGON"))
+  landcover_over_gc = sf::st_collection_extract(landcover_over_gc, "POLYGON")
+  landcover_over = rbind(landcover_over_p, landcover_over_mp, landcover_over_gc)
+
+  rm(landcover_over_p, landcover_over_mp, landcover_over_gc)
+
+  landcover_over = landcover_over[,names(landcover_noover)]
+  landcover_over <- sf::st_make_valid(landcover_over)
+  landcover = rbind(landcover_noover, landcover_over)
+
+
+  rm(landcover_noover, landcover_over)
+
+  # landcover_over_single = landcover_over[landcover_over$n.overlaps == 1,]
+  # landcover_over_multi = landcover_over[landcover_over$n.overlaps > 1,]
+  #
+  # landcover_over_multi = sf::st_transform(landcover_over_multi, 4326)
+  # landcover_over_multi = landcover_over_multi[sf::st_is_valid(landcover_over_multi),]
+  # qtm(landcover_over) + qtm(landcover_over, fill = "red")
+
+  # Remove Slivers
+  landcover$area = as.numeric(sf::st_area(landcover))
+  landcover = landcover[landcover$area > 1,]
   landcover$area = NULL
 
   lsoa_nonres = suppressWarnings(sf::st_intersection(bounds_lsoa_GB_full,landcover))
   lsoa_nonres = sf::st_collection_extract(lsoa_nonres,"POLYGON")
   lsoa_nonres = lsoa_nonres[!duplicated(lsoa_nonres$geometry),]
+
+  lsoa_nointer = bounds_lsoa_GB_full[!bounds_lsoa_GB_full$LSOA21CD %in% lsoa_nonres$LSOA21CD,]
 
   lsoa_nonres = dplyr::group_split(lsoa_nonres,LSOA21CD, type)
   lsoa_nonres = purrr::map(lsoa_nonres, function(x){
@@ -160,7 +241,7 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   lsoa_res <- sf::st_cast(lsoa_res, "MULTIPOLYGON")
 
   # Remove Slivers
-  lsoa_res <- sf::st_cast(lsoa_res, "POLYGON")
+  lsoa_res <- suppressWarnings(sf::st_cast(lsoa_res, "POLYGON"))
   lsoa_res$area <- as.numeric(sf::st_area(lsoa_res))
   lsoa_res <- lsoa_res[lsoa_res$area > 1,]
   lsoa_res$perimiter <- as.numeric(sf::st_perimeter(lsoa_res))
@@ -172,7 +253,10 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   lsoa_res = sf::st_cast(lsoa_res, "MULTIPOLYGON")
   lsoa_res$type = "residential"
 
-  res = rbind(lsoa_res, lsoa_nonres)
+  lsoa_nointer = sf::st_cast(lsoa_nointer, "MULTIPOLYGON")
+  lsoa_nointer$type = "residential"
+
+  res = rbind(lsoa_res, lsoa_nonres, lsoa_nointer)
   res$area = as.numeric(sf::st_area(res))
   res = res[res$area > 10,]
   res
@@ -186,6 +270,68 @@ fast_st_difference = function(x, y){
   message(Sys.time()," Start difference")
   sf::st_difference(x,sf::st_union(y_inter,y_solo))
 }
+
+
+
+remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
+  geom = purrr::map(sf::st_geometry(df), remove_small_holes_single,
+                    min_size = min_size,
+                    max_ap_ratio = max_ap_ratio,
+                    .progress = TRUE)
+  sf::st_geometry(df) = sf::st_sfc(geom, crs = 27700)
+  df
+}
+
+# foo2 = remove_small_holes(foo, 100, 1)
+# foo2 = sf::st_simplify(foo2, TRUE, 10)
+# foo2 = sf::st_intersection(foo2)
+#
+# foo4 = sf::st_intersection(sf::st_set_precision(foo[c(47,2),], 0.1))
+#
+# foo3 = sf::st_intersection(foo[c(1:46,48:59),])
+#
+#
+# x = foo$geometry[[47]]
+# fizz = purrr::map(x[seq(2, length(x))], split_holes)
+# fizz = unlist(fizz, recursive = FALSE)
+# fizz = sf::st_sfc(fizz, crs = 27700)
+# fizz = sf::st_as_sf(fizz)
+# fizz$area = as.numeric(sf::st_area(fizz))
+# fizz$perimeters = as.numeric(sf::st_perimeter(fizz))
+# fizz$ap_ratio = fizz$perimeter / fizz$area
+
+
+
+remove_small_holes_single = function(x, min_size = 5, max_ap_ratio = 1){
+  if(length(x) > 1){
+    vals = purrr::map(x[seq(2, length(x))], hole_area)
+    areas = sapply(vals,`[`,1)
+    perimeters = sapply(vals,`[`,2)
+    ap_ratio = perimeters / areas
+    is_small = areas < min_size
+    is_thin = ap_ratio > max_ap_ratio
+    x = sf::st_polygon(x[c(TRUE, !(is_small | is_thin))])
+  }
+  x
+}
+
+hole_area = function(y){
+  y = sf::st_sfc(sf::st_polygon(list(y)), crs = 27700)
+  c(as.numeric(sf::st_area(y)), as.numeric(sf::st_perimeter(y)))
+}
+
+try_inter = function(x){
+  res = try(sf::st_intersection(x), silent = TRUE)
+  if(inherits(res, "try-error")){
+    res = sf::st_intersection(sf::st_set_precision(x, 10))
+  }
+  res
+}
+
+# split_holes = function(y){
+#   sf::st_sfc(sf::st_polygon(list(y)), crs = 27700)
+# }
+
 
 # fast_st_intersects = function(x, y){
 #   intersections <- sf::st_intersects(x, y)

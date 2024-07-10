@@ -70,11 +70,11 @@ ggplot(ap_crop, aes(x = proximity, y = access, color = categoryname)) +
   scale_x_continuous(limits = c(-lim,lim), expand = c(0,0)) +
   scale_y_continuous(limits = c(-lim,lim), expand = c(0,0)) +
   xlab("Proximity, services per 10,000 people, SD from mean") +
-  ylab("Accessability by public tranport, services per 10,000 people, SD from mean") +
+  ylab("Accessibility by public transport, services per 10,000 people, SD from mean") +
   guides(color=guide_legend(ncol=1,keyheight=0.5,title="Categories of Destination")) +
   scale_color_manual(values = pal) +
   facet_wrap(vars(LSOA_name),ncol = 2)
-ggsave("plots/access_proximity_factet_15min.png", width = 10, height = 6)
+ggsave("plots/access_proximity_factet_15min_3pmh.png", width = 10, height = 6)
 
 # Just pubs
 
@@ -143,12 +143,12 @@ ggplot(ap_crop, aes(x = proximity, y = access, color = lsoa_class_name)) +
   scale_x_continuous(limits = c(-lim,lim), expand = c(0,0)) +
   scale_y_continuous(limits = c(-lim,lim), expand = c(0,0)) +
   xlab("Proximity, services per 10,000 people, SD from mean") +
-  ylab("Accessability by public tranport, services per 10,000 people, SD from mean") +
+  ylab("Accessibility by public transport, services per 10,000 people, SD from mean") +
   guides(color=guide_legend(ncol=1,keyheight=1,title="LSOA Area Classification", override.aes = list(size=2))) +
   theme(legend.key.size = unit(4, 'mm')) +
   scale_color_manual(values = pal) +
   facet_wrap(vars(classname),ncol = 2)
-ggsave("plots/access_proximity_LSOAs_15min.png", width = 10, height = 6)
+ggsave("plots/access_proximity_LSOAs_15min_3mph.png", width = 10, height = 6)
 
 # Map
 
@@ -225,7 +225,7 @@ m1 = tm_shape(bounds) +
   tm_fill(col = "col") +
   tm_scale_bar()
   #tm_borders(col = "black", lwd = 0.01)
-tmap_save(m1, "plots/bivariate_swimming_30min.png", dpi = 300, height = 6, width = 4)
+tmap_save(m1, "plots/bivariate_swimming_30min_3mph.png", dpi = 300, height = 6, width = 4)
 
 #
 # library(ggplot2)

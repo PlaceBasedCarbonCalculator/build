@@ -89,8 +89,12 @@ summarise_access_proximity = function(access_poi_circle_15min,
     ap[,i] = dplyr::if_else(ap[,i] > lim ,lim,ap[,i])
   }
 
+  # Sort
+  ap = ap[order(ap$LSOA11CD, ap$groupname, ap$categoryname, ap$classname),]
 
   ap
+
+
 
 
 }

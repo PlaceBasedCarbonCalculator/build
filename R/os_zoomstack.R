@@ -15,6 +15,27 @@ download_os_zoomstack = function(path = file.path(parameters$path_data,"os_zooms
 
 }
 
+zoomstack_buildings_high = function(dl_os_zoomstack) {
+  # TODO: Finish this function
+
+  sf::sf_use_s2(FALSE)
+
+  dir.create(file.path(tempdir(),"zoomstack"))
+  unzip(dl_os_zoomstack, exdir = file.path(tempdir(),"zoomstack"))
+
+  b_high = sf::st_read(file.path(tempdir(),"zoomstack","OS_Open_Zoomstack.gpkg"), layer = "local_buildings")
+
+  unlink(file.path(tempdir(),"zoomstack"), recursive = TRUE)
+
+  b_high$uuid = NULL
+
+  b_high = change_geom_name(b_high)
+
+  b_high
+
+}
+
+
 
 zoomstack_buildings_lsoa = function(dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised) {
   # TODO: Finish this function

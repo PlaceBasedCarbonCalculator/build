@@ -1,0 +1,43 @@
+tippecanoe --output carbon_super_gen.pmtiles --name=carbon --layer=carbon --attribution=MALCOLMMORGAN --maximum-zoom=8 --minimum-zoom=4  --coalesce-smallest-as-needed --simplification=10 --detect-shared-borders --maximum-tile-bytes=50000000 --buffer=5 --force  carbon_super_general.geojson
+
+tippecanoe --output carbon_gen.pmtiles --name=carbon --layer=carbon --attribution=MALCOLMMORGAN --maximum-zoom=11 --minimum-zoom=9  --coalesce-smallest-as-needed --simplification=10 --detect-shared-borders --maximum-tile-bytes=5000000 --buffer=5 --force  carbon_general.geojson
+
+tippecanoe --output carbon_full.pmtiles --name=carbon --layer=carbon --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=12  --coalesce-smallest-as-needed --simplification=10 --detect-shared-borders --maximum-tile-bytes=5000000 --buffer=5 --force  carbon_full.geojson
+
+tile-join -o carbon_legacy.pmtiles -pk --force carbon_super_gen.pmtiles carbon_gen.pmtiles carbon_full.pmtiles
+
+
+tile-join --output=LSOA_gen_and_sup_gen lsoa_super_general.mbtiles lsoa_general.mbtiles --attribution=MALCOLMMORGAN --name=lsoa
+
+### LAs
+
+tippecanoe --output la_legacy.pmtiles --name=la --layer=la --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=0  --drop-smallest-as-needed --simplification=10 --detect-shared-borders --force  bounds/la_bounds.geojson
+
+### Admin boundaries
+
+tippecanoe --output parish_legacy.pmtiles --name=parish --layer=parish --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=0  --drop-smallest-as-needed --simplification=10 --detect-shared-borders --force  bounds/parish.geojson
+
+tippecanoe --output constituencies_legacy.pmtiles --name=constituencies --layer=constituencies --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=0  --drop-smallest-as-needed --simplification=10 --detect-shared-borders --force  bounds/constituencies.geojson
+
+tippecanoe --output wards_legacy.pmtiles --name=wards --layer=wards --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=0  --drop-smallest-as-needed --simplification=10 --detect-shared-borders --force  bounds/wards.geojson
+
+
+### Bus Stops v2
+
+tippecanoe --output transitstops_legacy.pmtiles --name=transitstops --layer=transitstops --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=4  --drop-densest-as-needed -rg4 --force  transit_stop_frequency_v3.geojson 
+
+
+### LSOA cents
+
+tippecanoe --output centroids_legacy.pmtiles --name=centroids --layer=centroids --attribution=MALCOLMMORGAN --maximum-zoom=13 --minimum-zoom=6  --drop-densest-as-needed --force  data-prepared/lsoa_centroids.geojson
+
+### PCT
+
+
+tippecanoe --output pct_low.pmtiles --name=pct --layer=pct --attribution=PCT --maximum-zoom=8 --minimum-zoom=4  --drop-smallest-as-needed --simplification=10 --buffer=5 --force  pct/rnet_low.geojson
+
+tippecanoe --output pct_med.pmtiles --name=pct --layer=pct --attribution=PCT --maximum-zoom=11 --minimum-zoom=9  --drop-smallest-as-needed --simplification=10 --buffer=5 --force  pct/rnet_med.geojson
+
+tippecanoe --output pct_high.pmtiles --name=pct --layer=pct --attribution=PCT --maximum-zoom=13 --minimum-zoom=12  --drop-smallest-as-needed --simplification=10 --buffer=5 --force  pct/rnet_high.geojson
+
+tile-join --output pct_legacy.pmtiles -pk --name=pct --force pct_low.pmtiles pct_med.pmtiles pct_high.pmtiles

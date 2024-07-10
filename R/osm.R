@@ -21,9 +21,9 @@ read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
               "residential")
   amenity = c("university","college","parking")
   leisure = c("theme_park","water_park","golf_course","nature_reserve",
-              "park")
-  tourism = c("theme_park","water_park")
-  natural = c("wetland","wood","water","heath")
+              "park","stadium")
+  tourism = c("theme_park","water_park","attraction")
+  natural = c("wetland","wood","water","heath","scrub")
 
   good = poly$landuse %in% landuse |
     poly$amenity %in% amenity |
@@ -38,6 +38,23 @@ read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
 
   poly$area = as.numeric(sf::st_area(poly))
   poly = poly[poly$area > 100,]
+
+  poly
+
+}
+
+
+read_osm_pbf_buildings = function(path = file.path(parameters$path_data,"osm")){
+
+  poly = osmextract::oe_read(file.path(path,"united-kingdom-latest.osm.pbf"),
+                             layer  = "multipolygons",
+                             extra_tags = c("building","building:part")
+  )
+
+  poly = poly[,c("osm_id","building","building_part")]
+  poly = poly[!is.na(poly$building),]
+
+  poly = sf::st_cast(poly, "POLYGON")
 
   poly
 

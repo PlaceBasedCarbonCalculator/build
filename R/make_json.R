@@ -8,7 +8,7 @@
 #'
 #' Will drop any sf geometry and name files based on geo_code
 
-export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", zip = TRUE, rounddp = 2, dataframe = "rows"){
+export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -31,10 +31,15 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
   }
 
   # Reduce size with short file names
-  new_nms = reduce_name_length(names(x))
-  names(x) = new_nms$y
+  if(reduce){
+    new_nms = reduce_name_length(names(x))
+    names(x) = new_nms$y
 
-  idcol = new_nms$y[new_nms$x == idcol]
+    idcol = new_nms$y[new_nms$x == idcol]
+  } else {
+    new_nms = "Unchanged"
+  }
+
 
   # Round to 2DP
   for(i in seq_len(ncol(x))){
@@ -54,6 +59,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
     for(i in seq(1,length(x))){
       sub <- as.data.frame(x[[i]])
       nmsub <- sub[,idcol][1]
+      sub[idcol] <- NULL
       jsonlite::write_json(sub,
                            file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json")),
                            dataframe = dataframe)
@@ -72,6 +78,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
 
     if(file.exists(file.path(my_wd,path,paste0(idcol,"_json.zip")))){
       unlink(file.path(tempdir(),paste0("jsonzip",idcol)), recursive = TRUE)
+      write.csv(new_nms, file.path(path,"names_lookup.csv"), row.names = FALSE)
       return(file.path(my_wd,path,paste0(idcol,"_json.zip")))
     } else {
       stop("Zipping failed")
