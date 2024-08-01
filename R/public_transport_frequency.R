@@ -154,7 +154,16 @@ load_pt_frequency = function(path = parameters$path_data){
 
 select_transport_vars = function(pt_frequency){
 
-  pt_frequency$change_bus_2008_2023 = pt_frequency$tph_daytime_avg_2023_3 - pt_frequency$tph_daytime_avg_2008_3
+  pt_frequency = pt_frequency[!is.na(pt_frequency$zone_id),]
+
+  pt_frequency$maxbus_2006_2008 = pmax(pt_frequency$tph_daytime_avg_2006_3,
+                                       pt_frequency$tph_daytime_avg_2007_3,
+                                       pt_frequency$tph_daytime_avg_2008_3,
+                                       na.rm = TRUE)
+
+  pt_frequency$change_bus_2008_2023 = round(((pt_frequency$tph_daytime_avg_2023_3 - pt_frequency$maxbus_2006_2008)/
+                                              pt_frequency$maxbus_2006_2008) * 100, 1)
+  pt_frequency$change_bus_2008_2023[is.infinite(pt_frequency$change_bus_2008_2023)] = NA #Handful of cases of 0 service in 2006-2008
 
   pt_frequency = pt_frequency[,c("zone_id","change_bus_2008_2023","tph_daytime_avg_2023_0",
                                  "tph_daytime_avg_2023_1","tph_daytime_avg_2023_2","tph_daytime_avg_2023_3",

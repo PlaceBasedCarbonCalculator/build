@@ -1,4 +1,4 @@
-access_counts = function(zones, poi, oa, pop, gb_pop = 67.33e6){
+access_counts = function(zones, poi, oa, pop, lookup_oa2021_lsoa2021, gb_pop = 67.33e6){
   poi = poi[poi$measure_access,]
   # Calculate national rates
   poi = poi[,c("groupname","categoryname","classname","count")]
@@ -18,15 +18,39 @@ access_counts = function(zones, poi, oa, pop, gb_pop = 67.33e6){
 
   poi = sf::st_drop_geometry(poi[,c("groupname","categoryname","classname")])
 
-  summary_poi = pbapply::pblapply(inter_poi, summarise_poi, poi = poi)
+  #Fill in Missing Services
+  poi_unique = poi[!duplicated(poi$classname),]
+  poi_unique$count = 0
+
+  summary_poi = pbapply::pblapply(inter_poi, summarise_poi, poi = poi, poi_unique = poi_unique)
   names(summary_poi) = zones[[1]]
   summary_poi = dplyr::bind_rows(summary_poi, .id = names(zones)[1])
 
   oa = sf::st_drop_geometry(oa)
 
+
   summary_pop = pbapply::pbsapply(inter_pop, summarise_pop, oa = oa)
   summary_pop = data.frame(population = summary_pop)
   summary_pop$zone = zones[[1]]
+
+  # Check for missing population
+  # Happens when snapping to road network further than travel time back to centroid.
+  if(all(summary_pop$zone %in% pop$OA21CD)){
+    summary_pop = dplyr::left_join(summary_pop, pop, by = c("zone" = "OA21CD"))
+    summary_pop$population = dplyr::if_else(summary_pop$population == 0,
+                                            summary_pop$total_pop,
+                                            summary_pop$population)
+    summary_pop$total_pop = NULL
+  } else if (all(summary_pop$zone %in% lookup_oa2021_lsoa2021$LSOA21CD)) {
+    pop_lsoa = dplyr::left_join(lookup_oa2021_lsoa2021, pop, by = c("nearest_OA2021" = "OA21CD"))
+    pop_lsoa = pop_lsoa[,c("LSOA21CD","total_pop")]
+    summary_pop = dplyr::left_join(summary_pop, pop_lsoa, by = c("zone" = "LSOA21CD"))
+    summary_pop$population = dplyr::if_else(summary_pop$population == 0,
+                                            summary_pop$total_pop,
+                                            summary_pop$population)
+    summary_pop$total_pop = NULL
+  }
+
 
   colname = names(summary_poi)[1]
   summary_poi = dplyr::left_join(summary_poi, summary_pop, by = setNames("zone", colname))
@@ -35,7 +59,8 @@ access_counts = function(zones, poi, oa, pop, gb_pop = 67.33e6){
   summary_poi$pps_diff = summary_poi$local_pps - summary_poi$nat_pps
   summary_poi$pps_diff_std = summary_poi$pps_diff / summary_poi$nat_pps
   summary_poi$local_sp10kp = 10000/summary_poi$local_pps
-  summary_poi$local_sp10kp[is.infinite(summary_poi$local_sp10kp)] = NA
+  summary_poi$local_sp10kp[summary_poi$local_sp10kp == 0] = NA
+  #summary_poi$local_sp10kp[is.infinite(summary_poi$local_sp10kp)] = NA
   summary_poi$sp10kp_diff = summary_poi$local_sp10kp - summary_poi$nat_sp10kp
   summary_poi$sp10kp_diff_std = summary_poi$sp10kp_diff / summary_poi$nat_sp10kp
 
@@ -64,10 +89,13 @@ access_counts = function(zones, poi, oa, pop, gb_pop = 67.33e6){
 
 }
 
-summarise_poi = function(x, poi){
+summarise_poi = function(x, poi, poi_unique){
   poi_sub = poi[x,]
   poi_sub = dplyr::group_by(poi_sub, groupname, categoryname, classname)
   poi_sub = dplyr::summarise(poi_sub, count = dplyr::n(), .groups= 'drop')
+  # Add Missing
+  poi_unique = poi_unique[!poi_unique$classname %in% poi_sub$classname,]
+  poi_sub = rbind(poi_sub, poi_unique)
   poi_sub
 }
 

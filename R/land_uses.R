@@ -101,7 +101,7 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   if( FALSE){
     # TESTING MODE
-    buff = sf::st_buffer(bounds_lsoa_GB_full[bounds_lsoa_GB_full$LSOA21CD == "E01035044",],10000)
+    buff = sf::st_buffer(bounds_lsoa_GB_full[bounds_lsoa_GB_full$LSOA21CD == "W01000503",],10000)
     #buff = sf::st_buffer(sf::st_sfc(sf::st_point(c(210668.20566749386, 554110.83121316193)), crs = 27700),100)
     bounds_lsoa_GB_full = bounds_lsoa_GB_full[buff,]
     landcover = landcover[buff,]
@@ -143,6 +143,7 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   #landcover_over = sf::st_intersection(landcover_over)
 
+  # Resolve overalpping land uses
   inter = sf::st_intersects(landcover_over)
   attributes(inter)$class = "list"
 
@@ -170,6 +171,11 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   landcover_over <- sf::st_make_valid(landcover_over)
   landcover = rbind(landcover_noover, landcover_over)
 
+  # foo = landcover_over[landcover_over$area < 1e5,]
+  # foo$id = as.character(1:nrow(foo))
+  # st_precision(foo) = 0.001
+  #st_intersects(foo)
+  #qtm(foo[c(1,3:12),], fill = "id")
 
   rm(landcover_noover, landcover_over)
 
@@ -200,13 +206,14 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
       x = sf::st_as_sf(x)
     }
     x
-  }, .progress = "Unioning residential")
+  }, .progress = "Unioning non-residential")
   lsoa_nonres = dplyr::bind_rows(lsoa_nonres)
   lsoa_nonres = lsoa_nonres[as.numeric(sf::st_area(lsoa_nonres)) > 1,] # Remove tiny slivers
   lsoa_nonres = sf::st_make_valid(lsoa_nonres)
 
   #summary(sf::st_is_valid(lsoa_nonres))
 
+  # Combine non-residential into a single geometry
   nonres_union = lsoa_nonres["geometry"]
   nonres_union = sf::st_cast(nonres_union,"MULTIPOLYGON")
   nonres_union = sf::st_cast(nonres_union,"POLYGON")
@@ -260,6 +267,15 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   res$area = as.numeric(sf::st_area(res))
   res = res[res$area > 10,]
   res
+
+
+  # qtm(lsoa_res, fill = "red") + qtm(lsoa_nonres, fill = "blue")
+  # resbuff = st_buffer(res,0)
+  # ovr = st_overlaps(resbuff)
+  # ovrlst = as.list(ovr)
+  # qtm(res[2,], fill = "red") + qtm(res[18,], fill = "blue")
+  # qtm(resbuff[2,], fill = "red") + qtm(resbuff[18,], fill = "blue")
+
 }
 
 

@@ -100,6 +100,13 @@ read_centroids_oa21 <- function(path){
   bounds
 }
 
+read_centroids_lsoa21 <- function(path){
+  file_path = file.path(path, "LSOA_Dec_2021_PWC_for_England_and_Wales_2022_-7410472461544737417.gpkg")
+  bounds <- read_bounds(file_path)
+  bounds <- bounds[,c("LSOA21CD")]
+  bounds
+}
+
 read_postcodes <- function(path){
   dir.create(file.path(tempdir(),"postcodes"))
   unzip(path, exdir = file.path(tempdir(),"postcodes"))

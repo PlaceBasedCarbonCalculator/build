@@ -150,6 +150,9 @@ tar_target(centroids_dz11,{
 tar_target(centroids_oa21,{
   read_centroids_oa21(dl_boundaries)
 }),
+tar_target(centroids_lsoa21,{
+  read_centroids_lsoa21(dl_boundaries)
+}),
 tar_target(bounds_postcodes,{
   read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20200826.zip"))
 }),
@@ -382,51 +385,55 @@ tar_target(consumption_emissions,{
 
 # Accessibility Analysis
 tar_target(access_poi_circle_15min,{
-  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 0.75)# 15 min * 3 mph
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = sf::st_buffer(centroids_lsoa21, 1609.34 * 0.75)# 15 min * 3 mph
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_circle_30min,{
-  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 1.5)
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = sf::st_buffer(centroids_lsoa21, 1609.34 * 1.5)
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_circle_45min,{
-  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 2.25)
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = sf::st_buffer(centroids_lsoa21, 1609.34 * 2.25)
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_circle_60min,{
-  zones = sf::st_buffer(centroids_lsoa11, 1609.34 * 3)
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = sf::st_buffer(centroids_lsoa21, 1609.34 * 3)
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(lookup_oa2021_lsoa2011,{
   oa2021tolsoa2011(centroids_oa21, centroids_lsoa11)
 }),
 
+tar_target(lookup_oa2021_lsoa2021,{
+  oa2021tolsoa2021(centroids_oa21, centroids_lsoa21)
+}),
+
 tar_target(access_poi_iso_15min,{
   zones = ons_isochrones[ons_isochrones$iso_cutoff == 900,] # 15 min
-  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2021$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_iso_30min,{
   zones = ons_isochrones[ons_isochrones$iso_cutoff == 1800,]
-  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2021$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_iso_45min,{
   zones = ons_isochrones[ons_isochrones$iso_cutoff == 2700,]
-  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2021$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 tar_target(access_poi_iso_60min,{
   zones = ons_isochrones[ons_isochrones$iso_cutoff == 3600,]
-  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2011$nearest_OA2021,]
-  access_counts(zones, poi, centroids_oa21, population_oa21)
+  zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2021$nearest_OA2021,]
+  access_counts(zones, poi, centroids_oa21, population_oa21, lookup_oa2021_lsoa2021)
 }),
 
 #TODO: add the summary data and JSON creation, fucntions in assecc_proximity_funcs.R
@@ -435,7 +442,7 @@ tar_target(access_proximity,{
                              access_poi_circle_30min,access_poi_iso_30min,
                              access_poi_circle_45min,access_poi_iso_45min,
                              access_poi_circle_60min,access_poi_iso_60min,
-                             lookup_oa2021_lsoa2011,area_classifications
+                             lookup_oa2021_lsoa2021,area_classifications
   )
 }),
 
@@ -743,7 +750,10 @@ tar_target(build_lsoa_jsons,{
 }),
 
 tar_target(build_access_jsons,{
-  export_zone_json(access_proximity, idcol = "LSOA11CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
+  sub = access_proximity[,c("LSOA21CD","categoryname","classname","access_15",
+                            "proximity_15","access_30","proximity_30","access_45",
+                            "proximity_45","access_60","proximity_60")]
+  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
 })
 
 )
