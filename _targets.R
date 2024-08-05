@@ -109,6 +109,19 @@ tar_target(nondomestic_gas,{
 tar_target(nondomestic_electricity,{
   load_msoa_electric_nondom(dl_gas_electric)
 }),
+tar_target(postcode_gas_electricity,{
+  load_postcode_gas_electricity(path = file.path(parameters$path_data,"gas_electric/postcode"))
+}),
+tar_target(postcode_gas_electricity_emissions,{
+  calculate_postcode_gas_electric_emissions(postcode_gas_electricity, emissions_factors)
+}),
+
+tar_target(geojson_postcode,{
+  sub = prep_postcode_gas_electic(postcode_gas_electricity_emissions, bounds_postcodes_2024)
+  make_geojson(sub, "outputdata/postcodes.geojson")
+}, format = "file"),
+
+
 
 # Boundaries
 tar_target(dl_boundaries,{
@@ -153,11 +166,17 @@ tar_target(centroids_oa21,{
 tar_target(centroids_lsoa21,{
   read_centroids_lsoa21(dl_boundaries)
 }),
-tar_target(bounds_postcodes,{
+tar_target(bounds_postcodes_2020,{
   read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20200826.zip"))
 }),
+tar_target(bounds_postcodes_2024,{
+  read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20240401.zip"))
+}),
+tar_target(bounds_postcodes_2015,{
+  read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20150401.zip"))
+}),
 tar_target(bounds_postcode_area,{
-  make_postcode_areas(bounds_postcodes)
+  make_postcode_areas(bounds_postcodes_2024)
 }),
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
@@ -178,6 +197,10 @@ tar_target(bounds_lsoa_GB_generalised,{
 tar_target(bounds_lsoa_GB_super_generalised,{
   combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz11, keep = 0.05)
 }),
+tar_target(uprn,{
+  load_uprn(path = file.path(parameters$path_data,"os_uprn"))
+}),
+
 
 # Points of Interest
 tar_target(poi,{
@@ -351,6 +374,16 @@ tar_target(other_heating_emissions,{
   calculate_other_heating(central_heating_2021, central_heating_2011_21, domestic_gas, population)
 }),
 
+# House Prices
+tar_target(house_prices,{
+  load_house_prices(path = file.path(parameters$path_data,"house_price_age"), lsoa_11_21_tools)
+}),
+
+tar_target(house_transactions,{
+  load_house_transactions(path = file.path(parameters$path_data,"house_price_age"), lsoa_11_21_tools)
+}),
+
+
 # Travel to Work
 tar_target(travel2work,{
   load_travel2work(path = file.path(parameters$path_secure_data,"LSOA Flow Data/Public/WM12EW[CT0489]_lsoa.zip"),
@@ -521,7 +554,7 @@ tar_target(buildings_heights,{
 
 tar_target(zoomstack_buildings_lst_4326,{
   # Long running target ~ 9 hours
-  zoomstack_buildings_lsoa(dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised)
+  zoomstack_buildings_lsoa(buildings_heights, dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised)
 }),
 
 # Scenarios
@@ -744,6 +777,13 @@ tar_target(pmtiles_wards,{
                coalesce = FALSE, min_zoom = 6, max_zoom = 12)
 }, format = "file"),
 
+
+tar_target(pmtiles_postcode,{
+  make_pmtiles(geojson_postcode, "postcode.geojson","postcode.pmtiles",
+               name = "postcode", shared_borders = TRUE, extend_zoom = TRUE,
+               coalesce = TRUE, min_zoom = 6, max_zoom = 14)
+}, format = "file"),
+
 # Build JSON
 tar_target(build_lsoa_jsons,{
   export_zone_json(lsoa_emissions_all_forcasts, path = "outputdata/json/zones")
@@ -754,6 +794,11 @@ tar_target(build_access_jsons,{
                             "proximity_15","access_30","proximity_30","access_45",
                             "proximity_45","access_60","proximity_60")]
   export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
+}),
+
+tar_target(build_postcode_jsons,{
+  export_zone_json(postcode_gas_electricity_emissions, idcol = "postcode",
+                   path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
 })
 
 )

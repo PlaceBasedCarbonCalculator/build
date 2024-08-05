@@ -37,10 +37,13 @@ zoomstack_buildings_high = function(dl_os_zoomstack) {
 
 
 
-zoomstack_buildings_lsoa = function(dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised) {
+zoomstack_buildings_lsoa = function(buildings_heights, dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised) {
   # TODO: Finish this function
 
   sf::sf_use_s2(FALSE)
+
+  b_high = buildings_heights[,c("height_max","geometry")]
+  rm(buildings_heights)
 
   dir.create(file.path(tempdir(),"zoomstack"))
   unzip(dl_os_zoomstack, exdir = file.path(tempdir(),"zoomstack"))
@@ -51,9 +54,9 @@ zoomstack_buildings_lsoa = function(dl_os_zoomstack, bounds_lsoa_GB_full, bounds
   b_verylow = b_low[b_low$type == "National",]
   b_low = b_low[b_low$type == "Regional",]
 
-  b_high = gsub("OS_Open_Zoomstack.zip","",dl_os_zoomstack)
-  b_high = sf::st_read(file.path(b_high,"building_heights_gb.gpkg"))
-  b_high = b_high[,c("height_max")]
+  # b_high = gsub("OS_Open_Zoomstack.zip","",dl_os_zoomstack)
+  # b_high = sf::st_read(file.path(b_high,"building_heights_gb.gpkg"))
+  # b_high = b_high[,c("height_max")]
   names(b_high)[names(b_high) == "height_max"] = "height"
 
   unlink(file.path(tempdir(),"zoomstack"), recursive = TRUE)
@@ -62,7 +65,7 @@ zoomstack_buildings_lsoa = function(dl_os_zoomstack, bounds_lsoa_GB_full, bounds
   b_low$type = NULL
   b_verylow$type = NULL
 
-  b_high = change_geom_name(b_high)
+  #b_high = change_geom_name(b_high)
   b_med = change_geom_name(b_med)
   b_low = change_geom_name(b_low)
   b_verylow = change_geom_name(b_verylow)

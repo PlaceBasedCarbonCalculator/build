@@ -5,10 +5,13 @@
 #' @param zip logical, if true zips the json into a single zip folder
 #' @param rounddp numeric, how many decimpla places to round to
 #' @dataframe passed to toJSON
+#' @na passed to toJSON
 #'
 #' Will drop any sf geometry and name files based on geo_code
 
-export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE){
+export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
+                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE,
+                             na = "null"){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -26,7 +29,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
     x <- sf::st_drop_geometry(x)
   }
 
-  if(!inherits(x, "tibble")){
+  if(inherits(x, "tibble") | inherits(x, "tbl")){
     x <- as.data.frame(x)
   }
 
@@ -48,7 +51,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
     }
   }
 
-  x <- dplyr::group_split(x, x[idcol])
+  x <- dplyr::group_split(x, x[[idcol]], .keep = FALSE)
 
   if(zip){
     dir.create(file.path(tempdir(),paste0("jsonzip",idcol)))
@@ -62,7 +65,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
       sub[idcol] <- NULL
       jsonlite::write_json(sub,
                            file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json")),
-                           dataframe = dataframe)
+                           dataframe = dataframe, na = na)
     }
     files <- list.files(file.path(tempdir(),paste0("jsonzip",idcol)))
     message("Zipping JSON")
@@ -87,8 +90,12 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json", z
   } else {
     message("Writing JSON")
     for(i in seq(1,length(x))){
-      sub <- x[[i]]
-      jsonlite::write_json(sub, file.path(path,paste0(sub[idcol],".json")))
+      sub <- as.data.frame(x[[i]])
+      nmsub <- sub[,idcol][1]
+      sub[idcol] <- NULL
+      jsonlite::write_json(sub,
+                           file.path(path,paste0(nmsub,".json")),
+                           dataframe = dataframe, na = na)
     }
   }
 

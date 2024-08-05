@@ -1,5 +1,9 @@
 combine_land_use = function(os_land, os_greenspace, osm_land){
 
+  #TODO: landuse:farmyard is a residential land use that can overlap with non-residential
+  #leisure:garden leisure:park  are natural
+  #leisure:stadium is non-residential
+
   #OSM start with
   landuse = c("industrial", "retail", "military", "commercial", "landfill","quarry","recreation_ground","railway")
   military = c("danger_area", "shooting_range", "range", "training_area")
@@ -101,7 +105,7 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   if( FALSE){
     # TESTING MODE
-    buff = sf::st_buffer(bounds_lsoa_GB_full[bounds_lsoa_GB_full$LSOA21CD == "W01000503",],10000)
+    buff = sf::st_buffer(bounds_lsoa_GB_full[bounds_lsoa_GB_full$LSOA21CD == "W01000542",],10000)
     #buff = sf::st_buffer(sf::st_sfc(sf::st_point(c(210668.20566749386, 554110.83121316193)), crs = 27700),100)
     bounds_lsoa_GB_full = bounds_lsoa_GB_full[buff,]
     landcover = landcover[buff,]
@@ -149,7 +153,7 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   g = igraph::graph_from_adj_list(inter)
   g = igraph::components(g)
-  memb = g$membership
+  #memb = g$membership
   landcover_over$cluster = g$membership
 
   landcover_over = dplyr::group_split(landcover_over, cluster)
@@ -236,10 +240,18 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   x_inter <- sf::st_make_valid(x_inter)
   nonres_union <- c(x_inter, x_solo$geometry)
 
+  # Sort as later group_split also sorts
+  bounds_lsoa_GB_full = bounds_lsoa_GB_full[order(bounds_lsoa_GB_full$LSOA21CD),]
+
   inter3 <- sf::st_intersects(bounds_lsoa_GB_full, nonres_union)
   attributes(inter3)$class = "list"
 
   bounds_list <- dplyr::group_split(bounds_lsoa_GB_full, LSOA21CD, .keep = TRUE)
+
+  nms <- sapply(bounds_list, function(x){x$LSOA21CD})
+  if(!all(nms == bounds_lsoa_GB_full$LSOA21CD)){
+    stop("Res and non res LSOA order does not match")
+  }
 
   lsoa_res <- purrr::map2(bounds_list, inter3, function(x, y){
     suppressWarnings(sf::st_difference(x, sf::st_union(nonres_union[y])))
@@ -337,7 +349,7 @@ hole_area = function(y){
 }
 
 try_inter = function(x){
-  res = try(sf::st_intersection(x), silent = TRUE)
+  res = suppressMessages(suppressWarnings(try(sf::st_intersection(x), silent = TRUE)))
   if(inherits(res, "try-error")){
     res = sf::st_intersection(sf::st_set_precision(x, 10))
   }

@@ -346,5 +346,231 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
 
 }
 
+load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"gas_electric/postcode")){
 
+  # Gas
+  g15 <- read.csv(file.path(path,"Postcode_level_gas_2015.csv"))
+  g16 <- read.csv(file.path(path,"Postcode_level_gas_2016.csv"))
+  g17 <- read.csv(file.path(path,"Postcode_level_gas_2017.csv"))
+  g18 <- read.csv(file.path(path,"Postcode_level_gas_2018.csv"))
+  g19 <- read.csv(file.path(path,"Postcode_level_gas_2019.csv"))
+  g20 <- read.csv(file.path(path,"Postcode_level_gas_2020.csv"))
+  g21 <- read.csv(file.path(path,"Postcode_level_gas_2021.csv"))
+  g22 <- read.csv(file.path(path,"Postcode_level_gas_2022.csv"))
+
+  # Electric
+  e15_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2015.csv"))
+  e16_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2016.csv"))
+  e17_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2017.csv"))
+  e18_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2018.csv"))
+  e19_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2019.csv"))
+  e20_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2020.csv"))
+  e21_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2021.csv"))
+  e22_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2022.csv"))
+
+  e15_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2015.csv"))
+  e16_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2016.csv"))
+  e17_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2017.csv"))
+  e18_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2018.csv"))
+  e19_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2019.csv"))
+  e20_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2020.csv"))
+  e21_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2021.csv"))
+  e22_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2022.csv"))
+
+  e15_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2015.csv"))
+  e16_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2016.csv"))
+  e17_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2017.csv"))
+  e18_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2018.csv"))
+  e19_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2019.csv"))
+  e20_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2020.csv"))
+  e21_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2021.csv"))
+  e22_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2022.csv"))
+
+  # Clean
+  e15_all <- clean_postcode_elec(e15_all, 2015, "all")
+  e16_all <- clean_postcode_elec(e16_all, 2016, "all")
+  e17_all <- clean_postcode_elec(e17_all, 2017, "all")
+  e18_all <- clean_postcode_elec(e18_all, 2018, "all")
+  e19_all <- clean_postcode_elec(e19_all, 2019, "all")
+  e20_all <- clean_postcode_elec(e20_all, 2020, "all")
+  e21_all <- clean_postcode_elec(e21_all, 2021, "all")
+  e22_all <- clean_postcode_elec(e22_all, 2022, "all")
+
+  e15_st <- clean_postcode_elec(e15_st, 2015, "std")
+  e16_st <- clean_postcode_elec(e16_st, 2016, "std")
+  e17_st <- clean_postcode_elec(e17_st, 2017, "std")
+  e18_st <- clean_postcode_elec(e18_st, 2018, "std")
+  e19_st <- clean_postcode_elec(e19_st, 2019, "std")
+  e20_st <- clean_postcode_elec(e20_st, 2020, "std")
+  e21_st <- clean_postcode_elec(e21_st, 2021, "std")
+  e22_st <- clean_postcode_elec(e22_st, 2022, "std")
+
+  e15_eco7 <- clean_postcode_elec(e15_eco7, 2015, "eco7")
+  e16_eco7 <- clean_postcode_elec(e16_eco7, 2016, "eco7")
+  e17_eco7 <- clean_postcode_elec(e17_eco7, 2017, "eco7")
+  e18_eco7 <- clean_postcode_elec(e18_eco7, 2018, "eco7")
+  e19_eco7 <- clean_postcode_elec(e19_eco7, 2019, "eco7")
+  e20_eco7 <- clean_postcode_elec(e20_eco7, 2020, "eco7")
+  e21_eco7 <- clean_postcode_elec(e21_eco7, 2021, "eco7")
+  e22_eco7 <- clean_postcode_elec(e22_eco7, 2022, "eco7")
+
+
+  g15 <- clean_postcode_gas(g15, 2015)
+  g16 <- clean_postcode_gas(g16, 2016)
+  g17 <- clean_postcode_gas(g17, 2017)
+  g18 <- clean_postcode_gas(g18, 2018)
+  g19 <- clean_postcode_gas(g19, 2019)
+  g20 <- clean_postcode_gas(g20, 2020)
+  g21 <- clean_postcode_gas(g21, 2021)
+  g22 <- clean_postcode_gas(g22, 2022)
+
+  gall <- dplyr::full_join(g22, g21, by = "postcode")
+  gall <- dplyr::full_join(gall, g20, by = "postcode")
+  gall <- dplyr::full_join(gall, g19, by = "postcode")
+  gall <- dplyr::full_join(gall, g18, by = "postcode")
+  gall <- dplyr::full_join(gall, g17, by = "postcode")
+  gall <- dplyr::full_join(gall, g16, by = "postcode")
+  gall <- dplyr::full_join(gall, g15, by = "postcode")
+
+  eall_all <- dplyr::full_join(e22_all, e21_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e20_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e19_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e18_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e17_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e16_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e15_all, by = "postcode")
+
+  eall_st <- dplyr::full_join(e22_st, e21_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e20_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e19_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e18_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e17_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e16_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e15_st, by = "postcode")
+
+  eall_eco7 <- dplyr::full_join(e22_eco7, e21_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e20_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e19_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e18_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e17_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e16_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e15_eco7, by = "postcode")
+
+  geall = dplyr::full_join(gall, eall_all, by = "postcode")
+  geall = dplyr::full_join(geall, eall_st, by = "postcode")
+  geall = dplyr::full_join(geall, eall_eco7, by = "postcode")
+
+  geall = geall[,c("postcode",
+                   paste0("gas_meters_",2015:2022),
+                   paste0("elec_meters_all_",2015:2022),
+                   paste0("elec_meters_std_",2015:2022),
+                   paste0("elec_meters_eco7_",2015:2022),
+                   paste0("gas_totalkwh_",2015:2022),
+                   paste0("elec_totalkwh_all_",2015:2022),
+                   paste0("elec_totalkwh_std_",2015:2022),
+                   paste0("elec_totalkwh_eco7_",2015:2022),
+                   paste0("gas_meankwh_",2015:2022),
+                   paste0("elec_meankwh_all_",2015:2022),
+                   paste0("elec_meankwh_std_",2015:2022),
+                   paste0("elec_meankwh_eco7_",2015:2022),
+                   paste0("gas_mediankwh_",2015:2022),
+                   paste0("elec_mediankwh_std_",2015:2022),
+                   paste0("elec_mediankwh_all_",2015:2022),
+                   paste0("elec_mediankwh_eco7_",2015:2022)
+                   )]
+
+  geall
+}
+
+clean_postcode_elec = function(sub, year, type){
+  sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
+  names(sub) = c("postcode",paste0("elec_meters_",type,"_",year),paste0("elec_totalkwh_",type,"_",year),
+                 paste0("elec_meankwh_",type,"_",year),paste0("elec_mediankwh_",type,"_",year))
+  sub = sub[sub$postcode != "All postcodes",]
+  sub
+}
+
+clean_postcode_gas = function(sub, year){
+  sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
+  names(sub) = c("postcode",paste0("gas_meters_",year),paste0("gas_totalkwh_",year),
+                 paste0("gas_meankwh_",year),paste0("gas_mediankwh_",year))
+  sub = sub[sub$postcode != "All postcodes",]
+  sub
+}
+
+
+calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, emissions_factors){
+
+  names(postcode_gas_electricity) = gsub("_20", "X20", names(postcode_gas_electricity) )
+  nms = names(postcode_gas_electricity)
+  nms = nms[!nms %in% "postcode"]
+
+  emissions_factors = emissions_factors[,c("year","electricity_kgco2e","gas_kgco2e")]
+
+
+
+  bar = tidyr::pivot_longer(postcode_gas_electricity,
+                            cols = dplyr::all_of(nms),
+                            names_pattern = "(.*)X(.*)",
+                            names_to = c("variaible","year"))
+
+  bar = tidyr::pivot_wider(bar, id_cols = c("postcode","year"),
+                           names_from = "variaible",
+                           values_from = "value")
+  bar$year = as.integer(bar$year)
+
+  bar = dplyr::left_join(bar, emissions_factors, by = "year")
+
+  bar$gas_totalkgco2e = bar$gas_totalkwh  * bar$gas_kgco2e
+  bar$gas_mediankgco2e = bar$gas_mediankwh * bar$gas_kgco2e
+  bar$gas_meankgco2e = bar$gas_meankwh   * bar$gas_kgco2e
+
+  bar$elec_totalkgco2e_all = bar$elec_totalkwh_all * bar$electricity_kgco2e
+  bar$elec_meankgco2e_all = bar$elec_totalkwh_all * bar$electricity_kgco2e
+  bar$elec_mediankgco2e_all = bar$elec_mediankwh_all * bar$electricity_kgco2e
+
+  bar$elec_totalkgco2e_std = bar$elec_totalkwh_std * bar$electricity_kgco2e
+  bar$elec_meankgco2e_std = bar$elec_totalkwh_std * bar$electricity_kgco2e
+  bar$elec_mediankgco2e_std = bar$elec_mediankwh_std * bar$electricity_kgco2e
+
+  bar$elec_totalkgco2e_eco7 = bar$elec_totalkwh_eco7 * bar$electricity_kgco2e
+  bar$elec_meankgco2e_eco7 = bar$elec_totalkwh_eco7 * bar$electricity_kgco2e
+  bar$elec_mediankgco2e_eco7 = bar$elec_mediankwh_eco7 * bar$electricity_kgco2e
+
+  bar$gas_kgco2e = NULL
+  bar$electricity_kgco2e = NULL
+
+  # Fill in missing data
+  bar$elec_meters_eco7 = dplyr::if_else(is.na(bar$elec_meters_eco7),
+                                        bar$elec_meters_all - bar$elec_meters_std,
+                                        bar$elec_meters_eco7)
+  bar$elec_meters_std = dplyr::if_else(is.na(bar$elec_meters_std),
+                                        bar$elec_meters_all - bar$elec_meters_eco7,
+                                        bar$elec_meters_std)
+
+  bar
+
+}
+
+sumNA = function(x, y){
+  x[is.na(x)] = 0
+  y[is.na(y)] = 0
+  x+y
+}
+
+
+prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_postcodes_2024){
+  sub = postcode_gas_electricity_emissions[postcode_gas_electricity_emissions$year == 2022, ]
+  sub = sub[sub$postcode %in% bounds_postcodes_2024$POSTCODE,]
+  sub = sub[,c("postcode","elec_mediankgco2e_all","gas_mediankgco2e")]
+  sub$gas_elec_mediankgco2e = sumNA(sub$gas_mediankgco2e, sub$elec_mediankgco2e_all)
+  sub$elec = value2grade(sub$elec_mediankgco2e_all, FALSE)
+  sub$gas = value2grade(sub$gas_mediankgco2e, FALSE)
+  sub$combined = value2grade(sub$gas_elec_mediankgco2e, FALSE)
+  sub = sub[,c("postcode","gas","elec","combined")]
+  bounds_postcodes_2024$PC_AREA = NULL
+  sub = dplyr::left_join(sub, bounds_postcodes_2024, by = c("postcode" = "POSTCODE"))
+  sub = sf::st_as_sf(sub)
+  sub
+}
 

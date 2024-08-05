@@ -111,7 +111,7 @@ read_postcodes <- function(path){
   dir.create(file.path(tempdir(),"postcodes"))
   unzip(path, exdir = file.path(tempdir(),"postcodes"))
 
-  zips <- list.files(file.path(tempdir(),"postcodes","codepoint-poly_4637385"),
+  zips <- list.files(file.path(tempdir(),"postcodes"),
                       recursive = TRUE, pattern = ".zip", full.names = TRUE)
   postcode_areas <- list()
   postcodes <- list()
