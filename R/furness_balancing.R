@@ -3,6 +3,7 @@ bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   mat_rsum <- rowSums(mat2, na.rm = TRUE)
   mat_rratio <- rsum2 / mat_rsum
   mat_rratio[is.nan(mat_rratio)] <- 0
+  #TODO: Get Inf values if mat_rsum is zero
 
   mat2 <- mat2 * mat_rratio
 
@@ -35,7 +36,12 @@ round_half_random <- function(x) {
 
 
 # Furness method balancing
-furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE){
+furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = TRUE){
+
+  if(sum(rsum) != sum(csum)){
+    warning("Totals of rsum and csum don't match rsum=",
+            sum(rsum,na.rm = TRUE)," csum=",sum(csum,na.rm = TRUE))
+  }
 
   rname <- rownames(mat)
   cname <- colnames(mat)
@@ -56,13 +62,13 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE){
     mat_change <- bal_func(mat2 = mat_change,
                            rsum2 = rsum_change,
                            csum2 = csum_change,
-                           int_only = TRUE)
+                           int_only = int_only)
     # Are we stuck in a loop?
     if(identical(mat_old, mat_change)){
       mat_change <- bal_func(mat2 = mat_change_orig,
                              rsum2 = rsum_change,
                              csum2 = csum_change,
-                             int_only = TRUE)
+                             int_only = int_only)
       #message("Stuck in loop")
     }
     #print(mat_change)
@@ -86,6 +92,7 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE){
       print("\n")
       print(mat)
       print(rsum)
+      print(rowSums(mat_fin) - rsum)
       print(csum)
       stop("Rows don't match ",i)
     }
