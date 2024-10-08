@@ -50,3 +50,6 @@ rsconnect/
 
 # Ouput Data
 outputdata/
+*.gpkg
+*.gpkg-shm
+*.gpkg-wal
