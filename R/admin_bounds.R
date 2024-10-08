@@ -160,6 +160,15 @@ load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   lookup
 }
 
+load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
+  dir.create(file.path(tempdir(),"lookup"))
+  unzip(file.path(path,"PCD_OA21_LSOA21_MSOA21_LAD_FEB24_UK_LU.zip"), exdir = file.path(tempdir(),"lookup"))
+  lookup = readr::read_csv(file.path(tempdir(),"lookup","PCD_OA21_LSOA21_MSOA21_LAD_FEB24_UK_LU.csv"))
+  lookup = lookup[,c("pcds","oa21cd","lsoa21cd","msoa21cd","ladcd","ladnm")]
+  lookup
+}
+
+
 # Bind list of SF data frames together using faster data.table::rbindlist
 bind_sf = function(x, idcol = NULL) {
   if (length(x) == 0) stop("Empty list")

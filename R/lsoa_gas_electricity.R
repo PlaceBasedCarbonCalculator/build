@@ -526,15 +526,15 @@ calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, e
   bar$gas_meankgco2e = bar$gas_meankwh   * bar$gas_kgco2e
 
   bar$elec_totalkgco2e_all = bar$elec_totalkwh_all * bar$electricity_kgco2e
-  bar$elec_meankgco2e_all = bar$elec_totalkwh_all * bar$electricity_kgco2e
+  bar$elec_meankgco2e_all = bar$elec_meankwh_all * bar$electricity_kgco2e
   bar$elec_mediankgco2e_all = bar$elec_mediankwh_all * bar$electricity_kgco2e
 
   bar$elec_totalkgco2e_std = bar$elec_totalkwh_std * bar$electricity_kgco2e
-  bar$elec_meankgco2e_std = bar$elec_totalkwh_std * bar$electricity_kgco2e
+  bar$elec_meankgco2e_std = bar$elec_meankwh_std * bar$electricity_kgco2e
   bar$elec_mediankgco2e_std = bar$elec_mediankwh_std * bar$electricity_kgco2e
 
   bar$elec_totalkgco2e_eco7 = bar$elec_totalkwh_eco7 * bar$electricity_kgco2e
-  bar$elec_meankgco2e_eco7 = bar$elec_totalkwh_eco7 * bar$electricity_kgco2e
+  bar$elec_meankgco2e_eco7 = bar$elec_meankwh_eco7 * bar$electricity_kgco2e
   bar$elec_mediankgco2e_eco7 = bar$elec_mediankwh_eco7 * bar$electricity_kgco2e
 
   bar$gas_kgco2e = NULL

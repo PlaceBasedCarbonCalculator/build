@@ -121,7 +121,19 @@ tar_target(geojson_postcode,{
   make_geojson(sub, "outputdata/postcodes.geojson")
 }, format = "file"),
 
+# EPC Points
 
+tar_target(geojson_epc_dom,{
+  sub = readRDS(file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"))
+  sub = wiggle_points(sub)
+  make_geojson(sub, "outputdata/epc_dom.geojson")
+}, format = "file"),
+
+tar_target(geojson_epc_nondom,{
+  sub = readRDS(file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  sub = wiggle_points(sub)
+  make_geojson(sub, "outputdata/epc_nondom.geojson")
+}, format = "file"),
 
 # Boundaries
 tar_target(dl_boundaries,{
@@ -186,6 +198,10 @@ tar_target(lookup_lsoa_2001_11,{
 }),
 tar_target(lookup_OA_LSOA_MSOA_classifications,{
   load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
+}),
+
+tar_target(lookup_postcode_OA_LSOA_MSOA_2021,{
+  load_postcode_OA_LSOA_MSOA_class_2021_lookup(dl_boundaries)
 }),
 
 tar_target(bounds_lsoa_GB_full,{
@@ -258,6 +274,9 @@ tar_target(dl_nomis,{
   dowload_nomis(path = file.path(parameters$path_data,"nomis"))
 }),
 
+tar_target(vehicle_cenus21,{
+  load_census_2021_vehicles(path = file.path(parameters$path_data,"nomis"))
+}),
 
 # Income
 tar_target(dl_income,{
@@ -779,9 +798,23 @@ tar_target(pmtiles_wards,{
 
 
 tar_target(pmtiles_postcode,{
-  make_pmtiles(geojson_postcode, "postcode.geojson","postcode.pmtiles",
-               name = "postcode", shared_borders = TRUE, extend_zoom = TRUE,
+  make_pmtiles(geojson_postcode, "postcodes.geojson","postcodes.pmtiles",
+               name = "postcodes", shared_borders = TRUE, extend_zoom = TRUE,
                coalesce = TRUE, min_zoom = 6, max_zoom = 14)
+}, format = "file"),
+
+
+tar_target(pmtiles_epc_dom,{
+  make_pmtiles(geojson_epc_dom, "epc_dom.geojson","epc_dom.pmtiles",
+               name = "epc_dom", extend_zoom = TRUE,
+               drop = TRUE, min_zoom = 6, max_zoom = 14)
+}, format = "file"),
+
+
+tar_target(pmtiles_epc_nondom,{
+  make_pmtiles(geojson_epc_nondom, "epc_nondom.geojson","epc_nondom.pmtiles",
+               name = "epc_nondom", shared_borders = TRUE, extend_zoom = TRUE,
+               drop = TRUE, min_zoom = 6, max_zoom = 14)
 }, format = "file"),
 
 # Build JSON
