@@ -1,15 +1,21 @@
 bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   # Find ratio of rows
   mat_rsum <- rowSums(mat2, na.rm = TRUE)
+
+  # Check for zeros in the matrix, once the matrix has zeros they stay so a solution can't be found
+  r_bad0 <- ifelse(mat_rsum == 0 & rsum2 != 0, rsum2/ncol(mat2), 0)
+  mat2 <- sweep(mat2, 1, r_bad0, FUN = "+")
+  mat_rsum <- rowSums(mat2, na.rm = TRUE)
+
   mat_rratio <- rsum2 / mat_rsum
   mat_rratio[is.nan(mat_rratio)] <- 0
   #TODO: Get Inf values if mat_rsum is zero
 
   mat2 <- mat2 * mat_rratio
 
-  if(int_only){
-    mat2 <- round_half_random(mat2)
-  }
+  # if(int_only){
+  #   mat2 <- round_half_random(mat2)
+  # }
 
   # Find ratio of rows
   mat_csum <- colSums(mat2, na.rm = TRUE)
@@ -85,15 +91,15 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = T
 
   mat_fin = ifelse(is.na(mat), mat_change, mat)
 
-
   # Check
   if(check){
     if(!all(rowSums(mat_fin) == rsum)){
-      print("\n")
-      print(mat)
-      print(rsum)
-      print(rowSums(mat_fin) - rsum)
-      print(csum)
+      #print("\n")
+      #print(mat)
+      message("Rows don't match for: ")
+      print(rsum[rowSums(mat_fin) != rsum])
+      #print(rowSums(mat_fin) - rsum)
+      #print(csum)
       stop("Rows don't match ",i)
     }
     if(!all(colSums(mat_fin) == csum)){
@@ -177,4 +183,59 @@ generate_combinations <- function(t, n, prefix = numeric()) {
     }
   }
   return(result)
+}
+
+
+
+furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = FALSE, quiet = TRUE){
+
+  rname <- rownames(mat)
+  cname <- colnames(mat)
+
+  # Get scale about right
+  mat <- mat / (sum(mat, na.rm = TRUE) / sum(rsum))
+  #mat_orig = mat
+
+  for(i in seq_len(n)){
+    mat <- bal_func(mat, rsum = rsum, csum = csum, int_only = int_only)
+    if(i == 1 & !quiet){
+      message("First pass")
+      print(summary(rowSums(mat, na.rm = TRUE) - rsum))
+    }
+    if(i == n & !quiet){
+      message("Last pass")
+      print(summary(rowSums(mat, na.rm = TRUE) - rsum))
+    }
+  }
+
+
+  rownames(mat) <- rname
+  colnames(mat) <- cname
+
+  # Check
+  if(check){
+    if(!all(rowSums(mat) == rsum)){
+      # print("\n")
+      # print(mat)
+      # print(rsum)
+      # print(csum)
+      message("Rows don't match for: ")
+      print(rsum[rowSums(mat) != rsum])
+      #stop("Rows don't match ",i)
+    }
+    if(!all(colSums(mat) == csum)){
+      # print("\n")
+      # print(mat)
+      # print(rsum)
+      # print(csum)
+      message("Cols don't match for: ")
+      print(csum[colSums(mat) != csum])
+      print(colSums(mat))
+      print(csum)
+      print(colSums(mat) != csum)
+      #stop("Cols don't match ",i)
+    }
+  }
+
+  return(mat)
 }

@@ -1,5 +1,11 @@
-read_class_ethinic = function(path = "../inputdata/population/census2021EW_class_ethnic.csv"){
-  raw = read.csv(path)
+read_class_ethinic = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
+
+  dir = file.path(tempdir(),"class_ethnic")
+  dir.create(dir)
+  unzip(path, exdir = dir)
+  raw = read.csv(file.path(dir,"census2021EW_class_ethnic.csv"))
+  unlink(dir, recursive = TRUE)
+
   names(raw) = c("x","Total","AB","C1","C2","DE")
   raw_numb = raw[raw$x %in% c("Asian, Asian British or Asian Welsh",
                               "Black, Black British, Black Welsh, Caribbean or African",
@@ -25,16 +31,51 @@ read_class_ethinic = function(path = "../inputdata/population/census2021EW_class
 
 }
 
+read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdidents_NSSEC10_Ethnicity_LSOA_partial.csv"
+                              #,path2 = "../inputdata/population/census2021EW_Residents_Ethnicity_LSOA.csv"
+                              ){
 
-read_household_nssec = function(path6 = "../inputdata/population/census2021EW_HouseholdComposition_NSSEC6.csv",
-                                path8 = "../inputdata/population/census2021EW_HouseholdComposition_NSSEC8_partial.csv",
-                                path_hc = "../inputdata/population/census2021EW_HouseholdComposition.csv",
-                                path_nssec = "../inputdata/population/census2021EW_NSSEC.csv",
-                                ){
-  raw6 = read.csv(path6)
-  raw8 = read.csv(path8)
-  raw_hc = read.csv(path_hc)
-  raw_nssec = read.csv(path_nssec)
+  raw = read.csv(path)
+
+
+  names(raw) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","ethnic6CD","ethnic6","residents")
+  raw = raw[,c("LSOA21CD","NSSEC10","ethnic6","residents")]
+
+  raw$NSSEC10 = simplify_nssec(raw$NSSEC10)
+  raw$ethnic6 = simplify_ethnic6(raw$ethnic6)
+  raw = raw[raw$ethnic6 != "DNA",] # 0 For all rows so remove
+
+  # ethonly = read.csv(path2)
+  # names(ethonly) = c("LSOA21CD","LSOA21NM","ethnic6CD","ethnic6","residents")
+  # ethonly = ethonly[,c("LSOA21CD","ethnic6","residents")]
+  # ethonly = ethonly[!ethonly$LSOA21CD %in% unique(raw$LSOA21CD),]
+  # ethonly$ethnic6 = simplify_ethnic6(ethonly$ethnic6)
+
+  # Check ethonly distributions
+  # LSOAs with suppresed breakdown are all more the 97% white
+  # chk = purrr::map(dplyr::group_split(ethonly, LSOA21CD), function(x){
+  #   x = x[order(x$residents,decreasing = TRUE),]
+  #   x$percent = round(x$residents / sum(x$residents) * 100,1)
+  #   x = x[1,]
+  #   x
+  # }, .progress = T)
+  # chk = dplyr::bind_rows(chk)
+
+  raw
+
+}
+
+
+read_household_nssec = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
+
+  dir = file.path(tempdir(),"class_ethnic")
+  dir.create(dir)
+  unzip(path, exdir = dir)
+  raw6 = read.csv(file.path(dir,"census2021EW_HouseholdComposition_NSSEC6.csv"))
+  raw8 = read.csv(file.path(dir,"census2021EW_HouseholdComposition_NSSEC8_partial.csv"))
+  raw_hc = read.csv(file.path(dir,"census2021EW_HouseholdComposition.csv"))
+  raw_nssec = read.csv(file.path(dir,"census2021EW_NSSEC.csv"))
+  unlink(dir, recursive = TRUE)
 
   names(raw6) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","household6CD","household6","count")
   names(raw8) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","household8CD","household8","count")
@@ -79,21 +120,23 @@ read_household_nssec = function(path6 = "../inputdata/population/census2021EW_Ho
 
   wide = dplyr::left_join(wide6[,c("LSOA21CD", "NSSEC10","LoneParent","DNA")],
                           wide8, by = c("LSOA21CD", "NSSEC10"))
-  long = tidyr::pivot_longer(wide,
-                             cols = c("LoneParent","DNA","OnePersonOver66",
-                             "OnePersonOther","CoupleNoChildren","CoupleChildren",
-                             "CoupleNoDepChild","Other8"))
-  long_lst = dplyr::group_split(long, long$LSOA21CD, .keep = FALSE)
-  x = long_lst[[1]]
+  # long = tidyr::pivot_longer(wide,
+  #                            cols = c("LoneParent","DNA","OnePersonOver66",
+  #                            "OnePersonOther","CoupleNoChildren","CoupleChildren",
+  #                            "CoupleNoDepChild","Other8"))
+  # long_lst = dplyr::group_split(long, long$LSOA21CD, .keep = FALSE)
+  #x = long_lst[[1]]
 
-  cats = purrr::map(long_lst, top_architypes)
-  cats = dplyr::bind_rows(cats)
-  cats$cat_name = paste0(cats$NSSEC10,"-",cats$name)
+  # cats = purrr::map(long_lst, top_architypes)
+  # cats = dplyr::bind_rows(cats)
+  # cats$cat_name = paste0(cats$NSSEC10,"-",cats$name)
+  #
+  # foo = as.data.frame(table(cats$cat_name))
+  #
+  # wide_miss = wide[is.na(wide$Other8),]
+  # foo = wide_miss[wide_miss$LSOA21CD == "E01000117",]
 
-  foo = as.data.frame(table(cats$cat_name))
-
-  wide_miss = wide[is.na(wide$Other8),]
-  foo = wide_miss[wide_miss$LSOA21CD == "E01000117",]
+  wide
 
 }
 
@@ -131,6 +174,18 @@ simplify_household8 = function(x){
   x
 
 }
+
+simplify_ethnic6 = function(x){
+  x[x=="Does not apply"] = "DNA"
+  x[x=="Asian, Asian British or Asian Welsh"] = "Asian"
+  x[x=="Black, Black British, Black Welsh, Caribbean or African"] = "Black"
+  x[x=="Mixed or Multiple ethnic groups"] = "Mixed"
+  x[x=="Other ethnic group"] = "Other"
+  x
+
+}
+
+
 
 
 balance_nssec = function(x, y){
