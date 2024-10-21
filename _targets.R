@@ -76,9 +76,23 @@ tar_target(lsoa_11_21_tools,{
   lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population_2021)
 }),
 
+# Demographics
+tar_target(NSSEC_ethinic_residents,{
+  read_NSSEC_ethinic(path = file.path(parameters$path_data,"population/census2021EW_Resdidents_NSSEC10_Ethnicity_LSOA_partial.csv"))
+}),
 
+tar_target(NSSEC_household,{
+  read_household_nssec(path = file.path(parameters$path_data,"population/census2021EW_HouseholdComposition.zip"),
+                       path1 = file.path(parameters$path_data,"population/census2021EW_Households_HouseholdComposition15_LSOA.csv"),
+                       path2 = file.path(parameters$path_data,"population/census2021EW_RefPerson_NSSEC10_Houshold15_LSOA_partial.csv"),
+                       path_msoa = file.path(parameters$path_data,"population/census2021EW_RefPerson_NSSEC10_Houshold15_MSOA_partial.csv"),
+                       lookup_postcode_OA_LSOA_MSOA_2021
+                       )
+}),
 
-
+tar_target(household_clusters,{
+  build_household_types(NSSEC_household, NSSEC_ethinic_residents)
+}),
 
 
 # Gas and Electricity
@@ -401,6 +415,36 @@ tar_target(house_prices,{
 tar_target(house_transactions,{
   load_house_transactions(path = file.path(parameters$path_data,"house_price_age"), lsoa_11_21_tools)
 }),
+
+# VOA House by Council Tax
+tar_target(dwellings_tax_band,{
+  load_voa_CTSOP1(path = file.path(parameters$path_data,"voa"))
+}),
+
+tar_target(dwellings_type,{
+  load_voa_CTSOP3(path = file.path(parameters$path_data,"voa"))
+}),
+
+tar_target(dwellings_age,{
+  load_voa_CTSOP4(path = file.path(parameters$path_data,"voa"))
+}),
+
+
+tar_target(voa_json_2010,{
+  sub = summarise_voa_post2010(dwellings_tax_band)
+  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 1, path = "outputdata/json/voa_2010", dataframe = "columns",
+                   reduce = FALSE)
+}),
+
+tar_target(voa_json_2020,{
+  sub = summarise_voa_post2020(dwellings_type, dwellings_age)
+  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 1, path = "outputdata/json/voa_2020", dataframe = "columns",
+                   reduce = FALSE)
+}),
+
+
+
+
 
 
 # Travel to Work
