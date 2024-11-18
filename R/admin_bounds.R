@@ -22,7 +22,7 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
 }
 
 read_bounds_la <- function(path){
-  file_path = file.path(path, "Local_Authority_Districts_May_2023_UK_BFC_V2_179125415192200502.gpkg")
+  file_path = file.path(path, "Local_Authority_Districts_May_2024_Boundaries_UK_BFC_6876907690171027150.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("LAD23CD","LAD23NM")]
   bounds
@@ -30,7 +30,7 @@ read_bounds_la <- function(path){
 
 
 read_bounds_wards <- function(path){
-  file_path = file.path(path, "Wards_December_2022_Boundaries_GB_BFC_-6255559218859347997.gpkg")
+  file_path = file.path(path, "Wards_May_2024_Boundaries_UK_BFE_-4458353988245060602.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("WD22CD","WD22NM")]
   bounds
@@ -44,7 +44,7 @@ read_bounds_parish <- function(path){
 }
 
 read_bounds_westminster <- function(path){
-  file_path = file.path(path, "Westminster_Parliamentary_Constituencies_Dec_2022_UK_BFC_8233416892985902015.gpkg")
+  file_path = file.path(path, "Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BFC_-6236279356162627018.gpkg")
   bounds <- read_bounds(file_path)
   bounds <- bounds[,c("PCON22CD","PCON22NM")]
   bounds
@@ -195,4 +195,20 @@ read_bounds_dz11 <- function(path){
   bounds <- bounds[,c("DataZone","geometry")]
   bounds <- sf::st_make_valid(bounds)
   bounds
+}
+
+
+lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la){
+
+  cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
+
+  cents = sf::st_join(cents, bounds_wards)
+  cents = sf::st_join(cents, bounds_parish)
+  cents = sf::st_join(cents, bounds_westminster)
+  cents = sf::st_join(cents, bounds_la)
+  cents = cents[,c("LSOA21CD","WD22NM","PAR23NM","PCON22NM","LAD23NM")]
+  cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
+
+  cents
+
 }

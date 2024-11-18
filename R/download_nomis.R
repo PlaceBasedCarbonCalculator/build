@@ -73,3 +73,9 @@ load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomi
   dat
 }
 
+load_census_2021_households = function(path = file.path(parameters$path_data,"nomis")){
+  dat = unzip_nomis(file.path(path,"census2021-ts041.zip"))
+  names(dat) = c("year","LSOA21NM","LSOA21","households_total")
+  dat$LSOA21NM = NULL
+  dat
+}

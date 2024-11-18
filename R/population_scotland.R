@@ -173,3 +173,34 @@ combine_populations = function(population_2002_2020, population_2021, population
   population_2020_2021
 
 }
+
+# New version that uses the VOA/Council Tax data
+combine_populations2 = function(population_households_historical, population_scot, dwellings_tax_band_scotland) {
+
+  #TODO: Update to 2022 DataZones when published and add 2022 population for Scotland
+
+  nms = c("year","LSOA21CD","all_ages","0-4","5-9","10-14","15-19","20-24",
+          "25-29","30-34","35-39","40-44","45-49",
+          "50-54","55-59","60-64","65-69","70-74","75-79","80-84","85+")
+
+  names(population_scot)[names(population_scot) == "LSOA11CD"] = "LSOA21CD"
+  population_scot = population_scot[population_scot$year > 2001,]
+  population_scot$`85+` = population_scot$`85-89` + population_scot$`90+`
+  population_scot  = population_scot[,nms]
+
+  dwellings_tax_band_scotland = dwellings_tax_band_scotland[,c("LSOA11CD","year","all_properties")]
+
+  scot2  = dplyr::left_join(population_scot, dwellings_tax_band_scotland,
+                          by = c("LSOA21CD" = "LSOA11CD",
+                                 "year" = "year"
+                                 ))
+  scot2$adults_per_household = NA
+  scot2$households_est = NA
+  scot2$adults = rowSums(scot2[,c("20-24","25-29","30-34","35-39","40-44","45-49",
+                                  "50-54","55-59","60-64","65-69","70-74","75-79",
+                                  "80-84","85+")])
+
+  population = rbind(population_households_historical, scot2)
+  population
+
+}

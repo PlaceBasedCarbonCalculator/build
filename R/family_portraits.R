@@ -96,7 +96,7 @@ build_household_types = function(households_nssec, residents_ethnic){
 
   combined_long = combined[,!grepl("err_",names(combined))]
   combined_long = tidyr::pivot_longer(combined_long,
-                                      cols = names(combined_long)[names(combined_long) %in% c("NSSEC5","LSOA21CD")],
+                                      cols = names(combined_long)[!names(combined_long) %in% c("NSSEC5","LSOA21CD")],
                                       names_sep = "_",
                                       values_to = "households",
                                       names_to = c("householdComposition","ethnic")
@@ -113,29 +113,40 @@ select_household_pics = function(combined_long){
 
 
   long_lst = dplyr::group_split(combined_long, combined_long$LSOA21CD, .keep = FALSE)
-  cats = purrr::map(long_lst, top_architypes, .progress = TRUE)
+  cats = purrr::map(long_lst, top_architypes, n = 48, .progress = TRUE)
   cats = dplyr::bind_rows(cats)
 
-  #Check 20 is enough no close
-
-
-  chk = cats[cats$cum > 90,]
-  chk = group_split(chk, chk$LSOA21CD, .keep = FALSE)
-  chk = purrr::map(chk, function(x){x[1,]}, .progress = TRUE)
-  chk = dplyr::bind_rows(chk)
-  summary(chk$cum)
-  summary(duplicated(chk$LSOA21CD))
-  quantile(chk$cumvin, seq(0,1,0.05))
-  # Need between 14 and 50 types to cover 80% of the populations, mean of 22
-  x = cats[cats$LSOA21CD == "E01000501",]
-
-  # Look for unusual categorie to merge
-
-  cat_sum = cats %>%
-    group_by(NSSEC10,  NSSEC,ethnic) %>%
-    summarise(households = sum(households, na.rm = T))
+  # #Check 20 is enough no close
+  #
+  #
+  # chk = cats[cats$cumpic >= 48,]
+  # chk = dplyr::group_split(chk, chk$LSOA21CD, .keep = FALSE)
+  # chk = purrr::map(chk, function(x){x[1,]}, .progress = TRUE)
+  # chk = dplyr::bind_rows(chk)
+  # summary(chk$cum)
+  # summary(duplicated(chk$LSOA21CD))
+  # quantile(chk$cum, seq(0,1,0.05))
+  # # Need between 14 and 50 types to cover 80% of the populations, mean of 22
+  # x = cats[cats$LSOA21CD == "E01000501",]
+  #
+  # # Look for unusual categorie to merge
+  #
+  # cat_sum = cats %>%
+  #   group_by(NSSEC10,  NSSEC,ethnic) %>%
+  #   summarise(households = sum(households, na.rm = T))
 
   # Doing 48 images per LSOA for 90% of hosuheols in 90% of LSOAs
+
+  cats_top = cats[cats$cumpic <= 48,]
+  #cats_top = cats_top[,c("LSOA21CD","NSSEC5","householdComposition","ethnic","pic")]
+  cats_top$id = paste0(cats_top$NSSEC5,"_",cats_top$householdComposition,"_",cats_top$ethnic)
+  cats_top = cats_top[,c("LSOA21CD","id","pic")]
+  # cats_summary = cats_top %>%
+  #   group_by(NSSEC5, householdComposition, ethnic) %>%
+  #   summarise(households = sum(households),
+  #             pic = sum(pic))
+  cats_top
+
 }
 
 

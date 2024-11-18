@@ -112,11 +112,15 @@ central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
   dat_M = dplyr::ungroup(dat_M)
 
   #Split
-  dat_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, dat_S,
-                              by = "LSOA11CD", relationship = "many-to-many")
+  lookup_split = lsoa_11_21_tools$lookup_split
+  lookup_split = lookup_split[,c("LSOA11CD","LSOA21CD","year","household_ratio")]
+  lookup_split = lookup_split[lookup_split$year == 2011,]
+  dat_S = dplyr::left_join(lookup_split, dat_S,
+                            by = c("LSOA11CD"),
+                            relationship = "many-to-many")
   dat_S = as.data.frame(dat_S)
-  for(i in 4:11){
-    dat_S[i] = dat_S[,i ,drop = TRUE] * dat_S$pop_ratio
+  for(i in 5:12){
+    dat_S[i] = dat_S[,i ,drop = TRUE] * dat_S$household_ratio
   }
 
   nms = c("LSOA21CD","all_households","no_central_heating",

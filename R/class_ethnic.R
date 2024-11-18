@@ -456,13 +456,13 @@ balance_nssec2 = function(hc, nssec, both, msoa){
 
 
 
-top_architypes = function(x){
+top_architypes = function(x, n = 48){
   x = x[order(x$households, decreasing = TRUE),]
   x$per = x$households / sum(x$households) * 100
   x$cum = cumsum(x$per)
-  x$vin = round(x$per/5)
-  x$vin[x$vin == 0] = 1 # Can get stuck at less than 20 options
-  x$cumvin = cumsum(x$vin)
+  x$pic = round(x$per/(100/n))
+  x$pic[x$pic == 0] = 1 # Can get stuck at less than 20 options
+  x$cumpic = cumsum(x$pic)
   #x = x[x$cumvin <= 20,]
   x
 }

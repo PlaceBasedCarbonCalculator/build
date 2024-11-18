@@ -69,11 +69,15 @@ tar_target(population_scot,{
 }),
 
 tar_target(population,{
-  combine_populations(population_2002_2020, population_2021, population_2022, population_scot, lookup_lsoa_2011_21)
+  combine_populations2(population_households_historical, population_scot, dwellings_tax_band_scotland)
 }),
 
 tar_target(lsoa_11_21_tools,{
-  lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population_2021)
+  lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population)
+}),
+
+tar_target(households_cenus11,{
+  load_cenus11_households(path = file.path(parameters$path_data,"population/cenus2011_QS402UK_LSOA_Households_AcommodationType.csv"))
 }),
 
 # Demographics
@@ -92,6 +96,11 @@ tar_target(NSSEC_household,{
 
 tar_target(household_clusters,{
   build_household_types(NSSEC_household, NSSEC_ethinic_residents)
+}),
+
+tar_target(household_pics_json,{
+  sub = select_household_pics(household_clusters)
+  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/community_pics", dataframe = "columns")
 }),
 
 
@@ -136,6 +145,12 @@ tar_target(geojson_postcode,{
 }, format = "file"),
 
 # EPC Points
+tar_target(epc_dom_summary,{
+  epc_summarise_domestic(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                         bounds_lsoa_GB_full)
+}),
+
+
 
 tar_target(geojson_epc_dom,{
   sub = readRDS(file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"))
@@ -218,6 +233,14 @@ tar_target(lookup_postcode_OA_LSOA_MSOA_2021,{
   load_postcode_OA_LSOA_MSOA_class_2021_lookup(dl_boundaries)
 }),
 
+tar_target(SOAC_11,{
+  OAC_to_2021(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
+}),
+
+tar_target(lsoa_admin,{
+  lsoa_admin_summary(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la)
+}),
+
 tar_target(bounds_lsoa_GB_full,{
   combine_lsoa_bounds(bounds_lsoa21_full, bounds_dz11, keep = 1)
 }),
@@ -292,6 +315,11 @@ tar_target(vehicle_cenus21,{
   load_census_2021_vehicles(path = file.path(parameters$path_data,"nomis"))
 }),
 
+tar_target(households_cenus21,{
+  load_census_2021_households(path = file.path(parameters$path_data,"nomis"))
+}),
+
+
 # Income
 tar_target(dl_income,{
   dowload_income_msoa(path = file.path(parameters$path_data,"income"))
@@ -327,33 +355,53 @@ tar_target(ev_registrations,{
   # Long running target ~2 hour
   load_dft_ev_registrations(dl_vehicle_registrations)
 }),
+tar_target(vehicle_registrations_21,{
+  vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,"vehicle_registrations")
+}),
+tar_target(ulev_registrations_21,{
+  vehicle_reg_to_21(ulev_registrations,lsoa_11_21_tools,"ulev_registrations")
+}),
+tar_target(ev_registrations_21,{
+  vehicle_reg_to_21(ev_registrations,lsoa_11_21_tools,"ev_registrations")
+}),
+
 # Car Emissions
 tar_target(car_emissions_11,{
-  load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
+  sub = load_car_emissions(path = file.path(parameters$path_secure_data,"CREDS Data/github-secure-data/Historical_Car_Emissions_LSOA.zip"))
+  car_emissions_to_21(sub, lsoa_11_21_tools)
 }),
 tar_target(car_emissions_perkm,{
-  car_emissions_to_21(car_emissions_11, lsoa_11_21_tools)
+  car_emissions_post2018(car_emissions_11,vehicle_registrations_21,ulev_registrations_21)
 }),
 tar_target(car_emissions,{
-  calculate_car_emissions(car_km_lsoa, car_emissions_perkm, population)
+  calculate_car_emissions(car_km_lsoa_21, car_emissions_perkm, population)
 }),
 
 #Car &  Van km (2009-2011 LSOA)
 tar_target(car_km_2009_2011,{
-  read_motoring_along(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3"))
+  sub = read_motoring_along(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3"))
+  #car_km_2009_2011_to_2021(sub, lsoa_11_21_tools)
+  sub
 }),
+
+
 
 tar_target(car_km_pc,{
   read_mot_km_pc(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2023.Rds"))
 }),
 
-tar_target(car_km_lsoa_11,{
-  extraplote_car_km_trends(car_km_pc, car_km_2009_2011, centroids_lsoa11, centroids_dz11)
+# tar_target(car_km_lsoa_11,{
+#   extraplote_car_km_trends(car_km_pc, car_km_2009_2011, centroids_lsoa11, centroids_dz11, population)
+# }),
+
+tar_target(car_km_lsoa_21,{
+  extraplote_car_km_trends2(car_km_pc, car_km_2009_2011, centroids_lsoa21,
+                            centroids_dz11, vehicle_registrations_21, lookup_lsoa_2011_21)
 }),
 
-tar_target(car_km_lsoa,{
-  car_km_11_to_21(car_km_lsoa_11, lsoa_11_21_tools)
-}),
+# tar_target(car_km_lsoa,{
+#   car_km_11_to_21(car_km_lsoa_11, lsoa_11_21_tools)
+# }),
 
 # Public Transport Frequency
 tar_target(pt_frequency,{
@@ -378,8 +426,6 @@ tar_target(transport_lsoa_data,{
 }),
 
 
-# TODO: EPCs
-
 # Housing (Age, Building Type, Non-Gas Emissions, heating)
 tar_target(building_age_2011,{
   load_building_age_2011(path = file.path(parameters$path_secure_data,"CDRC/building age price"))
@@ -396,15 +442,12 @@ tar_target(central_heating_2021,{
 }),
 
 tar_target(central_heating_2011,{
-  load_central_heating_2011(path = file.path(parameters$path_data,"nomis","2011"))
-}),
-
-tar_target(central_heating_2011_21,{
-  central_heating_2011_to_2021(central_heating_2011, lsoa_11_21_tools)
+  sub = load_central_heating_2011(path = file.path(parameters$path_data,"nomis","2011"))
+  central_heating_2011_to_2021(sub, lsoa_11_21_tools)
 }),
 
 tar_target(other_heating_emissions,{
-  calculate_other_heating(central_heating_2021, central_heating_2011_21, domestic_gas, population)
+  calculate_other_heating(central_heating_2021, central_heating_2011, domestic_gas, population)
 }),
 
 # House Prices
@@ -421,6 +464,10 @@ tar_target(dwellings_tax_band,{
   load_voa_CTSOP1(path = file.path(parameters$path_data,"voa"))
 }),
 
+tar_target(dwellings_tax_band_scotland,{
+  load_scotland_council_tax(path = file.path(parameters$path_data,"council_tax_scotland"))
+}),
+
 tar_target(dwellings_type,{
   load_voa_CTSOP3(path = file.path(parameters$path_data,"voa"))
 }),
@@ -429,6 +476,12 @@ tar_target(dwellings_age,{
   load_voa_CTSOP4(path = file.path(parameters$path_data,"voa"))
 }),
 
+tar_target(population_households_historical,{
+  extrapolate_population_households(households_cenus11,households_cenus21,
+                                    lookup_lsoa_2011_21,dwellings_tax_band,
+                                    population_2002_2020,population_2021,
+                                    population_2022)
+}),
 
 tar_target(voa_json_2010,{
   sub = summarise_voa_post2010(dwellings_tax_band)
@@ -477,6 +530,10 @@ tar_target(consumption_income,{
 tar_target(consumption_emissions,{
   calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity)
 }),
+
+# Surveys
+
+
 
 
 # Accessibility Analysis
@@ -725,6 +782,20 @@ tar_target(geojson_westminster,{
 tar_target(geojson_la,{
   make_geojson(bounds_la, "outputdata/la.geojson")
 }, format = "file"),
+
+# Load Survey Data
+tar_target(nts,{
+  load_NTS(path = file.path(parameters$path_secure_data,"National Travel Survey/Safeguarded/"))
+}),
+
+tar_target(sipher,{
+  load_SIPHER(path = file.path(parameters$path_secure_data,"SIPHER Syntheic Population"))
+}),
+
+tar_target(us,{
+  load_US(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded"))
+}),
+
 
 # Build PMTiles
 tar_target(pmtiles_zones_high,{

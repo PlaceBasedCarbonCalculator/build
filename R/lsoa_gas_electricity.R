@@ -178,12 +178,20 @@ lsoa_gas_to_2021 <- function(domestic_gas, lsoa_11_21_tools){
   domestic_gas_M = dplyr::ungroup(domestic_gas_M)
 
   #Split
-  domestic_gas_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, domestic_gas_S,
-                                            by = "LSOA11CD", relationship = "many-to-many")
+  lookup_split = lsoa_11_21_tools$lookup_split
+  lookup_split = lookup_split[,c("LSOA11CD","LSOA21CD","year","household_ratio")]
+  lookup_split = lookup_split[lookup_split$year %in% unique(domestic_gas_S$year),]
+  domestic_gas_S = dplyr::left_join(lookup_split, domestic_gas_S,
+                                    by = c("LSOA11CD", "year"),
+                                    relationship = "many-to-many")
   domestic_gas_S = as.data.frame(domestic_gas_S)
-  for(i in 5:6){
-    domestic_gas_S[i] = domestic_gas_S[,i ,drop = TRUE] * domestic_gas_S$pop_ratio
-  }
+
+  domestic_gas_S$metres = domestic_gas_S$metres * domestic_gas_S$household_ratio
+  domestic_gas_S$total_gas_kwh = domestic_gas_S$total_gas_kwh * domestic_gas_S$household_ratio
+  domestic_gas_S$mean_gas_kwh = domestic_gas_S$total_gas_kwh / domestic_gas_S$metres
+
+  #TODO: How do you get the median of a subgroup? For now assuming unchanged
+
 
   nms = c("LSOA21CD","year","metres","total_gas_kwh","mean_gas_kwh","median_gas_kwh")
 
@@ -219,13 +227,28 @@ lsoa_electric_to_2021 <- function(domestic_electricity, lsoa_11_21_tools){
                                             metres = sum(metres, na.rm = TRUE))
   domestic_electricity_M = dplyr::ungroup(domestic_electricity_M)
 
-  #Split
-  domestic_electricity_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, domestic_electricity_S,
-                                            by = "LSOA11CD", relationship = "many-to-many")
+  lookup_split = lsoa_11_21_tools$lookup_split
+  lookup_split = lookup_split[,c("LSOA11CD","LSOA21CD","year","household_ratio")]
+  lookup_split = lookup_split[lookup_split$year %in% unique(domestic_electricity_S$year),]
+  domestic_electricity_S = dplyr::left_join(lookup_split, domestic_electricity_S,
+                                    by = c("LSOA11CD", "year"),
+                                    relationship = "many-to-many")
   domestic_electricity_S = as.data.frame(domestic_electricity_S)
-  for(i in 5:6){
-    domestic_electricity_S[i] = domestic_electricity_S[,i ,drop = TRUE] * domestic_electricity_S$pop_ratio
-  }
+
+  domestic_electricity_S$metres = domestic_electricity_S$metres * domestic_electricity_S$household_ratio
+  domestic_electricity_S$total_elec_kwh = domestic_electricity_S$total_elec_kwh * domestic_electricity_S$household_ratio
+  domestic_electricity_S$mean_elec_kwh = domestic_electricity_S$total_elec_kwh / domestic_electricity_S$metres
+
+  #TODO: How do you get the median of a subgroup? For now assuming unchanged
+
+
+  #Split
+  # domestic_electricity_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, domestic_electricity_S,
+  #                                           by = "LSOA11CD", relationship = "many-to-many")
+  # domestic_electricity_S = as.data.frame(domestic_electricity_S)
+  # for(i in 5:6){
+  #   domestic_electricity_S[i] = domestic_electricity_S[,i ,drop = TRUE] * domestic_electricity_S$pop_ratio
+  # }
 
   nms = c("LSOA21CD","year","metres","total_elec_kwh","mean_elec_kwh","median_elec_kwh")
 
@@ -240,11 +263,11 @@ lsoa_electric_to_2021 <- function(domestic_electricity, lsoa_11_21_tools){
 
 
 
-lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population_2021) {
+lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population) {
 
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA11CD","LSOA21CD","CHGIND")]
-  population_2021 = population_2021[,c("LSOA21","all_ages")]
-  names(population_2021) = c("LSOA21","pop2021")
+  #population_2021 = population_2021[,c("LSOA21","all_ages")]
+  #names(population_2021) = c("LSOA21","pop2021")
 
   lookup_lsoa_2011_21_U = lookup_lsoa_2011_21[lookup_lsoa_2011_21$CHGIND == "U",]
   lookup_lsoa_2011_21_M = lookup_lsoa_2011_21[lookup_lsoa_2011_21$CHGIND == "M",]
@@ -275,15 +298,27 @@ lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population_2021)
   lookup_lsoa_2011_21_M$CHGIND = NULL
   lookup_lsoa_2011_21_S$CHGIND = NULL
 
-  population_2021 = dplyr::left_join(lookup_lsoa_2011_21_S, population_2021, by = c("LSOA21CD" = "LSOA21"))
-  population_2021 = dplyr::group_by(population_2021, LSOA11CD)
-  population_2021 = dplyr::mutate(population_2021, pop_ratio = pop2021 / sum(pop2021))
-  population_2021 = dplyr::ungroup(population_2021, LSOA21CD)
+  # population_2021 = dplyr::left_join(lookup_lsoa_2011_21_S, population_2021, by = c("LSOA21CD" = "LSOA21"))
+  # population_2021 = dplyr::group_by(population_2021, LSOA11CD)
+  # population_2021 = dplyr::mutate(population_2021, pop_ratio = pop2021 / sum(pop2021))
+  # population_2021 = dplyr::ungroup(population_2021, LSOA21CD)
+  #
+  # lookup_lsoa_2011_21_S = population_2021[,c("LSOA11CD","LSOA21CD","pop_ratio")]
 
-  lookup_lsoa_2011_21_S = population_2021[,c("LSOA11CD","LSOA21CD","pop_ratio")]
+  #Split ratio over time
+  population = population[population$LSOA21CD %in% lookup_lsoa_2011_21_S$LSOA21CD,]
+  population = population[,c("LSOA21CD","year","all_ages","adults","households_est")]
+  population = dplyr::left_join(population, lookup_lsoa_2011_21_S, by = "LSOA21CD")
+  population = dplyr::group_by(population, LSOA11CD, year)
+  population = dplyr::mutate(population,
+                      pop_ratio = all_ages / sum(all_ages),
+                      household_ratio = households_est / sum(households_est),
+                      )
+  population = dplyr::ungroup(population)
+
 
   res = list(lookup_unchanged = lookup_lsoa_2011_21_U,
-             lookup_split = lookup_lsoa_2011_21_S,
+             lookup_split = population,
              lookup_merge = lookup_lsoa_2011_21_M)
 
   res
