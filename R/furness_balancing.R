@@ -1,22 +1,27 @@
 bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   # Find ratio of rows
   mat_rsum <- rowSums(mat2, na.rm = TRUE)
+
+  if(any(mat_rsum == 0)){
+    # Check for zeros in the matrix, once the matrix has zeros they stay so a solution can't be found
+    r_bad0 <- dplyr::if_else(mat_rsum == 0 & rsum2 != 0, rsum2/ncol(mat2), 0)
+    #mat2 <- sweep(mat2, 1, r_bad0, FUN = "+")
+    mat2 <- mat2 + matrix(r_bad0, nrow = nrow(mat2), ncol = ncol(mat2)) #10x faster than sweep
+    mat_rsum <- rowSums(mat2, na.rm = TRUE)
+  }
+
   mat_rratio <- rsum2 / mat_rsum
   mat_rratio[is.nan(mat_rratio)] <- 0
   #TODO: Get Inf values if mat_rsum is zero
 
   mat2 <- mat2 * mat_rratio
 
-  if(int_only){
-    mat2 <- round_half_random(mat2)
-  }
-
   # Find ratio of rows
-  mat_csum <- colSums(mat2, na.rm = TRUE)
-  mat_cratio <- csum2 / mat_csum
+  mat_cratio <- csum2 / colSums(mat2, na.rm = TRUE)
   mat_cratio[is.nan(mat_cratio)] <- 0
 
-  mat2 <- sweep(mat2, MARGIN=2, mat_cratio, `*`)
+  #mat2 <- sweep(mat2, MARGIN=2, mat_cratio, `*`)
+  mat2 <- mat2 * matrix(mat_cratio, nrow = nrow(mat2), ncol = ncol(mat2), byrow = TRUE) #10x faster than sweep
   mat2[is.nan(mat2)] <- 0
 
   if(int_only){
@@ -28,9 +33,7 @@ bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
 
 round_half_random <- function(x) {
   tweaks <- runif(length(x), min = -0.5, max = 0.5)
-  # Never tweak to 0
-  tweaks <- ifelse(x < 1, 0, tweaks)
-  #x <- ifelse(x %% 0.5 == 0, x + tweaks, x)
+  tweaks[x < 1] <- 0 # Never round to 0
   round(x + tweaks)
 }
 
@@ -38,9 +41,14 @@ round_half_random <- function(x) {
 # Furness method balancing
 furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = TRUE){
 
-  if(sum(rsum) != sum(csum)){
-    warning("Totals of rsum and csum don't match rsum=",
-            sum(rsum,na.rm = TRUE)," csum=",sum(csum,na.rm = TRUE))
+  # Check rsum = csum
+  rt = sum(rsum)
+  ct = sum(csum)
+
+  if(rt != ct & check){
+    message("Totals of rsum and csum differ by ",
+            abs(rt - ct)," (",round(100 * abs(rt - ct)/max(c(rt,ct)),2),
+            "%) an exact solution is impossible.")
   }
 
   rname <- rownames(mat)
@@ -85,23 +93,19 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = T
 
   mat_fin = ifelse(is.na(mat), mat_change, mat)
 
-
   # Check
   if(check){
     if(!all(rowSums(mat_fin) == rsum)){
-      print("\n")
-      print(mat)
-      print(rsum)
-      print(rowSums(mat_fin) - rsum)
-      print(csum)
-      stop("Rows don't match ",i)
+      err = rowSums(mat_fin, na.rm = TRUE) - rsum
+      message("Rows don't match: total error = ", round(sum(abs(err)), 2),"/",rt,
+              " max error = ", round(max(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
     }
     if(!all(colSums(mat_fin) == csum)){
-      print("\n")
-      print(mat)
-      print(rsum)
-      print(csum)
-      stop("Cols don't match ",i)
+      err = colSums(mat_fin, na.rm = TRUE) - csum
+      message("Cols don't match: total error = ", round(sum(abs(err)), 2),"/",ct,
+              " max error = ", round(max(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
     }
   }
 
@@ -177,4 +181,70 @@ generate_combinations <- function(t, n, prefix = numeric()) {
     }
   }
   return(result)
+}
+
+
+
+furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = FALSE, quiet = TRUE){
+
+  rname <- rownames(mat)
+  cname <- colnames(mat)
+
+  # Check rsum = csum
+  rt = sum(rsum)
+  ct = sum(csum)
+
+  if(rt != ct & check){
+    message("Totals of rsum and csum differ by ",
+            abs(rt - ct)," (",round(100 * abs(rt - ct)/max(c(rt,ct)),2),
+            "%) an exact solution is impossible.")
+  }
+
+  # Get scale about right
+  mat <- mat / (sum(mat, na.rm = TRUE) / sum(rsum))
+  #mat_orig = mat
+
+  for(i in seq_len(n)){
+    mat <- bal_func(mat, rsum = rsum, csum = csum, int_only = int_only)
+    if(i == 1 & !quiet){
+      err = rowSums(mat, na.rm = TRUE) - rsum
+      message("1st  pass: total error = ", round(sum(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
+    }
+    if(i == n & !quiet){
+      err = rowSums(mat, na.rm = TRUE) - rsum
+      message(n,"th pass: total error = ", round(sum(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
+    }
+    if(all(rowSums(mat, na.rm = TRUE) == rsum)){
+      if(all(colSums(mat, na.rm = TRUE) == csum)){
+        if(!quiet){
+          message(n,"th pass: perfect match, exit early")
+        }
+        break
+      }
+    }
+  }
+
+
+  rownames(mat) <- rname
+  colnames(mat) <- cname
+
+  # Check
+  if(check){
+    if(!all(rowSums(mat) == rsum)){
+      err = rowSums(mat, na.rm = TRUE) - rsum
+      message("Rows don't match: total error = ", round(sum(abs(err)), 2),"/",rt,
+              " max error = ", round(max(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
+    }
+    if(!all(colSums(mat) == csum)){
+      err = colSums(mat, na.rm = TRUE) - csum
+      message("Cols don't match: total error = ", round(sum(abs(err)), 2),"/",ct,
+              " max error = ", round(max(abs(err)), 2),
+              " RMSE = ", round(sqrt(mean(err * err)), 2))
+    }
+  }
+
+  return(mat)
 }

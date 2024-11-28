@@ -8,12 +8,14 @@ make_pmtiles = function(input = NULL,
                         max_zoom = NA,
                         extend_zoom = FALSE,
                         coalesce = FALSE,
+                        drop = FALSE,
                         shared_borders = FALSE,
                         max_tile_bytes = 5000000,
                         simplification = 10,
                         buffer = 5,
                         drop_rate = NA,
-                        force = TRUE
+                        force = TRUE,
+                        new_line_delim = TRUE
                         ){
 
   # Check input
@@ -42,12 +44,15 @@ make_pmtiles = function(input = NULL,
                              ifelse(is.na(max_zoom),'-zg',paste0('--maximum-zoom=',max_zoom)),
                              paste0('--maximum-tile-bytes=',format(max_tile_bytes, scientific = FALSE)),
                              ifelse(coalesce,'--coalesce-smallest-as-needed',''),
+                             ifelse(drop,'--drop-densest-as-needed',''),
                              ifelse(shared_borders,'--detect-shared-borders',''),
                              ifelse(extend_zoom,'--extend-zooms-if-still-dropping',''),
                              paste0('--simplification=',simplification),
                              paste0('--buffer=',buffer),
                              ifelse(is.na(drop_rate),'',paste0('--drop-rate=',drop_rate)),
-                             ifelse(force,'--force',''),geojson, collapse = " ")
+                             ifelse(force,'--force',''),
+                             ifelse(new_line_delim,'-P',''),
+                             geojson,collapse = " ")
 
 
   if(.Platform$OS.type == "unix") {

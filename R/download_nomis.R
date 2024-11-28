@@ -65,5 +65,17 @@ unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
   fl
 }
 
+load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomis")){
+  dat = unzip_nomis(file.path(path,"census2021-ts045.zip"))
+  names(dat) = c("year","LSOA21NM","LSOA21","households_total","households_noCarVan","households_1CarVan","households_2CarVan","households_3plusCarVan")
+  dat$total_carvan_est = dat$households_1CarVan + 2 * dat$households_2CarVan + 3 * dat$households_3plusCarVan
+  dat$LSOA21NM = NULL
+  dat
+}
 
-
+load_census_2021_households = function(path = file.path(parameters$path_data,"nomis")){
+  dat = unzip_nomis(file.path(path,"census2021-ts041.zip"))
+  names(dat) = c("year","LSOA21NM","LSOA21","households_total")
+  dat$LSOA21NM = NULL
+  dat
+}
