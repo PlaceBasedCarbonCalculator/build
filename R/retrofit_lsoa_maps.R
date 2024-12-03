@@ -24,12 +24,12 @@ select_retofit_vars = function(epc_dom_summary, population) {
   sub$modal_floord = modal(epc_dom_summary[,c("floord_soliduninsulated","floord_solidinsulated","floord_solidlimitedinsulated",
                                               "floord_suspendeduninsulated","floord_suspendedinsualted","floord_suspendedlimitedinsulated","floord_below")])
 
-  type = epc_dom_summary[,c("type_house_midterrace","type_house_endterrace","type_house_detached","type_flat",
+  type = epc_dom_summary[,c("type_house_semi","type_house_midterrace","type_house_endterrace","type_house_detached","type_flat",
                             "type_bungalow_semi","type_bungalow_midterrace","type_bungalow_endterrace","type_bungalow_detached",
                             "type_maisonette","type_parkhome")]
   names(type) = gsub("type_","",names(type))
 
-  sub$modaL_type = modal(type, drop = FALSE)
+  sub$modal_type = modal(type, drop = FALSE)
 
   sub$modal_tenure = modal(epc_dom_summary[,c("tenure_owner","tenure_privaterent",
                                               "tenure_socialrent","tenure_unknown")])
@@ -42,8 +42,24 @@ select_retofit_vars = function(epc_dom_summary, population) {
   sub = dplyr::left_join(sub, population, by = "LSOA21CD")
 
   sub$percent_EPC = round(sub$epc_total / sub$all_properties * 100)
+  sub$households_est = NULL
+  sub$all_properties = NULL
+  sub$epc_total = NULL
+
+  sub$epc_score_avg = as.character(cut(sub$epc_score_avg, breaks = c(0,50,55,60,65,70,80,100)))
+  sub$epc_score_avg = gsub("\\(|\\[|\\)|\\]","",sub$epc_score_avg)
+  sub$epc_score_avg = gsub(",","-",sub$epc_score_avg)
+
+  sub$floor_area_avg = as.character(cut(sub$floor_area_avg, breaks = c(0,40,60,80,100,120,140,160,500)))
+  sub$floor_area_avg = gsub("\\(|\\[|\\)|\\]","",sub$floor_area_avg)
+  sub$floor_area_avg = gsub(",","-",sub$floor_area_avg)
+
+  sub$percent_EPC = as.character(cut(sub$percent_EPC, breaks = c(0,30,50,60,70,80,90,200)))
+  sub$percent_EPC = gsub("\\(|\\[|\\)|\\]","",sub$percent_EPC)
+  sub$percent_EPC = gsub(",","-",sub$percent_EPC)
 
   sub
+
 
 }
 

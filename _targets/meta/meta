@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|692ad3e700b44730|||||||||||||||
+.Random.seed|object|1f22b2887d34985e|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -266,7 +266,7 @@ lsoa_map_data|stem|1c8497de66c170a8|d6500167bbab64ea|86e1069debd0629c|1195666468
 make_geojson|function|a54bfd7dafbf7555|||||||||||||||
 make_income_bands_lsoa|function|bc47ebe1ddb159ee|||||||||||||||
 make_pmtiles|function|0dc47744893b7675|||||||||||||||
-make_pmtiles_stack|function|974e460286ff953d|||||||||||||||
+make_pmtiles_stack|function|6123c7c667a16740|||||||||||||||
 make_postcode_areas|function|a174f4acc1279a05|||||||||||||||
 merge_woods|function|22a357b14df90794|||||||||||||||
 modal|function|c3137679039dca4b|||||||||||||||
@@ -303,7 +303,7 @@ pmtiles_epc_nondom|stem|f04c294c25c71029|6a5d71f20a0dd7e4|fdbc2fac625abaac|-8321
 pmtiles_la|stem|cfbf89add3aa1415|909f63d0f3ded0a6|1445365f358d9171|2059785649|outputdata/la.pmtiles|t19998.7202416689s|6219171fae64634b|5090263|file|local|vector|||20.71||
 pmtiles_parish|stem|df3eff3a1e355144|61b298874b1189b9|257479f04b27360f|100742970|outputdata/parish.pmtiles|t19998.7208823352s|c371432a1842e564|13635241|file|local|vector|||28.89||
 pmtiles_postcode|stem|c56cf62f137de564|ba78588cd5f217c9|02ca86a2c0d99b4d|-1011986628|outputdata/postcodes.pmtiles|t19998.7199452605s|242b2e3fa91b5815|518628590|file|local|vector|||639.97||
-pmtiles_retrofit|stem|dd58651e0f170652|aa2307583043cc27|fd544a6375ecf8e3|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20059.9921747738s|8642949a7636cc44|74975557|file|local|vector|||347.86|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
+pmtiles_retrofit|stem|1a98e3b9d136c34e|8c36f0bafd5e6a15|4dc11a87ce493f38|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20060.9158949817s|ed675a90b4f34ca4|61413969|file|local|vector|||5660.05|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
 pmtiles_wards|stem|279d4291225acf2d|d359249a336c3b34|7946ecc19a5d11d0|-1064363007|outputdata/wards.pmtiles|t19998.7205315896s|4715360d5a01ef69|13389665|file|local|vector|||23.6||
 pmtiles_westminster|stem|bf42dd325946f91f|d407a80999e11f30|34638b87e21a9473|2003519876|outputdata/westminster.pmtiles|t19998.7211615727s|69db10dffbb8275f|6172697|file|local|vector|||22.81||
 pmtiles_zones_high|stem|2c614f6f195de561|e730679251664b90|662d7e53e48d7355|1314585671|outputdata/zones_high.pmtiles|t19998.7222059491s|66c4639aa6bc2f90|33075338|file|local|vector|||68.79||
@@ -354,11 +354,11 @@ read_postcodes|function|161ea70c12eca290|||||||||||||||
 reduce_name_length|function|9e71e39b27a7f611|||||||||||||||
 remove_small_holes|function|63d1099bd9da14c5|||||||||||||||
 remove_small_holes_single|function|a19182f8b3ab2eb0|||||||||||||||
-retrofit_lsoa_data|stem|0763613f6b7f5dc2|dda4014cd8135e4b|2bc3f9d8f6a254d8|-2108320529||t20059.9867315206s|1805f78c7c67c1c4|851341|rds|local|vector|||2.25||
+retrofit_lsoa_data|stem|b9aa660cbd3bf5f6|dda4014cd8135e4b|59020775d038bed4|-2108320529||t20060.9096388602s|33b968964cfec56e|313677|rds|local|vector|||2.47||
 round_half_random|function|08ffba3445788f71|||||||||||||||
 select_household_pics|function|3002825fe4ee9df4|||||||||||||||
 select_map_outputs|function|f5e15acddddd9c71|||||||||||||||
-select_retofit_vars|function|bb69a0771819ec3a|||||||||||||||
+select_retofit_vars|function|2533511f2f1d8a8f|||||||||||||||
 select_transport_vars|function|5b8e0e669f9986b3|||||||||||||||
 simplify_ethnic6|function|73e78913ba551ba8|||||||||||||||
 simplify_household15|function|abd11747b16b75fd|||||||||||||||

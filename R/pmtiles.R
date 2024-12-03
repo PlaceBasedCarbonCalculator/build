@@ -192,19 +192,19 @@ make_pmtiles_stack = function(lsoa_data,
   if(!is.null(zoomstack_buildings_lst_4326)){
     buildings_high = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$high)
     make_geojson(buildings_high, file.path(output_path,paste0("buildings_",name,"_high.geojson")))
-    rm(zones_high)
+    rm(buildings_high)
 
     buildings_medium = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$medium)
     make_geojson(buildings_medium, file.path(output_path,paste0("buildings_",name,"_medium.geojson")))
-    rm(zones_high)
+    rm(buildings_medium)
 
     buildings_low = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$low)
     make_geojson(buildings_low, file.path(output_path,paste0("buildings_",name,"_low.geojson")))
-    rm(zones_high)
+    rm(buildings_low)
 
     buildings_verylow = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$verylow)
     make_geojson(buildings_verylow, file.path(output_path,paste0("buildings_",name,"_verylow.geojson")))
-    rm(zones_high)
+    rm(buildings_verylow)
 
 
     # Make pmtiles
@@ -212,20 +212,20 @@ make_pmtiles_stack = function(lsoa_data,
                  paste0("buildings_",name,"_high.geojson"),
                  paste0("buildings_",name,"_high.pmtiles"),
                  name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
-                 coalesce = TRUE, min_zoom = 12, max_zoom = 13, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 13, max_zoom = 14, output_path = output_path)
 
 
     make_pmtiles(NULL,
                  paste0("buildings_",name,"_medium.geojson"),
                  paste0("buildings_",name,"_medium.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
-                 coalesce = TRUE, min_zoom = 9, max_zoom = 11, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 10, max_zoom = 12, output_path = output_path)
 
     make_pmtiles(NULL,
                  paste0("buildings_",name,"_low.geojson"),
                  paste0("buildings_",name,"_low.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
-                 coalesce = TRUE, min_zoom = 4, max_zoom = 8, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 4, max_zoom = 9, output_path = output_path)
 
     # Join pmtiles
     join_pmtiles(paste0("buildings_",name,".pmtiles"),
