@@ -150,6 +150,14 @@ tar_target(epc_dom_summary,{
                          bounds_lsoa_GB_full)
 }),
 
+tar_target(build_epc_dom_jsons,{
+  export_zone_json(epc_dom_summary, idcol = "LSOA21CD",
+                   path = "outputdata/json/epc_dom", rounddp = 2, dataframe = "rows")
+}),
+
+tar_target(retrofit_lsoa_data,{
+  select_retofit_vars(epc_dom_summary, population)
+}),
 
 
 tar_target(geojson_epc_dom,{
@@ -227,6 +235,10 @@ tar_target(lookup_lsoa_2001_11,{
 }),
 tar_target(lookup_OA_LSOA_MSOA_classifications,{
   load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
+}),
+
+tar_target(lookup_OA_LSOA_MSOA_2021,{
+  load_OA_LSOA_MSOA_2021_lookup(dl_boundaries)
 }),
 
 tar_target(lookup_postcode_OA_LSOA_MSOA_2021,{
@@ -336,6 +348,10 @@ tar_target(experian_income,{
 
 tar_target(income_lsoa,{
   estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
+}),
+
+tar_target(income_bands_lsoa,{
+  make_income_bands_lsoa(NSSEC_household,income_msoa,lookup_OA_LSOA_MSOA_classifications,lookup_lsoa_2011_21)
 }),
 
 
@@ -686,87 +702,6 @@ tar_target(lsoa_map_data,{
   select_map_outputs(lsoa_emissions_all, year = 2020)
 }),
 
-tar_target(zones_high,{
-  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_full)
-}),
-
-tar_target(zones_medium,{
-  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_generalised)
-}),
-
-tar_target(zones_low,{
-  join_for_geojson(lsoa_map_data, bounds_lsoa_GB_super_generalised)
-}),
-
-tar_target(zones_transport_high,{
-  join_for_geojson(transport_lsoa_data, bounds_lsoa_GB_full)
-}),
-
-tar_target(zones_transport_medium,{
-  join_for_geojson(transport_lsoa_data, bounds_lsoa_GB_generalised)
-}),
-
-tar_target(zones_transport_low,{
-  join_for_geojson(transport_lsoa_data, bounds_lsoa_GB_super_generalised)
-}),
-
-
-tar_target(buildings_high,{
-  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$high)
-}),
-
-tar_target(buildings_medium,{
-  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$medium)
-}),
-
-tar_target(buildings_low,{
-  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$low)
-}),
-
-tar_target(buildings_verylow,{
-  join_for_geojson(lsoa_map_data, zoomstack_buildings_lst_4326$verylow)
-}),
-
-tar_target(geojson_buildings_high,{
-  make_geojson(buildings_high, "outputdata/buildings_high.geojson")
-}, format = "file"),
-
-tar_target(geojson_buildings_medium,{
-  make_geojson(buildings_medium, "outputdata/buildings_medium.geojson")
-}, format = "file"),
-
-tar_target(geojson_buildings_low,{
-  make_geojson(buildings_low, "outputdata/buildings_low.geojson")
-}, format = "file"),
-
-tar_target(geojson_buildings_verylow,{
-  make_geojson(buildings_verylow, "outputdata/buildings_verylow.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_high,{
-  make_geojson(zones_high, "outputdata/zones_high.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_medium,{
-  make_geojson(zones_medium, "outputdata/zones_medium.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_low,{
-  make_geojson(zones_low, "outputdata/zones_low.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_transport_high,{
-  make_geojson(zones_transport_high, "outputdata/zones_transport_high.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_transport_medium,{
-  make_geojson(zones_transport_medium, "outputdata/zones_transport_medium.geojson")
-}, format = "file"),
-
-tar_target(geojson_zones_transport_low,{
-  make_geojson(zones_transport_low, "outputdata/zones_transport_low.geojson")
-}, format = "file"),
-
 tar_target(geojson_wards,{
   make_geojson(bounds_wards, "outputdata/wards.geojson")
 }, format = "file"),
@@ -798,95 +733,6 @@ tar_target(us,{
 
 
 # Build PMTiles
-tar_target(pmtiles_zones_high,{
-  make_pmtiles(geojson_zones_high, "zones_high.geojson","zones_high.pmtiles",
-               name = "zones", shared_borders = TRUE, extend_zoom = TRUE,
-               coalesce = TRUE, min_zoom = 12, max_zoom = 13)
-}, format = "file"),
-
-tar_target(pmtiles_zones_medium,{
-  length(pmtiles_zones_high)
-  make_pmtiles(geojson_zones_medium, "zones_medium.geojson","zones_medium.pmtiles",
-               name = "zones", shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 9, max_zoom = 11)
-}, format = "file"),
-
-tar_target(pmtiles_zones_low,{
-  length(pmtiles_zones_medium)
-  make_pmtiles(geojson_zones_low, "zones_low.geojson","zones_low.pmtiles",
-               name = "zones", shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 4, max_zoom = 8)
-}, format = "file"),
-
-tar_target(pmtiles_zones_merge,{
-  length(pmtiles_zones_low)
-  join_pmtiles("zones.pmtiles",
-               c("zones_high.pmtiles","zones_medium.pmtiles","zones_low.pmtiles"))
-}),
-
-tar_target(pmtiles_zones_transport_high,{
-  length(pmtiles_zones_merge)
-  make_pmtiles(geojson_zones_transport_high, "zones_transport_high.geojson","zones_transport_high.pmtiles",
-               name = "zones", shared_borders = TRUE, extend_zoom = TRUE,
-               coalesce = TRUE, min_zoom = 12, max_zoom = 13)
-}, format = "file"),
-
-tar_target(pmtiles_zones_transport_medium,{
-  length(pmtiles_zones_transport_high)
-  make_pmtiles(geojson_zones_transport_medium, "zones_transport_medium.geojson","zones_transport_medium.pmtiles",
-               name = "zones", shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 9, max_zoom = 11)
-}, format = "file"),
-
-tar_target(pmtiles_zones_transport_low,{
-  length(pmtiles_zones_transport_medium)
-  make_pmtiles(geojson_zones_transport_low, "zones_transport_low.geojson","zones_transport_low.pmtiles",
-               name = "zones", shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 4, max_zoom = 8)
-}, format = "file"),
-
-tar_target(pmtiles_zones_transport_merge,{
-  length(pmtiles_zones_transport_low)
-  join_pmtiles("zones_transport.pmtiles",
-               c("zones_transport_high.pmtiles","zones_transport_medium.pmtiles","zones_transport_low.pmtiles"))
-}),
-
-
-tar_target(pmtiles_buildings_high,{
-  length(pmtiles_zones_transport_merge)
-  make_pmtiles(geojson_buildings_high, "buildings_high.geojson","buildings_high.pmtiles",
-               name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
-               coalesce = TRUE, min_zoom = 14, max_zoom = 15)
-}, format = "file"),
-
-tar_target(pmtiles_buildings_medium,{
-  length(pmtiles_buildings_high)
-  make_pmtiles(geojson_buildings_medium, "buildings_medium.geojson","buildings_medium.pmtiles",
-               name = "buildings", simplification = 2, shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 10, max_zoom = 13)
-}, format = "file"),
-
-tar_target(pmtiles_buildings_low,{
-  length(pmtiles_buildings_medium)
-  make_pmtiles(geojson_buildings_low, "buildings_low.geojson","buildings_low.pmtiles",
-               name = "buildings", simplification = 1, shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 7, max_zoom = 9)
-}, format = "file"),
-
-tar_target(pmtiles_buildings_verylow,{
-  length(pmtiles_buildings_low)
-  make_pmtiles(geojson_buildings_verylow, "buildings_verylow.geojson","buildings_verylow.pmtiles",
-               name = "buildings", simplification = 1, shared_borders = TRUE,
-               coalesce = TRUE, min_zoom = 4, max_zoom = 6)
-}, format = "file"),
-
-tar_target(pmtiles_buildings_merge,{
-  length(pmtiles_buildings_verylow)
-  join_pmtiles("buildings.pmtiles",
-               c("buildings_high.pmtiles","buildings_medium.pmtiles",
-                 "buildings_low.pmtiles","buildings_verylow.pmtiles"))
-}),
-
 tar_target(pmtiles_la,{
   make_pmtiles(geojson_la, "la.geojson","la.pmtiles",
                name = "la", shared_borders = TRUE, extend_zoom = TRUE,
@@ -947,6 +793,40 @@ tar_target(build_access_jsons,{
 tar_target(build_postcode_jsons,{
   export_zone_json(postcode_gas_electricity_emissions, idcol = "postcode",
                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
-})
+}),
+
+
+# Retrofit Map Build -------------------------------------------------------
+
+tar_target(pmtiles_retrofit,{
+  make_pmtiles_stack(retrofit_lsoa_data,
+                     bounds_lsoa_GB_full,
+                     bounds_lsoa_GB_generalised,
+                     bounds_lsoa_GB_super_generalised,
+                     zoomstack_buildings_lst_4326,
+                     name = "retrofit",
+                     output_path = "outputdata/retrofit")
+}, format = "file"),
+
+
+tar_target(pmtiles_transport,{
+  make_pmtiles_stack(transport_lsoa_data,
+                     bounds_lsoa_GB_full,
+                     bounds_lsoa_GB_generalised,
+                     bounds_lsoa_GB_super_generalised,
+                     zoomstack_buildings_lst_4326,
+                     name = "transport",
+                     output_path = "outputdata/transport")
+}, format = "file"),
+
+tar_target(pmtiles_pbcc,{
+  make_pmtiles_stack(lsoa_map_data,
+                     bounds_lsoa_GB_full,
+                     bounds_lsoa_GB_generalised,
+                     bounds_lsoa_GB_super_generalised,
+                     zoomstack_buildings_lst_4326,
+                     name = "pbcc",
+                     output_path = "outputdata/pbcc")
+}, format = "file")
 
 )

@@ -24,11 +24,13 @@ tmap_options(max.categories = 136)
 
 library(randomcoloR)
 cols = as.data.frame(table(oac$combined))
+cols$col = randomColor(count = 136)
 
-
+bounds = dplyr::left_join(bounds, cols, by = c("combined" = "Var1"))
 
 bounds$colour
 
 tmap_mode("plot")
-tm_shape(bounds) +
-  tm_fill("combined")
+m1 = tm_shape(bounds) +
+  tm_fill("col")
+tmap_save(m1, "plots/NTS_zones.png", dpi = 600)

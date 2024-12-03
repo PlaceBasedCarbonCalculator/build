@@ -47,55 +47,60 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
                         "total_weekly_income","upper_limit","lower_limit","interval")
   income2012 = income2012[5:nrow(income2012), ]
   income2012 = income2012[!is.na(income2012$MSOAname),]
-  income2012 = income2012[,c("MSOA11","total_weekly_income")]
+  income2012 = income2012[,c("MSOA11","total_weekly_income","upper_limit","lower_limit")]
   income2012$total_weekly_income = as.numeric(income2012$total_weekly_income)
-
+  income2012$upper_limit = as.numeric(income2012$upper_limit)
+  income2012$lower_limit = as.numeric(income2012$lower_limit)
+  income2012$year = 2012
 
   names(income2014) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
                         "total_weekly_income","upper_limit","lower_limit","interval")
   income2014 = income2014[5:nrow(income2014), ]
   income2014 = income2014[!is.na(income2014$MSOAname),]
-  income2014 = income2014[,c("MSOA11","total_weekly_income")]
+  income2014 = income2014[,c("MSOA11","total_weekly_income","upper_limit","lower_limit")]
   income2014$total_weekly_income = as.numeric(income2014$total_weekly_income)
+  income2014$upper_limit = as.numeric(income2014$upper_limit)
+  income2014$lower_limit = as.numeric(income2014$lower_limit)
+  income2014$year = 2014
 
   names(income2016) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
                         "total_annual_income","upper_limit","lower_limit","interval")
   income2016 = income2016[5:nrow(income2016), ]
   income2016 = income2016[!is.na(income2016$MSOAname),]
-  income2016 = income2016[,c("MSOA11","total_annual_income")]
+  income2016 = income2016[,c("MSOA11","total_annual_income","upper_limit","lower_limit")]
   income2016$total_annual_income = as.numeric(income2016$total_annual_income)
+  income2016$upper_limit = as.numeric(income2016$upper_limit)
+  income2016$lower_limit = as.numeric(income2016$lower_limit)
+  income2016$year = 2016
 
   names(income2018) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
                         "total_annual_income","upper_limit","lower_limit","interval")
   income2018 = income2018[5:nrow(income2018), ]
   income2018 = income2018[!is.na(income2018$MSOAname),]
-  income2018 = income2018[,c("MSOA11","total_annual_income")]
+  income2018 = income2018[,c("MSOA11","total_annual_income","upper_limit","lower_limit")]
   income2018$total_annual_income = as.numeric(income2018$total_annual_income)
+  income2018$upper_limit = as.numeric(income2018$upper_limit)
+  income2018$lower_limit = as.numeric(income2018$lower_limit)
+  income2018$year = 2018
 
   names(income2020) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
                         "total_annual_income","upper_limit","lower_limit","interval")
   income2020 = income2020[5:nrow(income2020), ]
   income2020 = income2020[!is.na(income2020$MSOAname),]
-  income2020 = income2020[,c("MSOA11","total_annual_income")]
+  income2020 = income2020[,c("MSOA11","total_annual_income","upper_limit","lower_limit")]
   income2020$total_annual_income = as.numeric(income2020$total_annual_income)
+  income2020$upper_limit = as.numeric(income2020$upper_limit)
+  income2020$lower_limit = as.numeric(income2020$lower_limit)
+  income2020$year = 2020
 
-  names(income2012) = paste0(names(income2012),"_2012")
-  names(income2014) = paste0(names(income2014),"_2014")
-  names(income2016) = paste0(names(income2016),"_2016")
-  names(income2018) = paste0(names(income2018),"_2018")
-  names(income2020) = paste0(names(income2020),"_2020")
 
-  income2012$total_annual_income_2012 = round(income2012$total_weekly_income_2012 * (365/7))
-  income2014$total_annual_income_2014 = round(income2014$total_weekly_income_2014 * (365/7))
+  income2012$total_annual_income = round(income2012$total_weekly_income * (365/7))
+  income2014$total_annual_income = round(income2014$total_weekly_income * (365/7))
 
-  income2012$total_weekly_income_2012 = NULL
-  income2014$total_weekly_income_2014 = NULL
+  income2012$total_weekly_income = NULL
+  income2014$total_weekly_income = NULL
 
-  income = dplyr::left_join(income2012, income2014, by = c("MSOA11_2012" = "MSOA11_2014"))
-  income = dplyr::left_join(income, income2016, by = c("MSOA11_2012" = "MSOA11_2016"))
-  income = dplyr::left_join(income, income2018, by = c("MSOA11_2012" = "MSOA11_2018"))
-  income = dplyr::left_join(income, income2020, by = c("MSOA11_2012" = "MSOA11_2020"))
-  names(income)[1] = "MSOA11"
+  income = rbind(income2012,income2014,income2016,income2018,income2020)
 
   income
 

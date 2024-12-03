@@ -125,3 +125,128 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
 
 
 }
+
+
+# Common need is to low/med/high zooms
+make_pmtiles_stack = function(lsoa_data,
+                              bounds_lsoa_GB_full,
+                              bounds_lsoa_GB_generalised,
+                              bounds_lsoa_GB_super_generalised,
+                              zoomstack_buildings_lst_4326 = NULL,
+                              name = "",
+                              output_path = "outputdata/retofit"){
+
+  if(!dir.exists(output_path)){
+    stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
+  }
+
+  # Make GeoJSON
+  zones_high =  join_for_geojson(lsoa_data, bounds_lsoa_GB_full)
+  make_geojson(zones_high, file.path(output_path,paste0("zones_",name,"_high.geojson")))
+  rm(zones_high)
+
+  zones_medium =  join_for_geojson(lsoa_data, bounds_lsoa_GB_generalised)
+  make_geojson(zones_medium, file.path(output_path,paste0("zones_",name,"_medium.geojson")))
+  rm(zones_medium)
+
+  zones_low =  join_for_geojson(lsoa_data, bounds_lsoa_GB_super_generalised)
+  make_geojson(zones_low, file.path(output_path,paste0("zones_",name,"_low.geojson")))
+  rm(zones_low)
+
+  # Make pmtiles
+  make_pmtiles(NULL,
+               paste0("zones_",name,"_high.geojson"),
+               paste0("zones_",name,"_high.pmtiles"),
+               name = "zones", shared_borders = TRUE, extend_zoom = TRUE,
+               coalesce = TRUE, min_zoom = 12, max_zoom = 13, output_path = output_path)
+
+
+  make_pmtiles(NULL,
+               paste0("zones_",name,"_medium.geojson"),
+               paste0("zones_",name,"_medium.pmtiles"),
+               name = "zones", shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 9, max_zoom = 11, output_path = output_path)
+
+  make_pmtiles(NULL,
+               paste0("zones_",name,"_low.geojson"),
+               paste0("zones_",name,"_low.pmtiles"),
+               name = "zones", shared_borders = TRUE,
+               coalesce = TRUE, min_zoom = 4, max_zoom = 8, output_path = output_path)
+
+  # Join pmtiles
+  join_pmtiles(paste0("zones_",name,".pmtiles"),
+               c(paste0("zones_",name,"_high.pmtiles"),
+                 paste0("zones_",name,"_medium.pmtiles"),
+                 paste0("zones_",name,"_low.pmtiles")),
+               output_path = output_path)
+
+
+  if(file.exists(file.path(output_path, paste0("zones_",name,".pmtiles")))){
+    res = file.path(output_path, paste0("zones_",name,".pmtiles"))
+  } else {
+    stop("Output failed to create", file.path(output_path, paste0("zones_",name,".pmtiles")))
+  }
+
+
+
+  if(!is.null(zoomstack_buildings_lst_4326)){
+    buildings_high = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$high)
+    make_geojson(buildings_high, file.path(output_path,paste0("buildings_",name,"_high.geojson")))
+    rm(zones_high)
+
+    buildings_medium = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$medium)
+    make_geojson(buildings_medium, file.path(output_path,paste0("buildings_",name,"_medium.geojson")))
+    rm(zones_high)
+
+    buildings_low = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$low)
+    make_geojson(buildings_low, file.path(output_path,paste0("buildings_",name,"_low.geojson")))
+    rm(zones_high)
+
+    buildings_verylow = join_for_geojson(lsoa_data, zoomstack_buildings_lst_4326$verylow)
+    make_geojson(buildings_verylow, file.path(output_path,paste0("buildings_",name,"_verylow.geojson")))
+    rm(zones_high)
+
+
+    # Make pmtiles
+    make_pmtiles(NULL,
+                 paste0("buildings_",name,"_high.geojson"),
+                 paste0("buildings_",name,"_high.pmtiles"),
+                 name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
+                 coalesce = TRUE, min_zoom = 12, max_zoom = 13, output_path = output_path)
+
+
+    make_pmtiles(NULL,
+                 paste0("buildings_",name,"_medium.geojson"),
+                 paste0("buildings_",name,"_medium.pmtiles"),
+                 name = "buildings", shared_borders = TRUE,
+                 coalesce = TRUE, min_zoom = 9, max_zoom = 11, output_path = output_path)
+
+    make_pmtiles(NULL,
+                 paste0("buildings_",name,"_low.geojson"),
+                 paste0("buildings_",name,"_low.pmtiles"),
+                 name = "buildings", shared_borders = TRUE,
+                 coalesce = TRUE, min_zoom = 4, max_zoom = 8, output_path = output_path)
+
+    # Join pmtiles
+    join_pmtiles(paste0("buildings_",name,".pmtiles"),
+                 c(paste0("buildings_",name,"_high.pmtiles"),
+                   paste0("buildings_",name,"_medium.pmtiles"),
+                   paste0("buildings_",name,"_low.pmtiles")),
+                 output_path = output_path)
+
+
+    if(file.exists(file.path(output_path, paste0("buildings_",name,".pmtiles")))){
+      res2 = file.path(output_path, paste0("buildings_",name,".pmtiles"))
+    } else {
+      stop("Output failed to create", file.path(output_path, paste0("zones_",name,".pmtiles")))
+    }
+
+    #res = c(res, res2)
+
+  }
+
+
+  res
+
+
+}

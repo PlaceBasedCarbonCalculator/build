@@ -160,6 +160,13 @@ load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   lookup
 }
 
+load_OA_LSOA_MSOA_2021_lookup <- function(path){
+  file_path = file.path(path, "OA_LSOA_MSOA_LAD_2021_Lookup_EW_v3.csv")
+  lookup = readr::read_csv(file_path)
+  lookup = lookup[,c("OA21CD", "LSOA21CD", "MSOA21CD", "LAD22CD", "LAD22CD","LAD22NM")]
+  lookup
+}
+
 load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   dir.create(file.path(tempdir(),"lookup"))
   unzip(file.path(path,"PCD_OA21_LSOA21_MSOA21_LAD_FEB24_UK_LU.zip"), exdir = file.path(tempdir(),"lookup"))

@@ -15,15 +15,15 @@ load_SIPHER = function(path = file.path(parameters$path_secure_data,"SIPHER Synt
 }
 
 
-load_US = function(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded")){
+load_US = function(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded"), wave = "k"){
 
   dir = file.path(tempdir(),"US")
   dir.create(dir)
   unzip(file.path(path,"US Wave 1-13 2009-2022 and BHPS Wave 1-180 1991-2009_SPSS_V1.zip"), exdir = dir)
 
   fls = list.files(file.path(dir,"UKDA-6614-spss","spss","spss25","ukhls"), full.names = FALSE,
-                   pattern = "k_") # Only Wave K for join to SIPHER
-  nms = gsub("k_","",gsub(".sav","",fls))
+                   pattern = paste0(wave,"_")) # Only Wave K for join to SIPHER
+  nms = gsub(paste0(wave,"_"),"",gsub(".sav","",fls))
 
   us = list()
 
@@ -62,6 +62,8 @@ load_US = function(path = file.path(parameters$path_secure_data,"Understanding S
   # newborn basic information about new born children such as brithweight
   # parstyle , information about parenting styles was collected
   # youth   Substantive data from youth questionnaire.
+
+  unlink(dir, recursive = TRUE)
 
   us
 }
