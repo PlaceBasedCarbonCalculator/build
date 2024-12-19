@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|1f22b2887d34985e|||||||||||||||
+.Random.seed|object|b81d7dfa7b2f77a5|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -18,7 +18,7 @@ balance_nssec|function|9663990c20e9b3fc|||||||||||||||
 balance_nssec2|function|9b19e94c84f6f2c6|||||||||||||||
 bind_sf|function|394cecd3caf06a56|||||||||||||||
 bounds_dz11|stem|e488ed73efc4a13d|589fb79c5262f8a4|224eef61da50beb8|886235684||t19832.2597757718s|92133f8a79ac86de|20406895|rds|local|vector|||11.99||
-bounds_la|stem|897e417a40f558cd|a4a0ffa41341eb8f|9b9042208cd69171|-1170770143||t19825.9582439038s|f29380cf74b524bc|41477065|rds|local|vector|||6.23||
+bounds_la|stem|58009bf724c7931a|a4a0ffa41341eb8f|f39c9e8c03747434|-1170770143||t20074.6180500191s|ad0ac6822f8ff5d3|56560389|rds|local|vector|||1.48||
 bounds_lsoa_GB_full|stem|dc43339816f9382c|09f6ddc74f0e8dc9|0c5abb41af97617f|-548696011||t19832.2602310212s|7b6cd3e7cdd95596|255476536|rds|local|vector|||2.44||
 bounds_lsoa_GB_full_landuse|stem|16cebb98a9b73308|f52231660bdccd1a|eb316ca3d41943be|-789494617||t19938.8268977308s|306b869fd7b2964e|1010127531|rds|local|vector|||22191.45|one or more notices ignored. GEOS difference returns NULL. GEOS difference returns NULL. GEOS difference returns NULL. GEOS difference returns NULL. GEOS difference returns NULL. one or more notices ignored|
 bounds_lsoa_GB_generalised|stem|11ed4664c9cf8446|7dec3a62e5af1fc7|fda96cf665b9b6ed|-1698483918||t19832.2611088518s|19341b20eae81e82|21889602|rds|local|vector|||16.8||
@@ -33,10 +33,10 @@ bounds_postcodes|stem|34a6699781094d62|a508d3c9e6e938c1|5c35ceb147537cba|-117116
 bounds_postcodes_2015|stem|1a08d6e18b6f8ff8|98b5c56a3aacdc3d|1fe4a54e7c0dc43a|-700057837||t19937.6389354538s|88945f4d4baac7c7|856647369|rds|local|vector|||71.83||
 bounds_postcodes_2020|stem|34a6699781094d62|a508d3c9e6e938c1|1fe4a54e7c0dc43a|-127698405||t19938.5638705207s|190b80e59c8c2eb8|695418200|rds|local|vector|||91.3||
 bounds_postcodes_2024|stem|596500a64595832a|dad89a78fcbc4251|1fe4a54e7c0dc43a|-1174915415||t19937.6130894327s|46a25da13bce34be|722693792|rds|local|vector|||87.14||
-bounds_wards|stem|04f1e40e6a272138|b37faa55286577b1|36d77d5158d150a4|128645437||t19825.9596099123s|0ee889db17c379f6|95465358|rds|local|vector|||3.58||
-bounds_westminster|stem|e4af77f21a08f44f|3b5ce7420002c1ec|79624d91a74e2cf1|1635228681||t19825.9584270892s|2da257a53cd50fb4|56876695|rds|local|vector|||9.54||
+bounds_wards|stem|2029ba230a907f3b|b37faa55286577b1|cf8ed73ff94294eb|128645437||t20074.5933582698s|813e106fe8a59562|145634236|rds|local|vector|||2.92||
+bounds_westminster|stem|31b70598de2450f3|3b5ce7420002c1ec|48ce936f0c50390f|1635228681||t20074.618150434s|abb5245acb8fac04|67499414|rds|local|vector|||1.72||
 build_access_jsons|stem|091467bafdbe7694|55945aad428f8f00|69c63386519738f2|1370075298||t19941.2986388371s|e92536e5890953e5|126|rds|local|vector|||227.6||
-build_epc_dom_jsons|stem|08bf061b88e9c72b|3a0bd5d49e15c43b|f9d22bef654345ff|974314826||t20059.4459529333s|bce99b594ffe2eda|128|rds|local|vector|||603.19||
+build_epc_dom_jsons|stem|08bf061b88e9c72b|3a0bd5d49e15c43b|7e484f4a74acc127|974314826||t20076.5427983581s|bce99b594ffe2eda|128|rds|local|vector|||645.33||
 build_household_types|function|b3c432e74bc2bbd3|||||||||||||||
 build_lsoa_jsons|stem|1ca02f4f8ff37a3e|1a79e1de4ecce9aa|e9e8e7e9941331ab|486560279||t19941.3083030769s|e92536e5890953e5|126|rds|local|vector|||814.7||
 build_lsoa_population|function|16788b7cff0945bf|||||||||||||||
@@ -92,7 +92,7 @@ combine_nssec_enthinic|function|a5e88a8e14ea38bf|||||||||||||||
 combine_os_osm_buildings|function|977ac3a6bc835da8|||||||||||||||
 combine_populations|function|0ac4f839beb7b80d|||||||||||||||
 combine_populations2|function|bebb2dafcda9f1cb|||||||||||||||
-consumption_emissions|stem|ce408a3828fb1c3b|74cdcee3be295706|8ca29e60ba800a48|-1836254043||t19832.7454436713s|c47390b3ecca71af|17923767|rds|local|vector|||2.78||
+consumption_emissions|stem|ce408a3828fb1c3b|74cdcee3be295706|e25c57e9da567f74|-1836254043||t19832.7454436713s||17923767|rds|local|vector|||0.91||missing value where TRUEFALSE needed
 consumption_income|stem|43a1f43f0e909a92|b658594e90abf040|51bdcb23b4416d0b|1528784390||t19825.9087491377s|64cf39f5e2afdc9f|1144|rds|local|vector|||0.02||
 consumption_uk|stem|966e3ee270d9ac77|b0c8c184bc408553|ee54eb471caa08d1|748098453||t19826.2855755914s|9f9f060d775e3e9a|9818|rds|local|vector|||1.5||
 count_weekday_runs|function|de67829ee1974cc2|||||||||||||||
@@ -108,10 +108,10 @@ dl_nomis|stem|2a59d22ca4fcc05e|afb7cfc4ff15e644|f6f60f3a5a106a48|831662753||t198
 dl_os_zoomstack|stem|984c1fb58a278375|33160b563cba39a6|f1214e0eabc2e1f3|-1064360665||t19825.8900492006s|9903306e1685fb67|94|rds|local|vector|||0||
 dl_pct|stem|35f02fc4ac337e39|4ff80f59614c9b79|2ae4e72ffb49d083|2055201872||t19825.9431349314s|d586f792a395948c|68|rds|local|vector|||0||
 dl_vehicle_registrations|stem|7b085b3b06e8e01b|df6128c247fc66c5|6549db78cdf4d786|-1702486100||t19825.9088042646s|e7d9c43b1c994be3|87|rds|local|vector|||0||
-domestic_electricity|stem|e38ab15faf2e6af0|390356fee6bc6d90|91ebcc9593c1ac13|1613811675||t19827.0047043389s|cf356309ac3d10b8|8594165|rds|local|vector|||0.47||
+domestic_electricity|stem|0dfbf31883061658|390356fee6bc6d90|b42d473cb22bee33|1613811675||t20076.6040163315s|bf7e69104ffb7d51|8613267|rds|local|vector|||0.36||
 domestic_electricity_11|stem|da88b1738c3cbc9f|a970aaa73c6c1d9f|f592e5455612311a|1084179350||t19825.9604654352s|61ea3785c6481e31|12571689|rds|local|vector|||24.69||
-domestic_electricity_emissions|stem|ae6c611cfd81d912|5539fb5d2336d012|f310f6ba9c5338d7|1639887079||t19827.0048112542s|8e96fef5430fd303|3368453|rds|local|vector|||1.08||
-domestic_gas|stem|1ec961e7a9f77e2b|5f3dff211c8096c4|c1572499cbbcb41e|-867186464||t19827.0047339245s|83605c9544e8df20|9551012|rds|local|vector|||0.5||
+domestic_electricity_emissions|stem|9fb07970a0a0a57e|5539fb5d2336d012|0b61297030d2d2c0|1639887079||t20076.6673961118s|aa0a0abb923e948b|3373678|rds|local|vector|||0.75||
+domestic_gas|stem|51ba181765d7f01f|5f3dff211c8096c4|c0d63aa896b3751f|-867186464||t20076.6040739857s|08fe972767b508f9|9571588|rds|local|vector|||0.31||
 domestic_gas_11|stem|3a2256e876ec207c|dd9ec31996485d13|fd4709cae67a4853|-658521949||t19825.9599505395s|458ee6cae6075913|13847597|rds|local|vector|||26.88||
 domestic_gas_emissions|stem|525e174d29c65047|be5bf9d6f4b9a82d|aa43511e1662d8aa|467753552||t19827.004826466s|e421e53044184553|3309502|rds|local|vector|||1.06||
 dowload_gas_electric|function|959ff56360c0b581|||||||||||||||
@@ -130,10 +130,10 @@ dwellings_tax_band|stem|4bc5c3518eb2cd36|efe22c182a253610|f38776dac4d4f381|-1298
 dwellings_tax_band_scotland|stem|509bcae8cd38d3ce|12a71815e8a929d5|fff64a47332bf5cf|-1691391911||t20033.6218406118s|8c162d4e47b1671f|1343835|rds|local|vector|||5.89||
 dwellings_type|stem|71e2c29b1a3c3c76|ce78354eb2055952|88daf45818be6115|253687054||t20017.439627738s|cfc7cebde01b9aad|14464113|rds|local|vector|||10.94||
 emissions_factors|stem|cef30f513a70e78d|65fb39d66d575fff|383da01761420680|-407640325||t19825.8894656948s|c0bcc022442a2701|569|rds|local|vector|||3.58||
-epc_dom_summary|stem|8e6b6265875f9c9a|5ee20abf53f340b6|16b910546803e3e4|-698757306||t20059.9833288572s|6eb5c2771c9fb7a9|7532318|rds|local|vector|||1003.36||
-epc_summarise_domestic|function|109c9fd7ae7fdf3e|||||||||||||||
+epc_dom_summary|stem|511d7ddda2da4fa0|5ee20abf53f340b6|6667c6c8557c26a6|-698757306||t20076.5330632879s|2ad9ade0d032acfa|7169980|rds|local|vector|||907.15||
+epc_summarise_domestic|function|5a2f88548b6b35ef|||||||||||||||
 estimate_car_meissions_post2018|function|7f751aef04cd03cd|||||||||||||||
-estimate_income|function|01ddeb0b3a50cb54|||||||||||||||
+estimate_income|function|1901a1e9a1e5541a|||||||||||||||
 ev_registrations|stem|eddebcee48d54691|18ea528277664ccb|3c6b0353b127cae5|1707219932||t20010.4238954752s|093993be14bafc6e|1109160|rds|local|vector|||1089.05||
 ev_registrations_21|stem|2f26e517d8c34f3b|c5a2ddc6a443584e|a0024a8aaefb7f8d|1163914246||t20039.4498843102s|b3f4d53967a1be54|1401410|rds|local|vector|||1.59||
 experian_income|stem|fa876ab8f4604443|24ebd7c7e83ba505|6a5514a931fc22ad|-331343829||t19825.9430833718s|4bf226ec968bfcde|327310|rds|local|vector|||2.56||
@@ -145,8 +145,8 @@ extrapolate_population_households|function|efb1627064abcddf|||||||||||||||
 fast_st_difference|function|4b9b779283df6d0f|||||||||||||||
 fill_gaps|function|33cdb8883b9fe473|||||||||||||||
 fill_gaps_135|function|10a349c80ecf651f|||||||||||||||
-flights_airports|stem|9deee7335e720978|41d91465f8d93af1|5cf3ad91f5a5dc95|-1783034371||t19826.4312387865s|7f3b3aba5edc04c4|39840|rds|local|vector|||35.25||
-flights_lsoa_emissions|stem|c75e6c28e2df4500|d46e42d8706463c7|ac89a987321157a3|1167197279||t19827.0047944887s|3da5cbb4b469ba27|6783965|rds|local|vector|||1.11||
+flights_airports|stem|9deee7335e720978|41d91465f8d93af1|86b9311df0fac9a8|-1783034371||t20076.4932735921s|7f3b3aba5edc04c4|39840|rds|local|vector|||46.85||
+flights_lsoa_emissions|stem|b08ca54165cbe6ac|d46e42d8706463c7|1e18f9d070c4a63e|1167197279||t20076.5428586613s|f5e2b5a01409037f|6784255|rds|local|vector|||0.56||
 flights_od|stem|ca000b1026bcb939|e8e918c9af9ecdc3|59a36361e86f6973|1922755203||t19825.8900330281s|763317a37a94c301|519376186|rds|local|vector|||17.31||
 flights_total_emissions|stem|a5377e4b020dedd1|86c5f538be3577e0|a4bb34a68d49311a|293120924||t19826.4746877054s|e9989e66406cfe99|1346|rds|local|vector|||0.1||
 forcast_emissions_plef|function|28a50827378ddb78|||||||||||||||
@@ -161,11 +161,11 @@ geojson_buildings_medium|stem|bcb494af9510e0bd|b922c4162dd013c7|b67143f0f2c5dff8
 geojson_buildings_verylow|stem|7b934e5e6de13437|1c5f36511220ccc4|f1258af4b34193a0|-666365029|outputdata/buildings_verylow.geojson|t19833.1042635888s|fc3e8e6bd0042418|39143725|file|local|vector|||6.02||
 geojson_epc_dom|stem|a78031b76bdbb096|fa3fcc913f48aaca|1c50300978672871|-265892237|outputdata/epc_dom.geojson|t19998.7021995312s|04d58fd0c0f7c04d|17705048042|file|local|vector|||1146.25|Thats a lot of columns for the GeoJSON, are they all needed|
 geojson_epc_nondom|stem|f75eddf231d12aff|36e136945fa87b77|1c50300978672871|165717121|outputdata/epc_nondom.geojson|t19998.6889230327s|4ebafa0a126585e3|264875702|file|local|vector|||26.11||
-geojson_la|stem|69e79bf9fa59950a|9455f525a3600684|f2a5f933cf2655f6|1656481300|outputdata/la.geojson|t19913.8895284976s|e8e0f05eba855cd8|134573959|file|local|vector|||32.19||
+geojson_la|stem|6d58ff35687a924c|9455f525a3600684|849b1d4d5299edf7|1656481300|outputdata/la.geojson|t20074.6197494866s|1d3cac52f71c726a|195103427|file|local|vector|||39.95||
 geojson_parish|stem|4350c9742d5e736e|7826a3416fd82f8e|2afefbd694f5e228|-1441095983|outputdata/parish.geojson|t19913.888622754s|343ed0611b6f78b5|424488857|file|local|vector|||93.97||
 geojson_postcode|stem|188a3bbb4d2a0537|6c63eb0433f5e96a|a3a13a0323673be9|1560777580|outputdata/postcodes.geojson|t19997.9638127653s|b91c5e5fdb5f7c2a|2129739220|file|local|vector|||405.6||
-geojson_wards|stem|04d91b6e5aba4afb|496f8f9b53bea9da|97d0e46b3458cc35|2025176598|outputdata/wards.geojson|t19913.8875094065s|a42bb27795a152df|299624523|file|local|vector|||69.05||
-geojson_westminster|stem|7e86173528412fce|a41ed2e36e2a0360|6358747a8cb7eac6|-1642132512|outputdata/westminster.geojson|t19913.88914604s|7021bdd4f2890405|187933176|file|local|vector|||43.96||
+geojson_wards|stem|48d81feaad0e13bc|496f8f9b53bea9da|1ecc5d2b4d5c967b|2025176598|outputdata/wards.geojson|t20074.6192784434s|c2965dda5963d19e|476156535|file|local|vector|||93.77||
+geojson_westminster|stem|b5b2768194bd89af|a41ed2e36e2a0360|a10130e61ec1e1d1|-1642132512|outputdata/westminster.geojson|t20076.4938660107s|be6dd0d5268d0239|228625356|file|local|vector|||48.5||
 geojson_zones_high|stem|4c5a682f0d9df44c|8a29a3ca6c7721de|775006bc141b309a|-1915331121|outputdata/zones_high.geojson|t19833.0933702329s|15c2ec977553927e|918284526|file|local|vector|||218.5||
 geojson_zones_low|stem|bd0fd373bf7fb69c|cb4e5e3e1ce417c1|9a62c602b53743ab|1148580836|outputdata/zones_low.geojson|t19833.0863514597s|1f96fd8d8fcd18ee|31579396|file|local|vector|||6.22||
 geojson_zones_medium|stem|50e6471371e8daa6|ae39ba5da1da1f9e|c9ab828dc68e22e6|-703191220|outputdata/zones_medium.geojson|t19833.1045067964s|fea329491670f5d3|90857734|file|local|vector|||20.81||
@@ -179,7 +179,7 @@ gtfs_trim_dates|function|c8c3f96195b85acd|||||||||||||||
 gtfs_trips_per_zone|function|a650516e2a50fe6d|||||||||||||||
 hole_area|function|cb6126d09e927207|||||||||||||||
 house_prices|stem|c330f20eeb895c3b|aecb00a87b2797dd|104537256f112a05|1467450346||t20039.8839657337s|9094eb06e36e1d77|2542503|rds|local|vector|||3.65||
-house_transactions|stem|8d563a45b0afafe1|e47195d7b8b8a49b|f6d422516b15fb1c|1370477967||t19938.8269320856s|2406aba58354734f|926068|rds|local|vector|||1.31||
+house_transactions|stem|207b61f5b7204c0e|e47195d7b8b8a49b|ab3f2221b74e58c9|1370477967||t20076.604047705s|c9664ae8dbf586c4|863419|rds|local|vector|||2.14||
 household_clusters|stem|a184b492b785e9b7|e5a12f5d9f1826d2|a210853020af1870|-1983834516||t20026.8587495223s|b1efbea68ef4f3e7|4827488|rds|local|vector|||334.47|UNRELIABLE VALUE Future none unexpectedly generated random numbers without specifying argument seed. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify seedTRUE. This ensures that proper, parallelsafe random numbers are produced via the LEcuyerCMRG method. To disable this check, use seedNULL, or set option future.rng.onMisuse to ignore.. UNRELIABLE VALUE Future none unexpectedly generated random numbers without specifying argument seed. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify seedTRUE. This ensures that proper, parallelsafe random numbers are produced via the LEcuyerCMRG method. To disable this check, use seedNULL, or set option future.rng.onMisuse to ignore.. UNRELIABLE VALUE Future none unexpectedly generated random numbers without specifying argument seed. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify seedTRUE. This ensures that proper, parallelsafe random numbers are produced via the LEcuyerCMRG method. To disable this check, use seedNULL, or set option future.rng.onMisuse to ignore.. UNRELIABLE VALUE Future none unexpectedly generated random numbers without specifying argument seed. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify seedTRUE. This ensures that proper, parallelsafe random numbers are produced via the LEcuyerCMRG method. To disable this check, use seedNULL, or set option future.rng.onMisuse to ignore.. UNRELIABLE VALUE Future none unexpectedly generated random numbers without specifying argument seed. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify seedTRUE. This ensures tha|
 household_pics_json|stem|0077101c8e28cb31|a7f26e422a92670b|611e19681f65578b|-995134782||t20026.8603087765s|4f74cbc508fbc9d3|133|rds|local|vector|||134.09||
 households_cenus11|stem|d5ee1974025abffa|ade69c55aacab65b|8d9b5a3a16f0b03f|-1638565795||t20026.8545992396s|51baa4308ac84137|181201|rds|local|vector|||0.39||
@@ -188,7 +188,8 @@ households_historical|stem|2634162b9a4ccd49|c692ebe46c442e40|90ba604eb186cf5c|-1
 housing_footprint|function|7f751aef04cd03cd|||||||||||||||
 housing_type_2021|stem|b65a670d5f7ccba8|f3cbfd74e42bd58c|9afdf5aee26f8910|-363671035||t19826.0948825267s|82d9e12e5b1a2c02|500481|rds|local|vector|||0.48||
 income_bands|function|7c095a6159168132|||||||||||||||
-income_lsoa|stem|0571b04f02651d4e|6fe3b5a3de5d7df8|ead26b53f47029aa|-245472229||t19826.4316483139s|8366f0a6831b8a4e|352479|rds|local|vector|||1.91||
+income_bands_lsoa|stem|08c88c0f6125acba|0359379a72dbfbc4|c6604e39306b5720|-882523201||t20076.5353012216s|7f9db67d607e5012|459302|rds|local|vector|||192.24||
+income_lsoa|stem|0571b04f02651d4e|6fe3b5a3de5d7df8|c6a52563ed9c1ddb|-245472229||t20076.4964616263s|8366f0a6831b8a4e|352479|rds|local|vector|||1.86||
 income_msoa|stem|bd27f572c4b5092f|5bbb993c0b7308c5|6f3ecbdbc6325666|1577550304||t20055.5370355713s|c6910f803630281a|294305|rds|local|vector|||2.67||
 inspire|stem|73688c646cb4361f|219703703bff2449|3614d82c08a2a373|-601057096||t19843.5069006284s|96366cd318902504|4635405818|rds|local|vector|||19608.23|GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21057 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21032 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21056 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21044 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21030 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21059 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21028 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21036 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21040 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21032 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not found. object sqr not found. GDAL Error 1 Failed to connect to 192.168.4.19 port 5080 after 21033 ms Couldnt connect to server. object poly_sel not found. object poly_sel_geom not|
 inspire_scotland|stem|490867a4aa62c075|c2238e0be7c1b0f3|262e1357b2909e29|-1645485193||t19849.7953636267s|653775efa9f37fe1|326434552|rds|local|vector|||98.62||
@@ -212,7 +213,7 @@ load_dft_ulev_registrations|function|a979b562f00b37d0|||||||||||||||
 load_dft_vehicle_registrations|function|644b306a8348a9a6|||||||||||||||
 load_emissions_factors|function|7176c93f70f81be7|||||||||||||||
 load_experian_income|function|ffc606296b7c4540|||||||||||||||
-load_flights_airports|function|ffa9223600c0ec18|||||||||||||||
+load_flights_airports|function|719fe6f1903a78dd|||||||||||||||
 load_flights_od|function|a6ec3227428a9170|||||||||||||||
 load_house_prices|function|4f738104591d2c6a|||||||||||||||
 load_house_transactions|function|199803dbeb6942a1|||||||||||||||
@@ -256,7 +257,8 @@ lookup_oa2021_lsoa2011|stem|079662fef9a8f2d4|cbe8a457930ae259|3c33218556d4adb6|2
 lookup_oa2021_lsoa2021|stem|3d21e39e6d821214|e281fd7c5ca3a212|c1a8784727279ed7|-505690643||t19934.2855082092s|ede19f0682bdf8f1|490678|rds|local|vector|||0.84||
 lookup_postcode_OA_LSOA_MSOA_2021|stem|10d1324ca7cb466c|571ccae9bc9ff1c8|291eb17900e608f4|1759155096||t19990.4123426078s|179c987a840659ca|13147698|rds|local|vector|||11.47||
 lsoa_11_21_tools|stem|85818ef5d0f36eda|1a3b64048ec52377|97afe45965f87bf8|993956763||t20033.7197341482s|a44d062e48ea8c3c|1072099|rds|local|vector|||0.2||
-lsoa_admin_summary|function|9bb8286a0594d4a0|||||||||||||||
+lsoa_admin|stem|4d31eb027c4dd856|f216c25240f7463a|5412edc8dede0e8b|-1485952592||t20076.5225425197s|a970381a5e29e192|917922|rds|local|vector|||17.3|st_point_on_surface assumes attributes are constant over geometries|
+lsoa_admin_summary|function|69f59b07ebb82e14|||||||||||||||
 lsoa_convert_2011_2021_pre_data|function|44115f7dc2a70b75|||||||||||||||
 lsoa_electric_to_2021|function|d023cd04234ee2a3|||||||||||||||
 lsoa_emissions_all|stem|e8d74df889b787ea|cf506a8969b19f97|1563bd0bfc4184e4|1303375064||t19832.7491291984s|72dc3b7b73bbc439|45064396|rds|local|vector|||2.28||
@@ -266,7 +268,7 @@ lsoa_map_data|stem|1c8497de66c170a8|d6500167bbab64ea|86e1069debd0629c|1195666468
 make_geojson|function|a54bfd7dafbf7555|||||||||||||||
 make_income_bands_lsoa|function|bc47ebe1ddb159ee|||||||||||||||
 make_pmtiles|function|0dc47744893b7675|||||||||||||||
-make_pmtiles_stack|function|6123c7c667a16740|||||||||||||||
+make_pmtiles_stack|function|ce735e44b38864fe|||||||||||||||
 make_postcode_areas|function|a174f4acc1279a05|||||||||||||||
 merge_woods|function|22a357b14df90794|||||||||||||||
 modal|function|c3137679039dca4b|||||||||||||||
@@ -275,7 +277,7 @@ nondomestic_gas|stem|4c321e2139703265|48896da2d3d9f38c|ff3099c8ef6ca5d0|15094639
 NSSEC_ethinic_residents|stem|3955d2f7b36c9ab7|43c87b1ff583cabe|0dec6f8990695400|-1382418143||t20010.4072193331s|34c87aa1f6e2595b|5746153|rds|local|vector|||13.8||
 NSSEC_household|stem|24f647cb75b4a777|fac6d9c6aa2f56a8|3d019bbb1b2e7e99|642119344||t20012.5946223561s|80de653200bb7602|1888284|rds|local|vector|||1640.12||
 nssec10_to_nssec5|function|89799122a902fe21|||||||||||||||
-nts|stem|05988ce16e994512|6d0a8410f9398a02|a0f4b00616f31462|-1652470759||t20043.8268157428s|b50cf8b722846116|468624128|rds|local|vector|||38.11||
+nts|stem|9a9de8cf7d93ea9d|6d0a8410f9398a02|8b794c544ba77fbd|-1652470759||t20074.5822843445s|132cfecb3db958c2|447253775|rds|local|vector|||163.94|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
 oa2021tolsoa2011|function|9b56cbba14499fa9|||||||||||||||
 oa2021tolsoa2021|function|aa8108a72754f771|||||||||||||||
 OAC_to_2021|function|3a0e68e9aa46a181|||||||||||||||
@@ -300,12 +302,13 @@ pmtiles_buildings_merge|stem|69f4dcdb9cf3e29d|5933fbe260962e53|ee4476dd1c9e532e|
 pmtiles_buildings_verylow|stem|6f9525989ea367dd|4985b37fe03bae67|547456e40a447664|743553700|outputdata/buildings_verylow.pmtiles|t19998.7450985922s|99074aa75f5b70fa|2677811|file|local|vector|||6.58||
 pmtiles_epc_dom|stem|050f9739a4dfd453|2451a6ae748f0426|aa2a41e62ce64971|-1313422490|outputdata/epc_dom.pmtiles|t19998.7124228437s|7c56820d5cceebcc|1296244366|file|local|vector|||786.98||
 pmtiles_epc_nondom|stem|f04c294c25c71029|6a5d71f20a0dd7e4|fdbc2fac625abaac|-832145070|outputdata/epc_nondom.pmtiles|t19998.7032793856s|2411c675ec6cb540|70329609|file|local|vector|||76.05||
-pmtiles_la|stem|cfbf89add3aa1415|909f63d0f3ded0a6|1445365f358d9171|2059785649|outputdata/la.pmtiles|t19998.7202416689s|6219171fae64634b|5090263|file|local|vector|||20.71||
+pmtiles_la|stem|2abcd6f5cc0e2045|909f63d0f3ded0a6|c55fad653157f8dd|2059785649|outputdata/la.pmtiles|t20076.4972847605s|d7fe7c90b6dd74c1|5134139|file|local|vector|||22.08||
 pmtiles_parish|stem|df3eff3a1e355144|61b298874b1189b9|257479f04b27360f|100742970|outputdata/parish.pmtiles|t19998.7208823352s|c371432a1842e564|13635241|file|local|vector|||28.89||
 pmtiles_postcode|stem|c56cf62f137de564|ba78588cd5f217c9|02ca86a2c0d99b4d|-1011986628|outputdata/postcodes.pmtiles|t19998.7199452605s|242b2e3fa91b5815|518628590|file|local|vector|||639.97||
-pmtiles_retrofit|stem|1a98e3b9d136c34e|8c36f0bafd5e6a15|4dc11a87ce493f38|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20060.9158949817s|ed675a90b4f34ca4|61413969|file|local|vector|||5660.05|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
-pmtiles_wards|stem|279d4291225acf2d|d359249a336c3b34|7946ecc19a5d11d0|-1064363007|outputdata/wards.pmtiles|t19998.7205315896s|4715360d5a01ef69|13389665|file|local|vector|||23.6||
-pmtiles_westminster|stem|bf42dd325946f91f|d407a80999e11f30|34638b87e21a9473|2003519876|outputdata/westminster.pmtiles|t19998.7211615727s|69db10dffbb8275f|6172697|file|local|vector|||22.81||
+pmtiles_retrofit|stem|167698630a254ced|8c36f0bafd5e6a15|3a50f6e9490e6c23|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20076.6079825395s|e37bd1a938c5695f|61431126|file|local|vector|||5468.14|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
+pmtiles_transport|stem|dd3eebeea5b08b4d|24d6f3fefcc24af1|b747cee17f63845b|50855935|outputdata/transport/zones_transport.pmtiles|t20076.5480898126s|aa089cb2901f100b|53842682|file|local|vector|||5135.27||
+pmtiles_wards|stem|0eca92fc66534c1e|d359249a336c3b34|1d08b5eda5be389f|-1064363007|outputdata/wards.pmtiles|t20076.4970120278s|ac79ff8fc7c596cb|14201208|file|local|vector|||38.09||
+pmtiles_westminster|stem|f60f82aa05f1d5c7|d407a80999e11f30|46911edaed80b932|2003519876|outputdata/westminster.pmtiles|t20076.4975683524s|3df7ac0941687557|6302027|file|local|vector|||23.23||
 pmtiles_zones_high|stem|2c614f6f195de561|e730679251664b90|662d7e53e48d7355|1314585671|outputdata/zones_high.pmtiles|t19998.7222059491s|66c4639aa6bc2f90|33075338|file|local|vector|||68.79||
 pmtiles_zones_low|stem|97e38f822bc299ab|b047ed3e2e532dff|6dc685a9848ce728|327195328|outputdata/zones_low.pmtiles|t19998.7224074881s|5b690ec4a16600d0|6824736|file|local|vector|||7.8||
 pmtiles_zones_medium|stem|a8e61fe55d8090a6|a31f77f3072e4ef3|251bdcd787010120|585711816|outputdata/zones_medium.pmtiles|t19998.722316044s|03a4f48ced84c9df|13648787|file|local|vector|||7.25||
@@ -329,14 +332,14 @@ pt_frequency|stem|f37a8da39dc62ba4|9b5cb8e669c06252|4b2a16e6992a5d11|971799777||
 pt_json|stem|fecfc34ef04d251a|c3b3c478273cc33e|5fae4ef8df6ab8b9|372774427||t19940.7707009702s|094cdf8ee71e1e88|135|rds|local|vector|||490.2||
 read_bounds|function|c98e479b00946565|||||||||||||||
 read_bounds_dz11|function|e1dcaf6fcc66a627|||||||||||||||
-read_bounds_la|function|819c426eb71f38d7|||||||||||||||
+read_bounds_la|function|7bc186fbacf627e6|||||||||||||||
 read_bounds_lsoa_full|function|b36db0c1e145c814|||||||||||||||
 read_bounds_lsoa_generalised|function|0b2376d8ad5f48d0|||||||||||||||
 read_bounds_lsoa_super_generalised|function|643f2eb903b9c338|||||||||||||||
 read_bounds_lsoa11_full|function|f623d04e2a4a34b9|||||||||||||||
 read_bounds_parish|function|6ec77596522f70e8|||||||||||||||
-read_bounds_wards|function|a48275c8d2d69797|||||||||||||||
-read_bounds_westminster|function|be3f82908908fa7a|||||||||||||||
+read_bounds_wards|function|67f43e3bcdd3dbc8|||||||||||||||
+read_bounds_westminster|function|189160b6559efd1a|||||||||||||||
 read_centroids|function|9538aaa523713cb6|||||||||||||||
 read_centroids_dz11|function|1bd8523b2b9c854a|||||||||||||||
 read_centroids_lsoa21|function|850f99018b635d12|||||||||||||||
@@ -354,7 +357,7 @@ read_postcodes|function|161ea70c12eca290|||||||||||||||
 reduce_name_length|function|9e71e39b27a7f611|||||||||||||||
 remove_small_holes|function|63d1099bd9da14c5|||||||||||||||
 remove_small_holes_single|function|a19182f8b3ab2eb0|||||||||||||||
-retrofit_lsoa_data|stem|b9aa660cbd3bf5f6|dda4014cd8135e4b|59020775d038bed4|-2108320529||t20060.9096388602s|33b968964cfec56e|313677|rds|local|vector|||2.47||
+retrofit_lsoa_data|stem|083c885f04956eb6|dda4014cd8135e4b|9546a508253892f6|-2108320529||t20076.5428460889s|30135985f3773f71|314742|rds|local|vector|||3.16||
 round_half_random|function|08ffba3445788f71|||||||||||||||
 select_household_pics|function|3002825fe4ee9df4|||||||||||||||
 select_map_outputs|function|f5e15acddddd9c71|||||||||||||||
@@ -366,6 +369,7 @@ simplify_household6|function|852002228c02e97d|||||||||||||||
 simplify_household8|function|f390353ab0a284b8|||||||||||||||
 simplify_nssec|function|7392f39693d34299|||||||||||||||
 sipher|stem|711604a57792047e|fe27a6d53638fe63|4466e2134c9b0f2f|-1562073936||t20042.8521317384s|9688927e1288b0e1|134248345|rds|local|vector|||17.8||
+SOAC_11|stem|82f86be6ffffbba6|5a33e2a011bde221|5bee8b65e3acd534|-348451342||t20076.4938813769s|ae9eeeab65de4525|276426|rds|local|vector|||0.05||
 split_buildings|function|39b85a22fa0d47e8|||||||||||||||
 split_lsoa_landuse|function|1c3deb4e8894a5ac|||||||||||||||
 split_merge|function|cffcc48ffc772922|||||||||||||||
@@ -383,7 +387,7 @@ ulev_registrations|stem|91a0b5781a01f0b0|a38f17b205acd99f|b3dbe6c82aa8cc6c|16550
 ulev_registrations_21|stem|195610d204e4944b|cb20399a04ccfa5b|5a35e1a38fd87663|1882962413||t20039.4495406875s|36e175df31cee509|1578242|rds|local|vector|||2.07||
 unzip_nomis|function|af736df11cd5af37|||||||||||||||
 uprn|stem|d610c283eba6e5eb|6a31ec6fdd42ee9e|3f86ff0d7e1d8b37|-155757933||t19940.544022006s|a3a19326f6828c74|598356934|rds|local|vector|||50.5||
-us|stem|1036d8e93cd7cf6a|757f1b7be63b721f|d14a397057be2c18|-1513705395||t20042.8637504795s|8591b707f033850f|48396067|rds|local|vector|||187.56|Undeclared levels 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 added in variable k_issueno. Undeclared levels 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 added in variable k_callno. Undeclared levels 91, 113, 120, 370, 557, 558, 609, 621, 622, 653, 990, 1001, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1086, 1213, 1296, 1316, 1394, 1418, 1449, 1457, 1573, 1629, 1631, 1642, 1725, 1786, 1853, 1909, 1982, 2001, 2002, 2005, 2008, 2015, 2019, 2020, 2022, 2023, 2251, 2425, 2553, 3171, 3177, 3416, 4421, 4424, 4699, 4986, 5162, 5177, 5473, 5626, 5640, 5781, 6205, 6408, 6510, 6513, 6921, 6970, 7013, 7560, 7592, 7773, 7850, 7870, 8097, 8116, 8304, 8544, 8574, 8731, 8739, 8763, 8765, 8889, 8930, 8941, 9005, 9019, 9023, 9026, 9030, 9057, 9077, 9079, 9258, 9351, 9423, 9598, 9757, 9768, 9841, 9949, 9968, 20781, 60012, 60508, 60696, 62138, 62142, 62498, 63339, 63662, 64443, 64446, 64450, 64484, 64541, 64580, 68660, 69320, 69470, 69714, 69988, 70209, 70217, 70299, 70424, 70542, 70809, 70842, 71085, 71184, 80158, 80180, 80262, 80306, 80308, 80359, 80431, 80456, 80531, 80549, 80571, 80656, 80733, 80787, 80799, 80858, 81057, 81099, 81347, 81377, 81440, 81595, 81724, 81811, 81833, 82005, 82037, 82158, 82197, 82214, 82218, 82223, 82239, 82252, 82255, 82258, 82260, 82273, 82281, 82391, 82399, 82629, 82700, 82747, 82803, 82833, 82940, 83095, 83141, 83157, 83223, 83268, 83303, 83434, 83497, 83499, 83521, 83530, 83625, 83888, 83908, 84145, 84148, 84232, 84239, 84241, 84467, 84540, 90100, 90102, 90103, 90104, 90105, 90106, 90107, 90109, 90118, 90122, 90152, 90160, 90161, 90163, 90170, 90174, 90176, 90177, 90178, 90179, 90180, 90184, 90188, 90189, 90190, 90191, 90192, 90193, 90196, 90198, 90205, 90224, 90225, 90226, 90228, 90229, 90240, 90241, 90242, 90247, 90251, 90252, 90254, 90304, 90305, 90307, 90308, 90310, 90311, 90313, 90315, 90316, 90317, 90341, 90344, 90350, 90354, 903|
+us|stem|1036d8e93cd7cf6a|757f1b7be63b721f|6347322f0f46f597|-1513705395||t20074.5786406797s|8591b707f033850f|48396067|rds|local|vector|||184.3|Undeclared levels 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 added in variable k_issueno. Undeclared levels 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 added in variable k_callno. Undeclared levels 91, 113, 120, 370, 557, 558, 609, 621, 622, 653, 990, 1001, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1086, 1213, 1296, 1316, 1394, 1418, 1449, 1457, 1573, 1629, 1631, 1642, 1725, 1786, 1853, 1909, 1982, 2001, 2002, 2005, 2008, 2015, 2019, 2020, 2022, 2023, 2251, 2425, 2553, 3171, 3177, 3416, 4421, 4424, 4699, 4986, 5162, 5177, 5473, 5626, 5640, 5781, 6205, 6408, 6510, 6513, 6921, 6970, 7013, 7560, 7592, 7773, 7850, 7870, 8097, 8116, 8304, 8544, 8574, 8731, 8739, 8763, 8765, 8889, 8930, 8941, 9005, 9019, 9023, 9026, 9030, 9057, 9077, 9079, 9258, 9351, 9423, 9598, 9757, 9768, 9841, 9949, 9968, 20781, 60012, 60508, 60696, 62138, 62142, 62498, 63339, 63662, 64443, 64446, 64450, 64484, 64541, 64580, 68660, 69320, 69470, 69714, 69988, 70209, 70217, 70299, 70424, 70542, 70809, 70842, 71085, 71184, 80158, 80180, 80262, 80306, 80308, 80359, 80431, 80456, 80531, 80549, 80571, 80656, 80733, 80787, 80799, 80858, 81057, 81099, 81347, 81377, 81440, 81595, 81724, 81811, 81833, 82005, 82037, 82158, 82197, 82214, 82218, 82223, 82239, 82252, 82255, 82258, 82260, 82273, 82281, 82391, 82399, 82629, 82700, 82747, 82803, 82833, 82940, 83095, 83141, 83157, 83223, 83268, 83303, 83434, 83497, 83499, 83521, 83530, 83625, 83888, 83908, 84145, 84148, 84232, 84239, 84241, 84467, 84540, 90100, 90102, 90103, 90104, 90105, 90106, 90107, 90109, 90118, 90122, 90152, 90160, 90161, 90163, 90170, 90174, 90176, 90177, 90178, 90179, 90180, 90184, 90188, 90189, 90190, 90191, 90192, 90193, 90196, 90198, 90205, 90224, 90225, 90226, 90228, 90229, 90240, 90241, 90242, 90247, 90251, 90252, 90254, 90304, 90305, 90307, 90308, 90310, 90311, 90313, 90315, 90316, 90317, 90341, 90344, 90350, 90354, 903|
 value2grade|function|170dee56b9d4f26e|||||||||||||||
 vehicle_cenus21|stem|39bfd5b27b7ab560|af39980e1a6ba3f7|753f20f24c02a849|-23538567||t19979.6968414398s|21c97aeea15c1595|451791|rds|local|vector|||0.25||
 vehicle_reg_to_21|function|4bec3612f7f32215|||||||||||||||

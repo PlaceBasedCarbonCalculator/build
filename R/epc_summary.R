@@ -18,13 +18,14 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
   certs$fuel <- trimws(certs$fuel)
 
+  certs$g_type <- as.character(certs$g_type)
   certs$g_type <- gsub(", known data"," glazing",certs$g_type)
   certs$g_type <- gsub(" installed before 2002","",certs$g_type)
   certs$g_type <- gsub(" installed during or after 2002","",certs$g_type)
   certs$g_type <- gsub(", unknown install date","",certs$g_type)
   certs$g_type[is.na(certs$g_type)] <- "not defined"
 
-  certs$tenure[is.na(certs$tenure)] = "unknown"
+
 
     # Flag Roofs and Floors
   certs$floor_ee <- as.character(certs$floor_ee)
@@ -32,17 +33,44 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
                                      (certs$floor_d %in% c("(another dwelling below)", "(other premises below)")),
                                    "dwelling below",certs$floor_ee)
 
+
   certs$roof_ee <- as.character(certs$roof_ee)
   certs$roof_ee <- ifelse(is.na(certs$roof_ee) &
                                     (certs$roof_d %in% c("(another dwelling above)", "(other premises above)")),
                                   "dwelling above",certs$roof_ee)
 
+
   certs$sol_wat[is.na(certs$sol_wat)] = "no"
+
+  certs$light_ee <- as.character(certs$light_ee)
+  certs$wind_ee <- as.character(certs$wind_ee)
+  certs$water_ee <- as.character(certs$water_ee)
+  certs$cur_rate <- as.character(certs$cur_rate)
+  certs$heat_ee <- as.character(certs$heat_ee)
+  certs$con_ee  <- as.character(certs$con_ee )
+  certs$wall_ee <- as.character(certs$wall_ee)
+
+  certs$tenure[is.na(certs$tenure)] = "unknown"
+  certs$roof_ee[is.na(certs$roof_ee)] = "unknown"
+  certs$floor_ee[is.na(certs$floor_ee)] = "unknown"
+  certs$light_ee[is.na(certs$light_ee)] = "unknown"
+  certs$wind_ee[is.na(certs$wind_ee)] = "unknown"
+  certs$wall_ee[is.na(certs$wall_ee)] = "unknown"
+  certs$water_ee[is.na(certs$water_ee)] = "unknown"
+  certs$heat_ee[is.na(certs$heat_ee)] = "unknown"
+  certs$con_ee[is.na(certs$con_ee)] = "unknown"
 
   certs$con_d[is.na(certs$con_d)] = "unknown"
   certs$floor_d[is.na(certs$floor_d)] = "unknown"
   certs$roof_d[is.na(certs$roof_d)] = "unknown"
-  certs$wall_d[is.na(certs$heat_d)] = "unknown"
+  certs$wall_d[is.na(certs$wall_d)] = "unknown"
+  certs$heat_d[is.na(certs$heat_d)] = "unknown"
+  certs$water_d[is.na(certs$water_d)] = "unknown"
+  certs$fuel[is.na(certs$fuel)] = "unknown"
+  certs$cur_rate[is.na(certs$cur_rate)] = "unknown"
+  certs$buidling_type[is.na(certs$buidling_type)] = "unknown"
+  certs$age[is.na(certs$age)] = "unknown"
+
 
 
   cert_summ <- dplyr::group_by(certs, LSOA21CD)
@@ -55,7 +83,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               epc_E = length(cur_rate[cur_rate == "E"]),
               epc_F = length(cur_rate[cur_rate == "F"]),
               epc_G = length(cur_rate[cur_rate == "G"]),
-              epc_other = length(cur_rate[is.na(cur_rate)]),
+              epc_other = length(cur_rate[cur_rate == "unknown"]),
               epc_score_avg = mean(cur_ee, na.rm = TRUE),
 
               type_house_semi = length(buidling_type[buidling_type == "Semi-Detached House"]),
@@ -86,6 +114,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               age_19962002 = length(age[age == "1996-2002"]),
               age_20032006 = length(age[age == "2003-2006"]),
               age_post2012 = length(age[age == "2012 onwards"]),
+              age_unknown = length(age[age == "unknown"]),
 
               floor_area_avg = round(mean(area, na.rm = TRUE)),
 

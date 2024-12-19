@@ -1,41 +1,30 @@
-# Created by use_targets().
-# Follow the comments below to fill in this target script.
-# Then follow the manual to check and run the pipeline:
-#   https://books.ropensci.org/targets/walkthrough.html#inspect-the-pipeline
+# Main analysis pipeline using `targets` package:
+# Use `tar_make()` to build or `tar_visnetwork()` to see flow chart
 
 # Load packages required to define the pipeline:
 library(targets)
 library(sf)
-# library(tarchetypes) # Load other packages as needed.
-
 # Set target options:
+# packages that your targets need to run
 tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
-               "igraph","plyr","terra","furrr","future") # packages that your targets need to run
+               "igraph","plyr","terra","furrr","future")
 )
 
-# tar_make_clustermq() is an older (pre-{crew}) way to do distributed computing
-# in {targets}, and its configuration for your machine is below.
 options(clustermq.scheduler = "multiprocess")
-
-# tar_make_future() is an older (pre-{crew}) way to do distributed computing
-# in {targets}, and its configuration for your machine is below.
-# Install packages {{future}}, {{future.callr}}, and {{future.batchtools}} to allow use_targets() to configure tar_make_future() options.
 
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source()
-# source("other_functions.R") # Source other scripts as needed.
 
-# Replace the target list below with your own:
+# Target List
 list(
-
 
 # Set Up ------------------------------------------------------------------
 
 # Detect when parameter file has changed:
+# Parameter file defines paths to data so must be correct
 tar_target(name = param_file, command = "parameters.json", format = "file"),
-# Check Renviron exists, create output directory, load params:
 tar_target(parameters, {
   p = jsonlite::read_json(param_file, simplifyVector = TRUE)
   p
@@ -778,7 +767,7 @@ tar_target(pmtiles_epc_nondom,{
                drop = TRUE, min_zoom = 6, max_zoom = 14)
 }, format = "file"),
 
-# Build JSON
+# Build JSON -------------------------------------------------------
 tar_target(build_lsoa_jsons,{
   export_zone_json(lsoa_emissions_all_forcasts, path = "outputdata/json/zones")
 }),
@@ -796,7 +785,7 @@ tar_target(build_postcode_jsons,{
 }),
 
 
-# Retrofit Map Build -------------------------------------------------------
+# Build pmtiles -------------------------------------------------------
 
 tar_target(pmtiles_retrofit,{
   make_pmtiles_stack(retrofit_lsoa_data,

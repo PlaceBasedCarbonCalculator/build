@@ -24,7 +24,7 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
 read_bounds_la <- function(path){
   file_path = file.path(path, "Local_Authority_Districts_May_2024_Boundaries_UK_BFC_6876907690171027150.gpkg")
   bounds <- read_bounds(file_path)
-  bounds <- bounds[,c("LAD23CD","LAD23NM")]
+  bounds <- bounds[,c("LAD24CD","LAD24NM")]
   bounds
 }
 
@@ -32,7 +32,7 @@ read_bounds_la <- function(path){
 read_bounds_wards <- function(path){
   file_path = file.path(path, "Wards_May_2024_Boundaries_UK_BFE_-4458353988245060602.gpkg")
   bounds <- read_bounds(file_path)
-  bounds <- bounds[,c("WD22CD","WD22NM")]
+  bounds <- bounds[,c("WD24CD","WD24NM")]
   bounds
 }
 
@@ -46,7 +46,7 @@ read_bounds_parish <- function(path){
 read_bounds_westminster <- function(path){
   file_path = file.path(path, "Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BFC_-6236279356162627018.gpkg")
   bounds <- read_bounds(file_path)
-  bounds <- bounds[,c("PCON22CD","PCON22NM")]
+  bounds <- bounds[,c("PCON24CD","PCON24NM")]
   bounds
 }
 
@@ -213,7 +213,7 @@ lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, 
   cents = sf::st_join(cents, bounds_parish)
   cents = sf::st_join(cents, bounds_westminster)
   cents = sf::st_join(cents, bounds_la)
-  cents = cents[,c("LSOA21CD","WD22NM","PAR23NM","PCON22NM","LAD23NM")]
+  cents = cents[,c("LSOA21CD","WD24NM","PAR23NM","PCON24NM","LAD24NM")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
 
   cents
