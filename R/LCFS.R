@@ -22,6 +22,9 @@ load_LCFS = function(path = "C:/Users/malco/OneDrive - University of Leeds/Data/
 
 
   households = lcfs$dvhh
+  households$A062
+
+  people = lcfs$dvper
 
 
 }
