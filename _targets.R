@@ -716,6 +716,14 @@ tar_target(sipher,{
   load_SIPHER(path = file.path(parameters$path_secure_data,"SIPHER Syntheic Population"))
 }),
 
+tar_target(census21_synth_households,{
+  sythetic_census(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded"))
+}),
+
+tar_target(lcfs,{
+  load_LCFS(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded"))
+}),
+
 tar_target(us,{
   load_US(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded"))
 }),

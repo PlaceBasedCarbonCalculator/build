@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|b81d7dfa7b2f77a5|||||||||||||||
+.Random.seed|object|5c945b719ae86197|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -73,6 +73,7 @@ car_km_lsoa_11|stem|25e1b1afcf67fd78|1896b34d4ce4dbac|08292df8cda1b6b0|208414373
 car_km_lsoa_21|stem|f7b512c7247293dd|479847ca77b94abf|6d81af2d021be4d4|2037685730||t20038.569845951s|634f0f24469c7eb4|16379744|rds|local|vector|||3.37||
 car_km_pc|stem|340a6c6ed99c5d42|c3236f367f6e9a7b|760dd06b41140ab5|305535931||t19825.9087468082s|c2a182f8cb432e1a|33581292|rds|local|vector|||0.34||
 car_km_pc_2005_2030|stem|33b0fbb6532ebe07|fcc9942102b4c9d5|e62f27878e760686|-485759429||t19809.6126999113s|e0a22a6ecd1ef55e|33579953|rds|local|vector|||0.219||
+census21_synth_households|stem|d833df50e5477964|2b6dbb1aaadf9fd4|45abf5fd4f215c49|1163979400||t20108.7545320307s|568ea1f9ffd01ecc|13371643|rds|local|vector|||286.5||
 central_heating_2011|stem|688846267aa4b127|2d228b2315c19e98|22bab636ac2baebf|739293567||t20039.9032904317s|77b975364e18c01c|573089|rds|local|vector|||0.41||
 central_heating_2011_21|stem|78a1b95a42c751de|9d43e785d2ba6df5|27c5e276544d0aa0|-1819136710||t19828.8809987933s|36b49abaa036dc18|590865|rds|local|vector|||0.19||
 central_heating_2011_to_2021|function|2dd2b76850958a95|||||||||||||||
@@ -81,6 +82,8 @@ centroids_dz11|stem|3fe346eaea7c96ca|067be8e5c17cbb7f|d3c82a8ef0af429f|279112810
 centroids_lsoa11|stem|f3c23fbb1efa29c2|9b6c00c9cfe1b48f|0d81c10696127047|713349175||t19825.9579245748s|5997662676b6cc9e|604984|rds|local|vector|||0.62||
 centroids_lsoa21|stem|43f3e8cf70432ea9|25eeeb0c119b73db|a3a091846368cfc7|-1794079577||t19931.3439452908s|7f7ea0878689171e|627325|rds|local|vector|||0.6||
 centroids_oa21|stem|ffefbec4e1dc623b|b65e9e3130abf2a0|72f7b8d845a9ebf2|-72066990||t19825.9579154267s|04664561ccbe1928|3307366|rds|local|vector|||4.66||
+cenus_syth_combine|function|dc983988988a4a2a|||||||||||||||
+cenus_syth_combine_alt|function|08e66913120f2cc1|||||||||||||||
 change_geom_name|function|ab4c869fe3632c5b|||||||||||||||
 clean_postcode_elec|function|d716c90d20945a7c|||||||||||||||
 clean_postcode_gas|function|28efbb4a3df87fb8|||||||||||||||
@@ -177,6 +180,7 @@ get_flights_total_emissions|function|551f59e5d295144d|||||||||||||||
 gtfs_stop_frequency|function|c3d1ff0baab81604|||||||||||||||
 gtfs_trim_dates|function|c8c3f96195b85acd|||||||||||||||
 gtfs_trips_per_zone|function|a650516e2a50fe6d|||||||||||||||
+hh_comp|function|63c138e04e34c413|||||||||||||||
 hole_area|function|cb6126d09e927207|||||||||||||||
 house_prices|stem|c330f20eeb895c3b|aecb00a87b2797dd|104537256f112a05|1467450346||t20039.8839657337s|9094eb06e36e1d77|2542503|rds|local|vector|||3.65||
 house_transactions|stem|207b61f5b7204c0e|e47195d7b8b8a49b|ab3f2221b74e58c9|1370477967||t20076.604047705s|c9664ae8dbf586c4|863419|rds|local|vector|||2.14||
@@ -198,6 +202,7 @@ join_for_geojson|function|880eb9cae0248d75|||||||||||||||
 join_pmtiles|function|f715f67e020e79b6|||||||||||||||
 join_sipher_us|function|a5b54daa32125899|||||||||||||||
 landcover|stem|923fe6f770326951|d6b101d06d29a5cb|853a1f4270ce3980|-1687245806||t19858.8716744441s|cc3974d52f0c210a|400709753|rds|local|vector|||5272.96|repeating attributes for all subgeometries for which they may not be constant. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to b|
+lcfs|stem|15e2cc299cc70bb5|0b5654f1441a2281|24587f2817d93a52|1276346926||t20111.4289782348s|5506d38880e1936c|29457043|rds|local|vector|||188.44|Undeclared levels 33, 62, 66, 70, 74, 79, 92, 95, 96, 102, 110, 111, 118, 140, 160, 171, 174, 188, 196, 199, 227, 230, 261, 279, 291, 300, 319, 354, 361, 362, 373, 374, 393, 394, 398, 421, 425, 472, 473, 483, 511, 514, 545, 556, 628, 663, 671, 677, 686, 697, 702, 709, 736, 745, 758, 761, 768, 778, 783, 792, 813, 814, 845, 870, 871, 877, 885, 896, 905, 911, 918, 928, 930, 960, 975, 1009, 1011, 1034, 1059, 1078, 1087, 1099, 1115, 1123, 1171, 1173, 1198, 1205, 1243, 1257, 1264, 1294, 1305, 1345, 1377, 1378, 1385, 1395, 1401, 1429, 1455, 1464, 1468, 1475, 1493, 1503, 1516, 1520, 1527, 1539, 1542, 1544, 1547, 1563, 1577, 1605, 1624, 1635, 1641, 1659, 1670, 1673, 1677, 1678, 1689, 1694, 1712, 1719, 1720, 1751, 1766, 1800, 1802, 1807, 1809, 1812, 1813, 1838, 1843, 1845, 1846, 1892, 1901, 1905, 1972, 1983, 1994, 2041, 2046, 2051, 2053, 2059, 2069, 2086, 2111, 2117, 2128, 2150, 2153, 2157, 2158, 2159, 2179, 2189, 2207, 2217, 2240, 2255, 2269, 2281, 2305, 2313, 2319, 2337, 2358, 2362, 2376, 2383, 2392, 2393, 2405, 2430, 2453, 2461, 2472, 2478, 2479, 2480, 2507, 2536, 2554, 2592, 2600, 2613, 2660, 2665, 2673, 2676, 2702, 2717, 2724, 2733, 2737, 2744, 2766, 2789, 2792, 2793, 2819, 2826, 2827, 2839, 2847, 2945, 2970, 2984, 2986, 2989, 3004, 3019, 3026, 3032, 3038, 3041, 3074, 3089, 3096, 3101, 3104, 3113, 3118, 3124, 3127, 3135, 3139, 3143, 3145, 3152, 3153, 3195, 3235, 3251, 3282, 3285, 3300, 3304, 3313, 3337, 3341, 3342, 3348, 3364, 3367, 3369, 3372, 3379, 3391, 3421, 3489, 3492, 3530, 3537, 3562, 3565, 3584, 3585, 3603, 3606, 3615, 3629, 3630, 3634, 3653, 3663, 3675, 3678, 3680, 3693, 3699, 3707, 3711, 3728, 3751, 3799, 3806, 3815, 3857, 3875, 3892, 3896, 3913, 3920, 3923, 3924, 3936, 3938, 3944, 3950, 3956, 3962, 3967, 3968, 3971, 3974, 3982, 4001, 4009, 4020, 4022, 4024, 4039, 4050, 4070, 4086, 4090, 4097, 4113, 4115, 4129, 4143, 4172, 4184, 4185, 4197, 4212, 4230, 4247, 4279, 4291, 4330, 4345, 4359, 4377, 4382, 4446, 4453, 4459, 4466, 4534, 4548, 4549, 4561, 4582, 4601, 4610, 4612, 4630, 4633, 4662, 4680, 4690, 4705,|
 load_area_classifications|function|bca57a8cb99e7081|||||||||||||||
 load_building_age_2011|function|d517be5ed7a7787e|||||||||||||||
 load_car_emissions|function|3ee450f00ada0a41|||||||||||||||
@@ -221,6 +226,8 @@ load_housing_type_2021|function|8239f284977327bc|||||||||||||||
 load_inspire|function|6b9cbff23c634f2b|||||||||||||||
 load_inspire_scot|function|1e8c9e6c81c5850f|||||||||||||||
 load_inspire_scotland|function|92cd49bdeddd6948|||||||||||||||
+load_LCFS|function|336ca0842b57b76b|||||||||||||||
+load_LCFS_single|function|987a53611534395f|||||||||||||||
 load_LSOA_2001_2011_lookup|function|339e62d02f7d8bd0|||||||||||||||
 load_LSOA_2011_2021_lookup|function|9db7e00257cf0dda|||||||||||||||
 load_lsoa_electric|function|cc9a3459076c9528|||||||||||||||
@@ -270,6 +277,8 @@ make_income_bands_lsoa|function|bc47ebe1ddb159ee|||||||||||||||
 make_pmtiles|function|0dc47744893b7675|||||||||||||||
 make_pmtiles_stack|function|ce735e44b38864fe|||||||||||||||
 make_postcode_areas|function|a174f4acc1279a05|||||||||||||||
+match_matrix_csums|function|0cbf9af72a01b1e3|||||||||||||||
+match_matrix_rsums|function|9ef50828098d91fd|||||||||||||||
 merge_woods|function|22a357b14df90794|||||||||||||||
 modal|function|c3137679039dca4b|||||||||||||||
 nondomestic_electricity|stem|be259bf8d434e5e6|d74e47c8b0a6790a|73ba691016ff4d9b|1461618057||t19825.9600565142s|2e62a220e530c685|2608749|rds|local|vector|||8.58||
@@ -330,6 +339,10 @@ postcode_gas_electricity_emissions|stem|53a61944ee5bd2db|35f4f621cdd4247a|a7df54
 prep_postcode_gas_electic|function|954f9dd6be7bced9|||||||||||||||
 pt_frequency|stem|f37a8da39dc62ba4|9b5cb8e669c06252|4b2a16e6992a5d11|971799777||t19903.8890487816s|aec65a957269a42c|24044905|rds|local|vector|||8.67||
 pt_json|stem|fecfc34ef04d251a|c3b3c478273cc33e|5fae4ef8df6ab8b9|372774427||t19940.7707009702s|094cdf8ee71e1e88|135|rds|local|vector|||490.2||
+read_Acc_CarVan|function|ccf8dadec0936f36|||||||||||||||
+read_Acc_hhComp|function|f45407a790ed370c|||||||||||||||
+read_Acc_hhSize|function|937f3cb518d6978e|||||||||||||||
+read_Acc_tenure|function|b199f53045802d8f|||||||||||||||
 read_bounds|function|c98e479b00946565|||||||||||||||
 read_bounds_dz11|function|e1dcaf6fcc66a627|||||||||||||||
 read_bounds_la|function|7bc186fbacf627e6|||||||||||||||
@@ -340,11 +353,16 @@ read_bounds_lsoa11_full|function|f623d04e2a4a34b9|||||||||||||||
 read_bounds_parish|function|6ec77596522f70e8|||||||||||||||
 read_bounds_wards|function|67f43e3bcdd3dbc8|||||||||||||||
 read_bounds_westminster|function|189160b6559efd1a|||||||||||||||
+read_CarVan|function|49aa05380a0a0171|||||||||||||||
+read_CarVan_hhComp|function|a77a496c62f3166c|||||||||||||||
 read_centroids|function|9538aaa523713cb6|||||||||||||||
 read_centroids_dz11|function|1bd8523b2b9c854a|||||||||||||||
 read_centroids_lsoa21|function|850f99018b635d12|||||||||||||||
 read_centroids_oa21|function|64e686fe7637e4a7|||||||||||||||
 read_class_ethinic|function|d35fb6416df560f8|||||||||||||||
+read_hhComp_Tenure|function|a01f69cb703131af|||||||||||||||
+read_hhSize|function|0db23fbadcbe2156|||||||||||||||
+read_hhSize_hhComp|function|7a73b8a7bfa3883b|||||||||||||||
 read_household_nssec|function|728ffc2d92af98ca|||||||||||||||
 read_household_nssec_old|function|f15805f45fc22fb1|||||||||||||||
 read_mot_km_pc|function|9a36df2193fb4c0a|||||||||||||||
@@ -354,6 +372,8 @@ read_os_poi|function|c503ac6d63920def|||||||||||||||
 read_osm_pbf_buildings|function|8af06922da0772f9|||||||||||||||
 read_osm_pbf_landuse|function|70877c45123691af|||||||||||||||
 read_postcodes|function|161ea70c12eca290|||||||||||||||
+read_tenure|function|7841046f80f0314c|||||||||||||||
+read_Tenure_hhSize|function|5927c2d055e5c20a|||||||||||||||
 reduce_name_length|function|9e71e39b27a7f611|||||||||||||||
 remove_small_holes|function|63d1099bd9da14c5|||||||||||||||
 remove_small_holes_single|function|a19182f8b3ab2eb0|||||||||||||||
@@ -374,11 +394,13 @@ split_buildings|function|39b85a22fa0d47e8|||||||||||||||
 split_lsoa_landuse|function|1c3deb4e8894a5ac|||||||||||||||
 split_merge|function|cffcc48ffc772922|||||||||||||||
 summarise_access_proximity|function|941de24ef762effa|||||||||||||||
+summarise_household_composition|function|25a7a4b8baa703ee|||||||||||||||
 summarise_poi|function|83dfba4fe9a919db|||||||||||||||
 summarise_pop|function|9264d0aef1a4b94b|||||||||||||||
 summarise_voa_post2010|function|f974a45b619ba283|||||||||||||||
 summarise_voa_post2020|function|4a6185e771e3aa60|||||||||||||||
 sumNA|function|16065a1d0a338fb4|||||||||||||||
+sythetic_census|function|069103cd9a12ed62|||||||||||||||
 top_architypes|function|24ec6121dffb52da|||||||||||||||
 transport_lsoa_data|stem|dda67bdaf23f9b40|6a78eaaee65e6911|2d81cad8c5370b77|-1134730169||t19931.3439900064s|72ac731fecde738a|303082|rds|local|vector|||1.17||
 travel2work|stem|cfc2781f6e5846fb|e5576a0f07ae9520|c0dfa5326169ab19|1855393739||t19826.3475780108s|69355519a838e5af|344568541|rds|local|vector|||360.67||
