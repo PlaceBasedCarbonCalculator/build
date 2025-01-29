@@ -142,10 +142,10 @@ convert_housing_type <- function(housing_type) {
     "Not Recorded" = NA,
     "Whole house,bungalow-detached" = "Detached",
     "Whole hse,bungalow-semi-dtchd" = "Semi",
-    "Whole house,bungalow-terraced" = "Terrace",
+    "Whole house,bungalow-terraced" = "Terraced",
     "Purpose-built flat maisonette" = "Flat",
     "Part of house converted flat" = "Flat",
-    "Others" = "Caravan"
+    "Others" = "caravan"
   )
 
   # Convert the input vector using the mapping
@@ -165,18 +165,22 @@ hh$hhComp = as.character(hh$hhcomp)
 hh$hhComp = gsub(" - students","",hh$hhComp)
 hh$hhComp = gsub(" - retired","",hh$hhComp)
 
-hh_unique = hh[,c("Acc","Tenure","Car","hhcomp","hhSize")]
-names(hh_unique) = gsub("hhcomp","hhComp",names(hh_unique))
+hh_unique = hh[,c("Acc","Tenure","Car","hhComp","hhSize")]
+#names(hh_unique) = gsub("hhcomp","hhComp",names(hh_unique))
+
+hh_unique = unique(hh_unique)
 
 head(hh_unique)
 head(census_unique)
+census_unique$Acc = as.character(census_unique$Acc)
+census_unique$hhComp = as.character(census_unique$hhComp)
 
 census_unique$in_census = TRUE
 hh_unique$in_lcfs = TRUE
 
 foo = dplyr::full_join(hh_unique, census_unique, by = c("Acc","Tenure","Car","hhComp","hhSize"))
 
-summary(census_unique$Acc %in% hh_unique$Acc)
+summary(unique(census_unique$Acc) %in% unique(hh_unique$Acc))
 summary(census_unique$Tenure %in% hh_unique$Tenure)
 summary(census_unique$Car %in% hh_unique$Car)
-summary(census_unique$hhComp %in% hh_unique$hhComp)
+summary(unique(census_unique$hhComp) %in% unique(hh_unique$hhComp))

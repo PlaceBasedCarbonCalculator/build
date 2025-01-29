@@ -317,6 +317,7 @@ summarise_household_composition = function(people){
 
 hh_comp = function(x){
 
+  #TODO: Check that string are the same across years, which some are not
   if(nrow(x) == 1){
     # Single Person
     if(x$a005p > 65){
@@ -330,10 +331,11 @@ hh_comp = function(x){
     # Check for Children
     if(any(x$A002 %in% c("Son or daughter","Grandson grndaughter"))){
       # Children
-      x$dependancy = ifelse(x$a005p < x$A007 %in% c("Not recorded","University/polytechnic, any other higher education college"),
+      x$dependancy = ifelse(x$A007 %in% c("Not recorded","University/polytechnic, any other higher education college"),
                             "non-dependant","dependant")
       x$dependancy = ifelse(x$A003 == "HRP", "non-dependant", x$dependancy) #HRP can't be dependant e.g. student parent
-      x$child = ifelse(x$a005p %in% c("Son or daughter","Grandson grndaughter"),
+      x$dependancy = ifelse(x$a005p >= 18, "non-dependant", x$dependancy) #Adults can't be dependant
+      x$child = ifelse(x$A002 %in% c("Son or daughter","Grandson grndaughter"),
                        "child", "adult")
 
       x$child_dep = ifelse(x$dependancy == "dependant", "dependant child", paste0(x$dependancy," ",x$child))
@@ -351,7 +353,7 @@ hh_comp = function(x){
 
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "LoneParent",
                             hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
-        } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner"))){
+        } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleChildren",
                             hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
         } else {
@@ -364,7 +366,7 @@ hh_comp = function(x){
         if(n_adutls == 1){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "LoneParentNonDepChildren",
                             hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
-        } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner"))){
+        } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleNonDepChildren",
                             hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
         } else {
@@ -381,7 +383,7 @@ hh_comp = function(x){
         } else {
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - retired", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
         }
-      } else if (nrow(x) == 2 & all(x$A002 %in% c("Person 1","Spouse cohabitee civil partner"))){
+      } else if (nrow(x) == 2 & all(x$A002 %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
         return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleNoChildren", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
       } else if (all(x$A007 == "University/polytechnic, any other higher education college")){
         return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - students", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
