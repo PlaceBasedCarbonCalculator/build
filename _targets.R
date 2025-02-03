@@ -717,7 +717,7 @@ tar_target(sipher,{
 }),
 
 tar_target(census21_synth_households,{
-  sythetic_census(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded"))
+  sythetic_census(path = file.path(parameters$path_data,"population"))
 }),
 
 tar_target(lcfs,{
