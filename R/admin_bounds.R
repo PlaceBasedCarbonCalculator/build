@@ -175,6 +175,12 @@ load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   lookup
 }
 
+load_MSOA_2011_2021_lookup <- function(path){
+  file_path = file.path(path, "MSOA_(2011)_to_MSOA_(2021)_to_Local_Authority_District_(2022)_Best_Fit_Lookup_for_EW_(V2).csv")
+  lookup = readr::read_csv(file_path)
+  lookup
+}
+
 
 # Bind list of SF data frames together using faster data.table::rbindlist
 bind_sf = function(x, idcol = NULL) {

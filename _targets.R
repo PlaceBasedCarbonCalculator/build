@@ -201,6 +201,10 @@ tar_target(centroids_dz11,{
 tar_target(centroids_oa21,{
   read_centroids_oa21(dl_boundaries)
 }),
+tar_target(centroids_oa11,{
+  read_centroids_oa11(dl_boundaries)
+}),
+
 tar_target(centroids_lsoa21,{
   read_centroids_lsoa21(dl_boundaries)
 }),
@@ -225,7 +229,9 @@ tar_target(lookup_lsoa_2001_11,{
 tar_target(lookup_OA_LSOA_MSOA_classifications,{
   load_OA_LSOA_MSOA_class_2011_lookup(dl_boundaries)
 }),
-
+tar_target(lookup_MSOA_2011_21,{
+  load_MSOA_2011_2021_lookup(dl_boundaries)
+}),
 tar_target(lookup_OA_LSOA_MSOA_2021,{
   load_OA_LSOA_MSOA_2021_lookup(dl_boundaries)
 }),
@@ -236,6 +242,19 @@ tar_target(lookup_postcode_OA_LSOA_MSOA_2021,{
 
 tar_target(SOAC_11,{
   OAC_to_2021(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
+}),
+
+tar_target(oac11lsoa21,{
+  OAC11_lsoa21(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications)
+}),
+
+
+tar_target(oac21,{
+  load_OAC21(path = file.path(parameters$path_data,"area_classifications/oac21ew.csv"))
+}),
+
+tar_target(lsoa21_OAC21_summary,{
+  OAC21_lsoa21(oac21, lookup_postcode_OA_LSOA_MSOA_2021)
 }),
 
 tar_target(lsoa_admin,{
@@ -716,8 +735,12 @@ tar_target(sipher,{
   load_SIPHER(path = file.path(parameters$path_secure_data,"SIPHER Syntheic Population"))
 }),
 
+tar_target(synth_pop_seed,{
+  build_synth_pop_seed(file.path(parameters$path_data,"population"))
+}),
+
 tar_target(census21_synth_households,{
-  sythetic_census(path = file.path(parameters$path_data,"population"))
+  sythetic_census(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
 }),
 
 tar_target(lcfs,{

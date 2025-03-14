@@ -172,6 +172,36 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   # Cars
   # Rural Urban
 
+  # Accommodation Alts
+
+  accommodation = dplyr::select(households_raw, dplyr::any_of(c("case",
+                                                         "AccOth", #Is the accommodation: a caravan; mobile home; homeboat; or some other kind of accommodation?
+                                                         "AccOth2",
+                                                        "CTBand", # Council Tax Band
+                                                         "RoomShar", #	Are any rooms in your accommodation shared with anyone who is not a member of your household?
+                                                         "Ten1",	#In which of these ways do you occupy this accommodation?
+                                                        "P200p", #(number of rooms occupied - anonymised),
+                                                        "A111p", #(rooms used solely by household - anonymised)
+                                                        "A114p", #(rooms in accommodation - total - anonymised)
+                                                        "p200p", #(number of rooms occupied - anonymised),
+                                                        "a111p", #(rooms used solely by household - anonymised)
+                                                        "a114p", #(rooms in accommodation - total - anonymised)
+                                                        "Nrmsp",
+                                                        "Nrms2p",
+                                                        "Nrms3p",
+                                                        "Nrms4p",
+                                                        "Nrms5p",
+                                                        "Nrms6p",
+                                                        "DVrmsp",
+                                                        "DVbedp",
+                                                        "DVsharep",
+                                                        "OAC"
+                                                         )))
+
+
+
+
+
   columns_to_select <- c("case",
                          "Mscale", # McClements Scale factor
                          "OECDSc", # OECD Scale factor
@@ -188,7 +218,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "a124p", # Cars and Vans top coded
                          "A094", # NS-SEC 12 Class of HRP,
                          "A091", # Socio-economic group HRP,
-                         "A116", # Building Type
+                         "A116", # Building Type - Removed in 2020
                          "A062", # Household Comp
                          "A138", # Second Dwelling
                          # Total consumption
@@ -285,7 +315,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   lcfs_final = list(household = household_char,
                     people = people_summary,
                     purchases = purchases,
-                    flights = flights_summary)
+                    flights = flights_summary,
+                    accommodation = accommodation)
 
   lcfs_final
 

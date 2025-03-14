@@ -236,3 +236,21 @@ difftime(t5,t4)
 
 
 hist(r1$result - r2$result, seq(-21,21,1))
+
+
+seed_new = seed
+seed_old = seed
+seed_old[seed_old > 1e-15] = 1
+
+
+t1 = Sys.time()
+r1 = cenus_syth_combine_v3(Acc_tenure_com[[1]], hhComp_Tenure_com[[1]], Tenure_hhSize_CarVan_com[[1]], Tenure_NSSEC_com[[1]], seed = seed_old)
+t2 = Sys.time()
+r2 = cenus_syth_combine_v3(Acc_tenure_com[[1]], hhComp_Tenure_com[[1]], Tenure_hhSize_CarVan_com[[1]], Tenure_NSSEC_com[[1]], seed = seed_new)
+t3 = Sys.time()
+
+difftime(t2,t1)
+difftime(t3,t2)
+
+
+
