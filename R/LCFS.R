@@ -213,6 +213,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "OAC3D", # Output Area Classification -3D
                          "incanon", # Anonymised household income and allowances
                          "p344p", # Gross normal weekly household income - top-coded
+                         "P389p", # Normal weekly disposable income
+                         "P352p", # Gross current income of household - top-coded
                          "A122", # Tenure
                          "A124", # Cars and Vans
                          "a124p", # Cars and Vans top coded

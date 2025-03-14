@@ -168,7 +168,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
   census21_synth_households$standard_error = (census21_synth_households$upper_limit - census21_synth_households$lower_limit)/1.96
   census21_synth_households$upper_limit99 = census21_synth_households$total_annual_income + 2.576 * census21_synth_households$standard_error
   census21_synth_households$lower_limit99 = census21_synth_households$total_annual_income - 2.576 * census21_synth_households$standard_error
-  census21_synth_households$lower_limit99[census21_synth_households$lower_limit99 < 0 ] =0
+  census21_synth_households$lower_limit99[census21_synth_households$lower_limit99 < 0 ] = 0
 
   census_unique =  census21_synth_households |>
     dplyr::group_by(hhComp15, Tenure5, hhSize5, CarVan5, OAC11combine, upper_limit99, lower_limit99) |>
@@ -225,10 +225,17 @@ match_LCFS_synth_pop = function(census21_synth_households,
                                 by = c("hhComp15", "Tenure5", "hhSize5", "CarVan5",
                                        "OAC11combine" = "OACs", "upper_limit99" = "upper_limit",
                                        "lower_limit99" = "lower_limit"))
+
+  select_id = function(lst){
+    sample(unlist(lst),1)
+  }
+
+
   future::plan("multisession")
-  cenus_long$household_id = furrr::future_map_dbl(cenus_long$household_id, function(x){
-       sample(x[[1]],1)
-  }, .progress = TRUE)
+  cenus_long$household_id_single = furrr::future_map_int(cenus_long$household_id,
+                                                         select_id,
+                                                         .options = furrr::furrr_options(seed = TRUE),
+                                                         .progress = TRUE)
   future::plan("sequential")
   cenus_long = dplyr::left_join(cenus_long, hh[,c("household_id","P600t","P601t","P602t",
                                            "P603t","P604t","P605t",
@@ -237,7 +244,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
                                            "P612t","P620tp","P630tp",
                                            "incanon", # Anonymised household income and allowances
                                            "p344p", # Gross normal weekly household income - top-coded
-                                           "p493p","p492p")], by = "household_id")
+                                           "p493p","p492p")], by = c("household_id_single" = "household_id"))
 
   cenus_long
 
