@@ -28,4 +28,11 @@ incomes_2018 = income_msoa[income_msoa$year == 2018,]
 joineds = left_join(incomes_2018, msoa_income, by = c("MSOA11" = "msoa21cd"))
 
 plot(joineds$total_annual_income, joineds$income_median)
-# COmplety bollocks
+
+library(ggplot2)
+ggplot(joineds, aes(y = income_median, x = total_annual_income)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("Observed average income") +
+  ylab("Modeled average income") +
+  geom_abline(intercept = 0, slope = 1, color = "red")

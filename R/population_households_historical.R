@@ -251,6 +251,7 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     d2 = dplyr::mutate(d2,
           household_share = all_properties * adults_per_household  / sum(all_properties * adults_per_household))
     d2 = dplyr::ungroup(d2)
+    d2$household_share = ifelse(is.nan(d2$household_share),0,d2$household_share)
 
     d2 = dplyr::left_join(d2[d2$year < 2021,], p, by = c("year" = "year"))
 
@@ -293,6 +294,10 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     aph = dplyr::left_join(aph, d[,c("LSOA21CD","year","all_properties")], by = c("year","LSOA21CD"))
 
     aph = aph[order(aph$LSOA21CD, aph$year),]
+
+    if(anyNA(aph$adults)){
+      stop("NA population")
+    }
 
     return(aph)
 

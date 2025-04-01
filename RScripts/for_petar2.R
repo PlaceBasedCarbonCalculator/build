@@ -12,8 +12,10 @@ census = read.csv(file.path(path,"census.csv"))
 hh = read.csv(file.path(path,"hh.csv"))
 incomes = read.csv(file.path(path,"incomes.csv"))
 
+tar_load(census21_synth_households)
+
 # For quick running only analyse a single neighbourhood on a single core
-single_core = TRUE
+single_core = FALSE
 
 if(single_core) {
   census = census[census$msoa21cd == "E02002383",] # comment out to do full dataset (slow)
@@ -154,8 +156,7 @@ cenus_long$households = NULL
 # Join on survey data
 cenus_long = dplyr::left_join(cenus_long, x,
                               by = c("hhComp15", "Tenure5", "hhSize5", "CarVan5",
-                                     "OAC11combine" = "OACs", "upper_limit99" = "upper_limit",
-                                     "lower_limit99" = "lower_limit"))
+                                     "OAC11combine" = "OACs"))
 
 # NEW METHOD - Add income to each ID
 cenus_long = dplyr::left_join(cenus_long, incomes[,c("MSOA11","total_annual_income")], by = c("msoa21cd" = "MSOA11"))
@@ -236,6 +237,7 @@ if(single_core) {
 
   ggplot(census_summary, aes(y = annual_income, x = total_annual_income)) +
     geom_point() +
+    geom_smooth(method = "lm") +
     xlab("Observed average income") +
     ylab("Modeled average income") +
     geom_abline(intercept = 0, slope = 1, color = "red")

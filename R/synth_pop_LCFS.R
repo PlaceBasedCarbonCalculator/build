@@ -1,11 +1,6 @@
-match_LCFS_synth_pop = function(census21_synth_households,
-                                lcfs,
-                                oac11lsoa21,
-                                yrs = c("20182019","20192020"),
-                                income_msoa,
-                                lookup_MSOA_2011_21,
-                                lookup_OA_LSOA_MSOA_2021,
-                                income_year = 2018){
+match_income_lsoa_msoa = function(income_msoa,
+                                  lookup_MSOA_2011_21,
+                                  lookup_OA_LSOA_MSOA_2021) {
 
   lookup_OA_LSOA_MSOA_2021 = lookup_OA_LSOA_MSOA_2021[,c("LSOA21CD","MSOA21CD")]
   lookup_OA_LSOA_MSOA_2021 = lookup_OA_LSOA_MSOA_2021[!duplicated(lookup_OA_LSOA_MSOA_2021$LSOA21CD),]
@@ -15,179 +10,133 @@ match_LCFS_synth_pop = function(census21_synth_households,
 
   lookup_OA_LSOA_MSOA_2021 = dplyr::left_join(lookup_OA_LSOA_MSOA_2021, lookup_MSOA_2011_21, by = c("MSOA21CD"))
 
-  income_msoa = income_msoa[income_msoa$year == income_year,]
+  #income_msoa = income_msoa[income_msoa$year == income_year,]
 
   income_lsoa = dplyr::left_join(lookup_OA_LSOA_MSOA_2021, income_msoa, by = c("MSOA11CD" = "MSOA11"))
-  income_lsoa = income_lsoa[,c("LSOA21CD","upper_limit" ,"lower_limit","total_annual_income")]
+  income_lsoa = income_lsoa[order(income_lsoa$LSOA21CD, income_lsoa$year),]
+  income_lsoa = income_lsoa[,c("LSOA21CD","year","upper_limit" ,"lower_limit","total_annual_income")]
 
-  lcfs_2021 = lcfs[[yrs[1]]]
-  lcfs_2022 = lcfs[[yrs[2]]]
+  income_lsoa
+}
 
-  #Dwelling Type missing in 21/22 and 20/21 data (A116), emailed ONS - removed in 2020
-  #TODO: OAC seem wrong in post 2020 data, emailed ONS
+# Select a random id form the list of matches, give more weight those close to average income.
+select_id_income = function(lst, mean_income, sd_income, hh){
+  lst = unlist(lst)
+  if(length(lst) == 1){
+    return(lst)
+  }
+  inc = hh$annual_income[match(lst, hh$household_id)]
+  weights <- dnorm(inc, mean = mean_income, sd = sd_income)
+  if(sum(weights) > 0){
+    res = try(sample(lst,1, prob = weights), silent = TRUE)
+  } else {
+    res = try(sample(lst,1), silent = TRUE)
+  }
+  # res = try(sample(lst,1, prob = weights), silent = TRUE)
+  if(inherits(res,"try-error")){
+    stop(paste(lst, collapse = " "))
+  } else {
+    return(res)
+  }
 
-  hh_21 = lcfs_2021$household
-  hh_22 = lcfs_2022$household
+}
 
-  pp_21 = lcfs_2021$people
-  pp_22 = lcfs_2022$people
+match_LCFS_synth_pop = function(census21_synth_households,
+                                lcfs_clean,
+                                oac11lsoa21,
+                                income_lsoa_msoa,
+                                population,
+                                dwellings_type_backcast,
+                                base_year = "2020/21"){
 
-  fly_21 = lcfs_2021$flights
-  fly_22 = lcfs_2022$flights
+  census21_synth_households$conv = NULL
+  census21_synth_households$pValue = NULL
 
-  hh_21$case = as.character(hh_21$case)
-  hh_22$case = as.character(hh_22$case)
+  population = population[,c("LSOA21CD","year","households_est","all_properties")]
+  population = population[population$year == as.numeric(substr(base_year,1,4)),]
 
-  pp_21$case = as.character(pp_21$case)
-  pp_22$case = as.character(pp_22$case)
+  population = population[population$LSOA21CD %in% unique(census21_synth_households$LSOA),] #TODO: Scotland
 
-  fly_21$case = as.character(fly_21$case)
-  fly_22$case = as.character(fly_22$case)
+  dwellings_type_backcast = dwellings_type_backcast[dwellings_type_backcast$year == as.numeric(substr(base_year,1,4)),]
 
-  hh_21 = dplyr::left_join(hh_21, pp_21, by = "case")
-  hh_22 = dplyr::left_join(hh_22, pp_22, by = "case")
+  dwellings_type_backcast$Detached = dwellings_type_backcast$house_detached + dwellings_type_backcast$unknown
+  dwellings_type_backcast$Semi = dwellings_type_backcast$house_semi + dwellings_type_backcast$bungalow
+  dwellings_type_backcast$Terraced = dwellings_type_backcast$house_terraced
+  dwellings_type_backcast$Flat = dwellings_type_backcast$flat_mais + dwellings_type_backcast$annexe
+  dwellings_type_backcast$caravan = dwellings_type_backcast$caravan_houseboat_mobilehome
 
-  hh_21 = dplyr::left_join(hh_21, fly_21, by = "case")
-  hh_22 = dplyr::left_join(hh_22, fly_22, by = "case")
+  dwellings_type_backcast = dwellings_type_backcast[,c("year","lsoa21cd","Detached","Semi","Terraced","Flat","caravan")]
 
-  hh = rbind(hh_21, hh_22)
-  hh$household_id = 1:nrow(hh)
-
-  hh$Tenure5 = convert_housing_tenure(hh$A122)
-  hh$CarVan5 = convert_car_ownership(hh$A124)
-  hh$hhSize5 = convert_household_size(hh$hhsize)
- # hh$NSSEC10 = convert_NSSEC(hh$A094)
-
-  hh$hhComp15 = as.character(hh$hhcomp)
-  hh$hhComp15 = gsub(" - students","",hh$hhComp15)
-  hh$hhComp15 = gsub(" - retired","",hh$hhComp15)
-  hh$hhComp15 = gsub(" - nondepchild","",hh$hhComp15)
-
-  # OAC
-  hh$OAC = tolower(hh$OAC)
-  hh$OAC = trimws(hh$OAC)
-  hh$OAC[hh$OAC == ""] = NA
-  hh = hh[!is.na(hh$OAC),]
+  hh = lcfs_clean[[base_year]]
+  income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == as.numeric(substr(base_year,1,4)),]
 
   oac11lsoa21$OAC11combine = sapply(oac11lsoa21$OAC11CD, function(x){
-    x = x[order(x$Freq, decreasing = TRUE),]
-    x = paste(x$OAC11CD, collapse = " ")
+    # x = x[order(x$Freq, decreasing = TRUE),]
+    # x = paste(x$OAC11CD, collapse = " ")
+    x = as.character(x$OAC11CD)
+    x = x[order(x)]
+    x = paste(x, collapse = " ")
     x
   })
   oac11lsoa21$OAC11CD = NULL
 
   census21_synth_households = dplyr::left_join(census21_synth_households, oac11lsoa21, by = c("LSOA" = "LSOA21CD"))
 
-  nms_Tenure <- c("Outright", "Mortgage", "Social_rented", "Private_rented")
-  nms_hhComp <- c("OnePersonOther", "OnePersonOver66", "CoupleNoChildren", "CoupleChildren",
-                  "CoupleNonDepChildren", "FamilyOver66", "LoneParent", "LoneParentNonDepChildren",
-                  "OtherChildren", "OtherIncStudentOrOver66", "OtherNoChildren")
-  nms_hhSize <- c("p1", "p2", "p3", "p4+")
-  nms_CarVan <- c("car0", "car1", "car2", "car3+")
-  nms_NSSEC <- c("DNA","L1L2L3","L4L5L6","L7","L8L9","L10L11","L12","L13","L14","L15")
+  similarity_table = make_similarity_table(hh)
 
-  similarity_Tenure = matrix(c(
-    1, 0.7, 0.5, 0.3,
-    0.7, 1, 0.7, 0.5,
-    0.5, 0.7, 1, 0.7,
-    0.3, 0.5, 0.7, 1
-  ), nrow = 4, dimnames = list(nms_Tenure, nms_Tenure))
+  census21_synth_households = dplyr::left_join(census21_synth_households, income_lsoa_msoa, by = c("LSOA" = "LSOA21CD"))
+  census21_synth_households$sd_income = (census21_synth_households$upper_limit - census21_synth_households$lower_limit) / 3.92
 
-  similarity_hhComp = matrix(c(
-    1  , 0.9, 0.7, 0.5, 0.3, 0.1, 0.7, 0.7, 0.5, 0.3, 0.1,
-    0.9, 1  , 0.9, 0.7, 0.5, 0.3, 0.9, 0.9, 0.7, 0.5, 0.3,
-    0.7, 0.9, 1  , 0.9, 0.7, 0.5, 0.9, 0.5, 0.9, 0.7, 0.5,
-    0.5, 0.7, 0.9, 1  , 0.9, 0.7, 0.7, 0.9, 0.9, 0.9, 0.7,
-    0.3, 0.5, 0.7, 0.9, 1  , 0.9, 0.5, 0.7, 0.9, 0.2, 0.9,
-    0.1, 0.3, 0.5, 0.7, 0.9, 1  , 0.3, 0.5, 0.7, 0.9, 0.7,
-    0.7, 0.9, 0.9, 0.7, 0.5, 0.3, 1  , 0.9, 0.7, 0.5, 0.3,
-    0.7, 0.9, 0.5, 0.9, 0.7, 0.5, 0.9, 1  , 0.9, 0.7, 0.5,
-    0.5, 0.7, 0.9, 0.9, 0.9, 0.7, 0.7, 0.9, 1  , 0.9, 0.7,
-    0.3, 0.5, 0.7, 0.9, 0.2, 0.9, 0.5, 0.7, 0.9, 1  , 0.9,
-    0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.3, 0.5, 0.7, 0.9, 1
-  ), nrow = 11, dimnames = list(nms_hhComp, nms_hhComp))
+  # Expand Census
+  cenus_long = census21_synth_households[rep(1:nrow(census21_synth_households), times = census21_synth_households$households),]
+  cenus_long$households = NULL
 
-  similarity_hhSize = matrix(c(
-    1, 0.85, 0.65, 0.45,
-    0.85, 1, 0.85, 0.65,
-    0.65, 0.85, 1, 0.85,
-    0.45, 0.65, 0.85, 1
-  ), nrow = 4, dimnames = list(nms_hhSize, nms_hhSize))
+  cenus_long = cenus_long[order(cenus_long$LSOA),]
+  dwellings_type_backcast = dwellings_type_backcast[order(dwellings_type_backcast$lsoa21cd),]
+  population = population[order(population$LSOA21CD),]
 
-  similarity_CarVan = matrix(c(
-    1, 0.8, 0.6, 0.4,
-    0.8, 1, 0.8, 0.6,
-    0.6, 0.8, 1, 0.8,
-    0.4, 0.6, 0.8, 1
-  ), nrow = 4, dimnames = list(nms_CarVan, nms_CarVan))
+  cenus_long = dplyr::group_split(cenus_long, LSOA)
+  dwellings_type_backcast = dplyr::group_split(dwellings_type_backcast, lsoa21cd)
+  population = dplyr::group_split(population, LSOA21CD)
 
-
-  # Define the variables
-  variables_21 <- c("1a1", "1a2", "1b1", "1b2", "1c1", "1c2", "2a1", "2a2", "2a3", "2b1", "2b2", "2c1", "2c2", "3a1", "3a2", "3a3", "3a4", "3b1", "3b2", "3c1", "3c2", "4a1", "4a2", "4a3", "4b1", "4b2", "4b3", "4b4", "4c1", "4c2", "5a1", "5a2", "5a3", "5b1", "5b2", "6a1", "6a2", "6a3", "6b1", "6b2", "6b3", "6c1", "6c2", "7a1", "7a2", "7b1", "7b2", "8a1", "8a2", "8b1", "8b2", "8b3")
-
-  variables_11 <- c("1a1","1a2","1a3","1a4","1b1","1b2","1b3","1c1","1c2","1c3","2a1","2a2","2a3","2b1","2b2","2c1","2c2","2c3",
-                    "2d1","2d2","2d3","3a1","3a2","3b1","3b2","3b3","3c1","3c2","3d1","3d2","3d3","4a1","4a2","4a3","4b1","4b2",
-                    "4c1","4c2","4c3","5a1","5a2","5a3","5b1","5b2","5b3","6a1","6a2","6a3","6a4","6b1","6b2","6b3","6b4","7a1",
-                    "7a2","7a3","7b1","7b2","7b3","7c1","7c2","7c3","7d1","7d2","7d3","7d4","8a1","8a2","8b1","8b2","8c1","8c2",
-                    "8c3","8d1","8d2","8d3")
-
-  variables = variables_11
-
-  # Initialize the similarity matrix
-  similarity_OAC <- matrix(0, nrow = length(variables), ncol = length(variables), dimnames = list(variables, variables))
-
-  # Calculate the similarity matrix
-  for (i in seq_along(variables)) {
-    for (j in seq_along(variables)) {
-      if (variables[i] == variables[j]) {
-        similarity_OAC[i, j] <- 1
-      } else if (substr(variables[i], 1, 2) == substr(variables[j], 1, 2)) {
-        similarity_OAC[i, j] <- 0.8
-      } else if (substr(variables[i], 1, 1) == substr(variables[j], 1, 1)) {
-        similarity_OAC[i, j] <- 0.5
-      } else {
-        similarity_OAC[i, j] <- 0
-      }
-    }
-  }
-
-
-  # Similarity matrices can be precomputed and stored outside the function if they remain constant
-  similarity_matrices <- list(
-    Tenure5 = similarity_Tenure,
-    hhComp15 = similarity_hhComp,
-    hhSize5 = similarity_hhSize,
-    CarVan5 = similarity_CarVan,
-    OAC = similarity_OAC
+  cenus_long2 = purrr::pmap(.l = list(
+    cenus_long,
+    population,
+    dwellings_type_backcast
+  ),
+  .f = select_synth_pop_year,
+  .progress = TRUE
   )
 
-  # Census Unique Coombinations
-  census21_synth_households = dplyr::left_join(census21_synth_households, income_lsoa, by = c("LSOA" = "LSOA21CD"))
-
-  # Go from 95% CI to 99% CI
-  census21_synth_households$standard_error = (census21_synth_households$upper_limit - census21_synth_households$lower_limit)/1.96
-  census21_synth_households$upper_limit99 = census21_synth_households$total_annual_income + 2.576 * census21_synth_households$standard_error
-  census21_synth_households$lower_limit99 = census21_synth_households$total_annual_income - 2.576 * census21_synth_households$standard_error
-  census21_synth_households$lower_limit99[census21_synth_households$lower_limit99 < 0 ] = 0
-
-  census_unique =  census21_synth_households |>
-    dplyr::group_by(hhComp15, Tenure5, hhSize5, CarVan5, OAC11combine, upper_limit99, lower_limit99) |>
-    dplyr::summarise(households = sum(households))
+  cen = cenus_long[[31882]]
+  pop = population[[31882]]
+  bk = dwellings_type_backcast[[31882]]
 
 
-  Tenure5 =  census_unique$Tenure5[6041]
-  hhComp15 =  census_unique$hhComp15[6041]
-  hhSize5 =  census_unique$hhSize5[6041]
-  CarVan5 =  census_unique$CarVan5[6041]
-  OACs =  census_unique$OAC11combine[6041]
-  upper_limit = census_unique$upper_limit99[6041]
-  lower_limit = census_unique$lower_limit99[6041]
+  t1 = Sys.time()
+  future::plan("multisession")
+  cenus_long2 = furrr::future_pmap(.l = list(
+    cen = cenus_long,
+    pop = population,
+    bk = dwellings_type_backcast
+  ),
 
-  # 200 households too rich to be in any LSOA
-  # 1550 hosuheoldsn too poor
+  .f = select_synth_pop_year,
+  .progress = TRUE,
+  .options = furrr::furrr_options(seed = TRUE,
+                                  scheduling  = 1))
+  future::plan("sequential")
+  t2 = Sys.time()
+  message(round(difftime(t2,t1, units = "mins"),2), " min")
 
-  #
-  #foo = match_hh_census(Tenure5,hhComp15,hhSize5,CarVan5,OACs,upper_limit, lower_limit, hh, similarity_matrices)
+  cenus_long2 = data.table::rbindlist(cenus_long2)
+  cenus_long2 = as.data.frame(cenus_long2)
+
+  # Census Unique Combinations
+  census_unique =  cenus_long2 |>
+    dplyr::group_by(hhComp15, Tenure5, hhSize5, CarVan5, OAC11combine) |>
+    dplyr::summarise(households = dplyr::n())
+
 
   hh$annual_income = hh$incanon * 52
 
@@ -198,14 +147,12 @@ match_LCFS_synth_pop = function(census21_synth_households,
     hhComp15 = census_unique$hhComp15,
     hhSize5 = census_unique$hhSize5,
     CarVan5 = census_unique$CarVan5,
-    OACs = census_unique$OAC11combine,
-    upper_limit = census_unique$upper_limit99,
-    lower_limit = census_unique$lower_limit99
+    OACs = census_unique$OAC11combine
   ),
 
-  .f = match_hh_census,
-  hh = hh[,c("household_id","Tenure5","hhComp15","hhSize5","CarVan5","OAC","annual_income")],
-  similarity_matrices = similarity_matrices,
+  .f = match_hh_census3,
+  hh = hh[,c("household_id","Tenure5","hhComp15","hhSize5","CarVan5","OAC")],
+  similarity_table = similarity_table,
   .progress = TRUE,
   .options = furrr::furrr_options(seed = TRUE,
                                   scheduling  = 1))
@@ -213,40 +160,30 @@ match_LCFS_synth_pop = function(census21_synth_households,
   t2 = Sys.time()
   message(round(difftime(t2,t1, units = "mins"),2), " min")
 
-  #x = dplyr::bind_rows(x)
   x = data.table::rbindlist(x)
-  #message(Sys.time())
 
-  # Expand Census
-  cenus_long = census21_synth_households[rep(1:nrow(census21_synth_households), times = census21_synth_households$households),]
-  cenus_long$households = NULL
-
-  cenus_long = dplyr::left_join(cenus_long, x,
+  cenus_long2 = dplyr::left_join(cenus_long2, x,
                                 by = c("hhComp15", "Tenure5", "hhSize5", "CarVan5",
-                                       "OAC11combine" = "OACs", "upper_limit99" = "upper_limit",
-                                       "lower_limit99" = "lower_limit"))
+                                       "OAC11combine" = "OACs"))
 
-  select_id = function(lst){
-    sample(unlist(lst),1)
-  }
+  cenus_long2$sd_income = (cenus_long2$upper_limit - cenus_long2$lower_limit) / 3.92
 
 
   future::plan("multisession")
-  cenus_long$household_id_single = furrr::future_map_int(cenus_long$household_id,
-                                                         select_id,
-                                                         .options = furrr::furrr_options(seed = TRUE),
-                                                         .progress = TRUE)
+  cenus_long2$household_id_single = furrr::future_pmap_int(.l = list(lst = cenus_long2$household_id,
+                                                                    mean_income = cenus_long2$total_annual_income,
+                                                                    sd_income = cenus_long2$sd_income),
+                                                          .f = select_id_income,
+                                                          hh = hh[,c("household_id","annual_income")],
+                                                          .options = furrr::furrr_options(seed = TRUE,
+                                                                                          scheduling  = 1))
   future::plan("sequential")
-  cenus_long = dplyr::left_join(cenus_long, hh[,c("household_id","P600t","P601t","P602t",
-                                           "P603t","P604t","P605t",
-                                           "P606t","P607t","P608t",
-                                           "P609t","P610t","P611t",
-                                           "P612t","P620tp","P630tp",
-                                           "incanon", # Anonymised household income and allowances
-                                           "p344p", # Gross normal weekly household income - top-coded
-                                           "p493p","p492p")], by = c("household_id_single" = "household_id"))
 
-  cenus_long
+  hh = hh[,!names(hh) %in% c("Tenure5","CarVan5","hhSize5","hhComp15")]
+
+  cenus_long2 = dplyr::left_join(cenus_long2, hh, by = c("household_id_single" = "household_id"))
+
+  cenus_long2
 
 }
 
@@ -466,4 +403,127 @@ match_hh_census <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, upper_limit, 
 
 
 
+match_hh_census2 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similarity_matrices) {
 
+
+  # Create named vectors for the input variables to match the dimension names in the similarity matrices
+  input_vars <- list(
+    Tenure5 = as.character(Tenure5),
+    hhComp15 = as.character(hhComp15),
+    hhSize5 = hhSize5,
+    CarVan5 = CarVan5,
+    OAC = unlist(strsplit(OACs," "))
+  )
+
+  # Initialize similarity scores as a numeric vector
+  similarity_scores <- numeric(nrow(hh))
+
+  # Calculate similarity scores using vectorized operations
+  for (var in names(input_vars)) {
+    sim_matrix <- similarity_matrices[[var]]
+    input_value <- input_vars[[var]]
+    hh_values <- hh[[var]]
+
+    if(var == "OAC"){
+      #Special case LSOAs can have multiple OACs,
+      #input_value$subgroup = as.character(input_value$subgroup)
+      #sim_matrix[,!colnames(sim_matrix) %in% input_value$subgroup] = 0
+      #sim_matrix[,!colnames(sim_matrix) %in% input_value] = 0
+
+      # Map the input value and household values to their corresponding indices
+      input_index <- which(rownames(sim_matrix) %in% input_value)
+      hh_indices <- match(hh_values, colnames(sim_matrix))
+
+      # Extract the similarity scores for all households at once
+      scores <- sim_matrix[input_index, hh_indices]
+      if(inherits(scores,"matrix")){
+        scores <- apply(scores, 2, max, na.rm = TRUE)
+      }
+
+
+    } else {
+      # Map the input value and household values to their corresponding indices
+      input_index <- which(rownames(sim_matrix) == input_value)
+      hh_indices <- match(hh_values, colnames(sim_matrix))
+
+      # Extract the similarity scores for all households at once
+      scores <- sim_matrix[input_index, hh_indices]
+    }
+
+    similarity_scores <- similarity_scores + scores
+
+
+  }
+
+  # Find the maximum similarity score
+  max_score <- max(similarity_scores, na.rm = TRUE)
+
+  # Get all households with the maximum similarity score
+  hh_sub <- hh[similarity_scores == max_score, ]
+
+  if (nrow(hh_sub) > 0) {
+    return(data.frame(
+      Tenure5 = Tenure5,
+      hhComp15 = hhComp15,
+      hhSize5 = hhSize5,
+      CarVan5 = CarVan5,
+      OACs = OACs,
+      n_match = nrow(hh_sub),
+      match_score = max_score / 5,
+      household_id = I(list(hh_sub$household_id))
+    ))
+  } else {
+    message(unlist(input_vars))
+    stop()
+  }
+}
+
+
+
+# For each LSOA select the number of households require for each year
+select_synth_pop_year = function(cen, pop, bk){
+  if(!all(unique(c(cen$LSOA,pop$LSOA21CD)) %in% unique(bk$lsoa21cd))){
+    stop("LSOA don't match")
+  }
+  #cen_long = cen[rep(1:nrow(cen), times = cen$households),]
+  #cen_long$households = NULL
+  cen = dplyr::group_split(cen, Acc5)
+
+  if(pop$all_properties == 0){
+    weight =  0
+  } else {
+    weight =  pop$households_est / pop$all_properties
+  }
+
+  bk$Detached = round(bk$Detached * weight)
+  bk$Semi     = round(bk$Semi * weight)
+  bk$Terraced = round(bk$Terraced * weight)
+  bk$Flat     = round(bk$Flat * weight)
+  bk$caravan  = round(bk$caravan * weight)
+
+  cen_long2 = list()
+  for(j in seq(1, length(cen))){
+    cen_sub = cen[[j]]
+    cnt = bk[[as.character(cen_sub$Acc5[1])]]
+    if(cnt > 0){
+      if(cnt <= nrow(cen_sub)){
+        cen_long2[[j]] = cen_sub[sample(seq(1, nrow(cen_sub)), cnt),]
+      } else {
+        if(cnt - nrow(cen_sub) > nrow(cen_sub)){
+          replace = TRUE
+        } else {
+          replace = FALSE
+        }
+        cen_long2[[j]] = rbind(cen_sub, cen_sub[sample(seq(1, nrow(cen_sub)), cnt - nrow(cen_sub), replace = replace),])
+      }
+
+    } else {
+      cen_long2[[j]] = NULL
+    }
+  }
+
+  cen_long2 = data.table::rbindlist(cen_long2)
+  cen_long2 = as.data.frame(cen_long2)
+  cen_long2
+
+}

@@ -222,7 +222,6 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "A091", # Socio-economic group HRP,
                          "A116", # Building Type - Removed in 2020
                          "A062", # Household Comp
-                         "A138", # Second Dwelling
                          # Total consumption
                          "P600t",
                          "P601t",
@@ -242,7 +241,6 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          # Other Vars
                          "p493p",
                          "p492p",
-                         "a069p",
                          "P431p",
                          "p431", # Main source of income
                          "a117p",
@@ -430,3 +428,241 @@ hh_comp = function(x){
   stop("Unknown example", x$case[1])
 }
 
+subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
+
+  if(length(yrs) != 2){
+    stop("Only two yrs values allowed")
+  }
+
+  if(!all(yrs %in% names(lcfs))){
+    stop("yrs values not valid")
+  }
+
+  lcfs_2021 = lcfs[[yrs[1]]]
+  lcfs_2022 = lcfs[[yrs[2]]]
+
+  #Dwelling Type missing in 21/22 and 20/21 data (A116), emailed ONS - removed in 2020
+  #TODO: OAC seem wrong in post 2020 data, emailed ONS
+
+  hh_21 = lcfs_2021$household
+  hh_22 = lcfs_2022$household
+
+  pp_21 = lcfs_2021$people
+  pp_22 = lcfs_2022$people
+
+  fly_21 = lcfs_2021$flights
+  fly_22 = lcfs_2022$flights
+
+  names(fly_21)[names(fly_21) %in% c("Single return from UK to outside UK","To a country outside the UK")] = "flight_international_return"
+  names(fly_22)[names(fly_22) %in% c("Single return from UK to outside UK","To a country outside the UK")] = "flight_international_return"
+
+  names(fly_21)[names(fly_21) == "Other flight"] = "flight_other"
+  names(fly_22)[names(fly_22) == "Other flight"] = "flight_other"
+
+  names(fly_21)[names(fly_21) %in% c("Domestic UK return","A domestic UK return")] = "flight_domestic_return"
+  names(fly_22)[names(fly_22) %in% c("Domestic UK return","A domestic UK return")] = "flight_domestic_return"
+
+  names(fly_21)[names(fly_21) %in% c("Domestic UK one way","A domestic UK one way")] = "flight_domestic_single"
+  names(fly_22)[names(fly_22) %in% c("Domestic UK one way","A domestic UK one way")] = "flight_domestic_single"
+
+  hh_21$case = as.character(hh_21$case)
+  hh_22$case = as.character(hh_22$case)
+
+  pp_21$case = as.character(pp_21$case)
+  pp_22$case = as.character(pp_22$case)
+
+  fly_21$case = as.character(fly_21$case)
+  fly_22$case = as.character(fly_22$case)
+
+  hh_21 = dplyr::left_join(hh_21, pp_21, by = "case")
+  hh_22 = dplyr::left_join(hh_22, pp_22, by = "case")
+
+  hh_21 = dplyr::left_join(hh_21, fly_21, by = "case")
+  hh_22 = dplyr::left_join(hh_22, fly_22, by = "case")
+
+  hh = dplyr::bind_rows(list(hh_21, hh_22))
+  hh$household_id = 1:nrow(hh)
+
+  hh$Tenure5 = convert_housing_tenure(hh$A122)
+  if(is.null(hh$A124)){
+    hh$CarVan5 = convert_car_ownership(hh$a124p)
+  } else {
+    hh$CarVan5 = convert_car_ownership(hh$A124)
+  }
+  hh$hhSize5 = convert_household_size(hh$hhsize)
+  # hh$NSSEC10 = convert_NSSEC(hh$A094)
+
+  hh$hhComp15 = as.character(hh$hhcomp)
+  hh$hhComp15 = gsub(" - students","",hh$hhComp15)
+  hh$hhComp15 = gsub(" - retired","",hh$hhComp15)
+  hh$hhComp15 = gsub(" - nondepchild","",hh$hhComp15)
+
+  # OAC
+  hh$OAC = trimws(hh$OAC)
+  if(any(grepl("Aspiring", hh$OAC, ignore.case = TRUE))){
+    hh$OAC = clean_OAC_codes(hh$OAC)
+  }
+
+  hh$OAC = tolower(hh$OAC)
+  hh$OAC[hh$OAC == ""] = NA
+  hh$OAC[hh$OAC == "ni"] = NA
+  hh = hh[!is.na(hh$OAC),]
+
+  columns_to_select <- c("household_id",
+                         "case",
+                         "Tenure5",
+                         "CarVan5",
+                         "hhSize5",
+                         "hhComp15",
+                         "OAC",
+                         "Gorx",
+                         "URGridEWp",
+                         "URGridSCp",
+                         "OAC3D",
+                         "incanon",
+                         "A122", # Tenure
+                         "A094",
+                         "A091",
+                         "A116", # Dwelling Category
+                         "p200p", # Number of rooms
+                         "P600t", # Concumption Categories
+                         "P601t",
+                         "P602t",
+                         "P603t",
+                         "P604t",
+                         "P605t",
+                         "P606t",
+                         "P607t",
+                         "P608t",
+                         "P609t",
+                         "P610t",
+                         "P611t",
+                         "P612t",
+                         "P620tp",
+                         "P630tp",
+                         "P431p",
+                        "a117p", # New Cars
+                        "a118p", # Second Hand Cars
+                        "a162p", # Motor Cycles
+                        "HRPemploy",
+                        "HRPethnic",
+                        "flight_international_return",
+                        "flight_other",
+                        "flight_domestic_return",
+                        "flight_domestic_single"
+                        )
+
+
+  hh = dplyr::select(hh, dplyr::any_of(columns_to_select))
+  hh = dplyr::rename(hh,
+                     tenure = A122,
+                     NSSEC8_HRP = A094,
+                     SEC_HRP = A091,
+                     dwelling_type = A116,
+                     rooms = p200p,
+                     spend_totalconsump = P600t,
+                     spend_food = P601t,
+                     spend_alcohol = P602t,
+                     spend_clothing = P603t,
+                     spend_housing = P604t,
+                     spend_furnish = P605t,
+                     spend_health = P606t,
+                     spend_transport = P607t,
+                     spend_communication = P608t,
+                     spend_recreation = P609t,
+                     spend_education = P610t,
+                     spend_restaurant = P611t,
+                     spend_misc = P612t,
+                     spend_nonconsump = P620tp,
+                     spend_total = P630tp,
+                     cars_new = a117p,
+                     cars_secondhand = a118p,
+                     motorcycles = a162p
+                     )
+
+  hh
+}
+
+
+selected_lcfs = function(lcfs){
+
+  res = list("2010/11" = subset_lcfs(lcfs, yrs = c("2010","2011")),
+             "2012/13" = subset_lcfs(lcfs, yrs = c("2012","2013")),
+             "2014/15" = subset_lcfs(lcfs, yrs = c("2014","20152016")),
+             "2016/17" = subset_lcfs(lcfs, yrs = c("20162017","20172018")),
+             "2018/19" = subset_lcfs(lcfs, yrs = c("20182019","20192020")),
+             "2020/21" = subset_lcfs(lcfs, yrs = c("20202021","20212022"))
+  )
+
+  res
+
+}
+
+clean_OAC_codes <- function(values) {
+  # Create a mapping of descriptions to ONS codes
+  mapping <- c(
+    "Northern Ireland - not classified" = "NI",
+    "Terraced Blue Collar (1)" = "1A1",
+    "Terraced Blue Collar (2)" = "1A2",
+    "Terraced Blue Collar (3)" = "1A3",
+    "Younger Blue Collar (1)" = "1B1",
+    "Younger Blue Collar (2)" = "1B2",
+    "Older Blue Collar (1)" = "1C1",
+    "Older Blue Collar (2)" = "1C2",
+    "Older Blue Collar (3)" = "1C3",
+    "Transient Communities (1)" = "2A1",
+    "Transient Communities (2)" = "2A2",
+    "Settled in the City (1)" = "2B1",
+    "Settled in the City (2)" = "2B2",
+    "Village Life (1)" = "3A1",
+    "Village Life (2)" = "3A2",
+    "Agricultural (1)" = "3B1",
+    "Agricultural (2)" = "3B2",
+    "Accessible Countryside (1)" = "3C1",
+    "Accessible Countryside (2)" = "3C2",
+    "Prospering Younger Families (1)" = "4A1",
+    "Prospering Younger Families (2)" = "4A2",
+    "Prospering Older Families (1)" = "4B1",
+    "Prospering Older Families (2)" = "4B2",
+    "Prospering Older Families (3)" = "4B3",
+    "Prospering Older Families (4)" = "4B4",
+    "Prospering Semis (1)" = "4C1",
+    "Prospering Semis (2)" = "4C2",
+    "Prospering Semis (3)" = "4C3",
+    "Thriving Suburbs (1)" = "4D1",
+    "Thriving Suburbs (2)" = "4D2",
+    "Senior Communities (1)" = "5A1",
+    "Senior Communities (2)" = "5A2",
+    "Older Workers (1)" = "5B1",
+    "Older Workers (2)" = "5B2",
+    "Older Workers (3)" = "5B3",
+    "Older Workers (4)" = "5B4",
+    "Public Housing (1)" = "5C1",
+    "Public Housing (2)" = "5C2",
+    "Public Housing (3)" = "5C3",
+    "Settled Households (1)" = "6A1",
+    "Settled Households (2)" = "6A2",
+    "Aspiring Households (1)" = "6B1",
+    "Aspiring Households (2)" = "6B2",
+    "Aspiring Households (3)" = "6B3",
+    "Young Families in Terraced Homes (1)" = "6C1",
+    "Young Families in Terraced Homes (2)" = "6C2",
+    "Aspiring Households (1)" = "6D1",
+    "Aspiring Households (1)_duplicated_6D1" = "6D1",
+    "Aspiring Households (2)" = "6D2",
+    "Aspiring Households (2)_duplicated_6D2" = "6D2",
+    "Asian Communities (1)" = "7A1",
+    "Asian Communities (2)" = "7A2",
+    "Asian Communities (3)" = "7A3",
+    "Afro-Caribbean Communities (1)" = "7B1",
+    "Afro-Caribbean Communities (2)" = "7B2"
+  )
+
+
+  converted <- mapping[as.character(values)]
+  converted <- unname(converted)
+  converted[is.na(converted)] = values[is.na(converted)]
+
+
+  return(converted)
+}

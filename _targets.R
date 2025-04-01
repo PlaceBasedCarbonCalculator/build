@@ -9,7 +9,8 @@ library(sf)
 tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
-               "igraph","plyr","terra","furrr","future")
+               "igraph","plyr","terra","furrr","future","humanleague",
+               "jsonlite","readr","lubridate")
 )
 
 options(clustermq.scheduler = "multiprocess")
@@ -354,6 +355,10 @@ tar_target(experian_income,{
   load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
 }),
 
+tar_target(income_lsoa_msoa,{
+  match_income_lsoa_msoa(income_msoa,lookup_MSOA_2011_21,lookup_OA_LSOA_MSOA_2021)
+}),
+
 tar_target(income_lsoa,{
   estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
 }),
@@ -505,6 +510,10 @@ tar_target(population_households_historical,{
                                     lookup_lsoa_2011_21,dwellings_tax_band,
                                     population_2002_2020,population_2021,
                                     population_2022)
+}),
+
+tar_target(dwellings_type_backcast,{
+  backcast_dwelling_types(dwellings_tax_band, dwellings_type)
 }),
 
 tar_target(voa_json_2010,{
@@ -745,6 +754,40 @@ tar_target(census21_synth_households,{
 
 tar_target(lcfs,{
   load_LCFS(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded"))
+}),
+
+tar_target(lcfs_clean,{
+  selected_lcfs(lcfs)
+}),
+
+tar_target(synth_households_lcfs_2020,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2020/21")
+}),
+
+tar_target(synth_households_lcfs_2018,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2018/19")
+}),
+
+tar_target(synth_households_lcfs_2016,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2016/17")
+}),
+
+tar_target(synth_households_lcfs_2014,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2014/15")
+}),
+
+tar_target(synth_households_lcfs_2012,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2012/13")
+}),
+
+tar_target(synth_households_lcfs_2010,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2010/11")
 }),
 
 tar_target(us,{
