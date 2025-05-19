@@ -238,6 +238,94 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "P612t",
                          "P620tp",
                          "P630tp",
+                         # Component consumption
+                         # Gas Electric and other fuels
+                         "B017",#	Electricity - amount paid in last account, less rebates
+                         "B018",#	Gas - amount paid in last account, less rebates
+                         "B053u",#	Gas – combined account, amount
+                         "B056u",#	Electricity – combined account, amount
+                         "B221", # Unknown
+                         "B222", # Unknown
+                         #"B489",#	Bottled gas for central heating - amount
+                         #"B490",#	Oil for central heating cost last quarter
+                         #"B254",#	Electricity – (combined) prepayment meter, less rebate
+                         #"B255",#	Gas – (combined) pre-payment meter less rebate
+                         #"B226",#	Electricity – (separate) pre-payment meter, less rebate
+                         #"B227",#	Gas – (separate) pre-payment meter less rebate
+                         "C45112t",#	Second dwelling: electricity account payment
+                         "C45114t",#	Electricity slot meter payment
+                         "C45212t",#	Second dwelling: gas account payment
+                         "C45214t",#	Gas slot meter payment
+                         "C45222t",#	Bottled gas - other
+                         "C45312t",#	Paraffin
+                         "C45411t",#	Coal and coke
+                         "C45412t",#	Wood and peat
+                         "C45511t",#	Hot water, steam and ice
+                         "B170", #  Gas - amount paid in last account
+                         "B173", #  Gas - amount last rebate (to remove)
+                         "B175", #  Electricity - amount paid in last account
+                         "B178", #  Electricity - amount last rebate (to remove)
+
+                         "P249t", # Gas - slot meter payments less rebate
+                         "P250t", # Electricity - slot meter payments less rebate
+
+
+                         ##Transport
+                         # Purchase of Vehicles
+                         "B244",#	Vehicle - cost of new car | van outright
+                         "B245",#	Vehicle - cost of second hand car | van outright
+                         "B247",#	Vehicle - cost of motorcycles outright
+                         "C71111c",#	Outright purchase of new car/van
+                         "C71112t",#	Loan / HP purchase of new car/van
+                         "C71121c",#	Outright purchase of secondhand car/van
+                         "C71122t",#	Loan / HP purchase of second-hand car/van
+                         "C71211c",#	Outright purchase of new or second-hand motorcycle
+                         "C71212t",#	Loan / HP purchase of new or second-hand motorcycle
+                         "C71311t",#	Purchase of bicycle
+                         "C71411t",#	Animal drawn vehicles
+
+                         # Operation of personal transport equipment
+                         "C72211t",#	Petrol
+                         "C72212t",#	Diesel oil
+                         "C72213t",#	Other motor oils
+                         "B249",#	Car or van - servicing: amount paid
+                         "B250",#	Car or van - other works, repairs: amount paid
+                         "B252",#	Motor cycle - services, repairs: amount paid
+                         "B248",#	Car leasing - expenditure on
+                         "C72111t",#	Car / van accessories and fittings
+                         "C72112t",#	Car / van spare parts
+                         "C72113t",#	Motorcycle accessories and spare parts
+                         "C72114t",#	Anti-freeze, battery water, cleaning materials
+                         "C72115t",#	Bicycle accessories, repairs and other costs
+                         "C72311c",#	Car or van repairs and servicing
+                         "C72312c",#	Motor cycle repairs, service
+                         "C72313t",#	Motoring organisation subscription (eg AA and RAC)
+                         "C72314t",#	Car washing and breakdown services
+                         "C72411t",#	Parking fees, tolls, and permits (excluding motoring fines)
+                         "C72412t",#	Garage rent, MOT etc
+                         "C72413t",#	Driving lessons
+                         "C72414t",#	Hire of self-drive cars, vans, bicycles
+
+                         # Transport services
+                         "B218",#	Season ticket - rail / tube - total net amount
+                         "B217",#	Season ticket - bus / coach - total net amount
+                         "B219",#	Water travel season ticket
+                         "B216",#	Bus + tube and/or rail season
+                         "C73112t",#	Railway and tube fares other than season tickets
+                         "C73212t",#	Bus and coach fares other than season tickets
+                         "C73411t",#	Water travel
+                         "C73512t",#	Combined fares other than season tickets
+                         "C73213t",#	Taxis and hired cars with drivers
+                         "C73214t",#	Other personal travel
+                         "C73513t",#	School travel
+                         "C73611t",#	Delivery charges and other transport services
+                         "C73311t",#	Air fares(within UK) (alternate source?)
+                         "C73312t",#	Air fares (international) (alternate source?)
+
+                         "B487", #	Domestic flight expenditure
+                         "B488", #	International flight expenditure
+
+
                          # Other Vars
                          "p493p",
                          "p492p",
@@ -258,6 +346,24 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   if(length(missing_cols) > 0){
     warning("Ths columns are missing: ", paste(missing_cols, collapse = ", "))
   }
+
+  #Values that have to de deducted as rebates
+  if("B173" %in% names(household_char)){
+    household_char$B173 = - household_char$B173
+  }
+
+  if("B178" %in% names(household_char)){
+    household_char$B178 = - household_char$B178
+  }
+
+  if("P249t" %in% names(household_char)){
+    household_char$P249t = - household_char$P249t
+  }
+
+  if("P250t" %in% names(household_char)){
+    household_char$P250t = - household_char$P250t
+  }
+
 
   # atttribs = attributes(households)
   # vars = data.frame(nms = names(atttribs$variable.labels), vals = unname(atttribs$variable.labels))
@@ -480,6 +586,19 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
   hh_21 = dplyr::left_join(hh_21, fly_21, by = "case")
   hh_22 = dplyr::left_join(hh_22, fly_22, by = "case")
 
+  # Fix for changeeing source of flight emissions
+  # if("B487" %in% names(hh_21)){ #& !"C73311t" %in% names(hh_21)){
+  #   hh_21$C73311t = hh_21$B487
+  # }
+  #
+  # if("B487" %in% names(hh_22)){ # & !"C73311t" %in% names(hh_22)){
+  #   hh_22$C73311t = hh_22$B487
+  # }
+
+  hh_21 = add_component_costs(hh_21, yrs[1])
+  hh_22 = add_component_costs(hh_22, yrs[2])
+
+
   hh = dplyr::bind_rows(list(hh_21, hh_22))
   hh$household_id = 1:nrow(hh)
 
@@ -508,6 +627,14 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
   hh$OAC[hh$OAC == "ni"] = NA
   hh = hh[!is.na(hh$OAC),]
 
+  # Summarise Components
+
+
+
+
+
+
+
   columns_to_select <- c("household_id",
                          "case",
                          "Tenure5",
@@ -525,7 +652,7 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                          "A091",
                          "A116", # Dwelling Category
                          "p200p", # Number of rooms
-                         "P600t", # Concumption Categories
+                         "P600t", # Consumption Categories
                          "P601t",
                          "P602t",
                          "P603t",
@@ -541,6 +668,13 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                          "P620tp",
                          "P630tp",
                          "P431p",
+                         "spend_housing_gaselecfuel",
+                         "spend_housing_gaselec_rebates",
+                         "spend_transport_vehiclepurchase",
+                         "spend_transport_optranequip_fuel",
+                         "spend_transport_optranequip_other",
+                         "spend_transport_services_pt",
+                         "spend_transport_services_air",
                         "a117p", # New Cars
                         "a118p", # Second Hand Cars
                         "a162p", # Motor Cycles
@@ -580,6 +714,7 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                      motorcycles = a162p
                      )
 
+
   hh
 }
 
@@ -597,6 +732,130 @@ selected_lcfs = function(lcfs){
   res
 
 }
+
+add_component_costs = function(hh, yr = "2010"){
+  hh$spend_housing_gaselecfuel = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "B017",#	Electricity - amount paid in last account, less rebates
+    "B018",#	Gas - amount paid in last account, less rebates
+    "B053u",#	Gas – combined account, amount
+    "B056u",#	Electricity – combined account, amount
+    #"B221", # Unknown so excluding from energy
+    #"B222", # Unknown
+    "C45112t",#	Second dwelling: electricity account payment
+    "C45114t",#	Electricity slot meter payment
+    "C45212t",#	Second dwelling: gas account payment
+    "C45214t",#	Gas slot meter payment
+    "C45222t",#	Bottled gas - other
+    "C45312t",#	Paraffin
+    "C45411t",#	Coal and coke
+    "C45412t",#	Wood and peat
+    "C45511t",#	Hot water, steam and ice
+    "B170", #  Gas - amount paid in last account
+    "B173", #  Gas - amount last rebate (to remove)
+    "B175", #  Electricity - amount paid in last account
+    "B178", #  Electricity - amount last rebate (to remove)
+    "P249t", # Gas - slot meter payments less rebate
+    "P250t" # Electricity - slot meter payments less rebate
+
+  ))), na.rm = TRUE)
+
+  hh$spend_housing_gaselec_rebates = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "B173", #  Gas - amount last rebate (to remove)
+    "B178", #  Electricity - amount last rebate (to remove)
+    "P249t", # Gas - slot meter payments less rebate
+    "P250t" # Electricity - slot meter payments less rebate
+  ))), na.rm = TRUE)
+
+  hh$spend_transport_vehiclepurchase = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "B244",#	Vehicle - cost of new car | van outright
+    "B245",#	Vehicle - cost of second hand car | van outright
+    "B247",#	Vehicle - cost of motorcycles outright
+    "C71111c",#	Outright purchase of new car/van
+    "C71112t",#	Loan / HP purchase of new car/van
+    "C71121c",#	Outright purchase of secondhand car/van
+    "C71122t",#	Loan / HP purchase of second-hand car/van
+    "C71211c",#	Outright purchase of new or second-hand motorcycle
+    "C71212t",#	Loan / HP purchase of new or second-hand motorcycle
+    "C71311t",#	Purchase of bicycle
+    "C71411t"#	Animal drawn vehicles
+  ))), na.rm = TRUE)
+
+  hh$spend_transport_optranequip_fuel = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    # Operation of personal transport equipment
+    "C72211t",#	Petrol
+    "C72212t",#	Diesel oil
+    "C72213t"#	Other motor oils
+  ))), na.rm = TRUE)
+
+  hh$spend_transport_optranequip_other = rowSums(dplyr::select(hh, dplyr::any_of(c(
+"B249",#	Car or van - servicing: amount paid
+"B250",#	Car or van - other works, repairs: amount paid
+"B252",#	Motor cycle - services, repairs: amount paid
+"B248",#	Car leasing - expenditure on
+"C72111t",#	Car / van accessories and fittings
+"C72112t",#	Car / van spare parts
+"C72113t",#	Motorcycle accessories and spare parts
+"C72114t",#	Anti-freeze, battery water, cleaning materials
+"C72115t",#	Bicycle accessories, repairs and other costs
+"C72311c",#	Car or van repairs and servicing
+"C72312c",#	Motor cycle repairs, service
+"C72313t",#	Motoring organisation subscription (eg AA and RAC)
+"C72314t",#	Car washing and breakdown services
+"C72411t",#	Parking fees, tolls, and permits (excluding motoring fines)
+"C72412t",#	Garage rent, MOT etc
+"C72413t",#	Driving lessons
+"C72414t"#	Hire of self-drive cars, vans, bicycles
+  ))), na.rm = TRUE)
+
+  hh$spend_transport_services_pt = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    # Transport services
+"B218",#	Season ticket - rail / tube - total net amount
+"B217",#	Season ticket - bus / coach - total net amount
+"B219",#	Water travel season ticket
+"B216",#	Bus + tube and/or rail season
+"C73112t",#	Railway and tube fares other than season tickets
+"C73212t",#	Bus and coach fares other than season tickets
+"C73411t",#	Water travel
+"C73512t",#	Combined fares other than season tickets
+"C73213t",#	Taxis and hired cars with drivers
+"C73214t",#	Other personal travel
+"C73513t",#	School travel
+"C73611t"#	Delivery charges and other transport services
+  ))), na.rm = TRUE)
+
+
+  if(yr %in% c("2010","2011","2012")){
+    hh$spend_transport_services_air = rowSums(dplyr::select(hh, dplyr::any_of(c(
+"C73311t",#	Air fares(within UK)
+"C73312t" #	Air fares (international)
+    ))), na.rm = TRUE)
+  } else {
+    hh$spend_transport_services_air = rowSums(dplyr::select(hh, dplyr::any_of(c(
+      "B487",#	Air fares(within UK)
+      "B488" #	Air fares (international)
+    ))), na.rm = TRUE)
+  }
+
+
+
+
+
+  # Check for consistancy
+
+  hh$diff = round(hh$P607t - (hh$spend_transport_vehiclepurchase + hh$spend_transport_optranequip_fuel + hh$spend_transport_optranequip_other + hh$spend_transport_services_air + hh$spend_transport_services_pt))
+
+  if(!all(hh$diff == 0)){
+    stop("Transport spending components don't add up, ",yr)
+  } else {
+    hh$diff = NULL
+  }
+
+
+  hh
+}
+
+
+
 
 clean_OAC_codes <- function(values) {
   # Create a mapping of descriptions to ONS codes

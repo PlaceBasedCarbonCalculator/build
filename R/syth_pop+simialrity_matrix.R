@@ -1,4 +1,4 @@
-make_similarity_table = function(hh){
+make_similarity_table = function(hh, oac_year = 2011){
   nms_Tenure <- c("Outright", "Mortgage", "Social_rented", "Private_rented")
   nms_hhComp <- c("OnePersonOther", "OnePersonOver66", "CoupleNoChildren", "CoupleChildren",
                   "CoupleNonDepChildren", "FamilyOver66", "LoneParent", "LoneParentNonDepChildren",
@@ -43,7 +43,7 @@ make_similarity_table = function(hh){
   ), nrow = 4, dimnames = list(nms_CarVan, nms_CarVan))
 
 
-  # Define the variables
+  # Define the OAC variables
   variables_21 <- c("1a1", "1a2", "1b1", "1b2", "1c1", "1c2", "2a1", "2a2", "2a3", "2b1", "2b2", "2c1", "2c2", "3a1", "3a2", "3a3", "3a4", "3b1", "3b2", "3c1", "3c2", "4a1", "4a2", "4a3", "4b1", "4b2", "4b3", "4b4", "4c1", "4c2", "5a1", "5a2", "5a3", "5b1", "5b2", "6a1", "6a2", "6a3", "6b1", "6b2", "6b3", "6c1", "6c2", "7a1", "7a2", "7b1", "7b2", "8a1", "8a2", "8b1", "8b2", "8b3")
 
   variables_11 <- c("1a1","1a2","1a3","1a4","1b1","1b2","1b3","1c1","1c2","1c3","2a1","2a2","2a3","2b1","2b2","2c1","2c2","2c3",
@@ -52,7 +52,26 @@ make_similarity_table = function(hh){
                     "7a2","7a3","7b1","7b2","7b3","7c1","7c2","7c3","7d1","7d2","7d3","7d4","8a1","8a2","8b1","8b2","8c1","8c2",
                     "8c3","8d1","8d2","8d3")
 
-  variables = variables_11
+  variables_01 <- c("1a1","1a2","1a3","1b1","1b2","1c1","1c2","1c3","2a1","2a2","2b1","2b2","3a1","3a2","3b1","3b2","3c1","3c2",
+                     "4a1","4a2","4b1","4b2","4b3","4b4","4c1","4c2","4c3","4d1","4d2","5a1","5a2","5b1","5b2","5b3","5b4","5c1",
+                     "5c2","5c3","6a1","6a2","6b1","6b2","6b3","6c1","6c2","6d1","6d2","7a1","7a2","7a3","7b1","7b2")
+
+
+  if(oac_year == 2021){
+    variables = variables_21
+  } else if(oac_year == 2011){
+    variables = variables_11
+  } else if(oac_year == 2001){
+    variables = variables_01
+  } else {
+    stop("oac_year can only be 2001, 2011, 2021")
+  }
+
+
+
+  if(!all(unique(hh$OAC) %in% variables)){
+    stop("OAC values in hh are not in known variables ",paste(unique(hh$OAC)[!unique(hh$OAC) %in% variables], collapse = " "))
+  }
 
   # Initialize the similarity matrix
   similarity_OAC <- matrix(0, nrow = length(variables), ncol = length(variables), dimnames = list(variables, variables))

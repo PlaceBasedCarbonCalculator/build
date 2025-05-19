@@ -86,33 +86,64 @@ OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_
 
   lsoa21b = rbind(lsoa21, lsoa21_missing)
 
+  names(lsoa21b) = c("LSOA21CD","OAC")
+
   lsoa21b
 
-  # Old method
+}
 
-  # lookup_postcode_OA_LSOA_MSOA_2021 = lookup_postcode_OA_LSOA_MSOA_2021[,c("oa21cd","lsoa21cd")]
-  # lookup_postcode_OA_LSOA_MSOA_2021 = lookup_postcode_OA_LSOA_MSOA_2021[!duplicated(lookup_postcode_OA_LSOA_MSOA_2021$oa21cd),]
-  #
-  # lookup_OA_LSOA_MSOA_classifications = lookup_OA_LSOA_MSOA_classifications[,c("OA11CD","OAC11CD","OAC11NM","LSOA11CD")]
-  #
-  # oas_unchanges = lookup_OA_LSOA_MSOA_classifications[lookup_OA_LSOA_MSOA_classifications$OA11CD %in% lookup_postcode_OA_LSOA_MSOA_2021$oa21cd,]
-  # oas_changes = lookup_OA_LSOA_MSOA_classifications[!lookup_OA_LSOA_MSOA_classifications$OA11CD %in% lookup_postcode_OA_LSOA_MSOA_2021$oa21cd,]
-  #
-  # lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA11CD","LSOA21CD","CHGIND")]
-  # lookup_lsoa_2011_21 = lookup_lsoa_2011_21[!duplicated(lookup_lsoa_2011_21$LSOA11CD),]
-  #
-  # oas_changes = dplyr::left_join(oas_changes, lookup_lsoa_2011_21, by = c("LSOA11CD"))
-  #
-  # oas_unchanges = dplyr::left_join(oas_unchanges, lookup_lsoa_2011_21, by = c("LSOA11CD"))
-  #
-  # oac21 = rbind(oas_unchanges, oas_changes)
-  #
-  # lsoa21 = dplyr::group_by(oac21, LSOA21CD)
-  # lsoa21 = dplyr::summarise(lsoa21,
-  #                           OAC11CD = list(as.data.frame(table(OAC11CD))))
-  # lsoa21
+OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
+
+  bounds_lsoa21_full$LSOA21NM = NULL
+  oac01 = oac01[,c("OA_CODE","Subgroup Code")]
+  names(oac01) = c("OA01CDOLD","OAC01")
+
+  oa = sf::st_join(centroids_oa01, bounds_lsoa21_full)
+  oa_buff = oa[is.na(oa$LSOA21CD),]
+  oa_buff$LSOA21CD = NULL
+  oa_buff$LSOA21NM = NULL
+  oa_buff = sf::st_buffer(oa_buff, 130)
+  oa_buff = sf::st_join(oa_buff, bounds_lsoa21_full)
+  oa_buff = oa_buff[!duplicated(oa_buff$OA01CDOLD),]
+
+  oa = oa[!is.na(oa$LSOA21CD),]
+
+  oa = sf::st_drop_geometry(oa)
+  oa_buff = sf::st_drop_geometry(oa_buff)
+
+  oa = rbind(oa, oa_buff)
+
+  oa = dplyr::left_join(oa, oac01, by = c("OA01CDOLD"))
+
+  lsoa21 = dplyr::group_by(oa, LSOA21CD)
+  lsoa21 = dplyr::summarise(lsoa21,
+                            OAC01 = list(as.data.frame(table(OAC01))))
+
+
+  lsoa21_missing = bounds_lsoa21_full[!bounds_lsoa21_full$LSOA21CD %in% lsoa21$LSOA21CD,]
+
+  nn = nngeo::st_nn(lsoa21_missing, centroids_oa01)
+
+  lsoa21_missing$OA01CDOLD = centroids_oa01$OA01CDOLD[unlist(nn)]
+  lsoa21_missing = dplyr::left_join(lsoa21_missing, oac01, by = c("OA01CDOLD"))
+
+  lsoa21_missing$OAC01 = lapply(lsoa21_missing$OAC01, function(x){
+    x = as.data.frame(table(x))
+    names(x) = c("OAC01","Freq")
+    x
+  })
+
+  lsoa21_missing = sf::st_drop_geometry(lsoa21_missing)
+  lsoa21_missing$OA01CDOLD = NULL
+
+  lsoa21b = rbind(lsoa21, lsoa21_missing)
+
+  names(lsoa21b) = c("LSOA21CD","OAC")
+
+  lsoa21b
 
 }
+
 
 read_centroids_oa11 = function(path = "../inputdata/boundaries/"){
   oa = sf::st_read(file.path(path,"Output_Areas_Dec_2011_PWC_2022_2937497644548359762.gpkg"))
@@ -120,3 +151,14 @@ read_centroids_oa11 = function(path = "../inputdata/boundaries/"){
   oa
 }
 
+read_centroids_oa01 = function(path = "../inputdata/boundaries/"){
+  oa = sf::st_read(file.path(path,"Output_Areas_2001_EW_PWC_6679101571236103446.gpkg"))
+  oa$GlobalID = NULL
+  oa
+}
+
+
+read_OAC01 = function(path = "../inputdata/area_classifications/2001/OAC_2001.Rds"){
+  oac = readRDS(path)
+  oac
+}

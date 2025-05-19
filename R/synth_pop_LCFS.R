@@ -49,6 +49,20 @@ match_LCFS_synth_pop = function(census21_synth_households,
                                 dwellings_type_backcast,
                                 base_year = "2020/21"){
 
+
+  inc_year = as.numeric(substr(base_year,1,4))
+  if(inc_year < 2012){
+    inc_year = 2012
+  }
+  if(inc_year == 2012){
+    oac_year = 2001
+  } else if(inc_year >= 2022) {
+    oac_year = 2021
+  } else {
+    oac_year = 2011
+  }
+
+
   census21_synth_households$conv = NULL
   census21_synth_households$pValue = NULL
 
@@ -68,21 +82,22 @@ match_LCFS_synth_pop = function(census21_synth_households,
   dwellings_type_backcast = dwellings_type_backcast[,c("year","lsoa21cd","Detached","Semi","Terraced","Flat","caravan")]
 
   hh = lcfs_clean[[base_year]]
-  income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == as.numeric(substr(base_year,1,4)),]
 
-  oac11lsoa21$OAC11combine = sapply(oac11lsoa21$OAC11CD, function(x){
+  income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == inc_year,]
+
+  oac11lsoa21$OAC11combine = sapply(oac11lsoa21$OAC, function(x){
     # x = x[order(x$Freq, decreasing = TRUE),]
-    # x = paste(x$OAC11CD, collapse = " ")
-    x = as.character(x$OAC11CD)
+    # x = paste(x$OAC, collapse = " ")
+    x = as.character(x$OAC)
     x = x[order(x)]
     x = paste(x, collapse = " ")
     x
   })
-  oac11lsoa21$OAC11CD = NULL
+  oac11lsoa21$OAC = NULL
 
   census21_synth_households = dplyr::left_join(census21_synth_households, oac11lsoa21, by = c("LSOA" = "LSOA21CD"))
 
-  similarity_table = make_similarity_table(hh)
+  similarity_table = make_similarity_table(hh, oac_year)
 
   census21_synth_households = dplyr::left_join(census21_synth_households, income_lsoa_msoa, by = c("LSOA" = "LSOA21CD"))
   census21_synth_households$sd_income = (census21_synth_households$upper_limit - census21_synth_households$lower_limit) / 3.92
@@ -99,18 +114,18 @@ match_LCFS_synth_pop = function(census21_synth_households,
   dwellings_type_backcast = dplyr::group_split(dwellings_type_backcast, lsoa21cd)
   population = dplyr::group_split(population, LSOA21CD)
 
-  cenus_long2 = purrr::pmap(.l = list(
-    cenus_long,
-    population,
-    dwellings_type_backcast
-  ),
-  .f = select_synth_pop_year,
-  .progress = TRUE
-  )
+  # cenus_long2 = purrr::pmap(.l = list(
+  #   cenus_long,
+  #   population,
+  #   dwellings_type_backcast
+  # ),
+  # .f = select_synth_pop_year,
+  # .progress = TRUE
+  # )
 
-  cen = cenus_long[[31882]]
-  pop = population[[31882]]
-  bk = dwellings_type_backcast[[31882]]
+  # cen = cenus_long[[31882]]
+  # pop = population[[31882]]
+  # bk = dwellings_type_backcast[[31882]]
 
 
   t1 = Sys.time()

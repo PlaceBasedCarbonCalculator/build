@@ -17,10 +17,10 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, mode = "veh
             "Battery electric_Private","Plug-in hybrid electric (petrol)_Private","Battery electric_Company",
             "Range extended electric_Private","Range extended electric_Company","Hybrid electric (petrol)_Private",
             "Hybrid electric (petrol)_Company","Plug-in hybrid electric (diesel)_Company","Plug-in hybrid electric (diesel)_Private",
-            "Gas_Company","Gas_Private","Diesel_Private",
+            "Diesel_Private",
             "Diesel_Company","Hybrid electric (diesel)_Company","Hybrid electric (diesel)_Private",
-            "Fuel cell electric_Company","Fuel cell electric_Private","Other fuel types_Private",
-            "Other fuel types_Company","Petrol_Company","Petrol_Private",
+            "Fuel cell electric_Company","Fuel cell electric_Private",
+            "Petrol_Company","Petrol_Private",
             "Battery electric_Disposal","Fuel cell electric_Disposal","Hybrid electric (petrol)_Disposal",
             "Plug-in hybrid electric (diesel)_Disposal","Plug-in hybrid electric (petrol)_Disposal","Range extended electric_Disposal",
             "Diesel_Disposal","Hybrid electric (diesel)_Disposal")

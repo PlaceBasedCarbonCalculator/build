@@ -212,20 +212,20 @@ make_pmtiles_stack = function(lsoa_data,
                  paste0("buildings_",name,"_high.geojson"),
                  paste0("buildings_",name,"_high.pmtiles"),
                  name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
-                 coalesce = TRUE, min_zoom = 13, max_zoom = 14, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 14, max_zoom = 15, output_path = output_path)
 
 
     make_pmtiles(NULL,
                  paste0("buildings_",name,"_medium.geojson"),
                  paste0("buildings_",name,"_medium.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
-                 coalesce = TRUE, min_zoom = 10, max_zoom = 12, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 11, max_zoom = 13, output_path = output_path)
 
     make_pmtiles(NULL,
                  paste0("buildings_",name,"_low.geojson"),
                  paste0("buildings_",name,"_low.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
-                 coalesce = TRUE, min_zoom = 4, max_zoom = 9, output_path = output_path)
+                 coalesce = TRUE, min_zoom = 4, max_zoom = 10, output_path = output_path)
 
     # Join pmtiles
     join_pmtiles(paste0("buildings_",name,".pmtiles"),

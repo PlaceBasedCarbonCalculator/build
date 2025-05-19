@@ -10,7 +10,7 @@ tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
                "igraph","plyr","terra","furrr","future","humanleague",
-               "jsonlite","readr","lubridate")
+               "jsonlite","readr","lubridate","purrr","yyjsonr")
 )
 
 options(clustermq.scheduler = "multiprocess")
@@ -206,6 +206,10 @@ tar_target(centroids_oa11,{
   read_centroids_oa11(dl_boundaries)
 }),
 
+tar_target(centroids_oa01,{
+  read_centroids_oa01(dl_boundaries)
+}),
+
 tar_target(centroids_lsoa21,{
   read_centroids_lsoa21(dl_boundaries)
 }),
@@ -249,6 +253,13 @@ tar_target(oac11lsoa21,{
   OAC11_lsoa21(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications)
 }),
 
+tar_target(oac01lsoa21,{
+  OAC01_lsoa21(centroids_oa01, bounds_lsoa21_full, oac01)
+}),
+
+tar_target(oac01,{
+  read_OAC01(path = file.path(parameters$path_data,"area_classifications/2001/OAC_2001.Rds"))
+}),
 
 tar_target(oac21,{
   load_OAC21(path = file.path(parameters$path_data,"area_classifications/oac21ew.csv"))
@@ -560,8 +571,21 @@ tar_target(consumption_income,{
   load_consumption_income(path = file.path(parameters$path_data,"consumption"))
 }),
 
+tar_target(consumption_syth_pop,{
+  consumption_footprint_syth_pop(synth_households_lcfs_2020,synth_households_lcfs_2018,
+                                 synth_households_lcfs_2016,synth_households_lcfs_2014,
+                                 synth_households_lcfs_2012,synth_households_lcfs_2010)
+}),
+
+tar_target(consumption_lookup,{
+  load_consumption_lookup(path = file.path(parameters$path_data,"consumption/PBCC_lookup.xlsx"))
+}),
+
+
 tar_target(consumption_emissions,{
-  calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity)
+  #calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity) # Old method
+  calculate_consumption_lsoa(consumption_syth_pop, population, consumption_uk, consumption_lookup)
+
 }),
 
 # Surveys
@@ -654,7 +678,7 @@ tar_target(flights_total_emissions,{
 }),
 
 tar_target(flights_lsoa_emissions,{
-  get_flights_lsoa_emissions(flights_total_emissions, income_lsoa, population)
+  get_flights_lsoa_emissions(flights_total_emissions, consumption_emissions)
 }),
 
 # Transit Stops
@@ -667,7 +691,8 @@ tar_target(emissions_factors,{
 tar_target(lsoa_emissions_all,{
   combine_lsoa_emissions(flights_lsoa_emissions,consumption_emissions,
                          car_emissions,domestic_electricity_emissions,
-                         domestic_gas_emissions,other_heating_emissions)
+                         domestic_gas_emissions,other_heating_emissions,
+                         max_year = 2020)
 }),
 
 # PLEF Forecasts
@@ -716,7 +741,7 @@ tar_target(zoomstack_buildings_lst_4326,{
 
 # Build GeoJSON
 tar_target(lsoa_map_data,{
-  select_map_outputs(lsoa_emissions_all, year = 2020)
+  select_map_outputs(lsoa_emissions_all, year = 2019)
 }),
 
 tar_target(geojson_wards,{
@@ -781,12 +806,12 @@ tar_target(synth_households_lcfs_2014,{
 }),
 
 tar_target(synth_households_lcfs_2012,{
-  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac01lsoa21,income_lsoa_msoa,
                        population, dwellings_type_backcast, base_year = "2012/13")
 }),
 
 tar_target(synth_households_lcfs_2010,{
-  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac01lsoa21,income_lsoa_msoa,
                        population, dwellings_type_backcast, base_year = "2010/11")
 }),
 
@@ -890,6 +915,40 @@ tar_target(pmtiles_pbcc,{
                      zoomstack_buildings_lst_4326,
                      name = "pbcc",
                      output_path = "outputdata/pbcc")
-}, format = "file")
+}, format = "file"),
+
+# Build Bulk Exports -------------------------------------------------------
+
+tar_target(bulk_pbcc,{
+  bulk_export_pbcc(lsoa_emissions_all_forcasts)
+}, format = "file"),
+
+tar_target(bulk_household_clusters,{
+  bulk_export_household_clusters(household_clusters)
+}, format = "file"),
+
+tar_target(bulk_pt_frequency,{
+  bulk_export_pt_frequency(pt_frequency)
+}, format = "file"),
+
+tar_target(bulk_access_proximity,{
+  bulk_export_access_proximity(access_proximity)
+}, format = "file"),
+
+tar_target(bulk_epc_dom_summary,{
+  bulk_export_epc_dom_summary(epc_dom_summary)
+}, format = "file")#,
+
+# tar_target(bulk_epc_dom,{
+#   bulk_export_epc_dom(geojson_epc_dom)
+# }, format = "file"),
+
+# tar_target(bulk_epc_nondom,{
+#   bulk_export_epc_nondom(geojson_epc_nondom)
+# }, format = "file"),
+#
+# tar_target(bulk_buildings_heights,{
+#   bulk_export_buildings(buildings_heights)
+# }, format = "file")
 
 )

@@ -37,7 +37,7 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
                                        "airport2_country" = "country"))
 
   #TODO: Update to 2023
-  flights_summary = flights_od[,c("fromclass","toclass",paste0("emissions_",1990:2021))]
+  flights_summary = flights_od[,c("fromclass","toclass",paste0("emissions_",2010:2021))]
   flights_summary = dplyr::group_by(flights_summary, fromclass, toclass)
   flights_summary = dplyr::summarise_all(flights_summary, sum, na.rm = TRUE)
   flights_summary = dplyr::ungroup(flights_summary)
@@ -85,9 +85,12 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
   summary_int = dplyr::summarise_all(summary_int, part_sum, frac = 0.64)
 
   names(summary_int)[1] = "country_uk"
+  summary_int$type = "international"
+  emissions_dom$type = "domestic"
+
   summary_all = rbind(summary_int, emissions_dom)
-  summary_all = dplyr::group_by(summary_all, country_uk)
-  summary_all = dplyr::summarise_all(summary_all, sum, na.rm = TRUE)
+  # summary_all = dplyr::group_by(summary_all, country_uk)
+  # summary_all = dplyr::summarise_all(summary_all, sum, na.rm = TRUE)
 
   # Check 99.98219% of emissions (some channel island to Europe)
   # for(i in 1990:2021){
@@ -98,82 +101,131 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
 
 }
 
-get_flights_lsoa_emissions = function(flights_total_emissions, income_lsoa, population){
+get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
 
-  #TODO: Get Scotland Income
-  #TODO: Change income shares over time
+  consumption_emissions = consumption_emissions[,c("LSOA21CD","year","all_ages",
+                                                   "flight_international_return",
+                                                   "flight_other","flight_domestic_return",
+                                                   "flight_domestic_single")]
 
-  # Define Curve
-  x = seq(0,1,0.01)
-  y = 1.02 * x **2 - 0.02 *x
-  y[y<0] <- 0
-  z = c(y[1],diff(y))
+  flights_total_emissions = tidyr::pivot_longer(flights_total_emissions,
+                                                cols = names(flights_total_emissions)[grepl("emissions_",names(flights_total_emissions))],
+                                                names_sep = "_",
+                                                names_to = c("dud","year"),
+                                                values_to = "emissions")
 
-  # Split by country
-  income_lsoa$county = substr(income_lsoa$LSOA21CD,1,1)
+  flights_total_emissions$dud = NULL
 
-  income_lsoa_EW = income_lsoa[income_lsoa$county %in% c("E","W"), ]
-  income_lsoa_S = population[,c("year","LSOA21CD")]
-  income_lsoa_S = income_lsoa_S[income_lsoa_S$year == 2021,]
-  income_lsoa_S$county = substr(income_lsoa_S$LSOA21CD,1,1)
-  income_lsoa_S = income_lsoa_S[income_lsoa_S$county == "S", ]
-  income_lsoa_S$year = NULL
+  flights_total_emissions = tidyr::pivot_wider(flights_total_emissions,
+                                               values_from  = "emissions",
+                                               names_from = "type")
 
-  income_lsoa_EW$centile <- percentile(income_lsoa_EW$income_lsoa) / 100
-  #income_lsoa_S$centile <- percentile(income_lsoa_S$income_lsoa) / 100
+  consumption_emissions$weight_international = (consumption_emissions$flight_international_return * 2) +
+    consumption_emissions$flight_other
+  consumption_emissions$weight_domestic = (consumption_emissions$flight_domestic_return * 2) +
+    consumption_emissions$flight_domestic_single
 
-  match_table <- data.frame(x, y, z)
-  match_table$x <- round(match_table$x, 2)
+  consumption_emissions$country_uk = substr(consumption_emissions$LSOA21CD,1,1)
 
-  income_lsoa_EW$emissions_share <- match_table$z[match(income_lsoa_EW$centile, match_table$x)]
-  income_lsoa_EW$emissions_share <- income_lsoa_EW$emissions_share / sum(income_lsoa_EW$emissions_share, na.rm = TRUE)
+  flights_total_emissions$year = as.numeric(flights_total_emissions$year)
 
-  flights_total_emissions = as.data.frame(flights_total_emissions)
+  consumption_emissions = dplyr::left_join(consumption_emissions, flights_total_emissions, by = c("year","country_uk"))
 
-  for(i in 2002:2021){
-    income_lsoa_EW[paste0("emissions_flights_",i)] <- income_lsoa_EW$emissions_share *
-      sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",i)], na.rm = TRUE)
-  }
-
-  # sum(income_lsoa_EW$emissions_flights_2021) /
-  # sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",2021)], na.rm = TRUE)
-
-  for(i in 2002:2021){
-    income_lsoa_S[paste0("emissions_flights_",i)] <- flights_total_emissions[flights_total_emissions$country_uk == "S",paste0("emissions_",i)] / nrow(income_lsoa_S)
-  }
-
-  income_lsoa_EW$centile = NULL
-  income_lsoa_EW$emissions_share = NULL
-
-  income_lsoa_EW$income_lsoa = NULL
+  emissions_summary = consumption_emissions |>
+    dplyr::group_by(year) |>
+    dplyr::mutate(emissions_international = weight_international * international / sum(weight_international),
+                  emissions_domestic = weight_domestic * international / sum(weight_domestic)) |>
+    dplyr::ungroup(year)
 
 
+  emissions_summary$emissions_percap = remove_inf((emissions_summary$emissions_international + emissions_summary$emissions_domestic) / emissions_summary$all_ages)
 
-  population = population[,c("year","LSOA21CD","all_ages")]
-  population = tidyr::pivot_wider(population, names_from = "year",
-                                  values_from = "all_ages", id_cols = "LSOA21CD")
+  emissions_summary = emissions_summary[,c("LSOA21CD","year",
+                                           "flight_international_return","flight_other",
+                                           "flight_domestic_return","flight_domestic_single",
+                                           "emissions_international","emissions_domestic","emissions_percap")]
+  emissions_summary
 
-  emissions_lsoa = rbind(income_lsoa_EW, income_lsoa_S)
-
-  population = population[order(population$LSOA21CD),]
-  emissions_lsoa = emissions_lsoa[order(emissions_lsoa$LSOA21CD),]
-
-  if(!all(population$LSOA21CD == emissions_lsoa$LSOA21CD)){
-    stop("LSOA21CD don't match")
-  }
-
-  for(i in 2002:2021){
-    emissions_lsoa[paste0("emissions_flights_percap_",i)] <- emissions_lsoa[paste0("emissions_flights_",i)] / population[as.character(i)]
-  }
-
-  # Few DataZones with 0 population in 2021
-  emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)] = lapply(emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)],
-                                                                          function(x){
-                                                                            x[is.infinite(x)] = 0
-                                                                            x
-                                                                          })
-  emissions_lsoa
 }
+
+
+# Old Method
+# get_flights_lsoa_emissions = function(flights_total_emissions, income_lsoa, population){
+#
+#   #TODO: Get Scotland Income
+#   #TODO: Change income shares over time
+#
+#   # Define Curve
+#   x = seq(0,1,0.01)
+#   y = 1.02 * x **2 - 0.02 *x
+#   y[y<0] <- 0
+#   z = c(y[1],diff(y))
+#
+#   # Split by country
+#   income_lsoa$county = substr(income_lsoa$LSOA21CD,1,1)
+#
+#   income_lsoa_EW = income_lsoa[income_lsoa$county %in% c("E","W"), ]
+#   income_lsoa_S = population[,c("year","LSOA21CD")]
+#   income_lsoa_S = income_lsoa_S[income_lsoa_S$year == 2021,]
+#   income_lsoa_S$county = substr(income_lsoa_S$LSOA21CD,1,1)
+#   income_lsoa_S = income_lsoa_S[income_lsoa_S$county == "S", ]
+#   income_lsoa_S$year = NULL
+#
+#   income_lsoa_EW$centile <- percentile(income_lsoa_EW$income_lsoa) / 100
+#   #income_lsoa_S$centile <- percentile(income_lsoa_S$income_lsoa) / 100
+#
+#   match_table <- data.frame(x, y, z)
+#   match_table$x <- round(match_table$x, 2)
+#
+#   income_lsoa_EW$emissions_share <- match_table$z[match(income_lsoa_EW$centile, match_table$x)]
+#   income_lsoa_EW$emissions_share <- income_lsoa_EW$emissions_share / sum(income_lsoa_EW$emissions_share, na.rm = TRUE)
+#
+#   flights_total_emissions = as.data.frame(flights_total_emissions)
+#
+#   for(i in 2002:2021){
+#     income_lsoa_EW[paste0("emissions_flights_",i)] <- income_lsoa_EW$emissions_share *
+#       sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",i)], na.rm = TRUE)
+#   }
+#
+#   # sum(income_lsoa_EW$emissions_flights_2021) /
+#   # sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",2021)], na.rm = TRUE)
+#
+#   for(i in 2002:2021){
+#     income_lsoa_S[paste0("emissions_flights_",i)] <- flights_total_emissions[flights_total_emissions$country_uk == "S",paste0("emissions_",i)] / nrow(income_lsoa_S)
+#   }
+#
+#   income_lsoa_EW$centile = NULL
+#   income_lsoa_EW$emissions_share = NULL
+#
+#   income_lsoa_EW$income_lsoa = NULL
+#
+#
+#
+#   population = population[,c("year","LSOA21CD","all_ages")]
+#   population = tidyr::pivot_wider(population, names_from = "year",
+#                                   values_from = "all_ages", id_cols = "LSOA21CD")
+#
+#   emissions_lsoa = rbind(income_lsoa_EW, income_lsoa_S)
+#
+#   population = population[order(population$LSOA21CD),]
+#   emissions_lsoa = emissions_lsoa[order(emissions_lsoa$LSOA21CD),]
+#
+#   if(!all(population$LSOA21CD == emissions_lsoa$LSOA21CD)){
+#     stop("LSOA21CD don't match")
+#   }
+#
+#   for(i in 2002:2021){
+#     emissions_lsoa[paste0("emissions_flights_percap_",i)] <- emissions_lsoa[paste0("emissions_flights_",i)] / population[as.character(i)]
+#   }
+#
+#   # Few DataZones with 0 population in 2021
+#   emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)] = lapply(emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)],
+#                                                                           function(x){
+#                                                                             x[is.infinite(x)] = 0
+#                                                                             x
+#                                                                           })
+#   emissions_lsoa
+# }
 
 
 

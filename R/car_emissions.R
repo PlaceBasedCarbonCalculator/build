@@ -106,8 +106,7 @@ car_emissions_post2018 = function(car_emissions_11,
   ulev_registrations_21$HEV = rowSums(ulev_registrations_21[,c("Hybrid electric (diesel)_Company","Hybrid electric (diesel)_Private",
                                                                "Hybrid electric (petrol)_Private","Hybrid electric (petrol)_Company")],
                                        na.rm = TRUE)
-  ulev_registrations_21$ULEV_ICE = rowSums(ulev_registrations_21[,c("Gas_Company","Gas_Private","Diesel_Private","Diesel_Company",
-                                                                    "Other fuel types_Private","Other fuel types_Company","Petrol_Company","Petrol_Private")],
+  ulev_registrations_21$ULEV_ICE = rowSums(ulev_registrations_21[,c("Diesel_Private","Diesel_Company","Petrol_Company","Petrol_Private")],
                                       na.rm = TRUE)
   ulev_registrations_21$fuelcell = rowSums(ulev_registrations_21[,c("Fuel cell electric_Company","Fuel cell electric_Private")],
                                            na.rm = TRUE)
@@ -199,7 +198,7 @@ calculate_car_emissions = function(car_km_lsoa_21, car_emissions_perkm, populati
 
   lsoa$car_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$car_emissions / lsoa$all_ages)
   lsoa$van_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$van_emissions / lsoa$all_ages)
-  lsoa$company_bike_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$company_bike_emissions / lsoa$all_ages)
+  lsoa$company_bike_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$company_bike_emissions / lsoa$all_ages) # This is company all types and private bikes
 
   #TODO: Missing emissions rate for Scotland pre 2019 and Scotland population in 2022
   lsoa = lsoa[,c("LSOA21CD","year","car_emissions_percap","van_emissions_percap","company_bike_emissions_percap")]
