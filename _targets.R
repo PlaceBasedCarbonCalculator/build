@@ -10,7 +10,8 @@ tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
                "igraph","plyr","terra","furrr","future","humanleague",
-               "jsonlite","readr","lubridate","purrr","yyjsonr")
+               "jsonlite","readr","lubridate","purrr","yyjsonr"),
+  error = "continue" # If a target fails will attempt to run other targets
 )
 
 options(clustermq.scheduler = "multiprocess")
@@ -362,9 +363,9 @@ tar_target(income_msoa,{
   load_msoa_income(path = file.path(parameters$path_data,"income"))
 }),
 
-tar_target(experian_income,{
-  load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
-}),
+# tar_target(experian_income,{
+#   load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
+# }),
 
 tar_target(income_lsoa_msoa,{
   match_income_lsoa_msoa(income_msoa,lookup_MSOA_2011_21,lookup_OA_LSOA_MSOA_2021)
@@ -765,9 +766,9 @@ tar_target(nts,{
   load_NTS(path = file.path(parameters$path_secure_data,"National Travel Survey/Safeguarded/"))
 }),
 
-tar_target(sipher,{
-  load_SIPHER(path = file.path(parameters$path_secure_data,"SIPHER Syntheic Population"))
-}),
+# tar_target(sipher,{
+#   load_SIPHER(path = file.path(parameters$path_secure_data,"SIPHER Syntheic Population"))
+# }),
 
 tar_target(synth_pop_seed,{
   build_synth_pop_seed(file.path(parameters$path_data,"population"))
@@ -815,9 +816,9 @@ tar_target(synth_households_lcfs_2010,{
                        population, dwellings_type_backcast, base_year = "2010/11")
 }),
 
-tar_target(us,{
-  load_US(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded"))
-}),
+# tar_target(us,{
+#   load_US(path = file.path(parameters$path_secure_data,"Understanding Society/Safeguarded"))
+# }),
 
 
 # Build PMTiles

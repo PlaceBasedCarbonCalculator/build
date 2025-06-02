@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|2eb0ed14bfb0b422|||||||||||||||
+.Random.seed|object|f4aae4e8c7121c3d|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -74,6 +74,7 @@ bulk_export_inspire|function|7f751aef04cd03cd|||||||||||||||
 bulk_export_pbcc|function|f9773e86e0222ef4|||||||||||||||
 bulk_export_pt_frequency|function|1f124f760bb66f0e|||||||||||||||
 bulk_household_clusters|stem|5764745fed274658|69230885029ca819|57e1dc4b4c5239d7|-1209036009|outputdata/bulk/household_clusters_20250519.zip|t20227.6554584974s|46e8b4af37b729fc|10146015|file|local|vector|||2.84|C\Users\earmmor\AppData\Local\Temp\Rtmp6Tb933\bulkexport already exists|
+bulk_pbcc|stem||b5a6ae31c1db3960|9b6a491bc7f73c42|2096282106||t20241.492801001s||0|file|local|vector|||0.03||could not load dependencies of target bulk_pbcc. invalid description argument
 bulk_pt_frequency|stem|e4a09fa3b3c72ece|4cf3aa8933084c41|9efd08b43ee8120d|1972409404|outputdata/bulk/pt_frequency_20250519.zip|t20227.6553229124s|5999e00d466fbe4f|18632729|file|local|vector|||6.8||
 calcualte_consumption_lsoa|function|4c5f25458fa6e3a5|||||||||||||||
 calcualte_other_heating|function|3a250485297c90a7|||||||||||||||
@@ -312,7 +313,7 @@ lsoa_admin_summary|function|69f59b07ebb82e14|||||||||||||||
 lsoa_convert_2011_2021_pre_data|function|44115f7dc2a70b75|||||||||||||||
 lsoa_electric_to_2021|function|d023cd04234ee2a3|||||||||||||||
 lsoa_emissions_all|stem|258fcd9190efb0f8|d45519306d6ba5a3|6dd54c00e99af166|1303375064||t20194.6925082485s|16998605a1e9ca51|66185239|rds|local|vector|||2.11||
-lsoa_emissions_all_forcasts|stem|96ddf8eb31ce0607|cb5695f963e55445|b3b8dc688a064e46|1643343737||t19838.551835469s|ffab4d1eb572e932|73117033|rds|local|vector|||0.74||
+lsoa_emissions_all_forcasts|stem|96ddf8eb31ce0607|cb5695f963e55445|896c99fd66edfc94|1643343737||t19838.551835469s||73117033|rds|local|vector|||0.01||could not load dependencies of target lsoa_emissions_all_forcasts. invalid description argument
 lsoa_gas_to_2021|function|d446ae22d301f83e|||||||||||||||
 lsoa_map_data|stem|e214398cde57ae53|428c16c9d5e4cb5f|5394a8207a486a2f|1195666468||t20194.7004586193s|d8003c4ba9acc6b0|305264|rds|local|vector|||0||
 lsoa21_OAC21_summary|stem|c787222169304078|a8f2cc9a30c710f6|15c5f8bfc11942c7|71114060||t20129.5709601373s|1f1b42b76c1edaec|909424|rds|local|vector|||44.53||
@@ -359,7 +360,7 @@ param_file|stem|32e425a7d6eddbc8|9c1a31a16c352029|ef46db3751d8e999|116550215|par
 parameters|stem|658b579c10f17f84|af4c02dd2edf3aec|c8a29bf1f4d7d8db|105499064||t19825.8900483555s|5377f570336eb2d2|149|rds|local|vector|||0.08||
 percentile|function|0a26ab54f55827d8|||||||||||||||
 PLEF|stem|a8ed7559e69539d7|ad47ee22bea2798b|c16809f6b01949ac|2126238213||t19838.5517078378s|4e0e57098e2d8350|497|rds|local|vector|||0.07||
-PLEF_emissions|stem|a43a42eb0a868178|da5c00eebe772ce1|620dcfda53fbbc0b|972481091||t19838.5517573482s||28139382|rds|local|vector|||0.06||replacement has 0 rows, data has 35672
+PLEF_emissions|stem|a43a42eb0a868178|da5c00eebe772ce1|620dcfda53fbbc0b|972481091||t19838.5517573482s||28139382|rds|local|vector|||0.05||replacement has 0 rows, data has 35672
 plef_equity|function|088639881cd84108|||||||||||||||
 pmtiles_buildings_high|stem|5f0d6d01dbc2a139|e514f699e320b796|6a3e5681eef11797|1530450579|outputdata/buildings_high.pmtiles|t19998.7433412205s|a52bc8bfa162761c|1761187371|file|local|vector|||1672.97||
 pmtiles_buildings_low|stem|d993ba55f077258f|28fd77272621c483|c2240abac22679cc|202113442|outputdata/buildings_low.pmtiles|t19998.7450218607s|87156b88b4d11c33|8746070|file|local|vector|||7.89||
