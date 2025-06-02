@@ -10,13 +10,13 @@ This repo is under the GNU Affero General Public License v3.0 which mean it can 
 
 ## Input Data
 
-Note that the pipeline looks for data folders defined in [`parameters.json`](https://github.com/PlaceBasedCarbonCalculator/build/blob/main/parameters.json) defines two input data locations:
+Note that the pipeline looks for data folders defined in [`parameters.json`](https://github.com/PlaceBasedCarbonCalculator/build/blob/main/parameters.json) which requires two input data locations:
 
 `path_data` should point to a local copy of [this repo](https://github.com/PlaceBasedCarbonCalculator/inputdata) which holds all open source inputs
 
 `path_secure_data` should point to a local copy of [this repo](https://github.com/PlaceBasedCarbonCalculator/inputdatasecure)
 
-Note that because this secure data can not be published on GitHub the repo is empty and contains place holders that describe the data and how it can be obtained.
+Note that because this secure data can not be published on GitHub the repo is empty and contains place holders that describe the data and how it can be obtained. More information on data sources is provided in each repo.
 
 ## Running the pipeline.
 
