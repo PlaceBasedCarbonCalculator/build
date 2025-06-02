@@ -53,3 +53,8 @@ outputdata/
 *.gpkg
 *.gpkg-shm
 *.gpkg-wal
+data/incomes_leeds.csv
+data/hh_leeds.csv
+data/census_leeds.csv
+wrongOACs.csv
+.RDataTmp1
