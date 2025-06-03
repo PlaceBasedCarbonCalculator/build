@@ -101,7 +101,7 @@ Outputs are mostly in four formats
 
 1. GeoJSON files of map data (used below)
 1. PMTiles files produced from one of more the GeoJSON files. These are the main format used for maps on the Carbon & Place website.
-1. Zipped folders of JSON files. These JSON files typically provide data form the popup reports in the Carbon & Place website.
+1. Zipped folders of JSON files. These JSON files typically provide data for the popup reports in the Carbon & Place website.
 1. Zipped folders of bulk data. These provide data in common formats such as CSV and are intended for publication on the [Data page](https://www.carbon.place/data/) of the Carbon & Place website.
 
 
