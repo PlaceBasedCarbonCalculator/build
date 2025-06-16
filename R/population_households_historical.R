@@ -10,6 +10,8 @@ load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS4
 # Estimate the population and number of households for Census 2021 boundaries even when there have been changes.
 # Number of households are a function of adults (20+) / dwelling and number of dwellings
 
+#TODO: Check odd LSOA resutls E01033274 E01024150 E01024301 E01016129 E01024504 W01001971
+
 extrapolate_population_households = function(households_cenus11,
                                              households_cenus21,
                                              lookup_lsoa_2011_21,

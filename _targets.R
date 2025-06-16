@@ -63,6 +63,10 @@ tar_target(population,{
   combine_populations2(population_households_historical, population_scot, dwellings_tax_band_scotland)
 }),
 
+tar_target(population_summary,{
+  summarise_population(population)
+}),
+
 tar_target(lsoa_11_21_tools,{
   lsoa_convert_2011_2021_pre_data(lookup_lsoa_2011_21, population)
 }),
@@ -194,6 +198,9 @@ tar_target(bounds_lsoa21_super_generalised,{
 tar_target(bounds_dz11,{
   read_bounds_dz11(dl_boundaries)
 }),
+tar_target(bounds_iz22,{
+  read_intermidiate_zones_2022(dl_boundaries)
+}),
 tar_target(centroids_lsoa11,{
   read_centroids(dl_boundaries)
 }),
@@ -244,6 +251,10 @@ tar_target(lookup_OA_LSOA_MSOA_2021,{
 
 tar_target(lookup_postcode_OA_LSOA_MSOA_2021,{
   load_postcode_OA_LSOA_MSOA_class_2021_lookup(dl_boundaries)
+}),
+
+tar_target(lookup_DataZone_2022,{
+  read_datazone_lookup_2022(dl_boundaries)
 }),
 
 tar_target(SOAC_11,{
@@ -371,9 +382,9 @@ tar_target(income_lsoa_msoa,{
   match_income_lsoa_msoa(income_msoa,lookup_MSOA_2011_21,lookup_OA_LSOA_MSOA_2021)
 }),
 
-tar_target(income_lsoa,{
-  estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
-}),
+# tar_target(income_lsoa,{
+#   estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
+# }),
 
 tar_target(income_bands_lsoa,{
   make_income_bands_lsoa(NSSEC_household,income_msoa,lookup_OA_LSOA_MSOA_classifications,lookup_lsoa_2011_21)
@@ -701,13 +712,13 @@ tar_target(PLEF,{
   load_plef(path = file.path(parameters$path_data,"PLEF"))
 }),
 
-tar_target(PLEF_emissions,{
-  forcast_emissions_plef(lsoa_emissions_all, PLEF)
-}),
+# tar_target(PLEF_emissions,{
+#   forcast_emissions_plef(lsoa_emissions_all, PLEF)
+# }),
 
-tar_target(lsoa_emissions_all_forcasts,{
-  dplyr::left_join(lsoa_emissions_all, PLEF_emissions, by = "LSOA21CD")
-}),
+# tar_target(lsoa_emissions_all_forcasts,{
+#   dplyr::left_join(lsoa_emissions_all, PLEF_emissions, by = "LSOA21CD")
+# }),
 
 # OS data
 tar_target(dl_os_zoomstack,{
@@ -773,6 +784,12 @@ tar_target(nts,{
 tar_target(synth_pop_seed,{
   build_synth_pop_seed(file.path(parameters$path_data,"population"))
 }),
+
+tar_target(synth_pop_seed_scotland,{
+  build_synth_pop_seed_scotland(file.path(parameters$path_data,"population_scotland"))
+}),
+
+
 
 tar_target(census21_synth_households,{
   sythetic_census(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
@@ -869,7 +886,11 @@ tar_target(pmtiles_epc_nondom,{
 
 # Build JSON -------------------------------------------------------
 tar_target(build_lsoa_jsons,{
-  export_zone_json(lsoa_emissions_all_forcasts, path = "outputdata/json/zones")
+  export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
+}),
+
+tar_target(build_population_jsons,{
+  export_zone_json(population_summary, path = "outputdata/json/population", dataframe = "columns")
 }),
 
 tar_target(build_access_jsons,{
@@ -921,7 +942,7 @@ tar_target(pmtiles_pbcc,{
 # Build Bulk Exports -------------------------------------------------------
 
 tar_target(bulk_pbcc,{
-  bulk_export_pbcc(lsoa_emissions_all_forcasts)
+  bulk_export_pbcc(lsoa_emissions_all)
 }, format = "file"),
 
 tar_target(bulk_household_clusters,{
@@ -938,7 +959,7 @@ tar_target(bulk_access_proximity,{
 
 tar_target(bulk_epc_dom_summary,{
   bulk_export_epc_dom_summary(epc_dom_summary)
-}, format = "file")#,
+}, format = "file"),
 
 # tar_target(bulk_epc_dom,{
 #   bulk_export_epc_dom(geojson_epc_dom)
@@ -948,8 +969,8 @@ tar_target(bulk_epc_dom_summary,{
 #   bulk_export_epc_nondom(geojson_epc_nondom)
 # }, format = "file"),
 #
-# tar_target(bulk_buildings_heights,{
-#   bulk_export_buildings(buildings_heights)
-# }, format = "file")
+tar_target(bulk_buildings_heights,{
+  bulk_export_buildings(buildings_heights)
+}, format = "file")
 
 )

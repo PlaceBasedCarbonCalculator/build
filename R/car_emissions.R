@@ -186,9 +186,9 @@ calculate_car_emissions = function(car_km_lsoa_21, car_emissions_perkm, populati
 
   lsoa = dplyr::left_join(car_km_lsoa_21, car_emissions_perkm, by = c("LSOA21CD","year"))
 
-  lsoa$car_emissions = lsoa$Cars_Private * lsoa$AvgCO2
-  lsoa$van_emissions = lsoa$vans_Private * lsoa$AvgCO2
-  lsoa$company_bike_emissions = lsoa$company_bike * lsoa$AvgCO2
+  lsoa$car_emissions = lsoa$car_km  * lsoa$AvgCO2 / 1000
+  lsoa$van_emissions = lsoa$van_km * lsoa$AvgCO2 / 1000
+  lsoa$company_bike_emissions = lsoa$company_km * lsoa$AvgCO2 / 1000
 
   population = population[,c("year","LSOA21CD","all_ages")]
 

@@ -84,8 +84,17 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
   summary_int = dplyr::group_by(summary_int, fromclass)
   summary_int = dplyr::summarise_all(summary_int, part_sum, frac = 0.64)
 
-  names(summary_int)[1] = "country_uk"
+  # No way to split international flights between nation as people easily can
+  # cross boarders for flights Assume international flights from NI only belong
+  # to NI people, check on Google Flights Belfast airports currently only serve
+  # Europe/near east. So seems unlikely many GB people will connect through Belfast
+  # TODO: Better way to split emissions between nations.
+  summary_int = summary_int[summary_int$fromclass != "N",]
+
+  summary_int = as.data.frame(t(colSums(summary_int[grepl("emissions_",names(summary_int))])))
+  summary_int$country_uk = "ESW"
   summary_int$type = "international"
+
   emissions_dom$type = "domestic"
 
   summary_all = rbind(summary_int, emissions_dom)
@@ -102,6 +111,12 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
 }
 
 get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
+
+  #TODO: Without Scotland Emissions data this distributes GB emissions to just EW
+
+  # Consistency Checks
+  chk_total = sum(flights_total_emissions$emissions_2019[flights_total_emissions$country_uk != "N"])
+
 
   consumption_emissions = consumption_emissions[,c("LSOA21CD","year","all_ages",
                                                    "flight_international_return",
@@ -129,13 +144,37 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
 
   flights_total_emissions$year = as.numeric(flights_total_emissions$year)
 
-  consumption_emissions = dplyr::left_join(consumption_emissions, flights_total_emissions, by = c("year","country_uk"))
+  # Domestic Join
+  consumption_emissions = dplyr::left_join(consumption_emissions,
+                                           flights_total_emissions[,c("country_uk","year","domestic")],
+                                           by = c("year","country_uk"))
+  # Interntational Join
+  consumption_emissions = dplyr::left_join(consumption_emissions,
+                                           flights_total_emissions[flights_total_emissions$country_uk == "ESW",c("year","international")],
+                                           by = c("year"))
 
   emissions_summary = consumption_emissions |>
+    dplyr::group_by(year, country_uk) |>
+    dplyr::mutate(weight_domestic = (weight_domestic / sum(weight_domestic))) |>
+    dplyr::ungroup(year, country_uk)
+
+  emissions_summary = emissions_summary |>
     dplyr::group_by(year) |>
-    dplyr::mutate(emissions_international = weight_international * international / sum(weight_international),
-                  emissions_domestic = weight_domestic * international / sum(weight_domestic)) |>
+    dplyr::mutate(weight_international = weight_international / sum(weight_international)) |>
     dplyr::ungroup(year)
+
+  # sum(emissions_summary$weight_international[emissions_summary$year == 2019]) # 1
+  # sum(emissions_summary$weight_domestic[emissions_summary$year == 2019 & emissions_summary$country_uk == "E"]) # 1
+  # sum(emissions_summary$weight_domestic[emissions_summary$year == 2019 & emissions_summary$country_uk == "W"]) # 1
+
+  emissions_summary$emissions_international = emissions_summary$international * emissions_summary$weight_international
+  emissions_summary$emissions_domestic = emissions_summary$domestic * emissions_summary$weight_domestic
+
+  # Check
+  if(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2019],
+           emissions_summary$emissions_domestic[emissions_summary$year == 2019])) != chk_total){
+    stop("Flight emissission check failed")
+  }
 
 
   emissions_summary$emissions_percap = remove_inf((emissions_summary$emissions_international + emissions_summary$emissions_domestic) / emissions_summary$all_ages)

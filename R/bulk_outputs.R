@@ -138,6 +138,53 @@ bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path =
 }
 
 
+bulk_export_sf_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
+
+  if(!dir.exists(path)){
+    dir.create(path)
+  }
+
+  if(is.null(name)){
+    stop("name not specified")
+  }
+
+  dir.create(file.path(tempdir(),"bulkexport"))
+
+  # Round to 2DP
+  for(i in seq_len(ncol(x))){
+    if(inherits(x[[i]],"numeric")){
+      x[[i]] = round(x[[i]], rounddp)
+    }
+  }
+
+  date = gsub("-","",as.character(date))
+
+  path_temp_out = file.path(tempdir(),"bulkexport",paste0(name,"_",date,".gpkg"))
+  path_final_out = file.path(path,paste0(name,"_",date,".zip"))
+
+  sf::write_sf(x, path_temp_out)
+
+  message("Zipping gpkg")
+  my_wd <- getwd()
+  setwd(file.path(tempdir(),"bulkexport"))
+
+  if(file.exists(path_final_out)){
+    unlink(path_final_out)
+  }
+
+  utils::zip(file.path(my_wd,path_final_out),
+             paste0(name,"_",date,".gpkg"),
+             flags="-q")
+  setwd(my_wd)
+
+  unlink(file.path(tempdir(),"bulkexport"), recursive = TRUE)
+
+
+  return(path_final_out)
+
+}
+
+
 
 bulk_export_pbcc = function(x = lsoa_emissions_all_forcasts){
   bulk_export_csv_generic(x, "pbcc_lsoa")
@@ -173,5 +220,5 @@ bulk_export_epc_nondom = function(geojson_epc_nondom){
 }
 
 bulk_export_buildings = function(buildings_heights){
-  bulk_export_geojson_generic(buildings_heights, "buildings_heights")
+  bulk_export_sf_generic(buildings_heights, "buildings_heights")
 }
