@@ -211,9 +211,19 @@ read_Tenure_HouseholdComp_scot <- function(path = "../inputdata/population_scotl
   return(raw_data)
 }
 
-read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_DataZone.csv"){
+read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_AccType3_DataZone.csv"){
 
-  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  nm1 = rep(c("house","flat","caravan","total"), each = 7)
+  nm2 = rep(c("detached",
+              "semidetached",
+              "terraced",
+              "flatpurposebuilt",
+              "flatconverted",
+              "flatcommercial",
+              "caravan"), times = 3)
+  nm3 = past
 
   names(raw) = c("LSOA21CD",
                  "detached",
