@@ -1,17 +1,26 @@
+# Builds a seed of the synthetic population of Scotland based on overall
+# Scotland population As aggregated to whole of Scotland inputs can be
+# multivariate without being disclosive. Nationally representative seed is then
+# used as input to local synthetic populations which discourages the generation of
+# usual household combinations
 build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_data,"population_scotland")){
 
+  # Read In Data
   householdComp10_CarVan5_Tenure5_hhSize5_scot = read_householdComp10_CarVan5_Tenure5_hhSize5_scot(file.path(path_data,"scotlandcenus2022_householdComp10_CarVan5_Tenure5_hhSize5_Scotland.xlsx"))
   AccTyp7_CarVan5_Tenure5_hhSize5_scot = read_AccTyp7_CarVan5_Tenure5_hhSize5_scot(file.path(path_data,"scotlandcenus2022_AccType7_CarVan5_Tenure5_hhSize5_Scotland.xlsx"))
   householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot = read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot(file.path(path_data,"scotlandcenus2022_householdComp10_hhSize5_CarVan3_Tenure3_AccType3.Scotland.xlsx"))
-
-
   AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot = read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot(file.path(path_data,"scotlandcenus2022_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_Scotland.xlsx"))
+  AccType7_AccType3_scot = read_AccType7_AccType3_scot(file.path(path_data,"scotlandcenus2022_AccType7_AccType3_Scotland.csv"))
 
+
+  # Define Variable Names
   householdComp10 = c("OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")
   hhSize5 = c("p1","p2","p3","p4","p5+")
   Tenure3 = c("owned","socialrented","privaterented")
   Tenure5 = c("outright","mortgage","socialrented","privaterented","rentfree")
   CarVan5 = c("car0","car1","car2","car3","car4+")
+  CarVan3 = c("car0","car1","car2+")
+  AccType3 = c("house","flat","caravan")
   AccType7 = c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
 
   # Build Arrays
@@ -33,53 +42,50 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
                dimnames = list(AccType7, CarVan5, hhSize5, Tenure5)
   )
 
+  mat3 = expand.grid(AccType3, householdComp10, CarVan3, Tenure3, hhSize5)
+  names(mat3) = c("AccType3", "householdComp10", "CarVan3", "Tenure3", "hhSize5")
+  mat3 = dplyr::left_join(mat3, householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot, by = c("AccType3", "householdComp10", "CarVan3", "Tenure3", "hhSize5"))
+  if(anyNA(mat3$value)){stop("NAs in values")}
+  mat3 = array(mat3$value,
+               dim = c(length(AccType3), length(householdComp10), length(CarVan3), length(Tenure3),length(hhSize5)),
+               dimnames = list(AccType3, householdComp10, CarVan3, Tenure3, hhSize5)
+  )
 
+  mat4 = expand.grid(Tenure5,Tenure3,AccType7,CarVan5,CarVan3)
+  names(mat4) = c("Tenure5","Tenure3","AccType7","CarVan5","CarVan3")
+  mat4 = dplyr::left_join(mat4, AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot, by = c("Tenure5","Tenure3","AccType7","CarVan5","CarVan3"))
+  if(anyNA(mat4$value)){stop("NAs in values")}
+  mat4 = array(mat4$value,
+               dim = c(length(Tenure5), length(Tenure3), length(AccType7), length(CarVan5),length(CarVan3)),
+               dimnames = list(Tenure5, Tenure3, AccType7, CarVan5, CarVan3)
+  )
 
+  mat5 = expand.grid(AccType3,AccType7)
+  names(mat5) = c("AccType3","AccType7")
+  mat5 = dplyr::left_join(mat5, AccType7_AccType3_scot, by = c("AccType3","AccType7"))
+  if(anyNA(mat5$value)){stop("NAs in values")}
+  mat5 = array(mat5$value,
+               dim = c(length(AccType3), length(AccType7)),
+               dimnames = list(AccType3, AccType7)
+  )
 
-  householdComp10_CarVan5_Tenure5_hhSize5_scot$carSizeTenure = paste0(householdComp10_CarVan5_Tenure5_hhSize5_scot$CarVan5,"_",
-                                                                      householdComp10_CarVan5_Tenure5_hhSize5_scot$hhSize5,"_",
-                                                                      householdComp10_CarVan5_Tenure5_hhSize5_scot$tenure5)
+  # Seed Dim
+  # householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3
 
-  AccTyp7_CarVan5_Tenure5_hhSize5_scot$carSizeTenure = paste0(AccTyp7_CarVan5_Tenure5_hhSize5_scot$CarVan5,"_",
-                                                              AccTyp7_CarVan5_Tenure5_hhSize5_scot$hhSize5,"_",
-                                                              AccTyp7_CarVan5_Tenure5_hhSize5_scot$tenure5)
-
-
-  householdComp10_CarVan5_Tenure5_hhSize5_scot = householdComp10_CarVan5_Tenure5_hhSize5_scot[,c("carSizeTenure","householdComp10","value")]
-  AccTyp7_CarVan5_Tenure5_hhSize5_scot = AccTyp7_CarVan5_Tenure5_hhSize5_scot[,c("carSizeTenure","AccType7","value")]
-
-  householdComp10_CarVan5_Tenure5_hhSize5_scot = tidyr::pivot_wider(householdComp10_CarVan5_Tenure5_hhSize5_scot, names_from = "householdComp10", values_from = "value")
-  AccTyp7_CarVan5_Tenure5_hhSize5_scot = tidyr::pivot_wider(AccTyp7_CarVan5_Tenure5_hhSize5_scot, names_from = "AccType7", values_from = "value")
-
-  householdComp10_CarVan5_Tenure5_hhSize5_scot = householdComp10_CarVan5_Tenure5_hhSize5_scot[order(householdComp10_CarVan5_Tenure5_hhSize5_scot$carSizeTenure),]
-  AccTyp7_CarVan5_Tenure5_hhSize5_scot = AccTyp7_CarVan5_Tenure5_hhSize5_scot[order(AccTyp7_CarVan5_Tenure5_hhSize5_scot$carSizeTenure),]
-
-  #summary(householdComp10_CarVan5_Tenure5_hhSize5_scot$carSizeTenure == AccTyp7_CarVan5_Tenure5_hhSize5_scot$carSizeTenure)
-
-  hh10 = as.matrix(householdComp10_CarVan5_Tenure5_hhSize5_scot[,2:ncol(householdComp10_CarVan5_Tenure5_hhSize5_scot)])
-  rownames(hh10) = householdComp10_CarVan5_Tenure5_hhSize5_scot$carSizeTenure
-
-  Acc7 = as.matrix(AccTyp7_CarVan5_Tenure5_hhSize5_scot[,2:ncol(AccTyp7_CarVan5_Tenure5_hhSize5_scot)])
-  rownames(Acc7) = AccTyp7_CarVan5_Tenure5_hhSize5_scot$carSizeTenure
-
-  Acc7 = match_matrix_rsums(hh10,Acc7)
-
-
-  seed = array(1, dim = c(125,10,7))
-
-  result = humanleague::qisi(seed,
-             indices = list(c(1,2),c(1,3)),
-             marginals = list(hh10,
-                              Acc7)
-             )
+  seed = array(1, dim = c(10,5,3,5,3,5,7,3))
+  res <- mipfp::Ipfp(seed,
+                     list(c(1,2,4,6),c(7,2,6,4),c(8,1,3,5,6),c(4,5,7,2,3),c(8,7)),
+                     list(mat1, #1,2,4,6
+                          mat2, #7,2,6,4
+                          mat3, #8,1,3,5,6
+                          mat4, #4,5,7,2,3
+                          mat5)) #8,7
 
   result_df = expand.grid(
-    rownames(hh10),
-    colnames(hh10),
-    colnames(Acc7)
+    householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3
   )
-  names(result_df) = c("carSizeTenure","householdComp10","AccTyp7")
-  result_df$households = as.numeric(result$result)
+  names(result_df) = c("householdComp10", "CarVan5", "CarVan3", "Tenure5", "Tenure3", "hhSize5", "AccType7", "AccType3")
+  result_df$households = int_trs(as.numeric(res$x.hat) * median(c(sum(mat1),sum(mat2),sum(mat3),sum(mat4),sum(mat5))))
 
   slt = strsplit(as.character(result_df$carSizeTenure),"_")
 
@@ -101,6 +107,23 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
   result_df
 
 }
+
+
+read_AccType7_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_AccType3_Scotland.csv"){
+
+  raw_data <- readr::read_csv(path , skip = 11, col_names = FALSE, show_col_types = FALSE)
+  raw_data = raw_data[1:3,1:8]
+  names(raw_data) = c("AccType3","detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
+
+  raw_data$AccType3 = c("house","flat","caravan")
+  raw_data$detached  = as.numeric(raw_data$detached)
+  raw_data = tidyr::pivot_longer(raw_data, cols = names(raw_data)[2:8], names_to = "AccType7")
+
+  raw_data
+
+}
+
+
 
 read_householdComp10_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_CarVan5_Tenure5_hhSize5_Scotland.xlsx") {
 
@@ -286,16 +309,16 @@ read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot <- function(path = ".
   p9$householdComp10 = "OtherChildren"
   p10$householdComp10 = "OtherIncStudentOrOver66"
 
-  p1 = tidyr::pivot_longer(p1, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p2 = tidyr::pivot_longer(p2, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p3 = tidyr::pivot_longer(p3, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p4 = tidyr::pivot_longer(p4, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p5 = tidyr::pivot_longer(p5, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p6 = tidyr::pivot_longer(p6, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p7 = tidyr::pivot_longer(p7, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p8 = tidyr::pivot_longer(p8, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p9 = tidyr::pivot_longer(p9, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
-  p10 = tidyr::pivot_longer(p10, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhsize5"))
+  p1 = tidyr::pivot_longer(p1, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p2 = tidyr::pivot_longer(p2, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p3 = tidyr::pivot_longer(p3, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p4 = tidyr::pivot_longer(p4, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p5 = tidyr::pivot_longer(p5, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p6 = tidyr::pivot_longer(p6, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p7 = tidyr::pivot_longer(p7, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p8 = tidyr::pivot_longer(p8, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p9 = tidyr::pivot_longer(p9, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
+  p10 = tidyr::pivot_longer(p10, cols = nms2[2:length(nms2)], names_sep = "_", names_to = c("CarVan3","Tenure3","hhSize5"))
 
   final = rbind(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)
   final
