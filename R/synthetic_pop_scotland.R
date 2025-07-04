@@ -1,11 +1,29 @@
-read_hhComp_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
+read_hhComp_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_householdComp4_DataZone.csv"){
 
-  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 10, col_names = FALSE)
 
-  names(raw) = c("LSOA21CD","OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66","Total","dummy")
-  raw = raw[,c("LSOA21CD","OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")]
+  names(raw) = c("counting","LSOA21CD","householdComp4","householdComp10","households")
+  raw$counting = NULL
+  raw = raw[!is.na(raw$LSOA21CD),]
+  raw = raw[raw$LSOA21CD != "Total",]
+  raw = raw[substr(raw$LSOA21CD,1,1) == "S",]
+  raw = raw[raw$householdComp4 != "Total",]
 
-  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+  raw$householdComp4[raw$householdComp4 == "One person household"] = "oneperson"
+  raw$householdComp4[raw$householdComp4 == "One family household: Couple family"] = "couplefamily"
+  raw$householdComp4[raw$householdComp4 == "One family household: Lone parent"] = "loneparentfamily"
+  raw$householdComp4[raw$householdComp4 == "Other household types"] = "other"
+
+  raw$householdComp10[raw$householdComp10 == "One person household: Aged 66 and over"] = "OnePersonOver66"
+  raw$householdComp10[raw$householdComp10 == "One person household: Aged under 66" ] = "OnePersonOther"
+  raw$householdComp10[raw$householdComp10 == "One family household: All aged 66 and over"] = "FamilyOver66"
+  raw$householdComp10[raw$householdComp10 == "One family household: Couple family: No children" ] = "CoupleNoChildren"
+  raw$householdComp10[raw$householdComp10 == "One family household: Couple family: With dependent children"] = "CoupleChildren"
+  raw$householdComp10[raw$householdComp10 == "One family household: Couple family: All children non-dependent"] = "CoupleNonDepChildren"
+  raw$householdComp10[raw$householdComp10 == "One family household: Lone parent: With dependent children" ] = "LoneParent"
+  raw$householdComp10[raw$householdComp10 == "One family household: Lone parent: All children non-dependent" ] = "LoneParentNonDepChildren"
+  raw$householdComp10[raw$householdComp10 == "Other household types: With dependent children" ] = "OtherChildren"
+  raw$householdComp10[raw$householdComp10 == "Other household types: Other (including all full-time students and all aged 66 and over)"] = "OtherIncStudentOrOver66"
 
   raw
 
@@ -215,42 +233,51 @@ read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
 
-  nm1 = rep(c("house","flat","caravan","total"), each = 7)
-  nm2 = rep(c("detached",
-              "semidetached",
-              "terraced",
-              "flatpurposebuilt",
-              "flatconverted",
-              "flatcommercial",
-              "caravan"), times = 3)
-  nm3 = past
+  AccType3 = c("house","flat","caravan","total")
+  AccType7 = c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
 
   names(raw) = c("LSOA21CD",
-                 "detached",
-                 "semidetached",
-                 "terraced",
-                 "flatpurposebuilt",
-                 "flatconverted",
-                 "flatcommercial",
-                 "caravan",
-                 "Total",
-                 "dummy")
-  raw = raw[,c("LSOA21CD","detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")]
-
+                 paste0(
+                   rep(AccType3, each = 7),
+                   "_",
+                   rep(AccType7, times = 4)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[,!grepl("total",names(raw))]
   raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("AccType3","AccType7"),
+                            values_to = "households",
+                            names_sep = "_")
 
   raw
 
 }
 
-read_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan5_DataZone.csv"){
+read_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan5_CarVan3_DataZone.csv"){
 
-  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
 
-  names(raw) = c("LSOA21CD","car0","car1","car2","car3","car4+","Total","dummy")
-  raw = raw[,c("LSOA21CD","car0","car1","car2","car3","car4+")]
+  CarVan3 = c("car0","car1","car2+","total")
+  CarVan5 = c("car0","car1","car2","car3","car4+")
 
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(CarVan3, each = 5),
+                   "_",
+                   rep(CarVan5, times = 4)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[,!grepl("total",names(raw))]
   raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("CarVan3","CarVan5"),
+                            values_to = "households",
+                            names_sep = "_")
 
   raw
 
@@ -269,14 +296,28 @@ read_hhSize_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 }
 
-read_Tenure_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_DataZone.csv"){
+read_Tenure_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_Tenure3_DataZone.csv"){
 
-  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
 
-  names(raw) = c("LSOA21CD","outright","mortgage","socialrented","privaterented","rentfree","Total","dummy")
-  raw = raw[,c("LSOA21CD","outright","mortgage","socialrented","privaterented","rentfree")]
+  Tenure3 = c("owned","socialrented","privaterented")
+  Tenure5 = c("outright","mortgage","socialrented","privaterented","rentfree")
 
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(Tenure3, each = 5),
+                   "_",
+                   rep(Tenure5, times = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[,!grepl("total",names(raw))]
   raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("Tenure3","Tenure5"),
+                            values_to = "households",
+                            names_sep = "_")
 
   raw
 
@@ -467,8 +508,530 @@ read_hhSize_CarVan_scot <- function(path = "../inputdata/population_scotland/sco
   return(raw_data)
 }
 
+read_hhSize5_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_Tenure3_DataZone.csv"){
 
-sythetic_census_scot = function(path_data = file.path(parameters$path_data,"population_scotland"), bounds_iz22, synth_pop_seed_scotland, lookup_DataZone_2022){
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  hhSize5 = c("p1","p2","p3","p4","p5+")
+  Tenure3 = c("owned","socialrented","privaterented")
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(hhSize5, each = 3),
+                   "_",
+                   rep(Tenure3, times = 5)),
+                   "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("hhSize5","Tenure3"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_hhSize5_householdComp4_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_householdComp4_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  hhSize5 = c("p1","p2","p3","p4","p5+")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other")
+
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(hhSize5, each = 4),
+                   "_",
+                   rep(householdComp4, times = 5)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("hhSize5","householdComp4"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_hhSize5_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  hhSize5 = c("p1","p2","p3","p4","p5+")
+  AccType3 = c("house","flat","caravan")
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(AccType3, each = 5),
+                   "_",
+                   rep(hhSize5, times = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("AccType3","hhSize5"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_CarVan3_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan3_AccType3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 10, col_names = FALSE)
+
+  names(raw) = c("Counting","LSOA21CD","CarVan3","AccType3","households")
+  raw$Counting = NULL
+  raw = raw[!is.na(raw$households),]
+  raw = raw[raw$LSOA21CD != "Total",]
+
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: No cars or vans"] = "car0"
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: One car or van"] = "car1"
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: Two or more cars or vans"] = "car2+"
+
+  raw$AccType3[raw$AccType3 == "Whole house or bungalow"] = "house"
+  raw$AccType3[raw$AccType3 == "Flat, maisonette or apartment"] = "flat"
+  raw$AccType3[raw$AccType3 == "Caravan or other mobile or temporary structure"] = "caravan"
+
+  raw
+
+}
+
+read_CarVan3_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan3_Tenure3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 10, col_names = FALSE)
+
+  names(raw) = c("Counting","LSOA21CD","Tenure3","CarVan3","households")
+  raw$Counting = NULL
+  raw = raw[!is.na(raw$households),]
+  raw = raw[raw$LSOA21CD != "Total",]
+
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: No cars or vans"] = "car0"
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: One car or van"] = "car1"
+  raw$CarVan3[raw$CarVan3 == "Number of cars or vans in household: Two or more cars or vans"] = "car2+"
+
+  raw$Tenure3[raw$Tenure3 == "Owned"] = "owned"
+  raw$Tenure3[raw$Tenure3 == "Social Rented by Council (LA) or Housing Association/ Registered Social Landlord"] = "socialrented"
+  raw$Tenure3[raw$Tenure3 == "Private rented or living rent free"] = "privaterented"
+
+  raw
+
+}
+
+read_householdComp4_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_CarVan3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  CarVan3 = c("car0","car1","car2+")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other","total")
+
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(CarVan3, times = 5),
+                   "_",
+                   rep(householdComp4, each = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[,!grepl("total",names(raw))]
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("CarVan3","householdComp4"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_householdComp4_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_AccType3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  AccType3 = c("house","flat","caravan")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other","total")
+
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(AccType3, times = 5),
+                   "_",
+                   rep(householdComp4, each = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+  raw = raw[,!grepl("total",names(raw))]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("AccType3","householdComp4"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_householdComp4_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_Tenure3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  Tenure3 = c("owned","socialrented","privaterented")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other","total")
+
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(Tenure3, times = 5),
+                   "_",
+                   rep(householdComp4, each = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+  raw = raw[,!grepl("total",names(raw))]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("Tenure3","householdComp4"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_hhSize5_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_CarVan3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  CarVan3 = c("car0","car1","car2+")
+  hhSize5 = c("p1","p2","p3","p4","p5+","total")
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(CarVan3, times = 6),
+                   "_",
+                   rep(hhSize5, each = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+  raw = raw[,!grepl("total",names(raw))]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("CarVan3","hhSize5"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+read_Tenure3_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure3_AccType3_DataZone.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
+
+  AccType3 = c("house","flat","caravan")
+  Tenure3 = c("owned","socialrented","privaterented","total")
+
+  names(raw) = c("LSOA21CD",
+                 paste0(
+                   rep(AccType3, times = 3),
+                   "_",
+                   rep(Tenure3, each = 3)),
+                 "dud")
+  raw$dud = NULL
+  raw = raw[!raw$LSOA21CD %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+  raw = raw[,!grepl("total",names(raw))]
+
+  raw = tidyr::pivot_longer(raw,
+                            cols = names(raw)[2:ncol(raw)],
+                            names_to = c("AccType3","Tenure3"),
+                            values_to = "households",
+                            names_sep = "_")
+
+  raw
+
+}
+
+
+
+sythetic_census_scot = function(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland){
+
+  # Load Data
+  dz_CarVan = read_CarVan_scot(file.path(path_data,"scotlandcenus2022_CarVan5_CarVan3_DataZone.csv"))
+  dz_HouseholdComp = read_hhComp_scot(file.path(path_data,"scotlandcenus2022_householdComp10_householdComp4_DataZone.csv"))
+  dz_Tenure = read_Tenure_scot(file.path(path_data,"scotlandcenus2022_Tenure5_Tenure3_DataZone.csv"))
+  dz_AccType = read_Acc_scot(file.path(path_data,"scotlandcenus2022_AccType7_AccType3_DataZone.csv"))
+  dz_hhSize5_Tenure3 = read_hhSize5_Tenure3_scot(file.path(path_data,"scotlandcenus2022_hhSize5_Tenure3_DataZone.csv"))
+  dz_hhSize5_householdComp4 = read_hhSize5_householdComp4_scot(file.path(path_data,"scotlandcenus2022_hhSize5_householdComp4_DataZone.csv"))
+  dz_hhSize5_AccType3 = read_hhSize5_AccType3_scot(file.path(path_data,"scotlandcenus2022_hhSize5_AccType3_DataZone.csv"))
+  dz_CarVan3_AccType3 = read_CarVan3_AccType3_scot(file.path(path_data,"scotlandcenus2022_CarVan3_AccType3_DataZone.csv"))
+  dz_CarVan3_Tenure3 = read_CarVan3_Tenure3_scot(file.path(path_data,"scotlandcenus2022_CarVan3_Tenure3_DataZone.csv"))
+  dz_householdComp4_CarVan3 = read_householdComp4_CarVan3_scot(file.path(path_data,"scotlandcenus2022_householdComp4_CarVan3_DataZone.csv"))
+  dz_householdComp4_AccType3 = read_householdComp4_AccType3_scot(file.path(path_data,"scotlandcenus2022_householdComp4_AccType3_DataZone.csv"))
+  dz_householdComp4_Tenure3 = read_householdComp4_Tenure3_scot(file.path(path_data,"scotlandcenus2022_householdComp4_Tenure3_DataZone.csv"))
+  dz_hhSize5_CarVan3 = read_hhSize5_CarVan3_scot(file.path(path_data,"scotlandcenus2022_hhSize5_CarVan3_DataZone.csv"))
+  dz_Tenure3_AccType3 = read_Tenure3_AccType3_scot(file.path(path_data,"scotlandcenus2022_Tenure3_AccType3_DataZone.csv"))
+
+  #Order
+  dz_CarVan = dz_CarVan[order(dz_CarVan$LSOA21CD),]
+  dz_HouseholdComp = dz_HouseholdComp[order(dz_HouseholdComp$LSOA21CD),]
+  dz_Tenure = dz_Tenure[order(dz_Tenure$LSOA21CD),]
+  dz_AccType = dz_AccType[order(dz_AccType$LSOA21CD),]
+  dz_hhSize5_Tenure3 = dz_hhSize5_Tenure3[order(dz_hhSize5_Tenure3$LSOA21CD),]
+  dz_hhSize5_householdComp4 = dz_hhSize5_householdComp4[order(dz_hhSize5_householdComp4$LSOA21CD),]
+  dz_hhSize5_AccType3 = dz_hhSize5_AccType3[order(dz_hhSize5_AccType3$LSOA21CD),]
+  dz_CarVan3_AccType3 = dz_CarVan3_AccType3[order(dz_CarVan3_AccType3$LSOA21CD),]
+  dz_CarVan3_Tenure3 = dz_CarVan3_Tenure3[order(dz_CarVan3_Tenure3$LSOA21CD),]
+  dz_householdComp4_CarVan3 = dz_householdComp4_CarVan3[order(dz_householdComp4_CarVan3$LSOA21CD),]
+  dz_householdComp4_AccType3 = dz_householdComp4_AccType3[order(dz_householdComp4_AccType3$LSOA21CD),]
+  dz_householdComp4_Tenure3 = dz_householdComp4_Tenure3[order(dz_householdComp4_Tenure3$LSOA21CD),]
+  dz_hhSize5_CarVan3 = dz_hhSize5_CarVan3[order(dz_hhSize5_CarVan3$LSOA21CD),]
+  dz_Tenure3_AccType3 = dz_Tenure3_AccType3[order(dz_Tenure3_AccType3$LSOA21CD),]
+
+  #Split
+  dz_CarVan = dplyr::group_split(dplyr::ungroup(dz_CarVan), LSOA21CD)
+  dz_HouseholdComp = dplyr::group_split(dplyr::ungroup(dz_HouseholdComp), LSOA21CD)
+  dz_Tenure = dplyr::group_split(dplyr::ungroup(dz_Tenure), LSOA21CD)
+  dz_AccType = dplyr::group_split(dplyr::ungroup(dz_AccType), LSOA21CD)
+  dz_hhSize5_Tenure3 = dplyr::group_split(dplyr::ungroup(dz_hhSize5_Tenure3), LSOA21CD)
+  dz_hhSize5_householdComp4 = dplyr::group_split(dplyr::ungroup(dz_hhSize5_householdComp4), LSOA21CD)
+  dz_hhSize5_AccType3 = dplyr::group_split(dplyr::ungroup(dz_hhSize5_AccType3), LSOA21CD)
+  dz_CarVan3_Tenure3 = dplyr::group_split(dplyr::ungroup(dz_CarVan3_Tenure3), LSOA21CD)
+  dz_householdComp4_CarVan3 = dplyr::group_split(dplyr::ungroup(dz_householdComp4_CarVan3), LSOA21CD)
+  dz_householdComp4_AccType3 = dplyr::group_split(dplyr::ungroup(dz_householdComp4_AccType3), LSOA21CD)
+  dz_householdComp4_Tenure3 = dplyr::group_split(dplyr::ungroup(dz_householdComp4_Tenure3), LSOA21CD)
+  dz_hhSize5_CarVan3 = dplyr::group_split(dplyr::ungroup(dz_hhSize5_CarVan3), LSOA21CD)
+  dz_Tenure3_AccType3 = dplyr::group_split(dplyr::ungroup(dz_Tenure3_AccType3), LSOA21CD)
+
+  dz_CarVan_sub = dz_CarVan[[1]]
+  dz_HouseholdComp_sub = dz_HouseholdComp[[1]]
+  dz_Tenure_sub = dz_Tenure[[1]]
+  dz_AccType_sub = dz_AccType[[1]]
+  dz_hhSize5_Tenure3_sub  = dz_hhSize5_Tenure3[[1]]
+  dz_hhSize5_householdComp4_sub  = dz_hhSize5_householdComp4[[1]]
+  dz_hhSize5_AccType3_sub  = dz_hhSize5_AccType3[[1]]
+  dz_CarVan3_Tenure3_sub  = dz_CarVan3_Tenure3[[1]]
+  dz_householdComp4_CarVan3_sub  = dz_householdComp4_CarVan3[[1]]
+  dz_householdComp4_AccType3_sub  = dz_householdComp4_AccType3[[1]]
+  dz_householdComp4_Tenure3_sub  = dz_householdComp4_Tenure3[[1]]
+  dz_hhSize5_CarVan3_sub  = dz_hhSize5_CarVan3[[1]]
+  dz_Tenure3_AccType3_sub  = dz_Tenure3_AccType3[[1]]
+
+
+
+}
+
+
+
+scot_syth_combine = function(dz_CarVan_sub,
+                             dz_HouseholdComp_sub,
+                             dz_Tenure_sub,
+                             dz_AccType_sub,
+                             dz_hhSize5_Tenure3_sub,
+                             dz_hhSize5_householdComp4_sub,
+                             dz_hhSize5_AccType3_sub,
+                             dz_CarVan3_Tenure3_sub,
+                             dz_householdComp4_CarVan3_sub,
+                             dz_householdComp4_AccType3_sub,
+                             dz_householdComp4_Tenure3_sub,
+                             dz_hhSize5_CarVan3_sub,
+                             dz_Tenure3_AccType3_sub,
+                                 seed) {
+
+  # Check Zone match
+  if(length(unique(c(dz_CarVan_sub$LSOA21CD,
+                     dz_HouseholdComp_sub$LSOA21CD,
+                     dz_Tenure_sub$LSOA21CD,
+                     dz_AccType_sub$LSOA21CD,
+                     dz_hhSize5_Tenure3_sub$LSOA21CD,
+                     dz_hhSize5_householdComp4_sub$LSOA21CD,
+                     dz_hhSize5_AccType3_sub$LSOA21CD,
+                     dz_CarVan3_Tenure3_sub$LSOA21CD,
+                     dz_householdComp4_CarVan3_sub$LSOA21CD,
+                     dz_householdComp4_AccType3_sub$LSOA21CD,
+                     dz_householdComp4_Tenure3_sub$LSOA21CD,
+                     dz_hhSize5_CarVan3_sub$LSOA21CD,
+                     dz_Tenure3_AccType3_sub$LSOA21CD
+  ))) != 1){
+    stop("More than one LSOA21CD")
+  }
+
+  # Define Variable Names
+  householdComp10 = c("OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other")
+  hhSize5 = c("p1","p2","p3","p4","p5+")
+  Tenure3 = c("owned","socialrented","privaterented")
+  Tenure5 = c("outright","mortgage","socialrented","privaterented","rentfree")
+  CarVan5 = c("car0","car1","car2","car3","car4+")
+  CarVan3 = c("car0","car1","car2+")
+  AccType3 = c("house","flat","caravan")
+  AccType7 = c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
+
+  array_maker = function(x, ...){
+    args <- substitute(list(...))[-1]  # Capture the unevaluated arguments
+    arg_names <- sapply(args, function(x) deparse(x))
+    mat1 = expand.grid(...)
+    names(mat1) = arg_names
+    mat1 = dplyr::left_join(mat1, x, by = arg_names)
+    if(anyNA(mat1$households)){stop("NAs in values")}
+    mat1 = array(mat1$households,
+                 dim = c(lengths(list(...))),
+                 dimnames = list(...)
+    )
+    mat1
+  }
+
+  MCarVan = array_maker(dz_CarVan_sub, CarVan5, CarVan3)
+  MHouseholdComp = array_maker(dz_HouseholdComp_sub,householdComp4, householdComp10)
+  MTenure = array_maker(dz_Tenure_sub,Tenure3,Tenure5)
+  MAccType = array_maker(dz_AccType_sub,AccType3, AccType7)
+  MhhSize5_Tenure3 = array_maker(dz_hhSize5_Tenure3_sub,hhSize5, Tenure3)
+  MhhSize5_householdComp4 = array_maker(dz_hhSize5_householdComp4_sub,hhSize5, householdComp4)
+  MhhSize5_AccType3 = array_maker(dz_hhSize5_AccType3_sub,AccType3, hhSize5)
+  MCarVan3_Tenure3 = array_maker(dz_CarVan3_Tenure3_sub,Tenure3,CarVan3)
+  MhouseholdComp4_CarVan3 = array_maker(dz_householdComp4_CarVan3_sub,CarVan3, householdComp4)
+  MhouseholdComp4_AccType3 = array_maker(dz_householdComp4_AccType3_sub,AccType3, householdComp4)
+  MhouseholdComp4_Tenure3 = array_maker(dz_householdComp4_Tenure3_sub,Tenure3, householdComp4)
+  MhhSize5_CarVan3 = array_maker(dz_hhSize5_CarVan3_sub, CarVan3, hhSize5)
+  MTenure3_AccType3 = array_maker(dz_Tenure3_AccType3_sub, AccType3, Tenure3)
+
+  # Seed Dim
+  # householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3, householdComp4
+  seed = array(synth_pop_seed_scotland$seed, dim = c(10,5,3,5,3,5,7,3,4))
+  med_pop = median(c(sum(MCarVan),
+                     sum(MHouseholdComp),
+                     sum(MTenure),
+                     sum(MAccType),
+                     sum(MhhSize5_Tenure3),
+                     sum(MhhSize5_householdComp4),
+                     sum(MhhSize5_AccType3),
+                     sum(MCarVan3_Tenure3),
+                     sum(MhouseholdComp4_CarVan3),
+                     sum(MhouseholdComp4_AccType3),
+                     sum(MhouseholdComp4_Tenure3),
+                     sum(MhhSize5_CarVan3),
+                     sum(MTenure3_AccType3)
+  ))
+  dimnames(seed) = list(householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3, householdComp4)
+
+  seed_weighted = (seed /sum(seed)) * med_pop
+
+  res <- mipfp::Ipfp(seed_weighted,
+                     list(c(2,3),c(9,1),c(5,4),c(8,7),c(6,5),c(6,9),c(8,6),
+                          c(5,3),c(3,9),c(8,9),c(5,9),c(3,6),c(8,5)
+                          ),
+                     list(
+                       MCarVan, #2,3
+                       MHouseholdComp, #9,1
+                       MTenure, #5,4
+                       MAccType, #8,7
+                       MhhSize5_Tenure3, #6,5
+                       MhhSize5_householdComp4, #6,9
+                       MhhSize5_AccType3, #8,6
+                       MCarVan3_Tenure3, #5,3
+                       MhouseholdComp4_CarVan3, #3,9
+                       MhouseholdComp4_AccType3, #8,9
+                       MhouseholdComp4_Tenure3,#5,9
+                       MhhSize5_CarVan3,#3,6
+                       MTenure3_AccType3#8,5
+                       ))
+
+  dimnames(res$x.hat) = dimnames(seed_weighted)
+
+  res2 = int_trs(res$x.hat * med_pop)
+
+  # result_df = expand.grid(
+  #   householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3, householdComp4, stringsAsFactors = FALSE
+  # )
+  # names(result_df) = c("householdComp10", "CarVan5", "CarVan3", "Tenure5", "Tenure3", "hhSize5", "AccType7", "AccType3","householdComp4")
+  # result_df$households = as.numeric(res2)
+  # result_df$error_margins = max(res$error.margins)
+  # result_df$conv = res$conv
+
+  result_df <- as.data.frame.table(res2)
+  names(result_df) = c("householdComp10", "CarVan5", "CarVan3", "Tenure5", "Tenure3", "hhSize5", "AccType7", "AccType3","householdComp4","households")
+
+
+  #Collapse to Main Variaibles
+
+  result_df2 = dplyr::group_by(result_df, householdComp10,CarVan5,Tenure5,hhSize5,AccType7) |>
+    dplyr::summarise(households = sum(households),
+                     error_margins = error_margins[1],
+                     conv = conv[1]
+                     )
+
+  # Integrity checks
+
+
+  chk1 = vaidate_syth_pop(result_df,MhouseholdComp4_CarVan3,"CarVan3","householdComp4")
+  chk2 = vaidate_syth_pop(result_df,MhhSize5_householdComp4,"hhSize5","householdComp4")
+  chk3 = vaidate_syth_pop(result_df,MCarVan3_Tenure3,"Tenure3","CarVan3")
+  chk4 = vaidate_syth_pop(result_df,MTenure3_AccType3,"AccType3","Tenure3")
+  chk5 = vaidate_syth_pop(result_df,MCarVan,"CarVan5","CarVan3")
+
+
+  # Should only be small differences in total populations
+  if(abs(sum(result_df2$households[result_df2$hhSize5 == "p1" & result_df2$householdComp10 %in% c("OnePersonOver66","OnePersonOther")]) -
+         MhhSize5_householdComp4["p1","oneperson"]) > 10){
+    warning("check 1 failed for:",dz_CarVan_sub$LSOA21CD[1])
+  }
+  if(abs(sum(result_df2$households[result_df2$AccType7 %in% c("detached","semidetached","terraced") & result_df2$Tenure5 %in% c("outright","mortgage")]) -
+         MTenure3_AccType3["house","owned"]) > 10){
+    warning("check 2 failed for:",dz_CarVan_sub$LSOA21CD[1])
+  }
+  if(abs(sum(result_df2$households[result_df2$CarVan5 == "car1" & result_df2$householdComp10 %in% c("CoupleChildren","CoupleNoChildren","CoupleNonDepChildren")]) -
+         MhouseholdComp4_CarVan3["car1","couplefamily"]) > 10){
+    warning("check 3 failed for:",dz_CarVan_sub$LSOA21CD[1])
+  }
+
+
+  result_df$IZCode = int_hhSize_CarVan_sub$IZCode[1]
+
+  # Validation Check
+  if(FALSE){
+    chk = result_df |>
+      dplyr::group_by(hhComp10,Tenure5) |>
+      dplyr::summarise(households = sum(households)) |>
+      tidyr::pivot_wider(names_from = "Tenure5", values_from = "households", values_fill = 0)
+    chkmat = as.matrix(chk[2:ncol(chk)])
+    round(abs(chkmat - HouseholdCompByTenure) / HouseholdCompByTenure * 100) # % error
+  }
+
+
+
+  result_df
+
+}
+
+vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
+  x = x[,c(var1,var2,"households")]
+  x2 = dplyr::group_by_at(x, c(var1,var2)) |>
+    dplyr::summarise(households = sum(households)) |>
+    tidyr::pivot_wider(names_from = var2, values_from = "households")
+  mat = as.matrix(x2[,2:ncol(x2)])
+
+  rownames(mat) = x2[[var1]]
+  diff = mat - y
+  print(diff)
+  return(sum(abs(diff))/length(diff)) # Return Mean Absolute Error
+}
+
+sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"population_scotland"), bounds_iz22, synth_pop_seed_scotland, lookup_DataZone_2022){
 
   # Intermediate Zone Data
 
@@ -703,7 +1266,7 @@ downscale_to_datazone = function(dz_CarVan_sub,
 
 }
 
-scot_syth_combine = function(int_hhSize_CarVan_sub,
+scot_syth_combine_old = function(int_hhSize_CarVan_sub,
                              int_hhSize_HouseholdComp_sub, int_hhSize_Tenure_sub, int_hhSize_AccType_sub, int_Tenure_HouseholdComp_sub,
                                  seed) {
 

@@ -10,11 +10,14 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
   AccTyp7_CarVan5_Tenure5_hhSize5_scot = read_AccTyp7_CarVan5_Tenure5_hhSize5_scot(file.path(path_data,"scotlandcenus2022_AccType7_CarVan5_Tenure5_hhSize5_Scotland.xlsx"))
   householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot = read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot(file.path(path_data,"scotlandcenus2022_householdComp10_hhSize5_CarVan3_Tenure3_AccType3.Scotland.xlsx"))
   AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot = read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot(file.path(path_data,"scotlandcenus2022_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_Scotland.xlsx"))
-  AccType7_AccType3_scot = read_AccType7_AccType3_scot(file.path(path_data,"scotlandcenus2022_AccType7_AccType3_Scotland.csv"))
+  householdComp10_householdComp4_AccType7_AccType3_scot = read_householdComp10_householdComp4_AccType7_AccType3_scot(file.path(path_data,"scotlandcenus2022_householdComp10_householdComp4_AccType7_AccType3_Scotland.csv"))
+  hhSize5_AccType7_householdComp10_Tenure5_scot = read_hhSize5_AccType7_householdComp10_Tenure5_scot(file.path(path_data,"scotlandcenus2022_hhSize5_AccType7_householdComp10_Tenure5_Scotland.csv"))
+  hhSize5_AccType7_householdComp10_CarVan3_scot = read_hhSize5_AccType7_householdComp10_CarVan3_scot(file.path(path_data,"scotlandcenus2022_hhSize5_AccType7_householdComp10_CarVan3_Scotland.csv"))
 
 
   # Define Variable Names
   householdComp10 = c("OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")
+  householdComp4 = c("oneperson","couplefamily","loneparentfamily","other")
   hhSize5 = c("p1","p2","p3","p4","p5+")
   Tenure3 = c("owned","socialrented","privaterented")
   Tenure5 = c("outright","mortgage","socialrented","privaterented","rentfree")
@@ -60,42 +63,53 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
                dimnames = list(Tenure5, Tenure3, AccType7, CarVan5, CarVan3)
   )
 
-  mat5 = expand.grid(AccType3,AccType7)
-  names(mat5) = c("AccType3","AccType7")
-  mat5 = dplyr::left_join(mat5, AccType7_AccType3_scot, by = c("AccType3","AccType7"))
-  if(anyNA(mat5$value)){stop("NAs in values")}
-  mat5 = array(mat5$value,
-               dim = c(length(AccType3), length(AccType7)),
-               dimnames = list(AccType3, AccType7)
+  mat5 = expand.grid(householdComp10,householdComp4,AccType7,AccType3)
+  names(mat5) = c("householdComp10","householdComp4","AccType7","AccType3")
+  mat5 = dplyr::left_join(mat5, householdComp10_householdComp4_AccType7_AccType3_scot, by = c("householdComp10","householdComp4","AccType7","AccType3"))
+  if(anyNA(mat5$households)){stop("NAs in values")}
+  mat5 = array(mat5$households,
+               dim = c(length(householdComp10), length(householdComp4),length(AccType7),length(AccType3)),
+               dimnames = list(householdComp10,householdComp4,AccType7,AccType3)
   )
 
-  # Seed Dim
-  # householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3
+  mat6 = expand.grid(hhSize5,AccType7,householdComp10,Tenure5)
+  names(mat6) = c("hhSize5","AccType7","householdComp10","Tenure5")
+  mat6 = dplyr::left_join(mat6, hhSize5_AccType7_householdComp10_Tenure5_scot, by = c("hhSize5","AccType7","householdComp10","Tenure5"))
+  if(anyNA(mat6$households)){stop("NAs in values")}
+  mat6 = array(mat6$households,
+               dim = c(length(hhSize5), length(AccType7),length(householdComp10),length(Tenure5)),
+               dimnames = list(hhSize5,AccType7,householdComp10,Tenure5)
+  )
 
-  seed = array(1, dim = c(10,5,3,5,3,5,7,3))
+  mat7 = expand.grid(hhSize5,AccType7,householdComp10,CarVan3)
+  names(mat7) = c("hhSize5","AccType7","householdComp10","CarVan3")
+  mat7 = dplyr::left_join(mat7, hhSize5_AccType7_householdComp10_CarVan3_scot, by = c("hhSize5","AccType7","householdComp10","CarVan3"))
+  if(anyNA(mat7$households)){stop("NAs in values")}
+  mat7 = array(mat7$households,
+               dim = c(length(hhSize5), length(AccType7),length(householdComp10),length(CarVan3)),
+               dimnames = list(hhSize5,AccType7,householdComp10,CarVan3)
+  )
+  # Seed Dim
+  # householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3, householdComp4
+
+  seed = array(1, dim = c(10,5,3,5,3,5,7,3,4))
   res <- mipfp::Ipfp(seed,
-                     list(c(1,2,4,6),c(7,2,6,4),c(8,1,3,5,6),c(4,5,7,2,3),c(8,7)),
+                     list(c(1,2,4,6),c(7,2,6,4),c(8,1,3,5,6),c(4,5,7,2,3),c(1,9,7,8),c(6,7,1,4),c(6,7,1,3)),
                      list(mat1, #1,2,4,6
                           mat2, #7,2,6,4
                           mat3, #8,1,3,5,6
                           mat4, #4,5,7,2,3
-                          mat5)) #8,7
-
+                          mat5, #1,9,7,8
+                          mat6, #6,7,1,4
+                          mat7 #6,7,1,3
+  ))
   result_df = expand.grid(
-    householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3
+    householdComp10, CarVan5, CarVan3, Tenure5, Tenure3, hhSize5, AccType7, AccType3, householdComp4
   )
-  names(result_df) = c("householdComp10", "CarVan5", "CarVan3", "Tenure5", "Tenure3", "hhSize5", "AccType7", "AccType3")
-  result_df$households = int_trs(as.numeric(res$x.hat) * median(c(sum(mat1),sum(mat2),sum(mat3),sum(mat4),sum(mat5))))
+  names(result_df) = c("householdComp10", "CarVan5", "CarVan3", "Tenure5", "Tenure3", "hhSize5", "AccType7", "AccType3","householdComp4")
+  result_df$households = int_trs(as.numeric(res$x.hat) * median(c(sum(mat1),sum(mat2),sum(mat3),sum(mat4),sum(mat5),sum(mat6),sum(mat7))))
 
-  slt = strsplit(as.character(result_df$carSizeTenure),"_")
-
-  result_df$CarVan5 = sapply(slt, `[[`, 1)
-  result_df$hhSize5 = sapply(slt, `[[`, 2)
-  result_df$Tenure5 = sapply(slt, `[[`, 3)
-
-  result_df = result_df[,c("hhSize5","householdComp10","CarVan5","AccTyp7","Tenure5","households")]
-
-  result_df$seed = result_df$households / 200
+  result_df$seed = result_df$households / 20
   result_df$seed = ifelse(result_df$seed > 1, 1,  result_df$seed)
   result_df$seed = ifelse(result_df$seed < 1 &    result_df$seed > 0.03, 0.75 , result_df$seed)
   result_df$seed = ifelse(result_df$seed < 0.03 & result_df$seed > 0.01, 0.5  , result_df$seed)
@@ -108,16 +122,154 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
 
 }
 
+read_hhSize5_AccType7_householdComp10_Tenure5_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType7_householdComp10_Tenure5_Scotland.csv"){
 
-read_AccType7_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_AccType3_Scotland.csv"){
+  raw_data <- readr::read_csv(path , skip = 10, col_names = FALSE, show_col_types = FALSE)
+  names(raw_data) = c("counting","hhSize5","AccType7","householdComp10","Tenure5","households")
+  raw_data$dud = NULL
+  raw_data$counting = NULL
+  raw_data = raw_data[!is.na(raw_data$households),]
+
+  raw_data$hhSize5 = rep_lables(raw_data$hhSize5)
+  raw_data$AccType7 = rep_lables(raw_data$AccType7)
+  raw_data$householdComp10 = rep_lables(raw_data$householdComp10)
+
+  raw_data = raw_data[raw_data$hhSize5 != "Total",]
+
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged 66 and over"] = "OnePersonOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged under 66" ] = "OnePersonOther"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: All aged 66 and over"] = "FamilyOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: No children" ] = "CoupleNoChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: With dependent children"] = "CoupleChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: All children non-dependent"] = "CoupleNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: With dependent children" ] = "LoneParent"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: All children non-dependent" ] = "LoneParentNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: With dependent children" ] = "OtherChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: Other (including all full-time students and all aged 66 and over)"] = "OtherIncStudentOrOver66"
+
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Detached"] = "detached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Semi-detached"] = "semidetached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Terraced (including end-terrace)" ] = "terraced"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Purpose-built block of flats or tenement"] = "flatpurposebuilt"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Part of a converted or shared house (including bed-sits)"] = "flatconverted"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: In a commercial building"] = "flatcommercial"
+  raw_data$AccType7[raw_data$AccType7  == "Caravan or other mobile or temporary structure"] = "caravan"
+
+  raw_data$hhSize5[raw_data$hhSize5  == "One person"] = "p1"
+  raw_data$hhSize5[raw_data$hhSize5  == "Two people"] = "p2"
+  raw_data$hhSize5[raw_data$hhSize5  == "Three people"] = "p3"
+  raw_data$hhSize5[raw_data$hhSize5  == "Four people"] = "p4"
+  raw_data$hhSize5[raw_data$hhSize5  == "Five or more people"] = "p5+"
+
+  raw_data$Tenure5[raw_data$Tenure5  == "Owned: Owned outright"] = "outright"
+  raw_data$Tenure5[raw_data$Tenure5  == "Owned: Owns with a mortgage or loan or shared ownership" ] = "mortgage"
+  raw_data$Tenure5[raw_data$Tenure5  == "Social Rented: Council (LA) or Housing Association/ Registered Social Landlord"] = "socialrented"
+  raw_data$Tenure5[raw_data$Tenure5  == "Private rented"] = "privaterented"
+  raw_data$Tenure5[raw_data$Tenure5  == "Living rent free" ] = "rentfree"
+
+  raw_data
+
+}
+
+
+
+rep_lables = function(x){
+  for(i in seq_len(length(x))){
+    if(is.na(x[i])){
+      x[i] = x[i-1]
+    }
+  }
+  x
+}
+
+
+read_hhSize5_AccType7_householdComp10_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType7_householdComp10_CarVan3_Scotland.csv"){
 
   raw_data <- readr::read_csv(path , skip = 11, col_names = FALSE, show_col_types = FALSE)
-  raw_data = raw_data[1:3,1:8]
-  names(raw_data) = c("AccType3","detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
+  names(raw_data) = c("hhSize5","AccType7","householdComp10","CarVan3","households","dud")
+  raw_data$dud = NULL
+  raw_data = raw_data[!is.na(raw_data$households),]
 
-  raw_data$AccType3 = c("house","flat","caravan")
-  raw_data$detached  = as.numeric(raw_data$detached)
-  raw_data = tidyr::pivot_longer(raw_data, cols = names(raw_data)[2:8], names_to = "AccType7")
+  raw_data$hhSize5 = rep_lables(raw_data$hhSize5)
+  raw_data$AccType7 = rep_lables(raw_data$AccType7)
+  raw_data$householdComp10 = rep_lables(raw_data$householdComp10)
+
+  raw_data = raw_data[raw_data$hhSize5 != "Total",]
+
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged 66 and over"] = "OnePersonOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged under 66" ] = "OnePersonOther"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: All aged 66 and over"] = "FamilyOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: No children" ] = "CoupleNoChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: With dependent children"] = "CoupleChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: All children non-dependent"] = "CoupleNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: With dependent children" ] = "LoneParent"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: All children non-dependent" ] = "LoneParentNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: With dependent children" ] = "OtherChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: Other (including all full-time students and all aged 66 and over)"] = "OtherIncStudentOrOver66"
+
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Detached"] = "detached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Semi-detached"] = "semidetached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Terraced (including end-terrace)" ] = "terraced"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Purpose-built block of flats or tenement"] = "flatpurposebuilt"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Part of a converted or shared house (including bed-sits)"] = "flatconverted"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: In a commercial building"] = "flatcommercial"
+  raw_data$AccType7[raw_data$AccType7  == "Caravan or other mobile or temporary structure"] = "caravan"
+
+  raw_data$CarVan3[raw_data$CarVan3  == "Number of cars or vans in household: No cars or vans"] = "car0"
+  raw_data$CarVan3[raw_data$CarVan3  == "Number of cars or vans in household: One car or van" ] = "car1"
+  raw_data$CarVan3[raw_data$CarVan3  == "Number of cars or vans in household: Two or more cars or vans"] = "car2+"
+
+  raw_data$hhSize5[raw_data$hhSize5  == "One person"] = "p1"
+  raw_data$hhSize5[raw_data$hhSize5  == "Two people"] = "p2"
+  raw_data$hhSize5[raw_data$hhSize5  == "Three people"] = "p3"
+  raw_data$hhSize5[raw_data$hhSize5  == "Four people"] = "p4"
+  raw_data$hhSize5[raw_data$hhSize5  == "Five or more people"] = "p5+"
+
+  raw_data
+
+}
+
+
+
+read_householdComp10_householdComp4_AccType7_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_householdComp4_AccType7_AccType3_Scotland.csv"){
+
+  raw_data <- readr::read_csv(path , skip = 10, col_names = FALSE, show_col_types = FALSE)
+  names(raw_data) = c("counting","householdComp10","householdComp4","AccType7","AccType3","households")
+  raw_data$counting = NULL
+
+  raw_data = raw_data[!is.na(raw_data$households),]
+  raw_data = raw_data[raw_data$householdComp10 != "Total",]
+
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged 66 and over"] = "OnePersonOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One person household: Aged under 66" ] = "OnePersonOther"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: All aged 66 and over"] = "FamilyOver66"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: No children" ] = "CoupleNoChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: With dependent children"] = "CoupleChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Couple family: All children non-dependent"] = "CoupleNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: With dependent children" ] = "LoneParent"
+  raw_data$householdComp10[raw_data$householdComp10 == "One family household: Lone parent: All children non-dependent" ] = "LoneParentNonDepChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: With dependent children" ] = "OtherChildren"
+  raw_data$householdComp10[raw_data$householdComp10 == "Other household types: Other (including all full-time students and all aged 66 and over)"] = "OtherIncStudentOrOver66"
+
+  raw_data$householdComp4[raw_data$householdComp4 == "One person household"] = "oneperson"
+  raw_data$householdComp4[raw_data$householdComp4 == "One family household: Couple family"] = "couplefamily"
+  raw_data$householdComp4[raw_data$householdComp4 == "One family household: Lone parent"] = "loneparentfamily"
+  raw_data$householdComp4[raw_data$householdComp4 == "Other household types"] = "other"
+
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Detached"] = "detached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Semi-detached"] = "semidetached"
+  raw_data$AccType7[raw_data$AccType7  == "Whole house or bungalow: Terraced (including end-terrace)" ] = "terraced"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Purpose-built block of flats or tenement"] = "flatpurposebuilt"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: Part of a converted or shared house (including bed-sits)"] = "flatconverted"
+  raw_data$AccType7[raw_data$AccType7  == "Flat, maisonette or apartment: In a commercial building"] = "flatcommercial"
+  raw_data$AccType7[raw_data$AccType7  == "Caravan or other mobile or temporary structure"] = "caravan"
+
+  raw_data$AccType3[raw_data$AccType3  == "Whole house or bungalow"] = "house"
+  raw_data$AccType3[raw_data$AccType3  == "Flat, maisonette or apartment"] = "flat"
+  raw_data$AccType3[raw_data$AccType3  == "Caravan or other mobile or temporary structure"] = "caravan"
+
+
+
 
   raw_data
 
