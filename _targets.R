@@ -516,6 +516,10 @@ tar_target(dwellings_tax_band,{
   load_voa_CTSOP1(path = file.path(parameters$path_data,"voa"))
 }),
 
+tar_target(households_scotland,{
+  read_scotland_households(path = file.path(parameters$path_data,"population_scotland/household-estimates.xlsx"))
+}),
+
 tar_target(dwellings_tax_band_scotland,{
   load_scotland_council_tax(path = file.path(parameters$path_data,"council_tax_scotland"))
 }),
@@ -789,10 +793,12 @@ tar_target(synth_pop_seed_scotland,{
   build_synth_pop_seed_scotland(file.path(parameters$path_data,"population_scotland"))
 }),
 
-
-
 tar_target(census21_synth_households,{
   sythetic_census(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
+}),
+
+tar_target(scot_synth_households,{
+  sythetic_census_scot(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland) # Long running ~ 3.5 days
 }),
 
 tar_target(lcfs,{
