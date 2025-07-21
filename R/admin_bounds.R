@@ -16,7 +16,7 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
     }
   }
   download.file("https://github.com/PlaceBasedCarbonCalculator/inputdata/releases/download/boundaries/Boundaries.zip",
-                destfile = file.path(tempdir(),"Boundaries.zip"), mode = "wb")
+                destfile = file.path(tempdir(),"Boundaries.zip"), mode = "wb", )
   unzip(file.path(tempdir(),"Boundaries.zip"), exdir = path)
   path
 }

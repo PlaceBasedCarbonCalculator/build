@@ -198,6 +198,9 @@ tar_target(bounds_lsoa21_super_generalised,{
 tar_target(bounds_dz11,{
   read_bounds_dz11(dl_boundaries)
 }),
+tar_target(bounds_dz22,{
+  read_dz2022_bounds(dl_boundaries)
+}),
 tar_target(bounds_iz22,{
   read_intermidiate_zones_2022(dl_boundaries)
 }),

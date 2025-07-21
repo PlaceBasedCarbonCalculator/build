@@ -900,7 +900,19 @@ sythetic_census_scot = function(path_data = file.path(parameters$path_data,"popu
 
 }
 
-
+array_maker = function(x, ...){
+  args <- substitute(list(...))[-1]  # Capture the unevaluated arguments
+  arg_names <- sapply(args, function(x) deparse(x))
+  mat1 = expand.grid(...)
+  names(mat1) = arg_names
+  mat1 = dplyr::left_join(mat1, x, by = arg_names)
+  if(anyNA(mat1$households)){stop("NAs in values")}
+  mat1 = array(mat1$households,
+               dim = c(lengths(list(...))),
+               dimnames = list(...)
+  )
+  mat1
+}
 
 scot_syth_combine = function(dz_CarVan_sub,
                              dz_HouseholdComp_sub,
@@ -950,19 +962,7 @@ scot_syth_combine = function(dz_CarVan_sub,
   AccType3 = c("house","flat","caravan")
   AccType7 = c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan")
 
-  array_maker = function(x, ...){
-    args <- substitute(list(...))[-1]  # Capture the unevaluated arguments
-    arg_names <- sapply(args, function(x) deparse(x))
-    mat1 = expand.grid(...)
-    names(mat1) = arg_names
-    mat1 = dplyr::left_join(mat1, x, by = arg_names)
-    if(anyNA(mat1$households)){stop("NAs in values")}
-    mat1 = array(mat1$households,
-                 dim = c(lengths(list(...))),
-                 dimnames = list(...)
-    )
-    mat1
-  }
+
 
   MCarVan = array_maker(dz_CarVan_sub, CarVan5, CarVan3)
   MHouseholdComp = array_maker(dz_HouseholdComp_sub,householdComp4, householdComp10)

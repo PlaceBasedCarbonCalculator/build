@@ -4,6 +4,9 @@ read_Acc_hhComp = function(path = "../inputdata/population/census2021EW_Househol
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp15CD","hhComp15","AccType5CD","AccType5","households")
   raw = raw[,c("LSOA21CD","AccType5","hhComp15","households")]
+  raw = raw[raw$hhComp15 != "Does not apply",]
+  raw$AccType5 = simplify_AccType5(raw$AccType5)
+  raw$hhComp15 = simplify_household15(raw$hhComp15)
 
   raw
 
@@ -16,6 +19,11 @@ read_Acc_tenure = function(path = "../inputdata/population/census2021EW_Househol
   names(raw) = c("LSOA21CD","LSOA21NM","Tenure5CD","Tenure5","AccType5CD","AccType5","households")
   raw = raw[,c("LSOA21CD","AccType5","Tenure5","households")]
 
+  raw = raw[raw$Tenure5 != "Does not apply",]
+
+  raw$AccType5 = simplify_AccType5(raw$AccType5)
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+
   raw
 
 }
@@ -26,6 +34,10 @@ read_Acc_CarVan = function(path = "../inputdata/population/census2021EW_Househol
 
   names(raw) = c("LSOA21CD","LSOA21NM","AccType5CD","AccType5","CarVan5CD","CarVan5","households")
   raw = raw[,c("LSOA21CD","AccType5","CarVan5","households")]
+  raw = raw[raw$CarVan5 != "Does not apply",]
+
+  raw$AccType5 = simplify_AccType5(raw$AccType5)
+  raw$CarVan5 = simplify_CarVan5(raw$CarVan5)
 
   raw
 
@@ -37,7 +49,10 @@ read_hhSize_hhComp = function(path = "../inputdata/population/census2021EW_House
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp6CD","hhComp6","hhSize5CD","hhSize5","households")
   raw = raw[,c("LSOA21CD","hhComp6","hhSize5","households")]
-
+  raw = raw[raw$hhSize5 != "0 people in household",]
+  raw = raw[raw$hhComp6 != "Does not apply",]
+  raw$hhSize5 = simplify_hhSize5(raw$hhSize5)
+  raw$hhComp6 = simplify_household6(raw$hhComp6)
   raw
 
 }
@@ -48,6 +63,10 @@ read_Acc_hhSize = function(path = "../inputdata/population/census2021EW_Househol
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhSize5CD","hhSize5","AccType5CD","AccType5","households")
   raw = raw[,c("LSOA21CD","hhSize5","AccType5","households")]
+  raw = raw[raw$hhSize5 != "0 people in household",]
+
+  raw$hhSize5 = simplify_hhSize5(raw$hhSize5)
+  raw$AccType5 = simplify_AccType5(raw$AccType5)
 
   raw
 
@@ -59,6 +78,11 @@ read_CarVan_hhComp = function(path = "../inputdata/population/census2021EW_House
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp6CD","hhComp6","CarVan5CD","CarVan5","households")
   raw = raw[,c("LSOA21CD","hhComp6","CarVan5","households")]
+  raw = raw[raw$CarVan5 != "Does not apply",]
+  raw = raw[raw$hhComp6 != "Does not apply",]
+
+  raw$CarVan5 = simplify_CarVan5(raw$CarVan5)
+  raw$hhComp6 = simplify_household6(raw$hhComp6)
 
   raw
 
@@ -70,6 +94,12 @@ read_Tenure_hhSize = function(path = "../inputdata/population/census2021EW_House
 
   names(raw) = c("LSOA21CD","LSOA21NM","Tenure5CD","Tenure5","hhSize5CD","hhSize5","households")
   raw = raw[,c("LSOA21CD","Tenure5","hhSize5","households")]
+  raw = raw[raw$hhSize5 != "0 people in household",]
+  raw = raw[raw$Tenure5 != "Does not apply",]
+
+  raw$hhSize5 = simplify_hhSize5(raw$hhSize5)
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+
 
   raw
 
@@ -81,7 +111,11 @@ read_Tenure_CarVan = function(path = "../inputdata/population/census2021EW_House
 
   names(raw) = c("LSOA21CD","LSOA21NM","CarVan5CD","CarVan5","Tenure5CD","Tenure5","households")
   raw = raw[,c("LSOA21CD","Tenure5","CarVan5","households")]
+  raw = raw[raw$CarVan5 != "Does not apply",]
+  raw = raw[raw$Tenure5 != "Does not apply",]
 
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+  raw$CarVan5 = simplify_CarVan5(raw$CarVan5)
   raw
 
 }
@@ -92,6 +126,13 @@ read_Tenure_hhSize_CarVan = function(path = "../inputdata/population/census2021E
 
   names(raw) = c("LSOA21CD","LSOA21NM","CarVan5CD","CarVan5","Tenure5CD","Tenure5","hhSize5CD","hhSize5","households")
   raw = raw[,c("LSOA21CD","Tenure5","hhSize5","CarVan5","households")]
+  raw = raw[raw$hhSize5 != "0 people in household",]
+  raw = raw[raw$Tenure5 != "Does not apply",]
+  raw = raw[raw$CarVan5 != "Does not apply",]
+
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+  raw$CarVan5 = simplify_CarVan5(raw$CarVan5)
+  raw$hhSize5 = simplify_hhSize5(raw$hhSize5)
 
   raw
 
@@ -104,6 +145,8 @@ read_Tenure_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
   names(raw) = c("LSOA21CD","LSOA21NM","Tenure5CD","Tenure5","NSSEC10CD","NSSEC10","households")
   raw = raw[,c("LSOA21CD","Tenure5","NSSEC10","households")]
 
+  raw = raw[raw$Tenure5 != "Does not apply",]
+
   raw
 
 }
@@ -114,6 +157,8 @@ read_hhComp_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp15CD","hhComp15","NSSEC10CD","NSSEC10","households")
   raw = raw[,c("LSOA21CD","hhComp15","NSSEC10","households")]
+
+  raw = raw[raw$hhComp15 != "Does not apply",]
 
   raw
 
@@ -127,6 +172,29 @@ read_hhComp_Tenure = function(path = "../inputdata/population/census2021EW_House
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp15CD","hhComp15","Tenure5CD","Tenure5","households")
   raw = raw[,c("LSOA21CD","hhComp15","Tenure5","households")]
 
+  raw = raw[raw$Tenure5 != "Does not apply",]
+  raw = raw[raw$hhComp15 != "Does not apply",]
+
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+  raw$hhComp15 = simplify_household15(raw$hhComp15)
+
+  raw
+
+}
+
+read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdComposition6_LSOA.csv"){
+
+  raw = readr::read_csv(path, show_col_types = FALSE)
+
+  names(raw) = c("LSOA21CD","LSOA21NM","hhComp6CD","hhComp6","Tenure5CD","Tenure5","households")
+  raw = raw[,c("LSOA21CD","hhComp6","Tenure5","households")]
+
+  raw = raw[raw$Tenure5 != "Does not apply",]
+  raw = raw[raw$hhComp6 != "Does not apply",]
+
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+  raw$hhComp6 = simplify_household6(raw$hhComp6)
+
   raw
 
 }
@@ -137,6 +205,11 @@ read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Hous
 
   names(raw) = c("LSOA21CD","LSOA21NM","hhComp6CD","hhComp6","Tenure5CD","Tenure5","households")
   raw = raw[,c("LSOA21CD","hhComp6","Tenure5","households")]
+  raw = raw[raw$hhComp6 != "Does not apply",]
+  raw = raw[raw$Tenure5 != "Does not apply",]
+
+  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
+  raw$hhComp6 = simplify_household6(raw$hhComp6)
 
   raw
 
@@ -177,51 +250,18 @@ read_tenure = function(path = "../inputdata/population/census2021EW_Households_T
 
 sythetic_census = function(path_data = file.path(parameters$path_data,"population"), synth_pop_seed){
 
-  #Acc_hhComp = read_Acc_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition15_AccomodationType5_LSOA_partial.csv"))  # Partial
-  #Acc_CarVan = read_Acc_CarVan(file.path(path_data,"census2021EW_Households_AccomodationType5_CarVan5_LSOA_partial.csv"))  # Partial
-  #hhSize_hhComp = read_hhSize_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition6_HouseholdSize5_LSOA_partial.csv"))  # Partial
+  Acc_hhComp = read_Acc_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition15_AccomodationType5_LSOA_partial.csv"))  # Partial
+  Acc_CarVan = read_Acc_CarVan(file.path(path_data,"census2021EW_Households_AccomodationType5_CarVan5_LSOA_partial.csv"))  # Partial
+  hhSize_hhComp = read_hhSize_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition6_HouseholdSize5_LSOA_partial.csv"))  # Partial
+  Tenure_hhSize_CarVan = read_Tenure_hhSize_CarVan(file.path(path_data,"census2021EW_Households_Tenure5_HouseholdSize5_CarVan5_LSOA_partial.csv")) # Partial
+  Acc_hhSize = read_Acc_hhSize(file.path(path_data,"census2021EW_Households_AccomodationType5_HousehholdSize5_LSOA_partial.csv")) # Partial
+
   Acc_tenure = read_Acc_tenure(file.path(path_data,"census2021EW_Households_AccomodationType5_Tenure5_LSOA.csv"))
   hhComp_Tenure = read_hhComp_Tenure(file.path(path_data,"census2021EW_Households_HouseholdComposition15_Tenure5_LSOA.csv"))
+  hhComp6_Tenure = read_hhComp6_Tenure(file.path(path_data,"census2021EW_Households_Tenure5_HouseholdComposition6_LSOA.csv"))
   Tenure_hhSize = read_Tenure_hhSize(file.path(path_data,"census2021EW_Households_Tenure5_HouseholdSize5_LSOA.csv"))
-  #CarVan_hhComp = read_CarVan_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition6_CarVan5_LSOA.csv"))
+  CarVan_hhComp = read_CarVan_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition6_CarVan5_LSOA.csv"))
   Tenure_CarVan = read_Tenure_CarVan(file.path(path_data,"census2021EW_Households_Tenure5_CarVan5_LSOA.csv"))
-  Tenure_hhSize_CarVan = read_Tenure_hhSize_CarVan(file.path(path_data,"census2021EW_Households_Tenure5_HouseholdSize5_CarVan5_LSOA_partial.csv")) # Partial
-  #Tenure_NSSEC = read_Tenure_NSSEC(file.path(path_data,"census2021EW_RefPerson_NSSEC10_Tenure5_LSOA.csv"))
-  #hhComp_NSSEC = read_hhComp_NSSEC(file.path(path_data,"census2021EW_RefPerson_NSSEC10_Houshold15_LSOA_partial.csv"))
-
-  # Remove DNA if all zeros
-  Acc_tenure = Acc_tenure[Acc_tenure$Tenure5 != "Does not apply",]
-  #Tenure_NSSEC = Tenure_NSSEC[Tenure_NSSEC$Tenure5 != "Does not apply",]
-  #hhComp_NSSEC = hhComp_NSSEC[hhComp_NSSEC$hhComp15 != "Does not apply",]
-  hhComp_Tenure = hhComp_Tenure[hhComp_Tenure$Tenure5 != "Does not apply",]
-  hhComp_Tenure = hhComp_Tenure[hhComp_Tenure$hhComp15 != "Does not apply",]
-  Tenure_hhSize = Tenure_hhSize[Tenure_hhSize$Tenure5 != "Does not apply",]
-  Tenure_hhSize = Tenure_hhSize[Tenure_hhSize$hhSize5 != "0 people in household",]
-  Tenure_CarVan = Tenure_CarVan[Tenure_CarVan$CarVan5 != "Does not apply",]
-  Tenure_CarVan = Tenure_CarVan[Tenure_CarVan$Tenure5 != "Does not apply",]
-  Tenure_hhSize_CarVan = Tenure_hhSize_CarVan[Tenure_hhSize_CarVan$Tenure5 != "Does not apply",]
-  Tenure_hhSize_CarVan = Tenure_hhSize_CarVan[Tenure_hhSize_CarVan$hhSize5 != "0 people in household",]
-  Tenure_hhSize_CarVan = Tenure_hhSize_CarVan[Tenure_hhSize_CarVan$CarVan5 != "Does not apply",]
-
-  #Acc_CarVan = Acc_CarVan[Acc_CarVan$CarVan5 != "Does not apply",]
-
-  # Simplify Values
-  Tenure_hhSize_CarVan$Tenure5 = simplify_Tenure5(Tenure_hhSize_CarVan$Tenure5)
-  Tenure_hhSize_CarVan$hhSize5 = simplify_hhSize5(Tenure_hhSize_CarVan$hhSize5)
-  Tenure_hhSize_CarVan$CarVan5 = simplify_CarVan5(Tenure_hhSize_CarVan$CarVan5)
-  Acc_tenure$Tenure5 = simplify_Tenure5(Acc_tenure$Tenure5)
-  Acc_tenure$AccType5 = simplify_AccType5(Acc_tenure$AccType5)
-  Tenure_CarVan$Tenure5 = simplify_Tenure5(Tenure_CarVan$Tenure5)
-  Tenure_CarVan$CarVan5 = simplify_CarVan5(Tenure_CarVan$CarVan5)
-  hhComp_Tenure$Tenure5 = simplify_Tenure5(hhComp_Tenure$Tenure5)
-  #hhComp_NSSEC$NSSEC10 =  simplify_nssec(hhComp_NSSEC$NSSEC10)
-  #Tenure_NSSEC$Tenure5 = simplify_Tenure5(Tenure_NSSEC$Tenure5)
-  #Tenure_NSSEC$NSSEC10 =  simplify_nssec(Tenure_NSSEC$NSSEC10)
-  Tenure_hhSize$Tenure5 = simplify_Tenure5(Tenure_hhSize$Tenure5)
-  Tenure_hhSize$hhSize5  = simplify_hhSize5(Tenure_hhSize$hhSize5)
-
-  #Acc_CarVan$CarVan5 = simplify_CarVan5(Acc_CarVan$CarVan5)
-  #Acc_CarVan$AccType5 = simplify_AccType5(Acc_CarVan$AccType5)
 
   # Simplify hhComp15 as don't know married etc
   hhComp_Tenure$hhComp15 = simplify_household15(hhComp_Tenure$hhComp15)
@@ -230,82 +270,66 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   hhComp_Tenure = dplyr::summarise(hhComp_Tenure, households = sum(households))
   hhComp_Tenure = dplyr::ungroup(hhComp_Tenure)
 
-  #hhComp_NSSEC$hhComp15 = simplify_household15(hhComp_NSSEC$hhComp15)
-  #hhComp_NSSEC$hhComp15 = gsub("Cohabit|Married","Couple",hhComp_NSSEC$hhComp15)
-  #hhComp_NSSEC = dplyr::group_by(hhComp_NSSEC, LSOA21CD, NSSEC10, hhComp15)
-  #hhComp_NSSEC = dplyr::summarise(hhComp_NSSEC, households = sum(households))
-  #hhComp_NSSEC = dplyr::ungroup(hhComp_NSSEC)
+  Acc_hhComp$hhComp15 = simplify_household15(Acc_hhComp$hhComp15)
+  Acc_hhComp$hhComp15 = gsub("Cohabit|Married","Couple",Acc_hhComp$hhComp15)
+  Acc_hhComp = dplyr::group_by(Acc_hhComp, LSOA21CD, AccType5, hhComp15)
+  Acc_hhComp = dplyr::summarise(Acc_hhComp, households = sum(households))
+  Acc_hhComp = dplyr::ungroup(Acc_hhComp)
+
 
   # Find common core
   lsoa_common = Reduce(intersect,
                        list(
-                         unique(Acc_tenure$LSOA21CD),
-                         unique(hhComp_Tenure$LSOA21CD),
-                         unique(Tenure_hhSize_CarVan$LSOA21CD)#,
-                          #unique(Tenure_NSSEC$LSOA21CD)
-                       )) #35148 98.5%
+                         unique(Acc_hhComp$LSOA21CD), #20676
+                         unique(Acc_hhSize$LSOA21CD), #35322
+                         unique(Acc_CarVan$LSOA21CD), #35335
+                         unique(hhSize_hhComp$LSOA21CD), #35601
+                         unique(Tenure_hhSize_CarVan$LSOA21CD) #35148
+                       )) #20475/35672 57%
 
-  Acc_tenure_com = Acc_tenure[Acc_tenure$LSOA21CD %in% lsoa_common,]
-  hhComp_Tenure_com = hhComp_Tenure[hhComp_Tenure$LSOA21CD %in% lsoa_common,]
-  Tenure_hhSize_CarVan_com = Tenure_hhSize_CarVan[Tenure_hhSize_CarVan$LSOA21CD %in% lsoa_common,]
-  #Tenure_NSSEC_com = Tenure_NSSEC[Tenure_NSSEC$LSOA21CD %in% lsoa_common,]
 
-  #Acc_CarVan_com = Acc_CarVan[Acc_CarVan$LSOA21CD %in% lsoa_common,]
+  # Second wave fo about 34852/35672 97.7 % if drop the Acc_hhComp
 
-  # Reduce to 2 variables
-  Tenure_hhSize_CarVan_com = Tenure_hhSize_CarVan_com[order(Tenure_hhSize_CarVan_com$hhSize5),]
-  Tenure_hhSize_CarVan_com$hhSize5_CarVan5 = paste0(Tenure_hhSize_CarVan_com$hhSize5,"_",Tenure_hhSize_CarVan_com$CarVan5)
-  Tenure_hhSize_CarVan_com = Tenure_hhSize_CarVan_com[,c("LSOA21CD","Tenure5","hhSize5_CarVan5","households")]
+  split_for_arrays = function(x, lsoa_common){
+    x = x[x$LSOA21CD %in% lsoa_common,]
+    x = x[order(x$LSOA21CD),]
+    x = dplyr::group_split(x, LSOA21CD)
+    x
+  }
 
-  # Pivot
-  Acc_tenure_com = tidyr::pivot_wider(Acc_tenure_com, names_from = "Tenure5", values_from = "households")
-  hhComp_Tenure_com = tidyr::pivot_wider(hhComp_Tenure_com, names_from = "Tenure5", values_from = "households")
-  Tenure_hhSize_CarVan_com = tidyr::pivot_wider(Tenure_hhSize_CarVan_com, names_from = "Tenure5", values_from = "households")
-  #Tenure_NSSEC_com = tidyr::pivot_wider(Tenure_NSSEC_com, names_from = "Tenure5", values_from = "households")
 
-  #Acc_CarVan_com = tidyr::pivot_wider(Acc_CarVan_com, names_from = "CarVan5", values_from = "households")
-
-  # Match Column orders
-  Acc_tenure_com = Acc_tenure_com[,c("LSOA21CD","AccType5","Outright","Mortgage","Social_rented","Private_rented")]
-  hhComp_Tenure_com = hhComp_Tenure_com[,c("LSOA21CD","hhComp15","Outright","Mortgage","Social_rented","Private_rented")]
-  Tenure_hhSize_CarVan_com = Tenure_hhSize_CarVan_com[,c("LSOA21CD","hhSize5_CarVan5","Outright","Mortgage","Social_rented","Private_rented")]
-  #Tenure_NSSEC_com = Tenure_NSSEC_com[,c("LSOA21CD","NSSEC10","Outright","Mortgage","Social_rented","Private_rented")]
-
-  # Order
-  Acc_tenure_com    = Acc_tenure_com[order(Acc_tenure_com$LSOA21CD),]
-  hhComp_Tenure_com    = hhComp_Tenure_com[order(hhComp_Tenure_com$LSOA21CD),]
-  Tenure_hhSize_CarVan_com    = Tenure_hhSize_CarVan_com[order(Tenure_hhSize_CarVan_com$LSOA21CD),]
-  #Tenure_NSSEC_com    = Tenure_NSSEC_com[order(Tenure_NSSEC_com$LSOA21CD),]
-
-  #Acc_CarVan_com    = Acc_CarVan_com[order(Acc_CarVan_com$LSOA21CD),]
-
-  # Split
-  Acc_tenure_com = dplyr::group_split(dplyr::ungroup(Acc_tenure_com), LSOA21CD)
-  hhComp_Tenure_com = dplyr::group_split(hhComp_Tenure_com, LSOA21CD)
-  Tenure_hhSize_CarVan_com = dplyr::group_split(Tenure_hhSize_CarVan_com, LSOA21CD)
-  #Tenure_NSSEC_com = dplyr::group_split(Tenure_NSSEC_com, LSOA21CD)
-
-  #Acc_CarVan_com = dplyr::group_split(Acc_CarVan_com, LSOA21CD)
+  # Common Core Datasets
+  Acc_tenure_com = split_for_arrays(Acc_tenure, lsoa_common)
+  hhComp_Tenure_com = split_for_arrays(hhComp_Tenure, lsoa_common)
+  Tenure_hhSize_CarVan_com = split_for_arrays(Tenure_hhSize_CarVan, lsoa_common)
+  Acc_hhComp_com = split_for_arrays(Acc_hhComp, lsoa_common)
+  Acc_CarVan_com = split_for_arrays(Acc_CarVan, lsoa_common)
+  hhSize_hhComp_com = split_for_arrays(hhSize_hhComp, lsoa_common)
+  Acc_hhSize_com = split_for_arrays(Acc_hhSize, lsoa_common)
+  hhComp6_Tenure_com = split_for_arrays(hhComp6_Tenure, lsoa_common)
+  Tenure_hhSize_com = split_for_arrays(Tenure_hhSize, lsoa_common)
+  CarVan_hhComp_com = split_for_arrays(CarVan_hhComp, lsoa_common)
+  Tenure_CarVan_com = split_for_arrays(Tenure_CarVan, lsoa_common)
 
   # Build Seed
   seed_df = expand.grid(c("Detached","Semi","Terraced","Flat","caravan"),
-    c("OnePersonOther","OnePersonOver66",
-      "CoupleNoChildren",
-      "CoupleChildren","CoupleNonDepChildren","FamilyOver66","LoneParent",
-      "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66","OtherNoChildren"),
-                          c("Outright","Mortgage","Social_rented","Private_rented"),
-                          c("p1_car0","p1_car1","p1_car2","p1_car3+","p2_car0","p2_car1","p2_car2","p2_car3+","p3_car0",
-                            "p3_car1","p3_car2","p3_car3+","p4+_car0","p4+_car1","p4+_car2","p4+_car3+"))#,
-                          #c("DNA","L1L2L3","L4L5L6","L7","L8L9","L10L11","L12","L13","L14","L15"))
+                        c("OnePersonOther","OnePersonOver66",
+                          "CoupleNoChildren",
+                          "CoupleChildren","CoupleNonDepChildren","FamilyOver66","LoneParent",
+                          "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66","OtherNoChildren"),
+                        c("Outright","Mortgage","Social_rented","Private_rented"),
+                        c("p1_car0","p1_car1","p1_car2","p1_car3+","p2_car0","p2_car1","p2_car2","p2_car3+","p3_car0",
+                          "p3_car1","p3_car2","p3_car3+","p4+_car0","p4+_car1","p4+_car2","p4+_car3+"))#,
+  #c("DNA","L1L2L3","L4L5L6","L7","L8L9","L10L11","L12","L13","L14","L15"))
   names(seed_df) = c("Acc5",
-    "hhComp15","Tenure5","hhSizeCarVan")#,"NSSEC10")
+                     "hhComp15","Tenure5","hhSizeCarVan")#,"NSSEC10")
 
   seed_df[] <- lapply(seed_df[], as.character)
 
   # Match Seed to Inputs
   synth_pop_seed = synth_pop_seed[,c("Acc5",
-    "hhComp15","Tenure5","hhSizeCarVan",#"NSSEC10",
-    "households","seed")]
+                                     "hhComp15","Tenure5","hhSizeCarVan",#"NSSEC10",
+                                     "households","seed")]
   synth_pop_seed[1:4] <- lapply(synth_pop_seed[1:4], as.character)
 
   synth_pop_seed$Tenure5 = gsub("Privaterented","Private_rented",synth_pop_seed$Tenure5)
@@ -314,7 +338,7 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   # Create a key column by concatenating columns' values
   seed_df$key <- apply(seed_df, 1, paste, collapse = "_")
   synth_pop_seed$key <- apply(synth_pop_seed[,c("Acc5","hhComp15","Tenure5","hhSizeCarVan"#"NSSEC10"
-                                                )], 1, paste, collapse = "_")
+  )], 1, paste, collapse = "_")
 
   # Match rows of A to B using the key column
   synth_pop_seed <- synth_pop_seed[match(seed_df$key, synth_pop_seed$key), ]
@@ -329,9 +353,9 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   # Combine
   future::plan("multisession")
   res_com = furrr::future_pmap(.l = list(Acc_tenure_com,
-    hhComp_Tenure_com, Tenure_hhSize_CarVan_com),# Tenure_NSSEC_com),
-                        .f = cenus_syth_combine_v3, seed = seed,
-    .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
+                                         hhComp_Tenure_com, Tenure_hhSize_CarVan_com),# Tenure_NSSEC_com),
+                               .f = cenus_syth_combine_v3, seed = seed,
+                               .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
   future::plan("sequential")
   res_com = dplyr::bind_rows(res_com)
 
@@ -342,9 +366,9 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   if(FALSE){
     #DEBUG
     res_com = purrr::pmap(.l = list(Acc_tenure_com[1:10],
-                                           hhComp_Tenure_com[1:10], Tenure_hhSize_CarVan_com[1:10]),# Tenure_NSSEC_com),
-                                 .f = cenus_syth_combine_v3, seed = seed,
-                                 .progress = TRUE)
+                                    hhComp_Tenure_com[1:10], Tenure_hhSize_CarVan_com[1:10]),# Tenure_NSSEC_com),
+                          .f = cenus_syth_combine_v3, seed = seed,
+                          .progress = TRUE)
 
     res_comb = cenus_syth_combine_v3(
       Acc_tenure_sub = Acc_tenure_com[[1]],
@@ -374,14 +398,14 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
     foo$households.y[is.na(foo$households.y)] = 0
 
     ggplot(foo, aes(x = households.x, y = households.y, colour = AccType5, shape = CarVan5)) +
-    geom_point() +
+      geom_point() +
       xlab("Number of Households in Census 2021") +
-         ylab("Number Households in Synthetic Population") +
+      ylab("Number Households in Synthetic Population") +
       ggtitle("Accommodation Type and Car/Van Ownership") +
       geom_abline(, color = "black") +
       labs(color='Accommodation Type') +
       labs(shape='Car/Van Ownership')
-      theme(legend.position = "none")
+    theme(legend.position = "none")
 
     cor(foo$households.x, foo$households.y) #0.9874037 very good
     summary(lm(foo$households.x ~ foo$households.y))
@@ -433,18 +457,18 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   # Combine
   future::plan("multisession")
   res_alt = furrr::future_pmap(.l = list(Acc_tenure_alt,
-    hhComp_Tenure_alt, Tenure_hhSize_alt,Tenure_CarVan_alt),#Tenure_NSSEC_alt),
-  .f = cenus_syth_combine_alt,
-  seed_alt = seed_alt,
-  .progress = TRUE,  .options = furrr::furrr_options(seed = TRUE))
+                                         hhComp_Tenure_alt, Tenure_hhSize_alt,Tenure_CarVan_alt),#Tenure_NSSEC_alt),
+                               .f = cenus_syth_combine_alt,
+                               seed_alt = seed_alt,
+                               .progress = TRUE,  .options = furrr::furrr_options(seed = TRUE))
   future::plan("sequential")
   res_alt = dplyr::bind_rows(res_alt)
 
   if(FALSE){
     # DEBUG
     res_alt = purrr::pmap(.l = list(Acc_tenure_alt[1:3],
-                                           hhComp_Tenure_alt[1:3], Tenure_hhSize_alt[1:3],Tenure_CarVan_alt[1:3]),#Tenure_NSSEC_alt),
-                                 .f = cenus_syth_combine_alt, seed_alt = seed_alt, .progress = TRUE)
+                                    hhComp_Tenure_alt[1:3], Tenure_hhSize_alt[1:3],Tenure_CarVan_alt[1:3]),#Tenure_NSSEC_alt),
+                          .f = cenus_syth_combine_alt, seed_alt = seed_alt, .progress = TRUE)
 
     # Acc_tenure_sub = Acc_tenure_com[[1]]
     # hhComp_Tenure_sub = hhComp_Tenure_com[[1]]
@@ -472,9 +496,9 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
 
 simplify_Tenure5 = function(x){
   x[x=="Owned: Owns outright"] = "outright"
-  x[x=="Owned: Owns with a mortgage or loan or shared ownership"] = "Mortgage"
-  x[x=="Rented: Social rented"] = "Social_rented"
-  x[x=="Private rented or lives rent free"] = "Private_rented"
+  x[x=="Owned: Owns with a mortgage or loan or shared ownership"] = "mortgage"
+  x[x=="Rented: Social rented"] = "socialrented"
+  x[x=="Private rented or lives rent free"] = "privaterented"
   x
 }
 
@@ -503,16 +527,16 @@ simplify_AccType5= function(x){
   x
 }
 
-cenus_syth_combine_v3 = function(Acc_tenure_sub,
-  hhComp_Tenure_sub, Tenure_hhSize_CarVan_sub, #Tenure_NSSEC_sub,
-  seed) {
+census_syth_combine_v4 = function(Acc_tenure_sub,
+                                 hhComp_Tenure_sub, Tenure_hhSize_CarVan_sub, #Tenure_NSSEC_sub,
+                                 seed) {
 
   # Check LSOA match
   if(length(unique(c(Acc_tenure_sub$LSOA21CD,
                      hhComp_Tenure_sub$LSOA21CD,
                      Tenure_hhSize_CarVan_sub$LSOA21CD#,
                      #Tenure_NSSEC_sub$LSOA21CD
-                     ))) != 1){
+  ))) != 1){
     stop("More than one LSOA")
   }
 
@@ -633,7 +657,7 @@ cenus_syth_combine_v3 = function(Acc_tenure_sub,
                                  marginals = list(AccByTenure,
                                                   hhCompByTenure2,
                                                   hhSizeCarVanByTenure2#,NSSECByTenure
-                                                  )),
+                                 )),
                silent = TRUE)
 
   if(inherits(result,"try-error")){
@@ -647,10 +671,10 @@ cenus_syth_combine_v3 = function(Acc_tenure_sub,
     rownames(hhCompByTenure2),
     #colnames(hhCompByTenure2),
     rownames(hhSizeCarVanByTenure2)#,rownames(NSSECByTenure)
-    )
+  )
   names(result_df) = c("Acc5","Tenure5",
-    "hhComp15","hhSizeCarVan"#,"NSSEC10"
-    )
+                       "hhComp15","hhSizeCarVan"#,"NSSEC10"
+  )
 
 
   result_df$households = as.numeric(result$result)
@@ -697,16 +721,16 @@ cenus_syth_combine_v3 = function(Acc_tenure_sub,
 
 
 cenus_syth_combine_alt = function(Acc_tenure_sub,
-  hhComp_Tenure_sub, Tenure_hhSize_sub,Tenure_CarVan_sub,#,Tenure_NSSEC_sub
-  seed_alt
-  ) {
+                                  hhComp_Tenure_sub, Tenure_hhSize_sub,Tenure_CarVan_sub,#,Tenure_NSSEC_sub
+                                  seed_alt
+) {
 
   # Check LSOA match
   if(length(unique(c(Acc_tenure_sub$LSOA21CD,
                      hhComp_Tenure_sub$LSOA21CD,
                      Tenure_hhSize_sub$LSOA21CD,
                      Tenure_CarVan_sub$LSOA21CD#,Tenure_NSSEC_sub$LSOA21CD
-                     ))) != 1){
+  ))) != 1){
     stop("More than one LSOA")
   }
 
@@ -765,35 +789,35 @@ cenus_syth_combine_alt = function(Acc_tenure_sub,
   # and hhCompByTenure rows 4-11 (housholds with 2-many people)
 
   #for (i in 1:dim[1]) {
-    # for (j in 1:dim[1]) {
-    #   for (k in 1:dim[2]) {
-    #     for (l in 1:dim[3]) {
-    #       for (m in 1:dim[4]) {
-    #         for(n in 1:dim[5]){
-    #           if ((j %in% c(1:2)) & (!l == 1)) {
-    #             # If one person household and number of household is not 1 set to 0
-    #             seed[j, k, l, m, n] = 1e-15
-    #           }
-    #
-    #           if ((j == 3) & (l != 2)) {
-    #             # If two person household and number of household is not 2 set to 0
-    #             seed[j, k, l, m, n] = 1e-15
-    #           }
-    #
-    #           if ((j %in% 4:5) & (l %in% c(1:2))) {
-    #             # If at least three person household and number of household is 1 or 2 set to 0
-    #             seed[j, k, l, m, n] = 1e-15
-    #           }
-    #
-    #           if ((j %in% 6:11) & (l == 1)) {
-    #             # If at least two person household and number of household is 1 set to 0
-    #             seed[j, k, l, m, n] = 1e-15
-    #           }
-    #         }
-    #       }
-    #     }
-    #   }
-    # }
+  # for (j in 1:dim[1]) {
+  #   for (k in 1:dim[2]) {
+  #     for (l in 1:dim[3]) {
+  #       for (m in 1:dim[4]) {
+  #         for(n in 1:dim[5]){
+  #           if ((j %in% c(1:2)) & (!l == 1)) {
+  #             # If one person household and number of household is not 1 set to 0
+  #             seed[j, k, l, m, n] = 1e-15
+  #           }
+  #
+  #           if ((j == 3) & (l != 2)) {
+  #             # If two person household and number of household is not 2 set to 0
+  #             seed[j, k, l, m, n] = 1e-15
+  #           }
+  #
+  #           if ((j %in% 4:5) & (l %in% c(1:2))) {
+  #             # If at least three person household and number of household is 1 or 2 set to 0
+  #             seed[j, k, l, m, n] = 1e-15
+  #           }
+  #
+  #           if ((j %in% 6:11) & (l == 1)) {
+  #             # If at least two person household and number of household is 1 set to 0
+  #             seed[j, k, l, m, n] = 1e-15
+  #           }
+  #         }
+  #       }
+  #     }
+  #   }
+  # }
   #}
 
 
@@ -804,7 +828,7 @@ cenus_syth_combine_alt = function(Acc_tenure_sub,
                                                   hhCompByTenure,
                                                   TenureByhhSize,
                                                   TenureByCarVan#, NSSECByTenure
-                                                  )),
+                                 )),
                silent = TRUE)
 
   if(inherits(result,"try-error")){
@@ -813,12 +837,12 @@ cenus_syth_combine_alt = function(Acc_tenure_sub,
   }
 
   result_df = expand.grid(rownames(AccByTenure), colnames(AccByTenure),
-     rownames(hhCompByTenure), #colnames(hhCompByTenure),
+                          rownames(hhCompByTenure), #colnames(hhCompByTenure),
                           rownames(TenureByhhSize), rownames(TenureByCarVan)#, rownames(NSSECByTenure)
-     )
+  )
   names(result_df) = c("Acc5","Tenure5",
-    "hhComp15","hhSize5","CarVan5"#,"NSSEC10"
-    )
+                       "hhComp15","hhSize5","CarVan5"#,"NSSEC10"
+  )
   result_df$households = as.numeric(result$result)
   result_df = result_df[result_df$households > 0,]
   result_df$conv = result$conv
