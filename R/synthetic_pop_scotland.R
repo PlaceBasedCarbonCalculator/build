@@ -1076,7 +1076,7 @@ scot_syth_combine = function(dz_CarVan_sub,
 
 vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
   x = x[,c(var1,var2,"households")]
-  x2 = dplyr::group_by_at(x, c(var1,var2)) |>
+  x2 = dplyr::group_by_at(x, dplyr::all_of(c(var1,var2))) |>
     dplyr::summarise(households = sum(households)) |>
     tidyr::pivot_wider(names_from = var2, values_from = "households")
   mat = as.matrix(x2[,2:ncol(x2)])
