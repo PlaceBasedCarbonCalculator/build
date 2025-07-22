@@ -390,20 +390,20 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
   Tenure_CarVan_hhComp6_com = split_for_arrays3(Tenure_CarVan_hhComp6, lsoa_all)
   hhSize_CarVan_com = split_for_arrays3(hhSize_CarVan, lsoa_all)
 
-  Acc_tenure_sub = Acc_tenure_com[[1]]
-  hhComp_Tenure_sub = hhComp_Tenure_com[[1]]
-  Tenure_hhSize_CarVan_sub = Tenure_hhSize_CarVan_com[[1]]
-  Acc_hhComp_sub = Acc_hhComp_com[[1]]
-  Acc_hhComp6_sub = Acc_hhComp6_com[[1]]
-  Acc_CarVan_sub = Acc_CarVan_com[[1]]
-  hhSize_hhComp_sub = hhSize_hhComp_com[[1]]
-  Acc_hhSize_sub = Acc_hhSize_com[[1]]
-  hhComp6_Tenure_sub = hhComp6_Tenure_com[[1]]
-  Tenure_hhSize_sub = Tenure_hhSize_com[[1]]
-  CarVan_hhComp_sub = CarVan_hhComp_com[[1]]
-  Tenure_CarVan_sub = Tenure_CarVan_com[[1]]
-  Tenure_CarVan_hhComp6_sub = Tenure_CarVan_hhComp6_com[[1]]
-  hhSize_CarVan_sub = hhSize_CarVan_com[[1]]
+  # Acc_tenure_sub = Acc_tenure_com[[1]]
+  # hhComp_Tenure_sub = hhComp_Tenure_com[[1]]
+  # Tenure_hhSize_CarVan_sub = Tenure_hhSize_CarVan_com[[1]]
+  # Acc_hhComp_sub = Acc_hhComp_com[[1]]
+  # Acc_hhComp6_sub = Acc_hhComp6_com[[1]]
+  # Acc_CarVan_sub = Acc_CarVan_com[[1]]
+  # hhSize_hhComp_sub = hhSize_hhComp_com[[1]]
+  # Acc_hhSize_sub = Acc_hhSize_com[[1]]
+  # hhComp6_Tenure_sub = hhComp6_Tenure_com[[1]]
+  # Tenure_hhSize_sub = Tenure_hhSize_com[[1]]
+  # CarVan_hhComp_sub = CarVan_hhComp_com[[1]]
+  # Tenure_CarVan_sub = Tenure_CarVan_com[[1]]
+  # Tenure_CarVan_hhComp6_sub = Tenure_CarVan_hhComp6_com[[1]]
+  # hhSize_CarVan_sub = hhSize_CarVan_com[[1]]
 
   # Iterate over LSOAs (1st round, common core about 54%)
   future::plan("multisession")
@@ -450,6 +450,7 @@ census_syth_combine_v4 = function(Acc_tenure_sub,
                                   Tenure_hhSize_sub,
                                   Tenure_CarVan_sub,
                                   hhSize_CarVan_sub,
+                                  seed,
                                   iter = 1000) {
 
 
