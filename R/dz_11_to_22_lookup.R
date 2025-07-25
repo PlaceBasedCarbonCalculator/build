@@ -1,9 +1,13 @@
-make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22){
+make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
+
 
   over = sf::st_intersects(bounds_dz22, bounds_dz11)
 
   bounds_dz22$area22 = as.numeric(sf::st_area(bounds_dz22))
   bounds_dz11$area11 = as.numeric(sf::st_area(bounds_dz11))
+
+
+
 
   res = list()
 
@@ -12,7 +16,8 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22){
   exe_i = seq_along(over)[bounds_dz22$DataZone22 %in% exe]
 
   #Check i = 3 as next problem to work on
-  for(i in seq_along(over)) {
+  # for(i in seq_along(over)) {
+  for(i in 1:100) {
     if(i %% 100 == 0) {
       message(paste("Processing DataZone22:", i, "of", length(over)))
     }
@@ -48,7 +53,8 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22){
       # sub_difference = sub_difference[sub_difference$p_change > 0.01,]
 
       # Summarise what makes up the area of the 2022 zone
-      sel_11 = bounds_dz11[bounds_dz11$DataZone %in% unique(c(sub_intersection$DataZone, sub_difference$DataZone)),]
+      #sel_11 = bounds_dz11[bounds_dz11$DataZone %in% unique(c(sub_intersection$DataZone, sub_difference$DataZone)),]
+      sel_11 = bounds_dz11[bounds_dz11$DataZone %in% unique(c(sub_intersection$DataZone)),]
       inter2 = sf::st_intersection(sel_11, bounds_dz22[i,])
       inter2$areaInter = as.numeric(sf::st_area(inter2))
       inter2 = sf::st_collection_extract(inter2, "POLYGON")
@@ -76,6 +82,10 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22){
   }
 
   res = dplyr::bind_rows(res)
+  res$areaID = seq_len(nrow(res))
+
+  uprn = sf::st_join(uprn, res[,"areaID"])
+
   # res$overlaps_with_count = lengths(res$overlaps_with)
   # res$overlapped_by_count = lengths(res$overlapped_by)
 

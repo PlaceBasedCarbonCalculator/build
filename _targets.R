@@ -300,6 +300,10 @@ tar_target(bounds_lsoa_GB_super_generalised,{
 tar_target(uprn,{
   load_uprn(path = file.path(parameters$path_data,"os_uprn"))
 }),
+tar_target(uprn_bng,{
+  load_uprn_27700(path = file.path(parameters$path_data,"os_uprn"))
+}),
+
 
 
 # Points of Interest
