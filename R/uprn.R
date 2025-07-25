@@ -16,7 +16,7 @@ load_uprn_27770 = function(path = file.path(parameters$path_data,"os_uprn")) {
   unzip(file.path(path,"osopenuprn_202406_csv.zip"), exdir = file.path(tempdir(),"uprn"))
 
   uprn = readr::read_csv(file.path(tempdir(),"uprn","osopenuprn_202406.csv"))
-  uprn = uprn[,c("UPRN","EASTING","NORTHING")]
-  uprn = sf::st_as_sf(uprn, coords = c("EASTING","NORTHING"), crs = 27700)
+  uprn = uprn[,c("UPRN","X_COORDINATE","Y_COORDINATE")]
+  uprn = sf::st_as_sf(uprn, coords = c("X_COORDINATE","Y_COORDINATE"), crs = 27700)
   uprn
 }

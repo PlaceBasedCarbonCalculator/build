@@ -1,23 +1,19 @@
 make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
-
   over = sf::st_intersects(bounds_dz22, bounds_dz11)
 
   bounds_dz22$area22 = as.numeric(sf::st_area(bounds_dz22))
   bounds_dz11$area11 = as.numeric(sf::st_area(bounds_dz11))
 
-
-
-
   res = list()
 
   #Intresting examples
-  exe = c("S01014682", "S01014688", "S01014832", "S01013485", "S01018390", "S01017990", "S01018879", "S01015643")
+  exe = c("S01013531","S01014682", "S01014688", "S01014832", "S01013485", "S01018390", "S01017990", "S01018879", "S01015643")
   exe_i = seq_along(over)[bounds_dz22$DataZone22 %in% exe]
 
   #Check i = 3 as next problem to work on
-  # for(i in seq_along(over)) {
-  for(i in 1:100) {
+  for(i in seq_along(over)) {
+  #for(i in 1:100) {
     if(i %% 100 == 0) {
       message(paste("Processing DataZone22:", i, "of", length(over)))
     }
@@ -32,14 +28,14 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
       sub_intersection = sub_intersection[,c("DataZone","DataZone22","area11", "area22", "areaInter", "pInter")]
       res[[i]] = sub_intersection
     } else if(length(over[[i]]) > 1) {
-      sub_intersection = sf::st_intersection(bounds_dz22[i,], bounds_dz11[over[[i]],])
+      sub_intersection = suppressWarnings(sf::st_intersection(bounds_dz22[i,], bounds_dz11[over[[i]],]))
       sub_intersection = slither_detection(sub_intersection) # Remove Slithers
       # Remove small areas, less than 1% of the 2022 area
       #sub_intersection = sub_intersection[sub_intersection$area_inter > (bounds_dz22$area22[i]/100),]
 
       # Remove small areas, less than 1% of the 2011 area
       sub_intersection$p_change = round(sub_intersection$area_inter / sub_intersection$area11,3)
-      sub_intersection = sub_intersection[sub_intersection$p_change > 0.01,]
+      sub_intersection = sub_intersection[sub_intersection$p_change > 0.01 | sub_intersection$area_inter > 25000,] #Keep big or significant areas
 
 
       # Also look for 2011 area larger than 2021
@@ -84,7 +80,13 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
   res = dplyr::bind_rows(res)
   res$areaID = seq_len(nrow(res))
 
-  uprn = sf::st_join(uprn, res[,"areaID"])
+  uprn_bng = sf::st_join(uprn_bng, res[,"areaID"])
+
+  #Start 12:45 UK laptop time, finsiehd 11 by 13:21
+  uprn_summary = uprn_bng |>
+    sf::st_drop_geometry() |>
+    dplyr::group_by(areaID) |>
+    dplyr::summarise(count = dplyr::n())
 
   # res$overlaps_with_count = lengths(res$overlaps_with)
   # res$overlapped_by_count = lengths(res$overlapped_by)
