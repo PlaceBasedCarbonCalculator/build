@@ -1,5 +1,5 @@
 make_similarity_table = function(hh, oac_year = 2011){
-  nms_Tenure <- c("Outright", "Mortgage", "Social_rented", "Private_rented")
+  nms_Tenure <- c("outright", "mortgage", "socialrented", "privaterented")
   nms_hhComp <- c("OnePersonOther", "OnePersonOver66", "CoupleNoChildren", "CoupleChildren",
                   "CoupleNonDepChildren", "FamilyOver66", "LoneParent", "LoneParentNonDepChildren",
                   "OtherChildren", "OtherIncStudentOrOver66", "OtherNoChildren")

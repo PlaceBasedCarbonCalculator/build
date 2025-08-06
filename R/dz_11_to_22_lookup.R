@@ -82,12 +82,17 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
   uprn_bng = sf::st_join(uprn_bng, res[,"areaID"])
 
-  #Start 12:45 UK laptop time, finsiehd 11 by 13:21
+  #Start 15:28:45 UK laptop time, finished 11 by 16:25
   uprn_summary = uprn_bng |>
     sf::st_drop_geometry() |>
     dplyr::group_by(areaID) |>
     dplyr::summarise(count = dplyr::n())
 
+  res = dplyr::left_join(res, uprn_summary, by = "areaID")
+
+  res$count[is.na(res$count)] = 0
+
+  res
   # res$overlaps_with_count = lengths(res$overlaps_with)
   # res$overlapped_by_count = lengths(res$overlapped_by)
 

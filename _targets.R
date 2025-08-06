@@ -239,6 +239,9 @@ tar_target(bounds_postcode_area,{
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
 }),
+tar_target(lookup_dz_2011_22_pre,{
+  make_dz_11_22_lookup(bounds_dz11, bounds_dz22, uprn_bng)
+}),
 tar_target(lookup_lsoa_2001_11,{
   load_LSOA_2001_2011_lookup(dl_boundaries)
 }),

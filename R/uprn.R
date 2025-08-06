@@ -10,7 +10,7 @@ load_uprn = function(path = file.path(parameters$path_data,"os_uprn")) {
 }
 
 
-load_uprn_27770 = function(path = file.path(parameters$path_data,"os_uprn")) {
+load_uprn_27700 = function(path = file.path(parameters$path_data,"os_uprn")) {
 
   dir.create(file.path(tempdir(),"uprn"))
   unzip(file.path(path,"osopenuprn_202406_csv.zip"), exdir = file.path(tempdir(),"uprn"))

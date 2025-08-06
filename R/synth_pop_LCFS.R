@@ -69,17 +69,17 @@ match_LCFS_synth_pop = function(census21_synth_households,
   population = population[,c("LSOA21CD","year","households_est","all_properties")]
   population = population[population$year == as.numeric(substr(base_year,1,4)),]
 
-  population = population[population$LSOA21CD %in% unique(census21_synth_households$LSOA),] #TODO: Scotland
+  population = population[population$LSOA21CD %in% unique(census21_synth_households$LSOA21CD),] #TODO: Scotland
 
   dwellings_type_backcast = dwellings_type_backcast[dwellings_type_backcast$year == as.numeric(substr(base_year,1,4)),]
 
-  dwellings_type_backcast$Detached = dwellings_type_backcast$house_detached + dwellings_type_backcast$unknown
-  dwellings_type_backcast$Semi = dwellings_type_backcast$house_semi + dwellings_type_backcast$bungalow
-  dwellings_type_backcast$Terraced = dwellings_type_backcast$house_terraced
-  dwellings_type_backcast$Flat = dwellings_type_backcast$flat_mais + dwellings_type_backcast$annexe
+  dwellings_type_backcast$detached = dwellings_type_backcast$house_detached + dwellings_type_backcast$unknown
+  dwellings_type_backcast$semidetached = dwellings_type_backcast$house_semi + dwellings_type_backcast$bungalow
+  dwellings_type_backcast$terraced = dwellings_type_backcast$house_terraced
+  dwellings_type_backcast$flat = dwellings_type_backcast$flat_mais + dwellings_type_backcast$annexe
   dwellings_type_backcast$caravan = dwellings_type_backcast$caravan_houseboat_mobilehome
 
-  dwellings_type_backcast = dwellings_type_backcast[,c("year","lsoa21cd","Detached","Semi","Terraced","Flat","caravan")]
+  dwellings_type_backcast = dwellings_type_backcast[,c("year","lsoa21cd","detached","semidetached","terraced","flat","caravan")]
 
   hh = lcfs_clean[[base_year]]
 
@@ -95,22 +95,23 @@ match_LCFS_synth_pop = function(census21_synth_households,
   })
   oac11lsoa21$OAC = NULL
 
-  census21_synth_households = dplyr::left_join(census21_synth_households, oac11lsoa21, by = c("LSOA" = "LSOA21CD"))
+  census21_synth_households = dplyr::left_join(census21_synth_households, oac11lsoa21, by = c("LSOA21CD" = "LSOA21CD"))
 
   similarity_table = make_similarity_table(hh, oac_year)
 
-  census21_synth_households = dplyr::left_join(census21_synth_households, income_lsoa_msoa, by = c("LSOA" = "LSOA21CD"))
+  census21_synth_households = dplyr::left_join(census21_synth_households, income_lsoa_msoa, by = c("LSOA21CD" = "LSOA21CD"))
   census21_synth_households$sd_income = (census21_synth_households$upper_limit - census21_synth_households$lower_limit) / 3.92
 
   # Expand Census
   cenus_long = census21_synth_households[rep(1:nrow(census21_synth_households), times = census21_synth_households$households),]
   cenus_long$households = NULL
 
-  cenus_long = cenus_long[order(cenus_long$LSOA),]
+  cenus_long = cenus_long[order(cenus_long$LSOA21CD),]
   dwellings_type_backcast = dwellings_type_backcast[order(dwellings_type_backcast$lsoa21cd),]
   population = population[order(population$LSOA21CD),]
 
-  cenus_long = dplyr::group_split(cenus_long, LSOA)
+  cenus_long = dplyr::ungroup(cenus_long)
+  cenus_long = dplyr::group_split(cenus_long, LSOA21CD)
   dwellings_type_backcast = dplyr::group_split(dwellings_type_backcast, lsoa21cd)
   population = dplyr::group_split(population, LSOA21CD)
 
@@ -206,14 +207,14 @@ match_LCFS_synth_pop = function(census21_synth_households,
 convert_housing_tenure <- function(housing_tenure) {
   # Define a named vector for mapping
   mapping <- c(
-    "Owned outright" = "Outright",
-    "Priv. rented (unfurn)" = "Private_rented",
-    "LA (furnished unfurnished)" = "Social_rented",
-    "Owned with mortgage" = "Mortgage",
-    "Hsng Assn (furnished unfrnish)" = "Social_rented",
-    "Priv. rented (furnished)" = "Private_rented",
-    "Rent free" = "Private_rented",
-    "Owned by rental purchase" = "Mortgage"
+    "Owned outright" = "outright",
+    "Priv. rented (unfurn)" = "privaterented",
+    "LA (furnished unfurnished)" = "socialrented",
+    "Owned with mortgage" = "mortgage",
+    "Hsng Assn (furnished unfrnish)" = "socialrented",
+    "Priv. rented (furnished)" = "privaterented",
+    "Rent free" = "privaterented",
+    "Owned by rental purchase" = "mortgage"
   )
 
   # Convert the input vector using the mapping
@@ -497,12 +498,12 @@ match_hh_census2 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similari
 
 # For each LSOA select the number of households require for each year
 select_synth_pop_year = function(cen, pop, bk){
-  if(!all(unique(c(cen$LSOA,pop$LSOA21CD)) %in% unique(bk$lsoa21cd))){
+  if(!all(unique(c(cen$LSOA21CD,pop$LSOA21CD)) %in% unique(bk$lsoa21cd))){
     stop("LSOA don't match")
   }
   #cen_long = cen[rep(1:nrow(cen), times = cen$households),]
   #cen_long$households = NULL
-  cen = dplyr::group_split(cen, Acc5)
+  cen = dplyr::group_split(cen, AccType5)
 
   if(pop$all_properties == 0){
     weight =  0
@@ -510,16 +511,16 @@ select_synth_pop_year = function(cen, pop, bk){
     weight =  pop$households_est / pop$all_properties
   }
 
-  bk$Detached = round(bk$Detached * weight)
-  bk$Semi     = round(bk$Semi * weight)
-  bk$Terraced = round(bk$Terraced * weight)
-  bk$Flat     = round(bk$Flat * weight)
+  bk$detached = round(bk$detached * weight)
+  bk$semidetached = round(bk$semidetached * weight)
+  bk$terraced = round(bk$terraced * weight)
+  bk$flat     = round(bk$flat * weight)
   bk$caravan  = round(bk$caravan * weight)
 
   cen_long2 = list()
   for(j in seq(1, length(cen))){
     cen_sub = cen[[j]]
-    cnt = bk[[as.character(cen_sub$Acc5[1])]]
+    cnt = bk[[as.character(cen_sub$AccType5[1])]]
     if(cnt > 0){
       if(cnt <= nrow(cen_sub)){
         cen_long2[[j]] = cen_sub[sample(seq(1, nrow(cen_sub)), cnt),]
