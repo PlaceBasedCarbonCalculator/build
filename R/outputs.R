@@ -1,6 +1,7 @@
 select_map_outputs = function(lsoa_emissions_all, year = 2020) {
-  lsoa = lsoa_emissions_all[,c("LSOA21CD",names(lsoa_emissions_all)[grepl(paste0("_",year),names(lsoa_emissions_all))])]
-  lsoa = lsoa[,c("LSOA21CD",names(lsoa)[grepl("grade",names(lsoa))])]
+  lsoa = lsoa_emissions_all[lsoa_emissions_all$year == year,]
+  lsoa = lsoa[,c("LSOA21CD","dom_gas_grade","dom_elec_grade","car_grade",
+                 "van_grade","flights_grade","total_grade","goods_services_combined_grade")]
   lsoa
 }
 

@@ -59,8 +59,8 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   income2014 = income2014[!is.na(income2014$MSOAname),]
   income2014 = income2014[,c("MSOA11","total_weekly_income","upper_limit","lower_limit")]
   income2014$total_weekly_income = as.numeric(income2014$total_weekly_income)
-  income2014$upper_limit = as.numeric(income2014$upper_limit)
-  income2014$lower_limit = as.numeric(income2014$lower_limit)
+  income2014$upper_limit = as.numeric(income2014$upper_limit) * 52
+  income2014$lower_limit = as.numeric(income2014$lower_limit) * 52
   income2014$year = 2014
 
   names(income2016) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
@@ -96,6 +96,12 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
 
   income2012$total_annual_income = round(income2012$total_weekly_income * (365/7))
   income2014$total_annual_income = round(income2014$total_weekly_income * (365/7))
+
+  income2012$upper_limit = round(income2012$upper_limit * (365/7))
+  income2012$lower_limit = round(income2012$lower_limit * (365/7))
+
+  income2014$upper_limit = round(income2014$upper_limit * (365/7))
+  income2014$lower_limit = round(income2014$lower_limit * (365/7))
 
   income2012$total_weekly_income = NULL
   income2014$total_weekly_income = NULL

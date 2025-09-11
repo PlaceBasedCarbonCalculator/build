@@ -93,6 +93,17 @@ read_centroids_dz11 <- function(path){
   cents
 }
 
+read_centroids_dz22 <- function(path){
+  dir.create(file.path(tempdir(),"dz"))
+  unzip(file.path(path,"SG_DataZoneCent_2022.zip"), exdir = file.path(tempdir(),"dz"))
+  file_path = file.path(tempdir(),"dz", "SG_DataZoneCent_2022.shp")
+  cents <- sf::read_sf(file_path)
+  unlink(file.path(tempdir(),"dz"), recursive = TRUE)
+  cents <- cents[,c("DZCode","DZName")]
+  names(cents)[1:2] = c("LSOA21CD","LSOA21NM")
+  cents
+}
+
 read_centroids_oa21 <- function(path){
   file_path = file.path(path, "Output_Areas_2021_PWC_V3_-4067204786746319875.gpkg")
   bounds <- read_bounds(file_path)
@@ -182,6 +193,13 @@ load_MSOA_2011_2021_lookup <- function(path){
 }
 
 
+load_OA_DZ_IZ_2022_lookup <- function(path = "../inputdata/boundaries/"){
+  dir.create(file.path(tempdir(),"lookup"))
+  unzip(file.path(path,"oa22_dz22_iz22.zip"), exdir = file.path(tempdir(),"lookup"))
+  lookup = readr::read_csv(file.path(tempdir(),"lookup","OA22_DZ22_IZ22.csv"))
+  lookup
+}
+
 # Bind list of SF data frames together using faster data.table::rbindlist
 bind_sf = function(x, idcol = NULL) {
   if (length(x) == 0) stop("Empty list")
@@ -225,3 +243,27 @@ lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, 
   cents
 
 }
+
+
+read_cents_scotland_oa11 = function(path = "../inputdata/boundaries/"){
+  dir.create(file.path(tempdir(),"dz"))
+  unzip(file.path(path, "Scotland-output-area-2011-pwc.zip"), exdir = file.path(tempdir(),"dz"))
+  bounds <- sf::read_sf(file.path(file.path(tempdir(),"dz","OutputArea2011_PWC.shp")))
+  unlink(file.path(tempdir(),"dz"), recursive = TRUE)
+  bounds = bounds[,c("code")]
+  names(bounds)[1] = "OA11"
+  bounds
+
+}
+
+read_cents_scotland_oa01 = function(path = "../inputdata/boundaries/"){
+  dir.create(file.path(tempdir(),"dz"))
+  unzip(file.path(path, "Scotland-OutputArea2001_HWC.zip"), exdir = file.path(tempdir(),"dz"))
+  bounds <- sf::read_sf(file.path(file.path(tempdir(),"dz","OutputArea2001_HWC.shp")))
+  unlink(file.path(tempdir(),"dz"), recursive = TRUE)
+  bounds = bounds[,c("OutputArea","NRSoldOutp")]
+  names(bounds)[1] = "OA01"
+  bounds
+
+}
+

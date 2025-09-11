@@ -3,10 +3,19 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2020,
                                           synth_households_lcfs_2016,
                                           synth_households_lcfs_2014,
                                           synth_households_lcfs_2012,
-                                          synth_households_lcfs_2010
+                                          synth_households_lcfs_2010,
+                                          synth_households_lcfs_2020_scotland,
+                                          synth_households_lcfs_2018_scotland,
+                                          synth_households_lcfs_2016_scotland,
+                                          synth_households_lcfs_2014_scotland,
+                                          synth_households_lcfs_2012_scotland,
+                                          synth_households_lcfs_2010_scotland
 ){
 
+  # Standardise inputs
   synth_households_lcfs_2010$flight_other = 0
+  synth_households_lcfs_2010_scotland$flight_other = 0
+
 
   synth_households_lcfs_2020 = consumption_lsoa_summary(synth_households_lcfs_2020)
   synth_households_lcfs_2018 = consumption_lsoa_summary(synth_households_lcfs_2018)
@@ -15,6 +24,13 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2020,
   synth_households_lcfs_2012 = consumption_lsoa_summary(synth_households_lcfs_2012)
   synth_households_lcfs_2010 = consumption_lsoa_summary(synth_households_lcfs_2010)
 
+  synth_households_lcfs_2020_scotland = consumption_lsoa_summary(synth_households_lcfs_2020_scotland)
+  synth_households_lcfs_2018_scotland = consumption_lsoa_summary(synth_households_lcfs_2018_scotland)
+  synth_households_lcfs_2016_scotland = consumption_lsoa_summary(synth_households_lcfs_2016_scotland)
+  synth_households_lcfs_2014_scotland = consumption_lsoa_summary(synth_households_lcfs_2014_scotland)
+  synth_households_lcfs_2012_scotland = consumption_lsoa_summary(synth_households_lcfs_2012_scotland)
+  synth_households_lcfs_2010_scotland = consumption_lsoa_summary(synth_households_lcfs_2010_scotland)
+
   synth_households_lcfs_2020$year = 2020
   synth_households_lcfs_2018$year = 2018
   synth_households_lcfs_2016$year = 2016
@@ -22,12 +38,19 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2020,
   synth_households_lcfs_2012$year = 2012
   synth_households_lcfs_2010$year = 2010
 
-  res = dplyr::bind_rows(list(synth_households_lcfs_2020,
-              synth_households_lcfs_2018,
-              synth_households_lcfs_2016,
-              synth_households_lcfs_2014,
-              synth_households_lcfs_2012,
-              synth_households_lcfs_2010))
+  synth_households_lcfs_2020_scotland$year = 2020
+  synth_households_lcfs_2018_scotland$year = 2018
+  synth_households_lcfs_2016_scotland$year = 2016
+  synth_households_lcfs_2014_scotland$year = 2014
+  synth_households_lcfs_2012_scotland$year = 2012
+  synth_households_lcfs_2010_scotland$year = 2010
+
+  res = dplyr::bind_rows(list(synth_households_lcfs_2020, synth_households_lcfs_2020_scotland,
+              synth_households_lcfs_2018, synth_households_lcfs_2018_scotland,
+              synth_households_lcfs_2016, synth_households_lcfs_2016_scotland,
+              synth_households_lcfs_2014, synth_households_lcfs_2014_scotland,
+              synth_households_lcfs_2012, synth_households_lcfs_2012_scotland,
+              synth_households_lcfs_2010, synth_households_lcfs_2010_scotland))
 
   res
 
@@ -36,7 +59,7 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2020,
 
 consumption_lsoa_summary = function(synth_households_lcfs_2020){
 
-  sub = dplyr::group_by(synth_households_lcfs_2020, by = LSOA) |>
+  sub = dplyr::group_by(synth_households_lcfs_2020, by = LSOA21CD) |>
     dplyr::summarise(households = dplyr::n(),
 
                      income_total = sum(annual_income),

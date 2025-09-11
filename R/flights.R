@@ -112,8 +112,6 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
 
 get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
 
-  #TODO: Without Scotland Emissions data this distributes GB emissions to just EW
-
   # Consistency Checks
   chk_total = sum(flights_total_emissions$emissions_2019[flights_total_emissions$country_uk != "N"])
 
