@@ -154,7 +154,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
     dplyr::summarise(households = dplyr::n())
 
 
-  hh$annual_income = hh$incanon * 52
+  hh$annual_income = hh$incanon * (365/7)
 
   t1 = Sys.time()
   future::plan("multisession")
@@ -202,6 +202,157 @@ match_LCFS_synth_pop = function(census21_synth_households,
   cenus_long2
 
 }
+
+match_LCFS_synth_pop_scotland = function(scot_synth_households,
+                                         lcfs_clean,
+                                         oac11dz22,
+                                         income_scot_dz22,
+                                         population,
+                                         base_year = "2020/21"){
+
+
+  inc_year = as.numeric(substr(base_year,1,4))
+
+  if(inc_year <= 2012){
+    oac_year = 2001
+  } else if(inc_year >= 2022) {
+    oac_year = 2021
+  } else {
+    oac_year = 2011
+  }
+
+
+  if(inc_year < 2014){
+    inc_year = 2014
+  }
+  if(inc_year > 2018){
+    inc_year = 2018
+  }
+  if(inc_year == 2016){ # No 2016 data so use 2017
+    inc_year = 2017
+  }
+
+  scot_synth_households$conv = NULL
+  scot_synth_households$error_margins = NULL
+  scot_synth_households$MAE = NULL
+
+  population = population[,c("LSOA21CD","year","households_est","all_properties")]
+  population = population[population$year == as.numeric(substr(base_year,1,4)),]
+
+  population = population[population$LSOA21CD %in% unique(scot_synth_households$LSOA21CD),]
+
+  hh = lcfs_clean[[base_year]]
+
+  income_scot_dz22 = income_scot_dz22[income_scot_dz22$year == inc_year,]
+
+  oac11dz22$OAC11combine = sapply(oac11dz22$OAC, function(x){
+    x = as.character(x$OAC)
+    x = x[order(x)]
+    x = paste(x, collapse = " ")
+    x
+  })
+  oac11dz22$OAC = NULL
+
+  scot_synth_households = dplyr::left_join(scot_synth_households, oac11dz22, by = c("LSOA21CD" = "LSOA21CD"))
+
+  # Match LCFS categories
+  scot_synth_households$Tenure5[scot_synth_households$Tenure5 == "rentfree"] = "privaterented"
+  scot_synth_households$hhSize5 = as.character(scot_synth_households$hhSize5)
+  scot_synth_households$CarVan5 = as.character(scot_synth_households$CarVan5)
+  scot_synth_households$hhSize5[scot_synth_households$hhSize5 %in% c("p4","p5+")] = "p4+"
+  scot_synth_households$CarVan5[scot_synth_households$CarVan5 %in% c("car3","car4+")] = "car3+"
+
+  similarity_table = make_similarity_table(hh, oac_year)
+
+  scot_synth_households = dplyr::left_join(scot_synth_households, income_scot_dz22, by = c("LSOA21CD" = "DataZone22"))
+  scot_synth_households$sd_income = (scot_synth_households$upper_limit - scot_synth_households$lower_limit) / 3.92
+
+  # Expand Census
+  cenus_long = scot_synth_households[rep(1:nrow(scot_synth_households), times = scot_synth_households$households),]
+  cenus_long$households = NULL
+
+  cenus_long = cenus_long[order(cenus_long$LSOA21CD),]
+  population = population[order(population$LSOA21CD),]
+
+  cenus_long = dplyr::ungroup(cenus_long)
+  cenus_long = dplyr::group_split(cenus_long, LSOA21CD)
+  population = dplyr::group_split(population, LSOA21CD)
+
+
+  t1 = Sys.time()
+  future::plan("multisession")
+  cenus_long2 = furrr::future_pmap(.l = list(
+    cen = cenus_long,
+    pop = population
+  ),
+  .f = select_synth_pop_year_scot,
+  .progress = TRUE,
+  .options = furrr::furrr_options(seed = TRUE,
+                                  scheduling  = 1))
+  future::plan("sequential")
+  t2 = Sys.time()
+  message(round(difftime(t2,t1, units = "mins"),2), " min")
+
+  cenus_long2 = data.table::rbindlist(cenus_long2)
+  cenus_long2 = as.data.frame(cenus_long2)
+
+  # Census Unique Combinations
+  census_unique =  cenus_long2 |>
+    dplyr::group_by(householdComp10, Tenure5, hhSize5, CarVan5, OAC11combine) |>
+    dplyr::summarise(households = dplyr::n())
+
+
+  hh$annual_income = hh$incanon * (365/7)
+
+  t1 = Sys.time()
+  future::plan("multisession")
+  x = furrr::future_pmap(.l = list(
+    Tenure5 = census_unique$Tenure5,
+    hhComp15 = census_unique$householdComp10 ,
+    hhSize5 = census_unique$hhSize5,
+    CarVan5 = census_unique$CarVan5,
+    OACs = census_unique$OAC11combine
+  ),
+
+  .f = match_hh_census3,
+  hh = hh[,c("household_id","Tenure5","hhComp15","hhSize5","CarVan5","OAC")],
+  similarity_table = similarity_table,
+  .progress = TRUE,
+  .options = furrr::furrr_options(seed = TRUE,
+                                  scheduling  = 1))
+  future::plan("sequential")
+  t2 = Sys.time()
+  message(round(difftime(t2,t1, units = "mins"),2), " min")
+
+  x = data.table::rbindlist(x)
+
+  cenus_long2 = dplyr::left_join(cenus_long2, x,
+                                 by = c("householdComp10" = "hhComp15",
+                                        "Tenure5"= "Tenure5",
+                                        "hhSize5" = "hhSize5",
+                                        "CarVan5" = "CarVan5",
+                                        "OAC11combine" = "OACs"))
+
+  cenus_long2$sd_income = (cenus_long2$upper_limit - cenus_long2$lower_limit) / 3.92
+
+  future::plan("multisession")
+  cenus_long2$household_id_single = furrr::future_pmap_int(.l = list(lst = cenus_long2$household_id,
+                                                                     mean_income = cenus_long2$total_annual_income,
+                                                                     sd_income = cenus_long2$sd_income),
+                                                           .f = select_id_income,
+                                                           hh = hh[,c("household_id","annual_income")],
+                                                           .options = furrr::furrr_options(seed = TRUE,
+                                                                                           scheduling  = 1))
+  future::plan("sequential")
+
+  hh = hh[,!names(hh) %in% c("Tenure5","CarVan5","hhSize5","hhComp15")]
+
+  cenus_long2 = dplyr::left_join(cenus_long2, hh, by = c("household_id_single" = "household_id"))
+
+  cenus_long2
+
+}
+
 
 
 convert_housing_tenure <- function(housing_tenure) {
@@ -540,6 +691,35 @@ select_synth_pop_year = function(cen, pop, bk){
 
   cen_long2 = data.table::rbindlist(cen_long2)
   cen_long2 = as.data.frame(cen_long2)
+  cen_long2
+
+}
+
+
+select_synth_pop_year_scot = function(cen, pop){
+  if(length(unique(c(cen$LSOA21CD,pop$LSOA21CD))) != 1){
+    stop("LSOA don't match")
+  }
+
+  if(is.na(pop$households_est)){
+    weight =  0
+  } else {
+    weight =  pop$households_est
+  }
+
+  replace = FALSE
+  if(weight > nrow(cen)){
+    if((weight - nrow(cen)) > nrow(cen)){
+      cen_long2 = cen[sample(seq_len(nrow(cen)), size = weight - nrow(cen), replace = TRUE),]
+    } else {
+      cen_long2 = cen[sample(seq_len(nrow(cen)), size = weight - nrow(cen), replace = FALSE),]
+    }
+    cen_long2 = rbind(cen_long2,cen)
+  } else {
+    cen_long2 = cen[sample(seq_len(nrow(cen)), size = weight, replace = FALSE),]
+  }
+
+
   cen_long2
 
 }

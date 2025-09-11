@@ -16,7 +16,7 @@ make_geojson <- function(z, path = "outputs/zones.geojson"){
     z <- sf::st_transform(z, 4326)
   }
   sf::st_precision(z) <- 1000000
-  sf::st_write(z,path, delete_dsn = TRUE)
+  sf::st_write(obj = z, dsn = path, delete_dsn = FALSE)
 
   return(path)
 }

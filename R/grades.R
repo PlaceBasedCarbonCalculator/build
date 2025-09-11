@@ -28,5 +28,7 @@ value2grade <- function(x, high_good = FALSE){
     x_grade <- grades[match(x_cent,0:100)]
   }
 
+  x_grade[is.na(x_grade)] = "NA"
+
   return(x_grade)
 }

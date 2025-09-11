@@ -273,3 +273,13 @@ income_bands <- function(dat){
 
 
 
+load_consumption_multipliers = function(path = "../inputdata/consumption/UK_full_dataset_1990_to_2021__including_conversion_factors_by_SIC_code.ods"){
+    cons = readODS::read_ods(path, sheet = "ghg_coicop_mult")
+    names(cons)[1] = "product"
+
+    cons = tidyr::pivot_longer(cons, cols = names(cons)[2:ncol(cons)], names_to = "year")
+    names(cons)[3] = "ghg_pound"
+    cons
+
+
+  }

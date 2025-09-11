@@ -95,8 +95,8 @@ read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Ano
 
 
 extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa21,
-                                    centroids_dz11,
-                                    vehicle_registrations_21, lookup_lsoa_2011_21){
+                                     centroids_dz22,
+                                    vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22){
 
 
   pc_geom = car_km_pc[,"PC_AREA"]
@@ -109,24 +109,22 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
 
 
   # Combine Scot and EW
-  centroids_dz11 = centroids_dz11[,c("LSOA11CD","geometry")]
-  names(centroids_dz11) =  c("LSOA21CD","geometry")
-  centroids_lsoa21 = rbind(centroids_lsoa21, centroids_dz11)
+  centroids_dz22 = centroids_dz22[,c("LSOA21CD","geometry")]
+  names(centroids_dz22) =  c("LSOA21CD","geometry")
+  centroids_lsoa21 = rbind(centroids_lsoa21, centroids_dz22)
 
   centroids_lsoa21 <- sf::st_join(centroids_lsoa21, pc_geom)
   centroids_lsoa21 <- sf::st_drop_geometry(centroids_lsoa21)
   centroids_lsoa21 <- centroids_lsoa21[,c("LSOA21CD","PC_AREA")]
 
-
-
   # MErged LSOA get data from one 2011 LSOA
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA21CD","LSOA11CD")]
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[!duplicated(lookup_lsoa_2011_21$LSOA21CD),]
 
-  centroids_dz11 = sf::st_drop_geometry(centroids_dz11)
-  centroids_dz11$LSOA11CD = centroids_dz11$LSOA21CD
+  lookup_dz_2011_22 = lookup_dz_2011_22[order(lookup_dz_2011_22$splitshare, decreasing = TRUE),]
+  lookup_dz_2011_22 = lookup_dz_2011_22[!duplicated(lookup_dz_2011_22$LSOA21CD),]
 
-  lookup_lsoa_2011_21 = rbind(lookup_lsoa_2011_21, centroids_dz11)
+  lookup_lsoa_2011_21 = rbind(lookup_lsoa_2011_21, lookup_dz_2011_22[,c("LSOA21CD","LSOA11CD")])
 
   car_km_2009_2011 <- dplyr::left_join(lookup_lsoa_2011_21, car_km_2009_2011,
                                        by = c("LSOA11CD" = "LSOA11"))

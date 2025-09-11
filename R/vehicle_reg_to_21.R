@@ -1,6 +1,6 @@
 
 # Convert vehicle registration to single dataset with 2021 boundaries
-vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, mode = "vehicle_registrations"){
+vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2011_22, mode = "vehicle_registrations"){
 
   if(mode == "vehicle_registrations"){
     nms = c("Cars_Company_Licensed","Cars_Private_Licensed",
@@ -34,6 +34,29 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, mode = "veh
     stop("Unknown mode")
   }
 
+  # Scotlamd
+  vehicle_registrations_Scot = vehicle_registrations[vehicle_registrations$LSOA11CD %in% lookup_dz_2011_22$LSOA11CD,]
+
+  vehicle_registrations_Scot = dplyr::left_join(vehicle_registrations_Scot,
+                                       lookup_dz_2011_22,
+                                       by = c("LSOA11CD"),
+                                       relationship = "many-to-many")
+
+  vehicle_registrations_Scot$year = as.integer(gsub(" Q1","",vehicle_registrations_Scot$quarter))
+  vehicle_registrations_Scot$quarter = NULL
+
+  vehicle_registrations_Scot <- vehicle_registrations_Scot |>
+    dplyr::group_by(year, LSOA21CD) |>
+    dplyr::summarise(
+      dplyr::across(
+        .cols = where(is.numeric) & !matches("splitshare"),
+        .fns = ~ round(sum(.x * splitshare, na.rm = TRUE)),
+        .names = "{.col}"
+      )
+    ) |>
+    dplyr::ungroup()
+
+  # England and Wales
 
   # vehicle_registrations 2010 - 2023 (2011 bounds)
   # car_emissions_perkm 2001 - 2018 (converted to 2021 bounds)
@@ -84,8 +107,9 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, mode = "veh
   vehicle_registrations_S = vehicle_registrations_S[,nms]
   vehicle_registrations_M = vehicle_registrations_M[,nms]
   vehicle_registrations_U = vehicle_registrations_U[,nms]
+  vehicle_registrations_Scot = vehicle_registrations_Scot[,nms]
 
-  vehicle_registrations = rbind(vehicle_registrations_S, vehicle_registrations_M, vehicle_registrations_U)
+  vehicle_registrations = rbind(vehicle_registrations_S, vehicle_registrations_M, vehicle_registrations_U, vehicle_registrations_Scot)
 
 
   vehicle_registrations

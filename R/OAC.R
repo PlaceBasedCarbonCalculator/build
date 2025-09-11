@@ -40,6 +40,54 @@ OAC21_lsoa21 = function(oac21, lookup_postcode_OA_LSOA_MSOA_2021){
 
 }
 
+OAC11_dz22 = function(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_classifications){
+
+  lookup_OA_LSOA_MSOA_classifications = lookup_OA_LSOA_MSOA_classifications[,c("OA11CD","OAC11CD")]
+
+  oa = sf::st_join(centroids_oa11_scotland, bounds_dz22)
+  oa_buff = oa[is.na(oa$DataZone22),]
+  oa_buff$DataZone22 = NULL
+  oa_buff = sf::st_buffer(oa_buff, 50)
+  oa_buff = sf::st_join(oa_buff, bounds_dz22)
+  oa_buff = oa_buff[!duplicated(oa_buff$OA11),]
+
+  oa = oa[!is.na(oa$DataZone22),]
+
+  oa = sf::st_drop_geometry(oa)
+  oa_buff = sf::st_drop_geometry(oa_buff)
+
+  oa = rbind(oa, oa_buff)
+
+  oa = dplyr::left_join(oa, lookup_OA_LSOA_MSOA_classifications, by = c("OA11" = "OA11CD"))
+
+  lsoa21 = dplyr::group_by(oa, DataZone22)
+  lsoa21 = dplyr::summarise(lsoa21,
+                            OAC11CD = list(as.data.frame(table(OAC11CD))))
+
+
+  lsoa21_missing = bounds_dz22[!bounds_dz22$DataZone22 %in% lsoa21$DataZone22,]
+
+  nn = nngeo::st_nn(lsoa21_missing, centroids_oa11_scotland)
+
+  lsoa21_missing$OA11CD = centroids_oa11_scotland$OA11[unlist(nn)]
+  lsoa21_missing = dplyr::left_join(lsoa21_missing, lookup_OA_LSOA_MSOA_classifications, by = c("OA11CD"))
+
+  lsoa21_missing$OAC11CD = lapply(lsoa21_missing$OAC11CD, function(x){
+    x = as.data.frame(table(x))
+    names(x) = c("OAC11CD","Freq")
+    x
+  })
+
+  lsoa21_missing = sf::st_drop_geometry(lsoa21_missing)
+  lsoa21_missing$OA11CD = NULL
+
+  lsoa21b = rbind(lsoa21, lsoa21_missing)
+
+  names(lsoa21b) = c("LSOA21CD","OAC")
+
+  lsoa21b
+
+}
 
 OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications){
 
@@ -135,6 +183,57 @@ OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
 
   lsoa21_missing = sf::st_drop_geometry(lsoa21_missing)
   lsoa21_missing$OA01CDOLD = NULL
+
+  lsoa21b = rbind(lsoa21, lsoa21_missing)
+
+  names(lsoa21b) = c("LSOA21CD","OAC")
+
+  lsoa21b
+
+}
+
+
+OAC01_dz22 = function(centroids_oa01_scotland, bounds_dz22, oac01){
+
+  oac01 = oac01[,c("OA_CODE","Subgroup Code")]
+  names(oac01) = c("OA01CDOLD","OAC01")
+
+  oa = sf::st_join(centroids_oa01_scotland, bounds_dz22)
+  oa_buff = oa[is.na(oa$DataZone22),]
+  oa_buff$DataZone22 = NULL
+  oa_buff = sf::st_buffer(oa_buff, 130)
+  oa_buff = sf::st_join(oa_buff, bounds_dz22)
+  oa_buff = oa_buff[!duplicated(oa_buff$NRSoldOutp),]
+
+  oa = oa[!is.na(oa$DataZone22),]
+
+  oa = sf::st_drop_geometry(oa)
+  oa_buff = sf::st_drop_geometry(oa_buff)
+
+  oa = rbind(oa, oa_buff)
+
+  oa = dplyr::left_join(oa, oac01, by = c("NRSoldOutp" = "OA01CDOLD"))
+
+  lsoa21 = dplyr::group_by(oa, DataZone22)
+  lsoa21 = dplyr::summarise(lsoa21,
+                            OAC01 = list(as.data.frame(table(OAC01))))
+
+
+  lsoa21_missing = bounds_dz22[!bounds_dz22$DataZone22 %in% lsoa21$DataZone22,]
+
+  nn = nngeo::st_nn(lsoa21_missing, centroids_oa01_scotland)
+
+  lsoa21_missing$NRSoldOutp = centroids_oa01_scotland$NRSoldOutp[unlist(nn)]
+  lsoa21_missing = dplyr::left_join(lsoa21_missing, oac01, by = c("NRSoldOutp" = "OA01CDOLD"))
+
+  lsoa21_missing$OAC01 = lapply(lsoa21_missing$OAC01, function(x){
+    x = as.data.frame(table(x))
+    names(x) = c("OAC01","Freq")
+    x
+  })
+
+  lsoa21_missing = sf::st_drop_geometry(lsoa21_missing)
+  lsoa21_missing$NRSoldOutp = NULL
 
   lsoa21b = rbind(lsoa21, lsoa21_missing)
 

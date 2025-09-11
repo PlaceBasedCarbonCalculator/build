@@ -1,6 +1,6 @@
 #' Function to convert a data.frame into a folder of JSON files
 #' @param x data frame with column called geo_code
-#' @parm idcol name of column with unique id
+#' @param idcol name of column with unique id
 #' @param path folder to save JSON
 #' @param zip logical, if true zips the json into a single zip folder
 #' @param rounddp numeric, how many decimpla places to round to
@@ -10,8 +10,7 @@
 #' Will drop any sf geometry and name files based on geo_code
 
 export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
-                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE,
-                             na = "null"){
+                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE, na = "null"){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -59,14 +58,16 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
 
 
     message("Writing JSON")
-    for(i in seq(1,length(x))){
-      sub <- as.data.frame(x[[i]])
+    ignr <- purrr::map(x, function(sub){
+      sub <- as.data.frame(sub)
       nmsub <- sub[,idcol][1]
       sub[idcol] <- NULL
-      jsonlite::write_json(sub,
-                           file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json")),
-                           dataframe = dataframe, na = na)
-    }
+      yyjsonr::write_json_file(sub,
+                               file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json")),
+                               dataframe = dataframe)
+      file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json"))
+    }, .progress = TRUE)
+
     files <- list.files(file.path(tempdir(),paste0("jsonzip",idcol)))
     message("Zipping JSON")
     my_wd <- getwd()
@@ -76,9 +77,10 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
       unlink(file.path(my_wd,path,paste0(idcol,"_json.zip")))
     }
 
-    utils::zip(file.path(my_wd,path,paste0(idcol,"_json.zip")),files, flags="-q")
+    zip::zip(file.path(my_wd,path,paste0(idcol,"_json.zip")),files)
     setwd(my_wd)
 
+    message("Cleaning up")
     if(file.exists(file.path(my_wd,path,paste0(idcol,"_json.zip")))){
       unlink(file.path(tempdir(),paste0("jsonzip",idcol)), recursive = TRUE)
       write.csv(new_nms, file.path(path,"names_lookup.csv"), row.names = FALSE)
@@ -135,13 +137,4 @@ reduce_name_length = function(x){
   }
   dat
 }
-
-#' Function to convert a data.frame into a folder of JSON files
-#' @param x data frame with column called geo_code
-#' @parm idcol name of column with unique id
-#' @param path folder to save JSON
-#' @param zip logical, if true zips the json into a single zip folder
-#' @param rounddp numeric, how many decimpla places to round to
-#'
-#' Will drop any sf geometry and name files based on geo_code
 

@@ -15,6 +15,8 @@ read_dz2022_bounds = function(path = "../inputdata/boundaries/SG_DataZoneBdry_20
   #Remove the temporary directory
   unlink(file.path(tempdir(), "scotbounds"), recursive = TRUE)
 
+  bounds = sf::st_make_valid(bounds)
+
   bounds
 
 }

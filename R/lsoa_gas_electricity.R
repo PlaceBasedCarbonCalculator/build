@@ -44,7 +44,6 @@ load_lsoa_electric <- function(path){
     elec[[i]] <- sub
   }
   elec = dplyr::bind_rows(elec)
-  unlink(file.path(tempdir(),"gaselec"), recursive = TRUE)
 
   elec$metres = as.numeric(elec$metres)
   elec$total_elec_kwh = as.numeric(elec$total_elec_kwh)
@@ -129,13 +128,12 @@ load_msoa_gas_nondom <- function(path){
 
   gas = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(path,"msoa_elec_nondom.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"msoa_gas_nondom.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
     names(sub) <- c("LAcode","LAname",
                     "MSOA","MSOAname",
-                    "metre_type",
                     "metres","total_gas_kwh",
                     "mean_gas_kwh","median_gas_kwh")
 
@@ -143,7 +141,7 @@ load_msoa_gas_nondom <- function(path){
     gas[[i]] <- sub
   }
   gas = dplyr::bind_rows(gas)
-  unlink(file.path(tempdir(),"gaselec"), recursive = TRUE)
+
 
   gas$metres = as.numeric(gas$metres)
   gas$total_gas_kwh = as.numeric(gas$total_gas_kwh)
@@ -154,15 +152,42 @@ load_msoa_gas_nondom <- function(path){
 
 }
 
-lsoa_gas_to_2021 <- function(domestic_gas, lsoa_11_21_tools){
+lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
-  domestic_gas = domestic_gas[,c("LSOA","year","metres","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
-  names(domestic_gas)[1] = "LSOA11CD"
+  domestic_gas_11 = domestic_gas_11[,c("LSOA","year","metres","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
+  names(domestic_gas_11)[1] = "LSOA11CD"
+
+  # Scotland
+  lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
+  # Share of the 2011 households
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre[,c("DataZone","DataZone22","splitshare")]
+  names(lookup_dz_2011_22_pre) = c("LSOA11CD","LSOA21CD","splitshare")
+
+  domestic_gas_Scot = domestic_gas_11[domestic_gas_11$LSOA11CD %in% lookup_dz_2011_22_pre$LSOA11CD,]
+
+  domestic_gas_Scot = dplyr::left_join(domestic_gas_Scot,
+                                       lookup_dz_2011_22_pre,
+                                       by = c("LSOA11CD"),
+                                       relationship = "many-to-many")
+
+  domestic_gas_Scot = dplyr::group_by(domestic_gas_Scot, year, LSOA21CD) |>
+    dplyr::summarise(total_gas_kwh = round(sum(total_gas_kwh * splitshare)),
+                     mean_gas_kwh = weighted.mean(mean_gas_kwh, splitshare),
+                     median_gas_kwh = weighted.mean(median_gas_kwh, splitshare),
+                     metres = round(sum(metres * splitshare))) |>
+    dplyr::ungroup()
 
 
-  domestic_gas_S = domestic_gas[domestic_gas$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
-  domestic_gas_M = domestic_gas[domestic_gas$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
-  domestic_gas_U = domestic_gas[domestic_gas$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
+  # England and Wales
+
+  domestic_gas_S = domestic_gas_11[domestic_gas_11$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
+  domestic_gas_M = domestic_gas_11[domestic_gas_11$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
+  domestic_gas_U = domestic_gas_11[domestic_gas_11$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
 
   #Unchanged
   domestic_gas_U = dplyr::left_join(domestic_gas_U, lsoa_11_21_tools$lookup_unchanged, by = "LSOA11CD")
@@ -198,21 +223,49 @@ lsoa_gas_to_2021 <- function(domestic_gas, lsoa_11_21_tools){
   domestic_gas_S = domestic_gas_S[,nms]
   domestic_gas_M = domestic_gas_M[,nms]
   domestic_gas_U = domestic_gas_U[,nms]
+  domestic_gas_Scot = domestic_gas_Scot[,nms]
 
-  final = rbind(domestic_gas_S, domestic_gas_M, domestic_gas_U)
+  final = rbind(domestic_gas_S, domestic_gas_M, domestic_gas_U, domestic_gas_Scot)
   final
 
 }
 
-lsoa_electric_to_2021 <- function(domestic_electricity, lsoa_11_21_tools){
+lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
-  domestic_electricity = domestic_electricity[,c("LSOA","year","metres","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
-  names(domestic_electricity)[1] = "LSOA11CD"
+  domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","metres","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
+  names(domestic_electricity_11)[1] = "LSOA11CD"
+
+  # Scotland
+  lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
+  # Share of the 2011 households
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre[,c("DataZone","DataZone22","splitshare")]
+  names(lookup_dz_2011_22_pre) = c("LSOA11CD","LSOA21CD","splitshare")
+
+  domestic_electricity_Scot = domestic_electricity_11[domestic_electricity_11$LSOA11CD %in% lookup_dz_2011_22_pre$LSOA11CD,]
+
+  domestic_electricity_Scot = dplyr::left_join(domestic_electricity_Scot,
+                                       lookup_dz_2011_22_pre,
+                                       by = c("LSOA11CD"),
+                                       relationship = "many-to-many")
+
+  domestic_electricity_Scot = dplyr::group_by(domestic_electricity_Scot, year, LSOA21CD) |>
+    dplyr::summarise(total_elec_kwh = round(sum(total_elec_kwh * splitshare)),
+                     mean_elec_kwh = weighted.mean(mean_elec_kwh, splitshare),
+                     median_elec_kwh = weighted.mean(median_elec_kwh, splitshare),
+                     metres = round(sum(metres * splitshare))) |>
+    dplyr::ungroup()
 
 
-  domestic_electricity_S = domestic_electricity[domestic_electricity$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
-  domestic_electricity_M = domestic_electricity[domestic_electricity$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
-  domestic_electricity_U = domestic_electricity[domestic_electricity$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
+  # England and Wales
+
+  domestic_electricity_S = domestic_electricity_11[domestic_electricity_11$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
+  domestic_electricity_M = domestic_electricity_11[domestic_electricity_11$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
+  domestic_electricity_U = domestic_electricity_11[domestic_electricity_11$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
 
   #Unchanged
   domestic_electricity_U = dplyr::left_join(domestic_electricity_U, lsoa_11_21_tools$lookup_unchanged, by = "LSOA11CD")
@@ -255,8 +308,9 @@ lsoa_electric_to_2021 <- function(domestic_electricity, lsoa_11_21_tools){
   domestic_electricity_S = domestic_electricity_S[,nms]
   domestic_electricity_M = domestic_electricity_M[,nms]
   domestic_electricity_U = domestic_electricity_U[,nms]
+  domestic_electricity_Scot = domestic_electricity_Scot[,nms]
 
-  final = rbind(domestic_electricity_S, domestic_electricity_M, domestic_electricity_U)
+  final = rbind(domestic_electricity_S, domestic_electricity_M, domestic_electricity_U, domestic_electricity_Scot)
   final
 
 }
@@ -349,6 +403,15 @@ calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
   }
 
   domestic_gas = domestic_gas[,c("LSOA21CD",paste0("dom_gas_kgco2e_percap_",2010:2021))]
+
+  domestic_gas = tidyr::pivot_longer(domestic_gas,
+                      cols = names(domestic_gas)[grepl("dom_gas_kgco2e_percap_",names(domestic_gas))],
+                      names_prefix = "dom_gas_kgco2e_percap_",
+                      names_to = "year")
+
+  names(domestic_gas)[3] = "dom_gas_kgco2e_percap"
+  domestic_gas$year = as.integer(domestic_gas$year)
+
   domestic_gas
 
 }
@@ -377,6 +440,15 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
   }
 
   domestic_electricity = domestic_electricity[,c("LSOA21CD",paste0("dom_elec_kgco2e_percap_",2010:2021))]
+
+  domestic_electricity = tidyr::pivot_longer(domestic_electricity,
+                                     cols = names(domestic_electricity)[grepl("dom_elec_kgco2e_percap_",names(domestic_electricity))],
+                                     names_prefix = "dom_elec_kgco2e_percap_",
+                                     names_to = "year")
+
+  names(domestic_electricity)[3] = "dom_elec_kgco2e_percap"
+  domestic_electricity$year = as.integer(domestic_electricity$year)
+
   domestic_electricity
 
 }

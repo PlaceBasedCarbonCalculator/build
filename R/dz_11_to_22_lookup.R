@@ -121,6 +121,20 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 #   qtm(sel_11, lines.col = "blue", fill = NULL)
 
 
+make_dz_11_22_lookup_simple = function(lookup_dz_2011_22_pre){
+  # Scotland
+  lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
+  # Share of the 2011 households
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre[,c("DataZone","DataZone22","splitshare")]
+  names(lookup_dz_2011_22_pre) = c("LSOA11CD","LSOA21CD","splitshare")
+  lookup_dz_2011_22_pre
+}
+
 slither_detection = function(x, apratio = 0.5, min_area = 100){
   x = sf::st_collection_extract(x, "POLYGON")
   x = sf::st_cast(x, "POLYGON")
@@ -131,3 +145,111 @@ slither_detection = function(x, apratio = 0.5, min_area = 100){
   x <- x[x$apratio < apratio,]
   x
 }
+
+
+# Convert Population 2011 to Population 22
+
+interpolate_population_dz11_dz22 = function(lookup_dz_2011_22_pre, households_scotland, population_scot, dwellings_tax_band_scotland){
+
+  lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
+
+  dwellings_tax_band_scotland = dwellings_tax_band_scotland[,c("LSOA11CD","year","all_properties")]
+  #dwellings_tax_band_scotland = dwellings_tax_band_scotland[dwellings_tax_band_scotland$year >= 2010,]
+
+  # Share of the 2011 households
+  lookup_dz_2011_22_pre = lookup_dz_2011_22_pre |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+
+  lookup_dz_2011_22_pre = dplyr::group_split(lookup_dz_2011_22_pre, DataZone22)
+
+  res = list()
+
+  for(i in seq_along(lookup_dz_2011_22_pre)){
+    sub = lookup_dz_2011_22_pre[[i]]
+    pop_sub = population_scot[population_scot$LSOA11CD %in% sub$DataZone,]
+    dwel_sub = households_scotland[households_scotland$dz11cd %in% sub$DataZone,]
+    tax_sub = dwellings_tax_band_scotland[dwellings_tax_band_scotland$LSOA11CD %in% sub$DataZone,]
+
+    dwel_sub = dwel_sub[,c("dz11cd","dwellings_total","occupied","year")]
+    names(dwel_sub) = c("dz11cd","all_properties","households","year")
+
+    tax_sub = tax_sub[tax_sub$year < 2014,]
+    tax_sub$households = tax_sub$all_properties #TODO better estimate of households pre-2014
+
+    names(tax_sub)[1] = "dz11cd"
+
+    dwel_sub = rbind(dwel_sub, tax_sub)
+
+    pop_sub = dplyr::left_join(pop_sub,
+                               sub[,c("DataZone","DataZone22","splitshare")],
+                               by = c("LSOA11CD" = "DataZone"))
+
+    dwel_sub = dplyr::left_join(dwel_sub,
+                               sub[,c("DataZone","DataZone22","splitshare")],
+                               by = c("dz11cd" = "DataZone"))
+
+    bands = c("all_ages","90+","0-4","5-9","10-14","15-19","20-24","25-29","30-34",
+              "35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79",
+              "80-84","85-89")
+
+    for(j in bands){
+      pop_sub[[j]] = pop_sub[[j]] * pop_sub$splitshare
+    }
+
+    bands = c("all_properties","households")
+
+    for(j in bands){
+      dwel_sub[[j]] = dwel_sub[[j]] * dwel_sub$splitshare
+    }
+
+    pop_sub = pop_sub |>
+      dplyr::group_by(DataZone22, year) |>
+      dplyr::summarise(`all_ages` = round(sum(`all_ages`)),
+                       `0-4` = round(sum(`0-4`)),
+                       `5-9` = round(sum(`5-9`)),
+                       `10-14` = round(sum(`10-14`)),
+                       `15-19` = round(sum(`15-19`)),
+                       `20-24` = round(sum(`20-24`)),
+                       `25-29` = round(sum(`25-29`)),
+                       `30-34` = round(sum(`30-34`)),
+                       `35-39` = round(sum(`35-39`)),
+                       `40-44` = round(sum(`40-44`)),
+                       `45-49` = round(sum(`45-49`)),
+                       `50-54` = round(sum(`50-54`)),
+                       `55-59` = round(sum(`55-59`)),
+                       `60-64` = round(sum(`60-64`)),
+                       `65-69` = round(sum(`65-69`)),
+                       `70-74` = round(sum(`70-74`)),
+                       `75-79` = round(sum(`75-79`)),
+                       `80-84` = round(sum(`80-84`)),
+                       `85-89` = round(sum(`85-89`)),
+                       `90+` = round(sum(`90+`)))
+
+
+    dwel_sub = dwel_sub |>
+      dplyr::group_by(DataZone22, year) |>
+      dplyr::summarise(all_properties = round(sum(all_properties)),
+                       households = round(sum(households)))
+
+    pop_sub = dplyr::left_join(pop_sub, dwel_sub, by = c("DataZone22", "year"))
+
+    pop_sub = pop_sub[pop_sub$year >= 2005, ]
+
+    if(anyNA(pop_sub)){
+      stop("NAs in",i)
+    }
+
+
+    res[[i]] = pop_sub
+
+  }
+
+  res = dplyr::bind_rows(res)
+  res
+
+}
+
+

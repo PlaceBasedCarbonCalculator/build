@@ -59,8 +59,12 @@ tar_target(population_scot,{
   load_scotland_population(path = file.path(parameters$path_data,"population_scotland"))
 }),
 
+tar_target(population_scot_dz22,{
+  interpolate_population_dz11_dz22(lookup_dz_2011_22_pre, households_scotland, population_scot, dwellings_tax_band_scotland)
+}),
+
 tar_target(population,{
-  combine_populations2(population_households_historical, population_scot, dwellings_tax_band_scotland)
+  combine_populations2(population_households_historical, population_scot_dz22)
 }),
 
 tar_target(population_summary,{
@@ -110,10 +114,10 @@ tar_target(domestic_electricity_11,{
   load_lsoa_electric(dl_gas_electric)
 }),
 tar_target(domestic_gas,{
-  lsoa_gas_to_2021(domestic_gas_11, lsoa_11_21_tools)
+  lsoa_gas_to_2021(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre)
 }),
 tar_target(domestic_electricity,{
-  lsoa_electric_to_2021(domestic_electricity_11, lsoa_11_21_tools)
+  lsoa_electric_to_2021(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre)
 }),
 tar_target(domestic_gas_emissions,{
   calculate_gas_emissions(domestic_gas, emissions_factors, population)
@@ -210,13 +214,21 @@ tar_target(centroids_lsoa11,{
 tar_target(centroids_dz11,{
   read_centroids_dz11(dl_boundaries)
 }),
+tar_target(centroids_dz22,{
+  read_centroids_dz22(dl_boundaries)
+}),
 tar_target(centroids_oa21,{
   read_centroids_oa21(dl_boundaries)
 }),
 tar_target(centroids_oa11,{
   read_centroids_oa11(dl_boundaries)
 }),
-
+tar_target(centroids_oa11_scotland,{
+  read_cents_scotland_oa11(dl_boundaries)
+}),
+tar_target(centroids_oa01_scotland,{
+  read_cents_scotland_oa01(dl_boundaries)
+}),
 tar_target(centroids_oa01,{
   read_centroids_oa01(dl_boundaries)
 }),
@@ -241,6 +253,9 @@ tar_target(lookup_lsoa_2011_21,{
 }),
 tar_target(lookup_dz_2011_22_pre,{
   make_dz_11_22_lookup(bounds_dz11, bounds_dz22, uprn_bng)
+}),
+tar_target(lookup_dz_2011_22,{
+  make_dz_11_22_lookup_simple(lookup_dz_2011_22_pre)
 }),
 tar_target(lookup_lsoa_2001_11,{
   load_LSOA_2001_2011_lookup(dl_boundaries)
@@ -271,6 +286,14 @@ tar_target(oac11lsoa21,{
   OAC11_lsoa21(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications)
 }),
 
+tar_target(oac11dz22,{
+  OAC11_dz22(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_classifications)
+}),
+
+tar_target(oac01dz22,{
+  OAC01_dz22(centroids_oa01_scotland, bounds_dz22, oac01)
+}),
+
 tar_target(oac01lsoa21,{
   OAC01_lsoa21(centroids_oa01, bounds_lsoa21_full, oac01)
 }),
@@ -292,13 +315,13 @@ tar_target(lsoa_admin,{
 }),
 
 tar_target(bounds_lsoa_GB_full,{
-  combine_lsoa_bounds(bounds_lsoa21_full, bounds_dz11, keep = 1)
+  combine_lsoa_bounds(bounds_lsoa21_full, bounds_dz22, keep = 1)
 }),
 tar_target(bounds_lsoa_GB_generalised,{
-  combine_lsoa_bounds(bounds_lsoa21_generalised, bounds_dz11, keep = 0.2)
+  combine_lsoa_bounds(bounds_lsoa21_generalised, bounds_dz22, keep = 0.2)
 }),
 tar_target(bounds_lsoa_GB_super_generalised,{
-  combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz11, keep = 0.05)
+  combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz22, keep = 0.05)
 }),
 tar_target(uprn,{
   load_uprn(path = file.path(parameters$path_data,"os_uprn"))
@@ -331,7 +354,6 @@ tar_target(osm_land,{
 tar_target(osm_buildings,{
   read_osm_pbf_buildings(path = file.path(parameters$path_data,"osm"))
 }),
-
 
 tar_target(landcover,{
   combine_land_use(os_land, os_greenspace, osm_land)
@@ -384,6 +406,17 @@ tar_target(income_msoa,{
   load_msoa_income(path = file.path(parameters$path_data,"income"))
 }),
 
+tar_target(income_scot_dz11,{
+  load_income_scotland(path = file.path(parameters$path_data,"income/scotland"))
+}),
+
+tar_target(income_scot_dz22,{
+  esimate_income_scotland_dz22(income_scot_dz11, lookup_dz_2011_22_pre)
+}),
+
+
+
+
 # tar_target(experian_income,{
 #   load_experian_income(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Malcolm/Experian.zip"))
 # }),
@@ -418,13 +451,13 @@ tar_target(ev_registrations,{
   load_dft_ev_registrations(dl_vehicle_registrations)
 }),
 tar_target(vehicle_registrations_21,{
-  vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,"vehicle_registrations")
+  vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"vehicle_registrations")
 }),
 tar_target(ulev_registrations_21,{
-  vehicle_reg_to_21(ulev_registrations,lsoa_11_21_tools,"ulev_registrations")
+  vehicle_reg_to_21(ulev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ulev_registrations")
 }),
 tar_target(ev_registrations_21,{
-  vehicle_reg_to_21(ev_registrations,lsoa_11_21_tools,"ev_registrations")
+  vehicle_reg_to_21(ev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ev_registrations")
 }),
 
 # Car Emissions
@@ -458,7 +491,7 @@ tar_target(car_km_pc,{
 
 tar_target(car_km_lsoa_21,{
   extraplote_car_km_trends2(car_km_pc, car_km_2009_2011, centroids_lsoa21,
-                            centroids_dz11, vehicle_registrations_21, lookup_lsoa_2011_21)
+                            centroids_dz22, vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22)
 }),
 
 # tar_target(car_km_lsoa,{
@@ -503,13 +536,22 @@ tar_target(central_heating_2021,{
   load_central_heating_2021(path = file.path(parameters$path_data,"nomis"))
 }),
 
+tar_target(central_heating_2022_scotland,{
+  load_cental_heating_scotland_2022(path = file.path(parameters$path_data,"gas_electric/scotland_2022_centralheating.csv"))
+}),
+
+tar_target(central_heating_2011_scotland,{
+  sub = load_cental_heating_scotland_2011(path = file.path(parameters$path_data,"gas_electric/scotland_2011_centralheating.csv"))
+  central_heating_2011_to_2022_scotland(sub, lookup_dz_2011_22_pre)
+}),
+
 tar_target(central_heating_2011,{
   sub = load_central_heating_2011(path = file.path(parameters$path_data,"nomis","2011"))
   central_heating_2011_to_2021(sub, lsoa_11_21_tools)
 }),
 
 tar_target(other_heating_emissions,{
-  calculate_other_heating(central_heating_2021, central_heating_2011, domestic_gas, population)
+  calculate_other_heating(central_heating_2021, central_heating_2011, central_heating_2011_scotland, central_heating_2022_scotland, domestic_gas, population)
 }),
 
 # House Prices
@@ -593,6 +635,10 @@ tar_target(consumption_uk,{
   load_consumption_footprint(dl_consumption)
 }),
 
+tar_target(consumption_multipliers_uk,{
+  load_consumption_multipliers(dl_consumption)
+}),
+
 tar_target(consumption_income,{
   load_consumption_income(path = file.path(parameters$path_data,"consumption"))
 }),
@@ -600,7 +646,11 @@ tar_target(consumption_income,{
 tar_target(consumption_syth_pop,{
   consumption_footprint_syth_pop(synth_households_lcfs_2020,synth_households_lcfs_2018,
                                  synth_households_lcfs_2016,synth_households_lcfs_2014,
-                                 synth_households_lcfs_2012,synth_households_lcfs_2010)
+                                 synth_households_lcfs_2012,synth_households_lcfs_2010,
+                                 synth_households_lcfs_2020_scotland,synth_households_lcfs_2018_scotland,
+                                 synth_households_lcfs_2016_scotland,synth_households_lcfs_2014_scotland,
+                                 synth_households_lcfs_2012_scotland,synth_households_lcfs_2010_scotland
+                                 )
 }),
 
 tar_target(consumption_lookup,{
@@ -609,8 +659,7 @@ tar_target(consumption_lookup,{
 
 
 tar_target(consumption_emissions,{
-  #calculate_consumption_lsoa(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity) # Old method
-  calculate_consumption_lsoa(consumption_syth_pop, population, consumption_uk, consumption_lookup)
+  calculate_consumption_lsoa(consumption_syth_pop, population, consumption_uk, consumption_lookup, consumption_multipliers_uk)
 
 }),
 
@@ -819,6 +868,37 @@ tar_target(lcfs_clean,{
   selected_lcfs(lcfs)
 }),
 
+tar_target(synth_households_lcfs_2020_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
+                       population, base_year = "2020/21")
+}),
+
+tar_target(synth_households_lcfs_2018_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
+                                population, base_year = "2018/19")
+}),
+
+tar_target(synth_households_lcfs_2016_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
+                                population, base_year = "2016/17")
+}),
+
+tar_target(synth_households_lcfs_2014_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
+                                population, base_year = "2014/15")
+}),
+
+
+tar_target(synth_households_lcfs_2012_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac01dz22,income_scot_dz22,
+                                population, base_year = "2012/13")
+}),
+
+tar_target(synth_households_lcfs_2010_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac01dz22,income_scot_dz22,
+                                population, base_year = "2010/11")
+}),
+
 tar_target(synth_households_lcfs_2020,{
   match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
                        population, dwellings_type_backcast, base_year = "2020/21")
@@ -903,6 +983,10 @@ tar_target(pmtiles_epc_nondom,{
 # Build JSON -------------------------------------------------------
 tar_target(build_lsoa_jsons,{
   export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
+}),
+
+tar_target(build_historical_emissions_jsons,{
+  export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns")
 }),
 
 tar_target(build_population_jsons,{
