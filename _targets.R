@@ -981,9 +981,9 @@ tar_target(pmtiles_epc_nondom,{
 }, format = "file"),
 
 # Build JSON -------------------------------------------------------
-tar_target(build_lsoa_jsons,{
-  export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
-}),
+# tar_target(build_lsoa_jsons,{
+#   export_zone_json(lsoa_emissions_all, path = "outputdata/json/zones")
+# }),
 
 tar_target(build_historical_emissions_jsons,{
   export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns")
