@@ -90,15 +90,18 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
     }
 
   } else {
+
     message("Writing JSON")
-    for(i in seq(1,length(x))){
-      sub <- as.data.frame(x[[i]])
+    ignr <- purrr::map(x, function(sub){
+      sub <- as.data.frame(sub)
       nmsub <- sub[,idcol][1]
       sub[idcol] <- NULL
-      jsonlite::write_json(sub,
-                           file.path(path,paste0(nmsub,".json")),
-                           dataframe = dataframe, na = na)
-    }
+      yyjsonr::write_json_file(sub,
+                               file.path(path,paste0(nmsub,".json")),
+                               dataframe = dataframe)
+      file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json"))
+    }, .progress = TRUE)
+
   }
 
   write.csv(new_nms, file.path(path,"names_lookup.csv"), row.names = FALSE)

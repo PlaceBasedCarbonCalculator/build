@@ -96,13 +96,15 @@ read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Ano
 
 extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa21,
                                      centroids_dz22,
-                                    vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22){
+                                    vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22, years = 2010:2023){
+
+  vehicle_registrations_21 = vehicle_registrations_21[vehicle_registrations_21$year %in% years,]
 
 
   pc_geom = car_km_pc[,"PC_AREA"]
   pc_geom = sf::st_transform(pc_geom, 27700)
   car_km_pc = sf::st_drop_geometry(car_km_pc)
-  car_km_pc = car_km_pc[,c("PC_AREA",2010:2023)]
+  car_km_pc = car_km_pc[,c("PC_AREA",years)]
 
   car_km_2009_2011$vans_total_11[is.na(car_km_2009_2011$vans_total_11)] = 0
   car_km_2009_2011$van_km_11[is.na(car_km_2009_2011$van_km_11)] = 0
@@ -117,7 +119,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   centroids_lsoa21 <- sf::st_drop_geometry(centroids_lsoa21)
   centroids_lsoa21 <- centroids_lsoa21[,c("LSOA21CD","PC_AREA")]
 
-  # MErged LSOA get data from one 2011 LSOA
+  # Merged LSOA get data from one 2011 LSOA
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA21CD","LSOA11CD")]
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[!duplicated(lookup_lsoa_2011_21$LSOA21CD),]
 
@@ -184,7 +186,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   names(car_km_pc_long) = c("PC_AREA","year","pc_total_km")
 
   # Weight By total number of vehicles
-  vr_pc_summary = left_join(vr_pc_summary, car_km_pc_long, by = c("PC_AREA","year"))
+  vr_pc_summary = dplyr::left_join(vr_pc_summary, car_km_pc_long, by = c("PC_AREA","year"))
   vr_pc_summary$pc_company_km = vr_pc_summary$pc_total_km * vr_pc_summary$company_ratio
   vr_pc_summary$pc_private_km = vr_pc_summary$pc_total_km - vr_pc_summary$pc_company_km
   vr_pc_summary$pc_car_km = vr_pc_summary$pc_private_km * vr_pc_summary$car_ratio

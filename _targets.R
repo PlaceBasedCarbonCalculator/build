@@ -986,7 +986,8 @@ tar_target(pmtiles_epc_nondom,{
 # }),
 
 tar_target(build_historical_emissions_jsons,{
-  export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns")
+  export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns",
+                   zip = FALSE, rounddp = 2)
 }),
 
 tar_target(build_population_jsons,{

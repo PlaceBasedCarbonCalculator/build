@@ -2,6 +2,7 @@ load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS4
   cenus11 = read.csv(path, skip = 7)
   cenus11 = cenus11[,2:3]
   names(cenus11) = c("LSOA11CD","households_total")
+  cenus11 = cenus11[!is.na(cenus11$households_total),]
   cenus11$year = 2011
   cenus11
 }
@@ -72,6 +73,14 @@ extrapolate_population_households = function(households_cenus11,
   lookup_U = rbind(lookup_U, lookup_X)
   lookup_U = lookup_U[,c("LSOA11CD","LSOA21CD")]
 
+  # Update households
+  households_cenus11 = dplyr::left_join(households_cenus11, lookup_U, by = c("LSOA" = "LSOA11CD"))
+  households_cenus11$LSOA21CD = ifelse(is.na(households_cenus11$LSOA21CD),
+                                       households_cenus11$LSOA,
+                                       households_cenus11$LSOA21CD)
+  households_cenus11$LSOA = households_cenus11$LSOA21CD
+  households_cenus11$LSOA21CD = NULL
+
   pop_U_old = population_2002_2020[population_2002_2020$LSOA11CD %in% lookup_U$LSOA11CD,]
   pop_U_old = dplyr::left_join(pop_U_old, lookup_U, by = "LSOA11CD")
   pop_U_old$LSOA11CD = NULL
@@ -89,6 +98,9 @@ extrapolate_population_households = function(households_cenus11,
   d_U = dwellings_tax_band[dwellings_tax_band$LSOA21CD %in% lsoa_U,]
   hh21_U = households_cenus21[households_cenus21$LSOA %in% lsoa_U,]
   hh11_U = households_cenus11[households_cenus11$LSOA %in% lsoa_U,]
+
+  hh21_U = hh21_U[order(hh21_U$LSOA),]
+  hh11_U = hh11_U[order(hh11_U$LSOA),]
 
   pop_U = dplyr::group_split(pop_U, LSOA21CD)
   d_U = dplyr::group_split(d_U, LSOA21CD)
@@ -142,6 +154,8 @@ extrapolate_population_households = function(households_cenus11,
 
   hh11_M = dplyr::left_join(hh11_M, lookup_M, by = c("LSOA" = "LSOA11CD"))
 
+  hh11_M$LSOA = hh11_M$LSOA21CD
+
   pop_M = dplyr::group_split(pop_M, LSOA21CD)
   d_M = dplyr::group_split(d_M, LSOA21CD)
   hh21_M = dplyr::group_split(hh21_M, LSOA)
@@ -191,12 +205,18 @@ extrapolate_population_households = function(households_cenus11,
 # d = dwellings_tax_band[dwellings_tax_band$LSOA21CD == "E01000001",]
 # hh21 = households_cenus21[households_cenus21$LSOA == "E01000001",]
 # hh11 = households_cenus11[households_cenus11$LSOA == "E01000001",]
-#
-# p = pop_S_old[[1]]
-# pn = pop_S_new[[1]]
-# d = d_S[[1]]
-# hh21 = hh21_S[[1]]
-# hh11 = hh11_S[[1]]
+# list(p = pop_U, d = d_U, hh21 = hh21_U, hh11 = hh11_U)
+# foo = sapply(pop_U, function(x){x$LSOA21CD[1]})
+# p = pop_U[foo == "W01001971"][[1]]
+# #pn = pop_S_new[[1]]
+# d = d_U[foo == "W01001971"][[1]]
+# hh21 = hh21_U[foo == "W01001971"][[1]]
+# hh11 = hh11_U[foo == "W01001971"][[1]]
+
+# p = pop_M[[1]]
+# d = d_M[[1]]
+# hh21 = hh21_M[[1]]
+# hh11 = hh11_M[[1]]
 
 extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
   # Initial check
@@ -204,7 +224,7 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     if(any(unique(p$LSOA21CD) != unique(d$LSOA21CD))){
       stop("LSOAs don't match")
     }
-    if(!any(unique(hh21$LSOA, hh11$LSOA) %in% unique(d$LSOA21CD))){
+    if(!all(unique(c(hh21$LSOA, hh11$LSOA)) %in% unique(d$LSOA21CD))){
       stop("LSOAs don't match")
     }
 
@@ -227,9 +247,14 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     m = lm(adults_per_household ~ year, hh)
     aph = data.frame(year = 2002:2022)
     aph$adults_per_household = predict(m, newdata = aph)
+    aph$adults_per_household = ifelse(aph$adults_per_household < 1,1,aph$adults_per_household)
     p = dplyr::left_join(p, aph, by = "year")
     p$households_est = round(p$adults / p$adults_per_household)
     p = dplyr::left_join(p, d[,c("year","all_properties")], by = "year")
+
+    # plot(p$all_ages, type = "l", col = "red", ylim = c(0,max(p$all_ages)))
+    # lines(p$households_est, col = "blue")
+    # lines(p$all_properties, col = "green")
 
     return(p)
 
@@ -246,6 +271,7 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     hh = dplyr::left_join(hh, d[,c("year","all_properties","LSOA21CD")], by = c("year", "LSOA" = "LSOA21CD"))
     hh$all_properties[hh$year == 2011] = sum(d$all_properties[d$year == 2011])
     hh$adults_per_household = hh$adults / hh$households_total
+
 
     d2 = dplyr::left_join(d[d$year < 2021,], hh[,c("LSOA","adults_per_household")],
                           by = c("LSOA21CD" = "LSOA"))
@@ -278,6 +304,7 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
       m = lm(adults_per_household ~ year, hh_list[[i]])
       aph = data.frame(year = 2002:2020)
       aph$adults_per_household = predict(m, newdata = aph)
+      aph$adults_per_household = ifelse(aph$adults_per_household < 1,1,aph$adults_per_household)
       aph$LSOA21CD = hh_list[[i]]$LSOA[hh_list[[i]]$year == 2021]
       aph_list[[i]] = aph
     }

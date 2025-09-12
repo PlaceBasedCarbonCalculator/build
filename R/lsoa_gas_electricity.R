@@ -37,7 +37,7 @@ load_lsoa_electric <- function(path){
     names(sub) <- c("LAcode","LAname",
                     "MSOA","MSOAname",
                     "LSOA","LSOAname",
-                    "metres","total_elec_kwh",
+                    "meters","total_elec_kwh",
                     "mean_elec_kwh","median_elec_kwh")
 
     sub$year <- i
@@ -45,10 +45,15 @@ load_lsoa_electric <- function(path){
   }
   elec = dplyr::bind_rows(elec)
 
-  elec$metres = as.numeric(elec$metres)
+  elec$meters = as.numeric(elec$meters)
   elec$total_elec_kwh = as.numeric(elec$total_elec_kwh)
   elec$mean_elec_kwh = as.numeric(elec$mean_elec_kwh)
   elec$median_elec_kwh = as.numeric(elec$median_elec_kwh)
+
+  elec$meters[is.na(elec$meters)] = 0
+  elec$total_elec_kwh[is.na(elec$total_elec_kwh)] = 0
+  elec$mean_elec_kwh[is.na(elec$mean_elec_kwh)] = 0
+  elec$median_elec_kwh[is.na(elec$median_elec_kwh)] = 0
 
   elec
 
@@ -69,8 +74,8 @@ load_msoa_electric_nondom <- function(path){
     sub <- sub[5:nrow(sub),]
     names(sub) <- c("LAcode","LAname",
                     "MSOA","MSOAname",
-                    "metre_type",
-                    "metres","total_elec_kwh",
+                    "meter_type",
+                    "meters","total_elec_kwh",
                     "mean_elec_kwh","median_elec_kwh")
 
     sub$year <- i
@@ -79,10 +84,16 @@ load_msoa_electric_nondom <- function(path){
   elec = dplyr::bind_rows(elec)
   unlink(file.path(tempdir(),"gaselec"), recursive = TRUE)
 
-  elec$metres = as.numeric(elec$metres)
+  elec$meters = as.numeric(elec$meters)
   elec$total_elec_kwh = as.numeric(elec$total_elec_kwh)
   elec$mean_elec_kwh = as.numeric(elec$mean_elec_kwh)
   elec$median_elec_kwh = as.numeric(elec$median_elec_kwh)
+
+  elec$total_elec_kwh[is.na(elec$total_elec_kwh)] = 0
+  elec$mean_elec_kwh[is.na(elec$mean_elec_kwh)] = 0
+  elec$median_elec_kwh[is.na(elec$median_elec_kwh)] = 0
+
+
 
   elec
 
@@ -100,11 +111,23 @@ load_lsoa_gas <- function(path){
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
-    names(sub) <- c("LAcode","LAname",
-                    "MSOA","MSOAname",
-                    "LSOA","LSOAname",
-                    "metres","total_gas_kwh",
-                    "mean_gas_kwh","median_gas_kwh")
+
+    if(ncol(sub) == 10){
+      names(sub) <- c("LAcode","LAname",
+                      "MSOA","MSOAname",
+                      "LSOA","LSOAname",
+                      "meters","total_gas_kwh",
+                      "mean_gas_kwh","median_gas_kwh")
+    } else {
+      names(sub) <- c("LAcode","LAname",
+                      "MSOA","MSOAname",
+                      "LSOA","LSOAname",
+                      "meters","total_gas_kwh",
+                      "mean_gas_kwh","median_gas_kwh",
+                      "nonconsump_meters")
+    }
+
+
 
     sub$year <- i
     gas[[i]] <- sub
@@ -112,10 +135,15 @@ load_lsoa_gas <- function(path){
   gas = dplyr::bind_rows(gas)
   unlink(file.path(tempdir(),"gaselec"), recursive = TRUE)
 
-  gas$metres = as.numeric(gas$metres)
+  gas$meters = as.numeric(gas$meters)
   gas$total_gas_kwh = as.numeric(gas$total_gas_kwh)
   gas$mean_gas_kwh = as.numeric(gas$mean_gas_kwh)
   gas$median_gas_kwh = as.numeric(gas$median_gas_kwh)
+
+  gas$meters[is.na(gas$meters)] = 0
+  gas$total_gas_kwh[is.na(gas$total_gas_kwh)] = 0
+  gas$mean_gas_kwh[is.na(gas$mean_gas_kwh)] = 0
+  gas$median_gas_kwh[is.na(gas$median_gas_kwh)] = 0
 
   gas
 
@@ -134,7 +162,7 @@ load_msoa_gas_nondom <- function(path){
     sub <- sub[5:nrow(sub),]
     names(sub) <- c("LAcode","LAname",
                     "MSOA","MSOAname",
-                    "metres","total_gas_kwh",
+                    "meters","total_gas_kwh",
                     "mean_gas_kwh","median_gas_kwh")
 
     sub$year <- i
@@ -143,7 +171,7 @@ load_msoa_gas_nondom <- function(path){
   gas = dplyr::bind_rows(gas)
 
 
-  gas$metres = as.numeric(gas$metres)
+  gas$meters = as.numeric(gas$meters)
   gas$total_gas_kwh = as.numeric(gas$total_gas_kwh)
   gas$mean_gas_kwh = as.numeric(gas$mean_gas_kwh)
   gas$median_gas_kwh = as.numeric(gas$median_gas_kwh)
@@ -154,7 +182,7 @@ load_msoa_gas_nondom <- function(path){
 
 lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
-  domestic_gas_11 = domestic_gas_11[,c("LSOA","year","metres","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
+  domestic_gas_11 = domestic_gas_11[,c("LSOA","year","meters","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
   names(domestic_gas_11)[1] = "LSOA11CD"
 
   # Scotland
@@ -179,7 +207,7 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
     dplyr::summarise(total_gas_kwh = round(sum(total_gas_kwh * splitshare)),
                      mean_gas_kwh = weighted.mean(mean_gas_kwh, splitshare),
                      median_gas_kwh = weighted.mean(median_gas_kwh, splitshare),
-                     metres = round(sum(metres * splitshare))) |>
+                     meters = round(sum(meters * splitshare))) |>
     dplyr::ungroup()
 
 
@@ -197,10 +225,13 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
   domestic_gas_M = dplyr::group_by(domestic_gas_M, year, LSOA21CD)
   domestic_gas_M = dplyr::summarise(domestic_gas_M,
                                     total_gas_kwh = sum(total_gas_kwh, na.rm = TRUE),
-                                    mean_gas_kwh = weighted.mean(mean_gas_kwh, metres, na.rm = TRUE),
-                                    median_gas_kwh = weighted.mean(median_gas_kwh, metres, na.rm = TRUE),
-                                    metres = sum(metres, na.rm = TRUE))
+                                    mean_gas_kwh = weighted.mean(mean_gas_kwh, meters, na.rm = TRUE),
+                                    median_gas_kwh = weighted.mean(median_gas_kwh, meters, na.rm = TRUE),
+                                    meters = sum(meters, na.rm = TRUE))
   domestic_gas_M = dplyr::ungroup(domestic_gas_M)
+
+  domestic_gas_M$mean_gas_kwh = ifelse(is.nan(domestic_gas_M$mean_gas_kwh), 0, domestic_gas_M$mean_gas_kwh)
+  domestic_gas_M$median_gas_kwh = ifelse(is.nan(domestic_gas_M$median_gas_kwh), 0, domestic_gas_M$median_gas_kwh)
 
   #Split
   lookup_split = lsoa_11_21_tools$lookup_split
@@ -211,14 +242,16 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
                                     relationship = "many-to-many")
   domestic_gas_S = as.data.frame(domestic_gas_S)
 
-  domestic_gas_S$metres = domestic_gas_S$metres * domestic_gas_S$household_ratio
+  domestic_gas_S$meters = domestic_gas_S$meters * domestic_gas_S$household_ratio
   domestic_gas_S$total_gas_kwh = domestic_gas_S$total_gas_kwh * domestic_gas_S$household_ratio
-  domestic_gas_S$mean_gas_kwh = domestic_gas_S$total_gas_kwh / domestic_gas_S$metres
+  domestic_gas_S$mean_gas_kwh = domestic_gas_S$total_gas_kwh / domestic_gas_S$meters
+  domestic_gas_S$mean_gas_kwh = ifelse(is.nan(domestic_gas_S$mean_gas_kwh),0,domestic_gas_S$mean_gas_kwh)
 
   #TODO: How do you get the median of a subgroup? For now assuming unchanged
+  domestic_gas_S$median_gas_kwh = ifelse(domestic_gas_S$mean_gas_kwh == 0,0,domestic_gas_S$median_gas_kwh)
 
 
-  nms = c("LSOA21CD","year","metres","total_gas_kwh","mean_gas_kwh","median_gas_kwh")
+  nms = c("LSOA21CD","year","meters","total_gas_kwh","mean_gas_kwh","median_gas_kwh")
 
   domestic_gas_S = domestic_gas_S[,nms]
   domestic_gas_M = domestic_gas_M[,nms]
@@ -232,7 +265,7 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
 
 lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
-  domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","metres","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
+  domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
   names(domestic_electricity_11)[1] = "LSOA11CD"
 
   # Scotland
@@ -257,7 +290,7 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
     dplyr::summarise(total_elec_kwh = round(sum(total_elec_kwh * splitshare)),
                      mean_elec_kwh = weighted.mean(mean_elec_kwh, splitshare),
                      median_elec_kwh = weighted.mean(median_elec_kwh, splitshare),
-                     metres = round(sum(metres * splitshare))) |>
+                     meters = round(sum(meters * splitshare))) |>
     dplyr::ungroup()
 
 
@@ -275,9 +308,9 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
   domestic_electricity_M = dplyr::group_by(domestic_electricity_M, year, LSOA21CD)
   domestic_electricity_M = dplyr::summarise(domestic_electricity_M,
                                             total_elec_kwh = sum(total_elec_kwh, na.rm = TRUE),
-                                            mean_elec_kwh = weighted.mean(mean_elec_kwh, metres, na.rm = TRUE),
-                                            median_elec_kwh = weighted.mean(median_elec_kwh, metres, na.rm = TRUE),
-                                            metres = sum(metres, na.rm = TRUE))
+                                            mean_elec_kwh = weighted.mean(mean_elec_kwh, meters, na.rm = TRUE),
+                                            median_elec_kwh = weighted.mean(median_elec_kwh, meters, na.rm = TRUE),
+                                            meters = sum(meters, na.rm = TRUE))
   domestic_electricity_M = dplyr::ungroup(domestic_electricity_M)
 
   lookup_split = lsoa_11_21_tools$lookup_split
@@ -288,9 +321,9 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
                                     relationship = "many-to-many")
   domestic_electricity_S = as.data.frame(domestic_electricity_S)
 
-  domestic_electricity_S$metres = domestic_electricity_S$metres * domestic_electricity_S$household_ratio
+  domestic_electricity_S$meters = domestic_electricity_S$meters * domestic_electricity_S$household_ratio
   domestic_electricity_S$total_elec_kwh = domestic_electricity_S$total_elec_kwh * domestic_electricity_S$household_ratio
-  domestic_electricity_S$mean_elec_kwh = domestic_electricity_S$total_elec_kwh / domestic_electricity_S$metres
+  domestic_electricity_S$mean_elec_kwh = domestic_electricity_S$total_elec_kwh / domestic_electricity_S$meters
 
   #TODO: How do you get the median of a subgroup? For now assuming unchanged
 
@@ -303,7 +336,7 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
   #   domestic_electricity_S[i] = domestic_electricity_S[,i ,drop = TRUE] * domestic_electricity_S$pop_ratio
   # }
 
-  nms = c("LSOA21CD","year","metres","total_elec_kwh","mean_elec_kwh","median_elec_kwh")
+  nms = c("LSOA21CD","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")
 
   domestic_electricity_S = domestic_electricity_S[,nms]
   domestic_electricity_M = domestic_electricity_M[,nms]
@@ -412,6 +445,8 @@ calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
   names(domestic_gas)[3] = "dom_gas_kgco2e_percap"
   domestic_gas$year = as.integer(domestic_gas$year)
 
+  domestic_gas$dom_gas_kgco2e_percap = ifelse(is.nan(domestic_gas$dom_gas_kgco2e_percap),0, domestic_gas$dom_gas_kgco2e_percap)
+
   domestic_gas
 
 }
@@ -448,6 +483,8 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
 
   names(domestic_electricity)[3] = "dom_elec_kgco2e_percap"
   domestic_electricity$year = as.integer(domestic_electricity$year)
+
+  domestic_electricity$dom_elec_kgco2e_percap = ifelse(is.nan(domestic_electricity$dom_elec_kgco2e_percap),0, domestic_electricity$dom_elec_kgco2e_percap)
 
   domestic_electricity
 

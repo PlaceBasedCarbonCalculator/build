@@ -139,7 +139,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
 
   .f = select_synth_pop_year,
   .progress = TRUE,
-  .options = furrr::furrr_options(seed = TRUE,
+  .options = furrr::furrr_options(seed = 1234L,
                                   scheduling  = 1))
   future::plan("sequential")
   t2 = Sys.time()
@@ -170,7 +170,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
   hh = hh[,c("household_id","Tenure5","hhComp15","hhSize5","CarVan5","OAC")],
   similarity_table = similarity_table,
   .progress = TRUE,
-  .options = furrr::furrr_options(seed = TRUE,
+  .options = furrr::furrr_options(seed = 1234L,
                                   scheduling  = 1))
   future::plan("sequential")
   t2 = Sys.time()
@@ -191,7 +191,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
                                                                     sd_income = cenus_long2$sd_income),
                                                           .f = select_id_income,
                                                           hh = hh[,c("household_id","annual_income")],
-                                                          .options = furrr::furrr_options(seed = TRUE,
+                                                          .options = furrr::furrr_options(seed = 1234L,
                                                                                           scheduling  = 1))
   future::plan("sequential")
 
@@ -287,7 +287,7 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
   ),
   .f = select_synth_pop_year_scot,
   .progress = TRUE,
-  .options = furrr::furrr_options(seed = TRUE,
+  .options = furrr::furrr_options(seed = 1234L,
                                   scheduling  = 1))
   future::plan("sequential")
   t2 = Sys.time()
@@ -318,7 +318,7 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
   hh = hh[,c("household_id","Tenure5","hhComp15","hhSize5","CarVan5","OAC")],
   similarity_table = similarity_table,
   .progress = TRUE,
-  .options = furrr::furrr_options(seed = TRUE,
+  .options = furrr::furrr_options(seed = 1234L,
                                   scheduling  = 1))
   future::plan("sequential")
   t2 = Sys.time()
@@ -341,7 +341,7 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
                                                                      sd_income = cenus_long2$sd_income),
                                                            .f = select_id_income,
                                                            hh = hh[,c("household_id","annual_income")],
-                                                           .options = furrr::furrr_options(seed = TRUE,
+                                                           .options = furrr::furrr_options(seed = 1234L,
                                                                                            scheduling  = 1))
   future::plan("sequential")
 

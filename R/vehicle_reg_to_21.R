@@ -34,6 +34,13 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2
     stop("Unknown mode")
   }
 
+  # Can only do up to year have population data
+  vehicle_registrations$year = as.integer(gsub(" Q1","",vehicle_registrations$quarter))
+  vehicle_registrations$quarter = NULL
+
+  vehicle_registrations = vehicle_registrations[vehicle_registrations$year %in% unique(lsoa_11_21_tools$lookup_split$year), ]
+
+
   # Scotlamd
   vehicle_registrations_Scot = vehicle_registrations[vehicle_registrations$LSOA11CD %in% lookup_dz_2011_22$LSOA11CD,]
 
@@ -42,8 +49,8 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2
                                        by = c("LSOA11CD"),
                                        relationship = "many-to-many")
 
-  vehicle_registrations_Scot$year = as.integer(gsub(" Q1","",vehicle_registrations_Scot$quarter))
-  vehicle_registrations_Scot$quarter = NULL
+
+
 
   vehicle_registrations_Scot <- vehicle_registrations_Scot |>
     dplyr::group_by(year, LSOA21CD) |>
@@ -68,24 +75,16 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2
   vehicle_registrations_M = vehicle_registrations[vehicle_registrations$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
   vehicle_registrations_U = vehicle_registrations[vehicle_registrations$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
 
-  #TODO: Fix for old Scotland 2011 Bounds
-  vehicle_registrations_scot = vehicle_registrations[substr(vehicle_registrations$LSOA11CD,1,1) == "S",]
-  vehicle_registrations_scot$LSOA21CD = vehicle_registrations_scot$LSOA11CD
-
   #Unchanged
   vehicle_registrations_U = dplyr::left_join(vehicle_registrations_U, lsoa_11_21_tools$lookup_unchanged, by = "LSOA11CD")
-  vehicle_registrations_U = rbind(vehicle_registrations_U, vehicle_registrations_scot)
 
   # Merge
   vehicle_registrations_M = dplyr::left_join(vehicle_registrations_M, lsoa_11_21_tools$lookup_merge, by = "LSOA11CD")
   vehicle_registrations_M = dplyr::select(vehicle_registrations_M, -LSOA11CD)
-  vehicle_registrations_M = dplyr::group_by(vehicle_registrations_M, quarter, LSOA21CD)
+  vehicle_registrations_M = dplyr::group_by(vehicle_registrations_M, year, LSOA21CD)
   vehicle_registrations_M = dplyr::summarise_all(vehicle_registrations_M, sum, na.rm = TRUE)
   vehicle_registrations_M = dplyr::ungroup(vehicle_registrations_M)
 
-  vehicle_registrations_S$year = as.integer(gsub(" Q1","",vehicle_registrations_S$quarter))
-  vehicle_registrations_M$year = as.integer(gsub(" Q1","",vehicle_registrations_M$quarter))
-  vehicle_registrations_U$year = as.integer(gsub(" Q1","",vehicle_registrations_U$quarter))
 
   #Split
   lookup_split = lsoa_11_21_tools$lookup_split
@@ -110,6 +109,7 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2
   vehicle_registrations_Scot = vehicle_registrations_Scot[,nms]
 
   vehicle_registrations = rbind(vehicle_registrations_S, vehicle_registrations_M, vehicle_registrations_U, vehicle_registrations_Scot)
+
 
 
   vehicle_registrations
