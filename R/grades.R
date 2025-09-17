@@ -1,6 +1,6 @@
-value2grade <- function(x, high_good = FALSE){
+value2grade <- function(x, high_good = FALSE, zeroNA = TRUE){
 
-  x_cent <- percentile(x) # In flights.R
+  x_cent <- percentile(x, zeroNA = zeroNA) # In flights.R
   grades <- c(rep("A+",1),
               rep("A",4),
               rep("A-",5),

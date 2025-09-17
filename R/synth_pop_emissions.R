@@ -7,6 +7,7 @@ load_consumption_lookup = function(path = "../inputdata/consumption/PBCC_lookup.
 calculate_consumption_lsoa = function(consumption_syth_pop, population, consumption_uk, consumption_lookup, consumption_multipliers_uk) {
 
   population = population[,c("LSOA21CD","year","all_ages")]
+  population = population[population$year >= 2010,]
 
   names(consumption_syth_pop)[names(consumption_syth_pop) == "by"] = "LSOA21CD"
 
@@ -84,7 +85,20 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
     dplyr::ungroup()
 
 
-  consumption_syth_emiss = dplyr::left_join(consumption_syth_emiss, population, by = c("LSOA21CD" = "LSOA21CD", "year" = "year"))
+  population = population[population$year %in% unique(consumption_syth_emiss$year),]
+
+  consumption_syth_emiss = dplyr::left_join(population, consumption_syth_emiss, by = c("LSOA21CD" = "LSOA21CD", "year" = "year"))
+
+  #NAs fomr LSOAs with 0 population
+
+  for(i in 1:ncol(consumption_syth_emiss)){
+    if(inherits(consumption_syth_emiss[[i]],"numeric")){
+      consumption_syth_emiss[[i]][is.na(consumption_syth_emiss[[i]])] = 0
+    }
+    if(inherits(consumption_syth_emiss[[i]],"integer")){
+      consumption_syth_emiss[[i]][is.na(consumption_syth_emiss[[i]])] = 0L
+    }
+  }
 
   consumption_syth_emiss = consumption_syth_emiss |>
     dplyr::mutate(emissions_percap_food = remove_inf(emissions_food / all_ages),
@@ -119,5 +133,6 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
 
 remove_inf = function(x){
   x[is.infinite(x)] = 0
+  x[is.nan(x)] = 0
   x
 }

@@ -6,6 +6,20 @@ read_bounds <- function(path = file.path(data_path(),"boundaries/Local_Authority
   bounds
 }
 
+read_bounds_shp <- function(path = file.path("../inputdata/","boundaries/LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")){
+  dir.create(file.path(tempdir(),"bounds"))
+  unzip(path, exdir = file.path(tempdir(),"bounds"))
+  fls = list.files(file.path(tempdir(),"bounds"), pattern = ".shp$", full.names = TRUE)
+  if(length(fls) > 1){
+    stop("muliple shape files in ",path)
+  }
+  bounds <- sf::read_sf(fls)
+  unlink(file.path(tempdir(),"bounds"), recursive = TRUE)
+  bounds <- bounds[,!names(bounds) %in% c("NG_E","BNG_N","BNG_E","LONG","LAT","GlobalID")]
+  bounds
+}
+
+
 download_boundaries <- function(path = file.path(data_path(),"boundaries")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -22,17 +36,17 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
 }
 
 read_bounds_la <- function(path){
-  file_path = file.path(path, "Local_Authority_Districts_May_2024_Boundaries_UK_BFC_6876907690171027150.gpkg")
-  bounds <- read_bounds(file_path)
-  bounds <- bounds[,c("LAD24CD","LAD24NM")]
+  file_path = file.path(path, "LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")
+  bounds <- read_bounds_shp(file_path)
+  bounds <- bounds[,c("LAD25CD","LAD25NM")]
   bounds
 }
 
 
 read_bounds_wards <- function(path){
-  file_path = file.path(path, "Wards_May_2024_Boundaries_UK_BFE_-4458353988245060602.gpkg")
-  bounds <- read_bounds(file_path)
-  bounds <- bounds[,c("WD24CD","WD24NM")]
+  file_path = file.path(path, "Wards_(May_2025)_Boundaries_UK_BFC_(V2).zip")
+  bounds <- read_bounds_shp(file_path)
+  bounds <- bounds[,c("WD25CD","WD25NM")]
   bounds
 }
 
@@ -237,7 +251,7 @@ lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, 
   cents = sf::st_join(cents, bounds_parish)
   cents = sf::st_join(cents, bounds_westminster)
   cents = sf::st_join(cents, bounds_la)
-  cents = cents[,c("LSOA21CD","WD24NM","PAR23NM","PCON24NM","LAD24NM")]
+  cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
 
   cents

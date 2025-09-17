@@ -266,8 +266,13 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
 
 
 
-percentile <- function(dat){
-  pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
+percentile <- function(dat, zeroNA = FALSE){
+  if(zeroNA){
+    dat[dat == 0] = NA
+    pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
+  } else {
+    pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
+  }
   pt2 <- unique(as.data.frame(pt1), fromLast = TRUE)
   pt3 <- rownames(pt2)
   pt4 <- as.integer(strsplit(pt3, "%"))
@@ -278,6 +283,6 @@ percentile <- function(dat){
   }
   datp <- pt4[as.integer(cut(dat, cts, labels = 1:length(pt3)))]
   return(datp)
-  # foo = data.frame(data = dat,
-  #                  datp = datp)
+  foo = data.frame(data = dat,
+                   datp = datp)
 }
