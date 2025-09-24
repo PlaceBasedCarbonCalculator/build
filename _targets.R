@@ -314,6 +314,10 @@ tar_target(lsoa_admin,{
   lsoa_admin_summary(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la)
 }),
 
+tar_target(lsoa_warnings,{
+  make_lsoa_warnings(lookup_lsoa_2011_21,lookup_dz_2011_22, population)
+}),
+
 tar_target(bounds_lsoa_GB_full,{
   combine_lsoa_bounds(bounds_lsoa21_full, bounds_dz22, keep = 1)
 }),
@@ -380,6 +384,10 @@ tar_target(dl_area_classifications,{
 }),
 tar_target(area_classifications,{
   load_area_classifications(dl_area_classifications)
+}),
+
+tar_target(area_classifications_11_21,{
+  match_2011_classifications_2021(area_classifications, lookup_dz_2011_22, lsoa_11_21_tools)
 }),
 
 # Census
@@ -595,6 +603,16 @@ tar_target(dwellings_type_backcast,{
   backcast_dwelling_types(dwellings_tax_band, dwellings_type)
 }),
 
+tar_target(la_emissions_summary_json,{
+  export_zone_json(la_emissions_all, idcol = "LAD25CD", rounddp = 0, path = "outputdata/json/la_emissions", dataframe = "columns",
+                   reduce = FALSE, zip = FALSE)
+}),
+
+tar_target(oac_emissions_summary_json,{
+  export_zone_json(oac_emissions_all, idcol = "lsoa_class_code", rounddp = 0, path = "outputdata/json/oac_emissions", dataframe = "columns",
+                   reduce = FALSE, zip = FALSE)
+}),
+
 tar_target(voa_json_2010,{
   sub = summarise_voa_post2010(dwellings_tax_band)
   export_zone_json(sub, idcol = "LSOA21CD", rounddp = 1, path = "outputdata/json/voa_2010", dataframe = "columns",
@@ -768,6 +786,14 @@ tar_target(lsoa_emissions_all,{
                          car_emissions,domestic_electricity_emissions,
                          domestic_gas_emissions,other_heating_emissions,
                          max_year = 2020)
+}),
+
+tar_target(la_emissions_all,{
+  make_la_summary(lsoa_emissions_all, lsoa_admin, population)
+}),
+
+tar_target(oac_emissions_all,{
+  make_oac_summary(lsoa_emissions_all, area_classifications_11_21, population)
 }),
 
 # PLEF Forecasts
@@ -987,7 +1013,7 @@ tar_target(pmtiles_epc_nondom,{
 
 tar_target(build_historical_emissions_jsons,{
   export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns",
-                   zip = FALSE, rounddp = 2)
+                   zip = FALSE, rounddp = 0)
 }),
 
 tar_target(build_population_jsons,{
@@ -1004,6 +1030,10 @@ tar_target(build_access_jsons,{
 tar_target(build_postcode_jsons,{
   export_zone_json(postcode_gas_electricity_emissions, idcol = "postcode",
                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
+}),
+
+tar_target(build_overview_jsons,{
+  make_lsoa_overview_json(lsoa_admin, area_classifications_11_21, lsoa_warnings)
 }),
 
 
