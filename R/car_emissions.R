@@ -217,14 +217,13 @@ calculate_car_emissions = function(car_km_lsoa_21, car_emissions_perkm, populati
   lsoa$van_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$van_emissions / lsoa$all_ages)
   lsoa$company_bike_emissions_percap = ifelse(lsoa$all_ages == 0, 0, lsoa$company_bike_emissions / lsoa$all_ages) # This is company all types and private bikes
 
-  #TODO: Missing emissions rate for Scotland pre 2019 and Scotland population in 2022
-  lsoa = lsoa[,c("LSOA21CD","year","car_emissions_percap","van_emissions_percap","company_bike_emissions_percap")]
+
+  lsoa = lsoa[,c("LSOA21CD","year",
+                 "car_emissions","van_emissions","company_bike_emissions",
+                 "car_km","van_km","company_km",
+                 "car_emissions_percap","van_emissions_percap","company_bike_emissions_percap")]
   lsoa
 
 }
 
-# DfT don't give average emissions anymore
-# Use EV / UVEL to make assumptions
-estimate_car_meissions_post2018 = function(){
 
-}

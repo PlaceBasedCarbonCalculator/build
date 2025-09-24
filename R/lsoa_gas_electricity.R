@@ -435,14 +435,17 @@ calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
     domestic_gas[paste0("dom_gas_kgco2e_percap_",i)] = (domestic_gas[as.character(i)] / population[as.character(i)]) * emissions_factors$gas_kgco2e[emissions_factors$year == i]
   }
 
-  domestic_gas = domestic_gas[,c("LSOA21CD",paste0("dom_gas_kgco2e_percap_",2010:2021))]
+  names(domestic_gas)[names(domestic_gas) %in% as.character(2010:2021)] = paste0("dom_gas_total_emissions_",2010:2021)
 
-  domestic_gas = tidyr::pivot_longer(domestic_gas,
-                      cols = names(domestic_gas)[grepl("dom_gas_kgco2e_percap_",names(domestic_gas))],
-                      names_prefix = "dom_gas_kgco2e_percap_",
-                      names_to = "year")
 
-  names(domestic_gas)[3] = "dom_gas_kgco2e_percap"
+  domestic_gas <- domestic_gas |>
+    tidyr::pivot_longer(
+      cols = -LSOA21CD,
+      names_to = c(".value", "year"),
+      names_pattern = "(dom_gas_.*)_(\\d{4})"
+    )
+
+
   domestic_gas$year = as.integer(domestic_gas$year)
 
   domestic_gas$dom_gas_kgco2e_percap = ifelse(is.nan(domestic_gas$dom_gas_kgco2e_percap),0, domestic_gas$dom_gas_kgco2e_percap)
@@ -474,14 +477,16 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
     domestic_electricity[paste0("dom_elec_kgco2e_percap_",i)] = (domestic_electricity[as.character(i)] / population[as.character(i)]) * emissions_factors$electricity_kgco2e[emissions_factors$year == i]
   }
 
-  domestic_electricity = domestic_electricity[,c("LSOA21CD",paste0("dom_elec_kgco2e_percap_",2010:2021))]
+  names(domestic_electricity)[names(domestic_electricity) %in% as.character(2010:2021)] = paste0("dom_elec_total_emissions_",2010:2021)
 
-  domestic_electricity = tidyr::pivot_longer(domestic_electricity,
-                                     cols = names(domestic_electricity)[grepl("dom_elec_kgco2e_percap_",names(domestic_electricity))],
-                                     names_prefix = "dom_elec_kgco2e_percap_",
-                                     names_to = "year")
 
-  names(domestic_electricity)[3] = "dom_elec_kgco2e_percap"
+  domestic_electricity <- domestic_electricity |>
+    tidyr::pivot_longer(
+      cols = -LSOA21CD,
+      names_to = c(".value", "year"),
+      names_pattern = "(dom_elec_.*)_(\\d{4})"
+    )
+
   domestic_electricity$year = as.integer(domestic_electricity$year)
 
   domestic_electricity$dom_elec_kgco2e_percap = ifelse(is.nan(domestic_electricity$dom_elec_kgco2e_percap),0, domestic_electricity$dom_elec_kgco2e_percap)

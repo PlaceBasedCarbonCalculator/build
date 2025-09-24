@@ -12,23 +12,12 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
 
   lsoa = lsoa[lsoa$year <= max_year,]
 
-  # car_emissions = tidyr::pivot_wider(car_emissions,
-  #                                    id_cols = "LSOA21CD",
-  #                                    values_from = c("car_emissions_percap","van_emissions_percap","company_bike_emissions_percap"),
-  #                                    names_from = "year"
-  #                                   )
-
   names(car_emissions) = gsub("_emissions_percap","_kgco2e_percap",names(car_emissions))
 
 
   other_heating_emissions = other_heating_emissions[other_heating_emissions$year <= max_year,]
 
-  # other_heating_emissions = tidyr::pivot_wider(other_heating_emissions,
-  #                                              id_cols = "LSOA21CD",
-  #                                              values_from = "heating_other_kgco2e_percap",
-  #                                              names_from = "year")
-  # names(other_heating_emissions)[2:ncol(other_heating_emissions)] = paste0("heating_other_kgco2e_percap_",names(other_heating_emissions)[2:ncol(other_heating_emissions)])
-
+  names(consumption_emissions) = gsub("emisions","emissions",names(consumption_emissions)) #TODO Fix typo
 
   consumption_emissions = consumption_emissions[,c("LSOA21CD","year",
                                                    "emissions_percap_food","emissions_percap_alcohol","emissions_percap_clothing",
@@ -37,36 +26,22 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                                    "emissions_percap_transport_optranequip_other",
                                                    "emissions_percap_transport_vehiclepurchase","emissions_percap_transport_pt",
                                                    "emissions_percap_health",
-                                                   "emissions_percap_education","emissions_percap_restaurant","emissions_percap_misc"
+                                                   "emissions_percap_education","emissions_percap_restaurant","emissions_percap_misc",
+                                                   "emissions_food","emissions_alcohol","emissions_clothing","emissions_communication",
+                                                   "emissions_housing_gaselecfuel","emissions_housing_other","emissions_furnish",
+                                                   "emissions_recreation","emissions_transport_optranequip","emissions_transport_optranequip_other",
+                                                   "emissions_transport_services","emissions_transport_pt","emissions_transport_vehiclepurchase",
+                                                   "emissions_health","emissions_education","emissions_restaurant",
+                                                   "emissions_misc"
                                                    )]
 
   names(consumption_emissions) = gsub("emissions_percap_","",names(consumption_emissions))
-  names(consumption_emissions)[3:ncol(consumption_emissions)] = paste0(names(consumption_emissions)[3:ncol(consumption_emissions)],"_kgco2e_percap")
-
-  # consumption_emissions = tidyr::pivot_wider(consumption_emissions, id_cols = "LSOA21CD",
-  #                                            names_from = "year",
-  #                                            values_from = c("food_kgco2e_percap",
-  #                                                            "alcohol_kgco2e_percap",
-  #                                                            "clothing_kgco2e_percap",
-  #                                                            "communication_kgco2e_percap",
-  #                                                            "housing_other_kgco2e_percap",
-  #                                                            "furnish_kgco2e_percap",
-  #                                                            "recreation_kgco2e_percap",
-  #                                                            "transport_vehiclepurchase_kgco2e_percap",
-  #                                                            "health_kgco2e_percap",
-  #                                                            "education_kgco2e_percap",
-  #                                                            "restaurant_kgco2e_percap",
-  #                                                            "misc_kgco2e_percap"))
+  names(consumption_emissions)[3:16] = paste0(names(consumption_emissions)[3:16],"_kgco2e_percap")
 
 
-  flights_lsoa_emissions = flights_lsoa_emissions[,c("LSOA21CD","year","emissions_percap")]
+  flights_lsoa_emissions$flights_emissions_total = rowSums(flights_lsoa_emissions[,c("emissions_international","emissions_domestic")], na.rm = TRUE)
+  flights_lsoa_emissions = flights_lsoa_emissions[,c("LSOA21CD","year","emissions_percap","flights_emissions_total")]
   names(flights_lsoa_emissions)[3] = "flights_kgco2e_percap"
-
-
-  # flights_lsoa_emissions = tidyr::pivot_wider(flights_lsoa_emissions, id_cols = "LSOA21CD",
-  #                                            names_from = "year",
-  #                                            values_from = "flights_kgco2e_percap",
-  #                                            names_prefix = "flights_kgco2e_percap_")
 
 
   lsoa = dplyr::left_join(lsoa, car_emissions, by = c("LSOA21CD","year"))
@@ -86,18 +61,41 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                                                "education_kgco2e_percap",
                                                                "restaurant_kgco2e_percap",
                                                                "misc_kgco2e_percap")], na.rm = TRUE)
-
+  lsoa$goods_services_combined_total = rowSums(lsoa[,c("emissions_food",
+                                                               "emissions_alcohol",
+                                                               "emissions_clothing",
+                                                               "emissions_communication",
+                                                               "emissions_housing_other",
+                                                               "emissions_furnish",
+                                                               "emissions_recreation",
+                                                               "emissions_health",
+                                                               "emissions_education",
+                                                               "emissions_restaurant",
+                                                               "emissions_misc")], na.rm = TRUE)
 
   lsoa$total_kgco2e_percap = rowSums(lsoa[,c("dom_gas_kgco2e_percap",
-                                                               "dom_elec_kgco2e_percap",
-                                                               "car_kgco2e_percap",
-                                                               "van_kgco2e_percap",
-                                                               "flights_kgco2e_percap",
-                                                               "heating_other_kgco2e_percap",
-                                                               "transport_vehiclepurchase_kgco2e_percap",
-                                                               "transport_pt_kgco2e_percap",
-                                                               "transport_optranequip_other_kgco2e_percap",
-                                                               "goods_services_combined_kgco2e_percap")], na.rm = TRUE)
+                                             "dom_elec_kgco2e_percap",
+                                             "car_kgco2e_percap",
+                                             "van_kgco2e_percap",
+                                             "company_bike_kgco2e_percap",
+                                             "flights_kgco2e_percap",
+                                             "heating_other_kgco2e_percap",
+                                             "transport_vehiclepurchase_kgco2e_percap",
+                                             "transport_pt_kgco2e_percap",
+                                             "transport_optranequip_other_kgco2e_percap",
+                                             "goods_services_combined_kgco2e_percap")], na.rm = TRUE)
+
+  lsoa$emissions_total = rowSums(lsoa[,c("dom_gas_total_emissions",
+                                         "dom_elec_total_emissions",
+                                         "car_emissions",
+                                         "van_emissions",
+                                         "company_bike_emissions",
+                                         "flights_emissions_total",
+                                         "heating_other_emissions_total",
+                                         "emissions_transport_vehiclepurchase",
+                                         "emissions_transport_pt",
+                                         "emissions_transport_optranequip",
+                                         "goods_services_combined_total")], na.rm = TRUE)
 
 
   lsoa = lsoa |>

@@ -7,7 +7,7 @@ load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_cl
   airports <- sf::read_sf(path)
 
   # Add home nations to airports
-  bounds_la$country_uk = substr(bounds_la$LAD24CD, 1, 1)
+  bounds_la$country_uk = substr(bounds_la$LAD25CD, 1, 1)
   bounds_la = dplyr::group_by(bounds_la, country_uk)
   bounds_la = dplyr::summarise(bounds_la)
   bounds_la = sf::st_transform(bounds_la, 4326)

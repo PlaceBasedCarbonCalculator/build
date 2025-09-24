@@ -1,7 +1,5 @@
 make_lsoa_overview_json = function(lsoa_admin, area_classifications_11_21, lsoa_warnings){
 
-  lsoa_admin = sf::st_drop_geometry(lsoa_admin)
-
   lsoa = dplyr::left_join(lsoa_admin, area_classifications_11_21, by = "LSOA21CD")
 
 

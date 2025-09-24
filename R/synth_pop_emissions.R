@@ -123,7 +123,7 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
 
   #foo = consumption_syth_pop[consumption_syth_pop$by == "E01000006",]
 
-
+  consumption_syth_emiss = consumption_syth_emiss[,!grepl("^total_",names(consumption_syth_emiss))] # Drop the total_ columns as name is confusing
 
   consumption_syth_emiss
 

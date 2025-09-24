@@ -254,6 +254,7 @@ lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, 
   cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
 
+  cents = sf::st_drop_geometry(cents)
   cents
 
 }
