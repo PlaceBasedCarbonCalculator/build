@@ -10,7 +10,7 @@
 #' Will drop any sf geometry and name files based on geo_code
 
 export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
-                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = TRUE, na = "null"){
+                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = FALSE, na = "null"){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -46,7 +46,12 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
   # Round to 2DP
   for(i in seq_len(ncol(x))){
     if(inherits(x[[i]],"numeric")){
-      x[[i]] = round(x[[i]], rounddp)
+      if(rounddp == 0){
+        x[[i]] = as.integer(x[[i]])
+      } else {
+        x[[i]] = round(x[[i]], rounddp)
+      }
+
     }
   }
 

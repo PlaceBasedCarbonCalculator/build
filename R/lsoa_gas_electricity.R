@@ -416,39 +416,19 @@ calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
 
   domestic_gas = domestic_gas[,c("LSOA21CD","year","total_gas_kwh")]
   domestic_gas$total_gas_kwh[is.na(domestic_gas$total_gas_kwh)] = 0
-  domestic_gas = tidyr::pivot_wider(domestic_gas, names_from = "year", values_from = "total_gas_kwh")
-  domestic_gas = as.data.frame(domestic_gas)
 
   population = population[,c("LSOA21CD","year","all_ages")]
-  population = tidyr::pivot_wider(population, names_from = "year", values_from = "all_ages")
 
-  domestic_gas = domestic_gas[order(domestic_gas$LSOA21CD),]
-  population = population[population$LSOA21CD %in% domestic_gas$LSOA21CD,]
-  population = population[order(population$LSOA21CD),]
-  population = as.data.frame(population)
+  domestic_gas = dplyr::left_join(domestic_gas, population, by = c("LSOA21CD","year"))
+  domestic_gas = dplyr::left_join(domestic_gas, emissions_factors[,c("year","gas_kgco2e")], by = c("year"))
 
-  if(!all(population$LSOA21CD == domestic_gas$LSOA21CD)){
-    stop("LSOA21CD don't match")
-  }
-
-  for(i in 2010:2021){
-    domestic_gas[paste0("dom_gas_kgco2e_percap_",i)] = (domestic_gas[as.character(i)] / population[as.character(i)]) * emissions_factors$gas_kgco2e[emissions_factors$year == i]
-  }
-
-  names(domestic_gas)[names(domestic_gas) %in% as.character(2010:2021)] = paste0("dom_gas_total_emissions_",2010:2021)
-
-
-  domestic_gas <- domestic_gas |>
-    tidyr::pivot_longer(
-      cols = -LSOA21CD,
-      names_to = c(".value", "year"),
-      names_pattern = "(dom_gas_.*)_(\\d{4})"
-    )
-
+  domestic_gas$dom_gas_total_emissions = domestic_gas$total_gas_kwh * domestic_gas$gas_kgco2e
+  domestic_gas$dom_gas_kgco2e_percap = ifelse(domestic_gas$all_ages == 0,0,
+                                              domestic_gas$dom_gas_total_emissions / domestic_gas$all_ages)
 
   domestic_gas$year = as.integer(domestic_gas$year)
 
-  domestic_gas$dom_gas_kgco2e_percap = ifelse(is.nan(domestic_gas$dom_gas_kgco2e_percap),0, domestic_gas$dom_gas_kgco2e_percap)
+  domestic_gas = domestic_gas[,c("LSOA21CD","year","dom_gas_total_emissions","dom_gas_kgco2e_percap")]
 
   domestic_gas
 
@@ -458,38 +438,19 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
 
   domestic_electricity = domestic_electricity[,c("LSOA21CD","year","total_elec_kwh")]
   domestic_electricity$total_elec_kwh[is.na(domestic_electricity$total_elec_kwh)] = 0
-  domestic_electricity = tidyr::pivot_wider(domestic_electricity, names_from = "year", values_from = "total_elec_kwh")
-  domestic_electricity = as.data.frame(domestic_electricity)
 
   population = population[,c("LSOA21CD","year","all_ages")]
-  population = tidyr::pivot_wider(population, names_from = "year", values_from = "all_ages")
 
-  domestic_electricity = domestic_electricity[order(domestic_electricity$LSOA21CD),]
-  population = population[population$LSOA21CD %in% domestic_electricity$LSOA21CD,]
-  population = population[order(population$LSOA21CD),]
-  population = as.data.frame(population)
+  domestic_electricity = dplyr::left_join(domestic_electricity, population, by = c("LSOA21CD","year"))
+  domestic_electricity = dplyr::left_join(domestic_electricity, emissions_factors[,c("year","electricity_kgco2e")], by = c("year"))
 
-  if(!all(population$LSOA21CD == domestic_electricity$LSOA21CD)){
-    stop("LSOA21CD don't match")
-  }
-
-  for(i in 2010:2021){
-    domestic_electricity[paste0("dom_elec_kgco2e_percap_",i)] = (domestic_electricity[as.character(i)] / population[as.character(i)]) * emissions_factors$electricity_kgco2e[emissions_factors$year == i]
-  }
-
-  names(domestic_electricity)[names(domestic_electricity) %in% as.character(2010:2021)] = paste0("dom_elec_total_emissions_",2010:2021)
-
-
-  domestic_electricity <- domestic_electricity |>
-    tidyr::pivot_longer(
-      cols = -LSOA21CD,
-      names_to = c(".value", "year"),
-      names_pattern = "(dom_elec_.*)_(\\d{4})"
-    )
+  domestic_electricity$dom_elec_total_emissions = domestic_electricity$total_elec_kwh * domestic_electricity$electricity_kgco2e
+  domestic_electricity$dom_elec_kgco2e_percap = ifelse(domestic_electricity$all_ages == 0,0,
+                                                      domestic_electricity$dom_elec_total_emissions / domestic_electricity$all_ages)
 
   domestic_electricity$year = as.integer(domestic_electricity$year)
 
-  domestic_electricity$dom_elec_kgco2e_percap = ifelse(is.nan(domestic_electricity$dom_elec_kgco2e_percap),0, domestic_electricity$dom_elec_kgco2e_percap)
+  domestic_electricity = domestic_electricity[,c("LSOA21CD","year","dom_elec_total_emissions","dom_elec_kgco2e_percap")]
 
   domestic_electricity
 

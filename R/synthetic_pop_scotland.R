@@ -891,7 +891,7 @@ sythetic_census_scot = function(path_data = file.path(parameters$path_data,"popu
                                          dz_Tenure5_CarVan3),
                                .f = scot_syth_combine,
                                seed = synth_pop_seed_scotland,
-                               .progress = TRUE,  .options = furrr::furrr_options(seed = TRUE))
+                               .progress = TRUE,  .options = furrr::furrr_options(seed = 1234))
   future::plan("sequential")
   res_all = dplyr::bind_rows(res_all)
 
@@ -1083,7 +1083,7 @@ vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "C
 
   rownames(mat) = x2[[var1]]
   diff = mat - y
-  print(diff)
+  #print(diff)
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
@@ -1162,7 +1162,7 @@ sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"
                                          int_hhSize_Tenure,
                                          int_hhSize_AccType),
                                .f = scot_syth_combine, seed = seed,
-                               .progress = TRUE, .options = furrr::furrr_options(seed = TRUE))
+                               .progress = TRUE, .options = furrr::furrr_options(seed = 1234))
   future::plan("sequential")
   res_com = dplyr::bind_rows(res_com)
 

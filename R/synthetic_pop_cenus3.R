@@ -413,7 +413,7 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
                              seed = synth_pop_seed,
                              iter = 20000, # More iterations for convergence
                              .progress = TRUE,
-                             .options = furrr::furrr_options(seed = TRUE))
+                             .options = furrr::furrr_options(seed = 1234))
   future::plan("sequential")
   res_1 = dplyr::bind_rows(res_1)
 
