@@ -84,6 +84,12 @@ consumption_lsoa_summary = function(synth_households_lcfs_2020){
                      spend_total = sum(spend_total[spend_total > 0]),
 
                      spend_housing_gaselecfuel = sum(spend_housing_gaselecfuel[spend_housing_gaselecfuel > 0]),
+                     spend_housing_gaselec = sum(spend_housing_gaselec[spend_housing_gaselec > 0]),
+                     spend_housing_otherfuels = sum(spend_housing_otherfuels[spend_housing_otherfuels > 0]),
+                     spend_housing_gaselec_seconddwelling = sum(spend_housing_gaselec_seconddwelling[spend_housing_gaselec_seconddwelling > 0]),
+                     spend_housing_gaselec_rebates = sum(spend_housing_gaselec_rebates),
+
+
                      spend_transport_vehiclepurchase = sum(spend_transport_vehiclepurchase[spend_transport_vehiclepurchase > 0]),
                      spend_transport_optranequip_fuel = sum(spend_transport_optranequip_fuel[spend_transport_optranequip_fuel > 0]),
                      spend_transport_optranequip_other = sum(spend_transport_optranequip_other[spend_transport_optranequip_other > 0]),

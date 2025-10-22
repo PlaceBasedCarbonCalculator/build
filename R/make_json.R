@@ -10,7 +10,8 @@
 #' Will drop any sf geometry and name files based on geo_code
 
 export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
-                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = FALSE, na = "null"){
+                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = FALSE, na = "null",
+                             parallel = TRUE, workers = NULL){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -55,58 +56,70 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
     }
   }
 
-  x <- dplyr::group_split(x, x[[idcol]], .keep = FALSE)
+  # Avoid building a large list in memory; iterate unique ids and write files per id.
+  ids <- unique(x[[idcol]])
+
+  # Prepare output directory (for zip we write to a temp dir first)
+  temp_json_dir <- file.path(tempdir(), paste0("jsonzip", idcol))
+  if(zip){
+    if(!dir.exists(temp_json_dir)) dir.create(temp_json_dir, recursive = TRUE)
+  } else {
+    if(!dir.exists(path)) dir.create(path, recursive = TRUE)
+  }
+
+  # writer for a single id
+  write_one <- function(idv){
+    sub <- x[x[[idcol]] == idv, , drop = FALSE]
+    # ensure a data.frame (avoid tibble overhead)
+    sub <- as.data.frame(sub)
+    nmsub <- sub[[idcol]][1]
+    sub[[idcol]] <- NULL
+    outfile <- if(zip) file.path(temp_json_dir, paste0(nmsub, ".json")) else file.path(path, paste0(nmsub, ".json"))
+    yyjsonr::write_json_file(sub, outfile, dataframe = dataframe, na = na)
+    outfile
+  }
+
+  message("Writing JSON")
+
+  # Try to use parallel execution if requested and available (furrr + future).
+  if(parallel && requireNamespace("future", quietly = TRUE) && requireNamespace("furrr", quietly = TRUE)){
+    # choose workers
+    if(is.null(workers)) workers <- max(1, future::availableCores() - 1)
+    old_plan <- NULL
+    # set multisession plan on Windows-friendly mode
+    try({
+      old_plan <- future::plan()
+      future::plan(future::multisession, workers = workers)
+      ignr <- furrr::future_map_chr(ids, write_one, .progress = TRUE)
+    }, silent = TRUE)
+    # restore plan if possible
+    try({ if(!is.null(old_plan)) future::plan(old_plan) }, silent = TRUE)
+  } else {
+    # fallback to serial purrr map (fast and robust)
+    ignr <- purrr::map_chr(ids, write_one, .progress = TRUE)
+  }
 
   if(zip){
-    dir.create(file.path(tempdir(),paste0("jsonzip",idcol)))
-
-
-
-    message("Writing JSON")
-    ignr <- purrr::map(x, function(sub){
-      sub <- as.data.frame(sub)
-      nmsub <- sub[,idcol][1]
-      sub[idcol] <- NULL
-      yyjsonr::write_json_file(sub,
-                               file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json")),
-                               dataframe = dataframe)
-      file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json"))
-    }, .progress = TRUE)
-
-    files <- list.files(file.path(tempdir(),paste0("jsonzip",idcol)))
+    files <- list.files(temp_json_dir)
     message("Zipping JSON")
     my_wd <- getwd()
-    setwd(file.path(tempdir(),paste0("jsonzip",idcol)))
+    setwd(temp_json_dir)
 
-    if(file.exists(file.path(my_wd,path,paste0(idcol,"_json.zip")))){
-      unlink(file.path(my_wd,path,paste0(idcol,"_json.zip")))
+    if(file.exists(file.path(my_wd, path, paste0(idcol, "_json.zip")))){
+      unlink(file.path(my_wd, path, paste0(idcol, "_json.zip")))
     }
 
-    zip::zip(file.path(my_wd,path,paste0(idcol,"_json.zip")),files)
+    zip::zip(file.path(my_wd, path, paste0(idcol, "_json.zip")), files)
     setwd(my_wd)
 
     message("Cleaning up")
-    if(file.exists(file.path(my_wd,path,paste0(idcol,"_json.zip")))){
-      unlink(file.path(tempdir(),paste0("jsonzip",idcol)), recursive = TRUE)
-      write.csv(new_nms, file.path(path,"names_lookup.csv"), row.names = FALSE)
-      return(file.path(my_wd,path,paste0(idcol,"_json.zip")))
+    if(file.exists(file.path(my_wd, path, paste0(idcol, "_json.zip")))){
+      unlink(temp_json_dir, recursive = TRUE)
+      write.csv(new_nms, file.path(path, "names_lookup.csv"), row.names = FALSE)
+      return(file.path(my_wd, path, paste0(idcol, "_json.zip")))
     } else {
       stop("Zipping failed")
     }
-
-  } else {
-
-    message("Writing JSON")
-    ignr <- purrr::map(x, function(sub){
-      sub <- as.data.frame(sub)
-      nmsub <- sub[,idcol][1]
-      sub[idcol] <- NULL
-      yyjsonr::write_json_file(sub,
-                               file.path(path,paste0(nmsub,".json")),
-                               dataframe = dataframe)
-      file.path(tempdir(),paste0("jsonzip",idcol),paste0(nmsub,".json"))
-    }, .progress = TRUE)
-
   }
 
   write.csv(new_nms, file.path(path,"names_lookup.csv"), row.names = FALSE)

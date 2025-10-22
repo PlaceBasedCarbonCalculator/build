@@ -246,12 +246,17 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "B056u",#	Electricity – combined account, amount
                          "B221", # Unknown
                          "B222", # Unknown
-                         #"B489",#	Bottled gas for central heating - amount
-                         #"B490",#	Oil for central heating cost last quarter
-                         #"B254",#	Electricity – (combined) prepayment meter, less rebate
-                         #"B255",#	Gas – (combined) pre-payment meter less rebate
-                         #"B226",#	Electricity – (separate) pre-payment meter, less rebate
-                         #"B227",#	Gas – (separate) pre-payment meter less rebate
+                         "B017",#	Electricity - amount paid in last account, less rebates
+                         "B018",#	Gas - amount paid in last account, less rebates
+                         "B053u",#	Gas – combined account, amount
+                         "B056u",#	Electricity – combined account, amount
+                         "B254",	#Electricity â€“ (combined) pre- payment meter, less rebate - ADDED 2021 data?
+                         "B255",	#Gas â€“ (combined) pre-payment meter less rebate - ADDED 2021 data?
+                         "B226",	#Electricity â€“  (separate) pre-payment meter, less rebate - ADDED 2021 data?
+                         "B227",	#Gas â€“ (separate) pre-payment meter less rebate - ADDED 2021 data?
+                         "B489",#	Bottled gas for central  heating - amount  - ADDED 2021 data?
+                         "B490",#	Oil for central heating cost last quarter  - ADDED 2021 data?
+                         "C44211t",	#Second dwelling: electricity account payment	gas/electric  - ADDED 2021 data?
                          "C45112t",#	Second dwelling: electricity account payment
                          "C45114t",#	Electricity slot meter payment
                          "C45212t",#	Second dwelling: gas account payment
@@ -265,10 +270,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "B173", #  Gas - amount last rebate (to remove)
                          "B175", #  Electricity - amount paid in last account
                          "B178", #  Electricity - amount last rebate (to remove)
-
                          "P249t", # Gas - slot meter payments less rebate
                          "P250t", # Electricity - slot meter payments less rebate
-
 
                          ##Transport
                          # Purchase of Vehicles
@@ -416,6 +419,25 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   people = lcfs$dvper
   people_summary = summarise_household_composition(people)
 
+  # Check for extreme consumption
+  household_char$P600t = remove_extreme_consumption(household_char$P600t, "total")
+  household_char$P601t = remove_extreme_consumption(household_char$P601t, "Food")
+  household_char$P602t = remove_extreme_consumption(household_char$P602t, "Achohol Tobacco")
+  household_char$P603t = remove_extreme_consumption(household_char$P603t, "Clothes")
+  household_char$P604t = remove_extreme_consumption(household_char$P604t, "Housing")
+  household_char$P605t = remove_extreme_consumption(household_char$P605t, "Furnishings")
+  household_char$P606t = remove_extreme_consumption(household_char$P606t, "Health")
+  household_char$P607t = remove_extreme_consumption(household_char$P607t, "Transport")
+  household_char$P608t = remove_extreme_consumption(household_char$P608t, "Communications")
+  household_char$P609t = remove_extreme_consumption(household_char$P609t, "Recreation")
+  household_char$P610t = remove_extreme_consumption(household_char$P610t, "Ediucation")
+  household_char$P611t = remove_extreme_consumption(household_char$P611t, "Restaurant Hotels")
+  household_char$P612t = remove_extreme_consumption(household_char$P612t, "Misc")
+
+  household_char$P620tp = remove_extreme_consumption(household_char$P620tp, "Non-Consumption")
+  household_char$P630tp = remove_extreme_consumption(household_char$P630tp, "Total Anoymised")
+  household_char$a117p = remove_extreme_consumption(household_char$a117p, "new cars")
+  household_char$a118p = remove_extreme_consumption(household_char$a118p, "second hand cars")
 
 
   lcfs_final = list(household = household_char,
@@ -428,6 +450,21 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 
 
 }
+
+remove_extreme_consumption = function(x, type = ""){
+  #hist(x, seq(min(x)-10, max(x)+10, 10))
+
+  # Reduce anything above the threshold
+  threshold <- max(quantile(x, 0.9999), #99.99% percentile
+                   2 * quantile(x, 0.995) - quantile(x, 0.005)) # Upper 0.5% + 99% range
+  chk = x > threshold
+  if(any(chk)){
+    message("Reducing ",sum(chk)," values above £",round(threshold)," per week on ",type)
+  }
+  x[chk] = threshold
+  x
+}
+
 
 
 summarise_household_composition = function(people){
@@ -669,6 +706,9 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                          "P630tp",
                          "P431p",
                          "spend_housing_gaselecfuel",
+                         "spend_housing_gaselec",
+                         "spend_housing_otherfuels",
+                         "spend_housing_gaselec_seconddwelling",
                          "spend_housing_gaselec_rebates",
                          "spend_transport_vehiclepurchase",
                          "spend_transport_optranequip_fuel",
@@ -734,29 +774,41 @@ selected_lcfs = function(lcfs){
 }
 
 add_component_costs = function(hh, yr = "2010"){
-  hh$spend_housing_gaselecfuel = rowSums(dplyr::select(hh, dplyr::any_of(c(
+
+  hh$spend_housing_gaselec = rowSums(dplyr::select(hh, dplyr::any_of(c(
     "B017",#	Electricity - amount paid in last account, less rebates
     "B018",#	Gas - amount paid in last account, less rebates
     "B053u",#	Gas – combined account, amount
     "B056u",#	Electricity – combined account, amount
     #"B221", # Unknown so excluding from energy
     #"B222", # Unknown
-    "C45112t",#	Second dwelling: electricity account payment
+    "B254",	#Electricity â€“ (combined) pre- payment meter, less rebate - ADDED 2021 data?
+    "B255",	#Gas â€“ (combined) pre-payment meter less rebate - ADDED 2021 data?
+    "B226",	#Electricity â€“  (separate) pre-payment meter, less rebate - ADDED 2021 data?
+    "B227",	#Gas â€“ (separate) pre-payment meter less rebate - ADDED 2021 data?
     "C45114t",#	Electricity slot meter payment
-    "C45212t",#	Second dwelling: gas account payment
-    "C45214t",#	Gas slot meter payment
-    "C45222t",#	Bottled gas - other
-    "C45312t",#	Paraffin
-    "C45411t",#	Coal and coke
-    "C45412t",#	Wood and peat
-    "C45511t",#	Hot water, steam and ice
     "B170", #  Gas - amount paid in last account
     "B173", #  Gas - amount last rebate (to remove)
     "B175", #  Electricity - amount paid in last account
     "B178", #  Electricity - amount last rebate (to remove)
     "P249t", # Gas - slot meter payments less rebate
     "P250t" # Electricity - slot meter payments less rebate
+  ))), na.rm = TRUE)
 
+  hh$spend_housing_otherfuels = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "B489",#	Bottled gas for central  heating - amount  - ADDED 2021 data?
+    "B490",#	Oil for central heating cost last quarter  - ADDED 2021 data?
+    "C45222t",#	Bottled gas - other
+    "C45312t",#	Paraffin
+    "C45411t",#	Coal and coke
+    "C45412t",#	Wood and peat
+    "C45511t"#	Hot water, steam and ice
+  ))), na.rm = TRUE)
+
+  hh$spend_housing_gaselec_seconddwelling = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "C44211t",	#Second dwelling: electricity account payment	gas/electric  - ADDED 2021 data?
+    "C45112t",#	Second dwelling: electricity account payment
+    "C45212t"#	Second dwelling: gas account payment
   ))), na.rm = TRUE)
 
   hh$spend_housing_gaselec_rebates = rowSums(dplyr::select(hh, dplyr::any_of(c(
@@ -765,6 +817,12 @@ add_component_costs = function(hh, yr = "2010"){
     "P249t", # Gas - slot meter payments less rebate
     "P250t" # Electricity - slot meter payments less rebate
   ))), na.rm = TRUE)
+
+  hh$spend_housing_gaselecfuel = rowSums(dplyr::select(hh, dplyr::any_of(c(
+    "spend_housing_gaselec",
+    "spend_housing_otherfuels",
+    "spend_housing_gaselec_seconddwelling"
+  ))))
 
   hh$spend_transport_vehiclepurchase = rowSums(dplyr::select(hh, dplyr::any_of(c(
     "B244",#	Vehicle - cost of new car | van outright
@@ -844,8 +902,8 @@ add_component_costs = function(hh, yr = "2010"){
 
   hh$diff = round(hh$P607t - (hh$spend_transport_vehiclepurchase + hh$spend_transport_optranequip_fuel + hh$spend_transport_optranequip_other + hh$spend_transport_services_air + hh$spend_transport_services_pt))
 
-  if(!all(hh$diff == 0)){
-    stop("Transport spending components don't add up, ",yr)
+  if(sum(hh$diff != 0) > 1){ # Allow one error for subpression of excessive consumption
+    stop("Transport spending components don't add up in ",yr," ",sum(hh$diff == 0)," cases")
   } else {
     hh$diff = NULL
   }

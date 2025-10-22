@@ -1087,6 +1087,67 @@ vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "C
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
+vaidate_syth_pop2 = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
+  x = x[,c(var1,var2,"households")]
+
+  x2 <- x |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(var1, var2)))) |>
+    dplyr::summarise(households = sum(households), .groups = "drop") |>
+    tidyr::pivot_wider(names_from = var2, values_from = households)
+  mat = as.matrix(x2[,2:ncol(x2)])
+
+  rownames(mat) = x2[[var1]]
+  if(length(dim(y)) != 2){
+    # Convert y to matrix of var1 x var2
+    # If y is an array with >2 dimensions, try to sum over the other dimensions
+    if(!is.null(dim(y)) && length(dim(y)) >= 3){
+      dn <- dimnames(y)
+      dn_names <- names(dn)
+
+      if(!is.null(dn_names) && var1 %in% dn_names && var2 %in% dn_names){
+        idx1 <- which(dn_names == var1)
+        idx2 <- which(dn_names == var2)
+        # Sum over all dimensions except idx1 and idx2
+        y_mat <- apply(y, MARGIN = c(idx1, idx2), FUN = sum)
+        # ensure matrix
+        y_mat <- as.matrix(y_mat)
+        # keep dimnames if present
+        if(!is.null(dn[[idx1]])) rownames(y_mat) <- dn[[idx1]]
+        if(!is.null(dn[[idx2]])) colnames(y_mat) <- dn[[idx2]]
+      } else {
+        # Fallback: collapse to first two dimensions (sum over others)
+        stop(paste0("vaidate_syth_pop2: dimension names '", var1, "' and/or '", var2, "' not found in 'y' dimnames"))
+      }
+
+      # Align y_mat to mat by row/col names. Create a zero-filled matrix with mat's dimnames
+      y_aligned <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = list(rownames(mat), colnames(mat)))
+
+      if(!is.null(rownames(y_mat)) && !is.null(colnames(y_mat))){
+        common_r <- intersect(rownames(mat), rownames(y_mat))
+        common_c <- intersect(colnames(mat), colnames(y_mat))
+        if(length(common_r) > 0 && length(common_c) > 0){
+          y_aligned[common_r, common_c] <- y_mat[common_r, common_c, drop = FALSE]
+        }
+      } else if(nrow(y_mat) == nrow(mat) && ncol(y_mat) == ncol(mat)){
+        # same shape and no dimnames: assume same ordering
+        y_aligned[,] <- y_mat
+      } else {
+        stop("vaidate_syth_pop2: unable to align 'y' to expected var1 x var2 matrix; dimnames are missing or mismatched")
+      }
+
+      y <- y_aligned
+    } else {
+      # if y has no dim or is a vector, coerce to matrix
+      y <- as.matrix(y)
+    }
+  }
+
+
+  diff = mat - y
+  #print(diff)
+  return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
+}
+
 sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"population_scotland"), bounds_iz22, synth_pop_seed_scotland, lookup_DataZone_2022){
 
   # Intermediate Zone Data
