@@ -3,7 +3,7 @@ load_pt_frequency = function(path = parameters$path_data){
   zone_service = list()
 
   for(i in c(2004:2011,2014:2023)){
-    sub = readRDS(file.path(path,"pt_frequency",paste0("trips_per_lsoa21_by_mode_",i,".Rds")))
+    sub = readRDS(file.path(path,"pt_frequency",paste0("trips_per_lsoa21_22_by_mode_",i,".Rds")))
     sub$year = i
     zone_service[[i]] = sub
   }

@@ -97,9 +97,17 @@ tar_target(household_clusters,{
   build_household_types(NSSEC_household, NSSEC_ethinic_residents)
 }),
 
+tar_target(household_clusters_scot,{
+  make_community_photo_scotland(path = "../inputdata/population_scotland/", bounds_iz22, lookup_DataZone_2022)
+}),
+
 tar_target(household_pics_json,{
-  sub = select_household_pics(household_clusters)
-  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/community_pics", dataframe = "columns")
+  household_clusters_scot2 = household_clusters_scot[,c("NSSEC5","DataZone","householdComp10","ethnic3","households")]
+  names(household_clusters_scot2) = c("NSSEC5","LSOA21CD","householdComposition","ethnic","households")
+  household_clusters_scot2$ethnic = as.character(household_clusters_scot2$ethnic)
+  household_clusters_scot2$ethnic = paste0(toupper(substr(as.character(household_clusters_scot2$ethnic), 1, 1)), substr(household_clusters_scot2$ethnic, 2, nchar(household_clusters_scot2$ethnic)))
+  sub = select_household_pics(rbind(household_clusters,household_clusters_scot2))
+  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 0, path = "outputdata/json/community_pics", dataframe = "columns", zip = FALSE)
 }),
 
 
@@ -245,6 +253,9 @@ tar_target(bounds_postcodes_2024,{
 tar_target(bounds_postcodes_2015,{
   read_postcodes(path = file.path(parameters$path_secure_data,"Postcodes/Postcode Polygons/Postcodes_20150401.zip"))
 }),
+tar_target(postcode_points,{
+  read_postcode_points(path = file.path(parameters$path_secure_data,"Postcodes/codepo_20251101/codepo_gpkg_gb.zip"))
+}),
 tar_target(bounds_postcode_area,{
   make_postcode_areas(bounds_postcodes_2024)
 }),
@@ -334,7 +345,9 @@ tar_target(uprn_bng,{
   load_uprn_27700(path = file.path(parameters$path_data,"os_uprn"))
 }),
 
-
+tar_target(uprn_historical,{
+  load_uprn_historical(path = file.path(parameters$path_data,"os_uprn/osopenuprn_2020_2025_all.zip"))
+}),
 
 # Points of Interest
 tar_target(poi,{
@@ -512,7 +525,7 @@ tar_target(pt_frequency,{
 }),
 
 tar_target(pt_json,{
-  ptf = pt_frequency
+  ptf = pt_frequency[!is.na(pt_frequency$zone_id),]
   names(ptf) = gsub("Morning_Peak","MorningPeak",names(ptf))
   names(ptf) = gsub("Afternoon_Peak","AfternoonPeak",names(ptf))
   ptf = tidyr::pivot_longer(ptf, cols = tph_weekday_MorningPeak_2004_2:tph_daytime_avg_2023_4,
@@ -521,7 +534,7 @@ tar_target(pt_json,{
                             names_to = c("day","time","year","mode"))
   ptf = tidyr::pivot_wider(ptf, names_from = c("day","time","mode"), values_from = "value", id_cols = c("zone_id","year"))
   export_zone_json(ptf, idcol = "zone_id", rounddp = 2, path = "outputdata/json/pt_frequency", dataframe = "columns",
-                   reduce = FALSE)
+                   reduce = FALSE, zip = FALSE)
 }),
 
 tar_target(transport_lsoa_data,{
@@ -532,6 +545,30 @@ tar_target(transport_lsoa_data,{
 # Housing (Age, Building Type, Non-Gas Emissions, heating)
 tar_target(building_age_2011,{
   load_building_age_2011(path = file.path(parameters$path_secure_data,"CDRC/building age price"))
+}),
+
+tar_target(house_price_lr,{
+  load_lr_price_paid(path = file.path(parameters$path_data,"house prices/land registry"))
+}),
+
+tar_target(house_prices_ubdc,{
+  load_ubdc_house_prices(path = file.path(parameters$path_data,"house prices/ppdid_uprn_usrn.zip"))
+}),
+
+tar_target(house_price_lr_uprn,{
+  land_registry_add_uprn(house_price_lr,house_prices_ubdc,uprn_historical,
+                       lookup_postcode_OA_LSOA_MSOA_2021,
+                       bounds_lsoa_GB_full,
+                       path_epc = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                       path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+}),
+
+tar_target(house_prices_lsoa,{
+  house_price_lsoa_summary(house_price_lr_uprn)
+}),
+
+tar_target(house_prices_nowcast,{
+  house_price_extrapolate(house_price_lr_uprn, lsoa_admin)
 }),
 
 tar_target(housing_type_2021,{
@@ -603,6 +640,12 @@ tar_target(dwellings_type_backcast,{
   backcast_dwelling_types(dwellings_tax_band, dwellings_type)
 }),
 
+tar_target(prices_json,{
+  export_zone_json(house_prices_lsoa, idcol = "LSOA21CD", rounddp = 0, path = "outputdata/json/prices", dataframe = "columns",
+                   reduce = FALSE, zip = FALSE)
+}),
+
+
 tar_target(la_emissions_summary_json,{
   export_zone_json(la_emissions_all, idcol = "LAD25CD", rounddp = 0, path = "outputdata/json/la_emissions", dataframe = "columns",
                    reduce = FALSE, zip = FALSE)
@@ -650,11 +693,23 @@ tar_target(dl_consumption,{
 }),
 
 tar_target(consumption_uk,{
-  load_consumption_footprint(dl_consumption)
+  load_consumption_footprint(path = file.path(parameters$path_data,"consumption/Defra22_results_UK.ods"), "Summary_product_90-22")
+}),
+
+tar_target(consumption_england,{
+  load_consumption_footprint(path = file.path(parameters$path_data,"consumption/Defra22_results_England.ods"), "Summary_product_01-22")
+}),
+
+tar_target(consumption_la,{
+  load_la_consumption_accounts(path = file.path(parameters$path_data,"consumption/laca_data-c524b8f66272a734d87238602a7cef41.xlsx"))
 }),
 
 tar_target(consumption_multipliers_uk,{
   load_consumption_multipliers(dl_consumption)
+}),
+
+tar_target(consumption_nations,{
+  make_consumption_scot_wales(consumption_uk, consumption_england, consumption_la)
 }),
 
 tar_target(consumption_income,{
@@ -677,8 +732,7 @@ tar_target(consumption_lookup,{
 
 
 tar_target(consumption_emissions,{
-  calculate_consumption_lsoa(consumption_syth_pop, population, consumption_uk, consumption_lookup, consumption_multipliers_uk)
-
+  calculate_consumption_lsoa(consumption_syth_pop, population, consumption_nations, consumption_lookup, consumption_multipliers_uk)
 }),
 
 # Surveys
@@ -842,7 +896,7 @@ tar_target(zoomstack_buildings_lst_4326,{
 
 # Build GeoJSON
 tar_target(lsoa_map_data,{
-  select_map_outputs(lsoa_emissions_all, year = 2019)
+  select_map_outputs(lsoa_emissions_all, area_classifications_11_21, year = 2019)
 }),
 
 tar_target(geojson_wards,{
@@ -1092,14 +1146,15 @@ tar_target(bulk_epc_dom_summary,{
   bulk_export_epc_dom_summary(epc_dom_summary)
 }, format = "file"),
 
+#TODO: Error parsing JSON file 'F:\GitHub\PlaceBasedCarbonCalculator\build\outputdata\epc_dom.geojson': unexpected end of data code: 5 at position: 407782137
 # tar_target(bulk_epc_dom,{
 #   bulk_export_epc_dom(geojson_epc_dom)
 # }, format = "file"),
 
-# tar_target(bulk_epc_nondom,{
-#   bulk_export_epc_nondom(geojson_epc_nondom)
-# }, format = "file"),
-#
+tar_target(bulk_epc_nondom,{
+  bulk_export_epc_nondom(geojson_epc_nondom)
+}, format = "file"),
+
 tar_target(bulk_buildings_heights,{
   bulk_export_buildings(buildings_heights)
 }, format = "file")

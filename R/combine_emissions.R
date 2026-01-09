@@ -97,6 +97,15 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                          "emissions_transport_optranequip",
                                          "goods_services_combined_total")], na.rm = TRUE)
 
+  # Bad Data Checks
+  # Company Cars
+  # A few LSOAs have a crazy number of company cars, so exclude from emissions total and NA the grade
+
+  lsoa$total_kgco2e_percap = ifelse(lsoa$company_bike_kgco2e_percap > 2000, #99.7% below
+                                    lsoa$total_kgco2e_percap - lsoa$company_bike_kgco2e_percap,
+                                    lsoa$total_kgco2e_percap)
+
+
 
   lsoa = lsoa |>
     dplyr::group_by(year) |>
@@ -128,6 +137,10 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
 
     ) |>
     dplyr::ungroup()
+
+
+
+
 
 
   lsoa

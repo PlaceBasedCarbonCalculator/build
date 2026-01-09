@@ -107,7 +107,7 @@ build_household_types = function(households_nssec, residents_ethnic){
   combined_long
 }
 
-#TODO: finish this
+
 select_household_pics = function(combined_long){
 
 

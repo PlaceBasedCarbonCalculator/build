@@ -24,5 +24,11 @@ make_lsoa_warnings = function(lookup_lsoa_2011_21,lookup_dz_2011_22, population)
   warningcode = rbind(lookup_dz_2011_22, lookup_lsoa_2011_21,population)
   warningcode = warningcode[order(warningcode$LSOA21CD),]
 
+  # Bespoke warnings
+
+  extra = read.csv("data/lsoa_warnings.csv")
+  warningcode = rbind(warningcode, extra)
+
+
   warningcode
 }

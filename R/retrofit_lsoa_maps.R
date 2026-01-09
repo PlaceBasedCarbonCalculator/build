@@ -4,7 +4,7 @@ select_retofit_vars = function(epc_dom_summary, population) {
                                            "age_19001929","age_19301949","age_19501966",
                                            "age_19671975","age_19761982","age_19831990",
                                            "age_19911995","age_19962002","age_20032006",
-                                           "age_post2012")])
+                                           "age_20072011","age_20122021","age_post2022")])
   sub$modal_wall = modal(epc_dom_summary[,c("wall_verygood","wall_good",
                                             "wall_average","wall_poor","wall_verypoor","wall_other")])
   sub$modal_roof = modal(epc_dom_summary[,c("roof_verygood","roof_good",

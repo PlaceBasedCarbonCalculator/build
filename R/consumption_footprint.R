@@ -20,13 +20,16 @@ download_consumption_footprint <- function(path){
 
 }
 
-load_consumption_footprint <- function(path){
-  cons = readODS::read_ods(path, sheet = "Summary_product_90-20")
+load_consumption_footprint <- function(path, sheet = "Summary_product_90-22"){
+  cons = readODS::read_ods(path, sheet = sheet)
   cons = cons[,2:37]
   cons = as.data.frame(cons)
   names(cons) = cons[2,]
-  cons = cons[3:33,]
   names(cons)[1] = "year"
+  cons = cons[3:nrow(cons),]
+  first_na <- which(is.na(cons$year))[1] # Two sets of data on the page, only take first
+  cons = cons[1:(first_na - 1),]
+
   cons[] <- lapply(cons[], as.numeric)
 
   lookup = data.frame(
@@ -121,6 +124,78 @@ load_consumption_income = function(path){
   income
 }
 
+
+load_la_consumption_accounts = function(path = "../inputdata/consumption/laca_data-c524b8f66272a734d87238602a7cef41.xlsx"){
+
+  yrs = 2001:2022
+
+  res = list()
+  for(i in yrs){
+    sub = readxl::read_xlsx(path, sheet = as.character(i), col_names = FALSE)
+    names(sub) = as.character(sub[3,])
+    sub = sub[4:8,c(1,3,47:ncol(sub))]
+    sub$`Devolved region`[is.na(sub$`Devolved region`)] = "UK"
+    res[[i]] = sub
+  }
+  res = dplyr::bind_rows(res)
+  res[c(1,3:ncol(res))] = lapply(res[c(1,3:ncol(res))], as.numeric)
+
+  names(res) = c("Year","Devolved region","Total",
+                 "Food","Housing","Transport",
+                 "Goods","Services","Government and Capital Investment",
+                 "Bread and cereals","Meat","Fish and seafood",
+                 "Dairy and eggs","Fruit","Vegetables",
+                 "Beverages","Other_food","Electricity",
+                 "Gas and other fuels","Water and waste","Maintenance and repair of the dwelling",
+                 "Other_housing","Private transport","Public transport",
+                 "Other transport services","Aviation","Clothes",
+                 "Furniture and homeware","Electrical appliances","Medicines and medical equipment",
+                 "Hobbies, pets and sports","Paper and stationery","Other_goods",
+                 "Healthcare","Communication","Education",
+                 "Restaurants and cafes","Hotels","Finance and insurance",
+                 "Other_services","Government","Capital Investment and other" )
+
+  res
+
+
+}
+
+make_consumption_scot_wales = function(consumption_uk, consumption_england, consumption_la){
+
+  consumption_uk = consumption_uk[consumption_uk$year %in% unique(consumption_england$year),]
+  names(consumption_uk)[names(consumption_uk) == "value"] = "value_uk"
+  names(consumption_england)[names(consumption_england) == "value"] = "value_england"
+
+  consumption_uk2 = dplyr::left_join(consumption_uk, consumption_england, by = c("year","name","desc","group"))
+  consumption_uk2$valueRUK = consumption_uk2$value_uk - consumption_uk2$value_england
+
+
+
+
+  #TODO: Categories don't match so just use an overall weight
+  consumption_la = consumption_la[,c("Year","Devolved region","Total")]
+  consumption_la = tidyr::pivot_wider(consumption_la, names_from = "Devolved region", values_from = "Total")
+  consumption_la$RUK = consumption_la$Scotland + consumption_la$Wales + consumption_la$`Northern Ireland`
+
+  consumption_la$Scotland_share = consumption_la$Scotland / consumption_la$RUK
+  consumption_la$Wales_share = consumption_la$Wales / consumption_la$RUK
+  consumption_la$NI_share = consumption_la$`Northern Ireland` / consumption_la$RUK
+
+  consumption_uk2 = dplyr::left_join(consumption_uk2,
+                                     consumption_la[,c("Year","Scotland_share","Wales_share","NI_share")],
+                                     by = c("year"= "Year")
+  )
+
+
+  consumption_uk2$value_scotland = consumption_uk2$valueRUK * consumption_uk2$Scotland_share
+  consumption_uk2$value_wales = consumption_uk2$valueRUK * consumption_uk2$Wales_share
+  consumption_uk2$value_ni = consumption_uk2$valueRUK * consumption_uk2$NI_share
+
+  consumption_uk2 = consumption_uk2[,c("year","name","desc","group","value_uk",
+                                       "value_england","value_scotland","value_wales","value_ni")]
+
+  consumption_uk2
+}
 
 # Old Method
 # calculate_consumption_lsoa = function(consumption_uk, consumption_income, population, income_lsoa, domestic_electricity){

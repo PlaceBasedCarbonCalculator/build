@@ -71,7 +71,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   certs$buidling_type[is.na(certs$buidling_type)] = "unknown"
   certs$age[is.na(certs$age)] = "unknown"
 
-
+  certs = certs[!is.na(certs$LSOA21CD),]
 
   cert_summ <- dplyr::group_by(certs, LSOA21CD)
   cert_summ <- dplyr::summarise(cert_summ,
@@ -113,7 +113,9 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               age_19911995 = length(age[age == "1991-1995"]),
               age_19962002 = length(age[age == "1996-2002"]),
               age_20032006 = length(age[age == "2003-2006"]),
-              age_post2012 = length(age[age == "2012 onwards"]),
+              age_20072011 = length(age[age == "2007-2011"]),
+              age_20122021 = length(age[age %in% c("2012 onwards","2012-2021")]),
+              age_post2022 = length(age[age == "2022 onwards"]),
               age_unknown = length(age[age == "unknown"]),
 
               floor_area_avg = round(mean(area, na.rm = TRUE)),

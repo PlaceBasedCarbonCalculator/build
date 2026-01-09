@@ -164,6 +164,15 @@ make_postcode_areas <- function(postcodes){
   postcodes
 }
 
+read_postcode_points = function(path = "D:/OneDrive - University of Leeds/Data/Postcodes/codepo_20251101/codepo_gpkg_gb.zip"){
+  dir.create(file.path(tempdir(),"postcodes"))
+  unzip(path, exdir = file.path(tempdir(),"postcodes"))
+  points = sf::st_read(file.path(tempdir(),"postcodes","data/codepo_gb.gpkg"))
+  unlink(file.path(tempdir(),"postcodes"), recursive = TRUE)
+  points = points[,c("postcode","geometry")]
+  points
+}
+
 load_LSOA_2011_2021_lookup <- function(path){
   file_path = file.path(path, "LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Lookup_for_England_and_Wales_(Version_2).csv")
   lookup = readr::read_csv(file_path)

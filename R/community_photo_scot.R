@@ -67,9 +67,11 @@ make_community_photo_scotland = function(path = "../inputdata/population_scotlan
 
   dz_nssec10 = read_nssec10_dz_scot(file.path(path,"scotlandcenus2022_nssec10_DataZone.csv"))
   dz_HouseholdComp = read_hhcomp10_dz_scot(file.path(path,"scotlandcenus2022_householdComp10_DataZone.csv"))
+  dz_ethnic2 = read_ethnic2_dz_scot(file.path(path,"scotlandcensus2022_Ethnic2_People_DataZone.csv"))
 
   dz_nssec10 = dplyr::left_join(dz_nssec10, lookup_DataZone_2022, by = c("DataZone" = "DZ22_Code"))
   dz_HouseholdComp = dplyr::left_join(dz_HouseholdComp, lookup_DataZone_2022, by = c("DataZone" = "DZ22_Code"))
+  dz_ethnic2 = dplyr::left_join(dz_ethnic2, lookup_DataZone_2022, by = c("DataZone" = "DZ22_Code"))
 
   dz_nssec10 = tidyr::pivot_longer(dz_nssec10,
                                    cols = c("DNA","L1L2L3","L4L5L6","L7","L8L9",
@@ -94,13 +96,27 @@ make_community_photo_scotland = function(path = "../inputdata/population_scotlan
 
   dz_HouseholdComp = dz_HouseholdComp[order(dz_HouseholdComp$IZ22_Code),]
   dz_nssec10 = dz_nssec10[order(dz_nssec10$IZ22_Code),]
+  dz_ethnic2 = dz_ethnic2[order(dz_ethnic2$IZ22_Code),]
+
   res_all = res_all[order(res_all$IZCode),]
 
   dz_HouseholdComp = dplyr::group_split(dplyr::ungroup(dz_HouseholdComp), IZ22_Code)
   dz_nssec10 = dplyr::group_split(dplyr::ungroup(dz_nssec10), IZ22_Code)
+  dz_ethnic2 = dplyr::group_split(dplyr::ungroup(dz_ethnic2), IZ22_Code)
   res_all_lst = dplyr::group_split(dplyr::ungroup(res_all), IZCode)
 
+  future::plan("multisession")
+  res_all_dz = furrr::future_pmap(.l = list(ra = res_all_lst,
+                                            nssec = dz_nssec10,
+                                            comp = dz_HouseholdComp,
+                                            eth = dz_ethnic2),
+                               .f = syth_communit_photo_dz_scot,
+                               .progress = TRUE,
+                               .options = furrr::furrr_options(seed = 1234))
+  future::plan("sequential")
+  res_all_dz = dplyr::bind_rows(res_all_dz)
 
+  res_all_dz
 
 
 }
@@ -115,16 +131,18 @@ make_community_photo_scotland = function(path = "../inputdata/population_scotlan
 #                              seed = hhComp_nssec_ethnic_scot,
 #                              .progress = TRUE)
 
-ra = res_all_lst[[1]]
-comp = dz_HouseholdComp[[1]]
-nssec = dz_nssec10[[1]]
+# ra = res_all_lst[[645]]
+# comp = dz_HouseholdComp[[645]]
+# nssec = dz_nssec10[[645]]
+# eth = dz_ethnic2[[645]]
 
 
-syth_communit_photo_dz_scot = function(ra, nssec, comp){
+syth_communit_photo_dz_scot = function(ra, nssec, comp, eth){
 
   if(length(unique(c(ra$IZCode,
                      nssec$IZ22_Code,
-                     comp$IZ22_Code
+                     comp$IZ22_Code,
+                     eth$IZ22_Code
   ))) != 1){
     stop("More than one IZCode")
   }
@@ -135,6 +153,11 @@ syth_communit_photo_dz_scot = function(ra, nssec, comp){
   DataZonen = unique(nssec$DataZone)
 
   nssec = nssec[nssec$NSSEC5 != "DNA",] # Only a handful in all of scotland
+
+  # Get total housheolds per DataZone
+  dz_hh = comp |>
+    dplyr::group_by(DataZone) |>
+    dplyr::summarise(households = sum(households))
 
   nssec= nssec|>
     dplyr::mutate(
@@ -169,30 +192,110 @@ syth_communit_photo_dz_scot = function(ra, nssec, comp){
 
   med_pop = median(c(sum(nssec_array),sum(comp_array),sum(ra_array)))
 
+  # Adjust population ethnic3 to housholds ethnic3
+  hh_eth = ra |>
+    dplyr::group_by(ethnic3) |>
+    dplyr::summarise(households = sum(households))
+
+  eth = dplyr::left_join(eth, dz_hh, by = "DataZone")
+
+  #eth$Whitehh = eth$White * (hh_eth$households[hh_eth$ethnic3 == "white"]/sum(eth$White))
+  #eth$Whitehh = eth$households * (eth$White/(eth$White + eth$Other))
+
+  eth$weight_households = eth$households/sum(eth$households)
+  eth$weight_white = (eth$White/(eth$White + eth$Other))
+  eth$weight_othercomb = (eth$Other/(eth$White + eth$Other))
+
+  eth$households_weighted = sum(hh_eth$households) * eth$weight_households
+
+  eth$diff0 = eth$households - eth$households_weighted
+
+  #eth$Whitehh = hh_eth$households[hh_eth$ethnic3 == "white"] * (eth$weight_households * eth$weight_white)/(sum(eth$weight_households * eth$weight_white))
+  eth$Whitehh = eth$households_weighted * eth$weight_white
+  #eth$OtherComhh = eth$Other * (sum(hh_eth$households[hh_eth$ethnic3 %in% c("black","other")])/sum(eth$Other))
+  #eth$OtherComhh = eth$households * (eth$Other/(eth$White + eth$Other))
+  #eth$OtherComhh = sum(hh_eth$households[hh_eth$ethnic3 %in% c("black","other")]) * (eth$weight_households * eth$weight_othercomb)/(sum(eth$weight_households * eth$weight_othercomb))
+  eth$OtherComhh = eth$households_weighted * eth$weight_othercomb
+
+
+
+  # for(i in seq_len(nrow(eth))){
+  #   if(eth$Whitehh[i] %% 1 == 0 & eth$OtherComhh[i] %% 1 == 0){
+  #     next #Aready Integer result
+  #   }
+  #   intspop = int_trs(c(eth$Whitehh[i],eth$OtherComhh[i]))
+  #   eth$Whitehh[i] = intspop[1]
+  #   eth$OtherComhh[i] = intspop[2]
+  # }
+
+  eth$diff1 = eth$households_weighted - eth$Whitehh - eth$OtherComhh
+
+  eth$Blackhh = (eth$OtherComhh * hh_eth$households[hh_eth$ethnic3 == "black"]/sum(hh_eth$households[hh_eth$ethnic3 %in% c("black","other")]))
+  eth$Otherhh = (eth$OtherComhh * hh_eth$households[hh_eth$ethnic3 == "other"]/sum(hh_eth$households[hh_eth$ethnic3 %in% c("black","other")]))
+
+  for(i in seq_len(nrow(eth))){
+    if(eth$Blackhh[i] %% 1 == 0 &
+       eth$Otherhh[i] %% 1 == 0 &
+       eth$Whitehh[i] %% 1 == 0){
+      next #Aready Integer result
+    }
+    intspop = int_trs(c(eth$Blackhh[i],eth$Otherhh[i],eth$Whitehh[i]))
+    eth$Blackhh[i] = intspop[1]
+    eth$Otherhh[i] = intspop[2]
+    eth$Whitehh[i] = intspop[3]
+  }
+
+  eth$diff2 = eth$households_weighted - eth$Whitehh - eth$Blackhh - eth$Otherhh
+
+  eth = eth[,c("DataZone","Whitehh","Blackhh","Otherhh","IZ22_Code")]
+  names(eth) = c("DataZone","white","black","other","IZ22_Code")
+  eth = eth |>
+    tidyr::pivot_longer(cols = ethnic3n,
+                        names_to = "ethnic3",
+                        values_to = "households")
+
+  eth= eth|>
+    dplyr::mutate(
+      DataZone   = factor(DataZone, levels = DataZonen),
+      ethnic3 = factor(ethnic3, levels = ethnic3n)
+    ) |>
+    dplyr::arrange(ethnic3, DataZone)
+
+  eth_array = array(eth$households, dim = c(length(DataZonen),3), dimnames = list(DataZonen, ethnic3n))
+
+
   seed2 = array(1, dim = c(10,5,3,length(DataZonen)))
   dimnames(seed2) = list(householdComp10n, NSSEC5n, ethnic3n, DataZonen)
 
   seed_weighted = (seed2 /sum(seed2)) * med_pop
 
   res <- mipfp::Ipfp(seed_weighted,
-                     list(c(3,2,1),c(4,1),c(4,2)),
+                     list(c(3,2,1),c(4,1),c(4,2),c(4,3)),
                      list(
                        ra_array,
                        comp_array,
-                       nssec_array
-                     ))
+                       nssec_array,
+                       eth_array
+                     ), iter = 1000, tol = 1e-10)
 
-  dimnames(res$x.hat) = dimnames(seed_weighted)
-  res2 = int_trs(res$x.hat * med_pop)
+  dimnames(res$p.hat) = dimnames(seed_weighted)
+  res2 = int_trs(res$p.hat * med_pop)
 
   result_df <- as.data.frame.table(res2)
   names(result_df) = c("householdComp10", "NSSEC5", "ethnic3","DataZone","households")
+  result_df$conv = res$conv
 
-  chk1 = vaidate_syth_pop2(result_df,nssec_array,"DataZone","NSSEC5")
+  chk1 = vaidate_syth_pop2(x = result_df, y = nssec_array,var1 = "DataZone", var2 = "NSSEC5")
   chk2 = vaidate_syth_pop2(result_df,comp_array,"DataZone","householdComp10")
   chk3 = vaidate_syth_pop2(x = result_df, y = ra_array,var1 = "NSSEC5", var2 = "ethnic3")
   chk4 = vaidate_syth_pop2(x = result_df, y = ra_array,var1 = "NSSEC5", var2 = "householdComp10")
   chk5 = vaidate_syth_pop2(x = result_df, y = ra_array,var1 = "ethnic3", var2 = "householdComp10")
+
+  result_df = result_df[result_df$households > 0,]
+  result_df$MAE = max(c(chk1, chk2, chk3, chk4, chk5))
+  #result_df$IZCode = hhns$IZCode[1]
+  result_df
+
 
 }
 
@@ -280,7 +383,7 @@ read_hhComp_nssec_iz_scot = function(path = "../inputdata/population_scotland/sc
                          "LoneParent","LoneParentNonDepChildren",
                          "OtherChildren","OtherIncStudentOrOver66","total"), each = 10),
                    "_",
-                   rep(c("L1L2L3","L4L5L6","L7","L8L9","L10L11","L12","L13","L14","L15","DNA"), times = 11)
+                   rep(c("DNA","L1L2L3","L4L5L6","L7","L8L9","L10L11","L12","L13","L14","L15"), times = 11)
                  ), "dud")
 
   raw$dud = NULL
@@ -404,4 +507,50 @@ read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotla
   raw = raw[!raw$DataZone %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
 
   raw
+}
+
+
+read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
+
+  # Read the CSV (skip the metadata rows)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+
+  # Household composition categories used in other readers in this file
+  householdComp10n = c("OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")
+
+  # Assign names: first column is DataZone label, then the 10 household composition columns, then optional dud
+  names(raw) = c("DataZone", householdComp10n,"total","dud")
+
+  # Drop dud/trailing column if present
+  raw$dud = NULL
+  raw$total = NULL
+
+  # Remove rows that are clearly not data
+  raw = raw[!is.na(raw$DataZone),]
+  raw = raw[!raw$DataZone %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw
+}
+
+# Note Population Not Households
+read_ethnic2_dz_scot = function(path = "../inputdata/population_scotland/scotlandcensus2022_Ethnic2_People_DataZone.csv"){
+
+  # Read the CSV (skip the metadata rows)
+  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
+
+  # The expected columns are: DataZone, two ethnic group columns (e.g. White and Other / Minority),
+  # then optional total/dud columns produced by the source CSV. Name them conservatively and
+  # drop the trailing total/dud columns if present.
+  names(raw) = c("DataZone", "White", "Other", "total", "dud")
+
+  # Drop helper/total columns if present
+  if("total" %in% names(raw)) raw$total = NULL
+  if("dud" %in% names(raw)) raw$dud = NULL
+
+  # Remove non-data rows and return
+  raw = raw[!is.na(raw$DataZone),]
+  raw = raw[!raw$DataZone %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
+
+  raw
+
 }
