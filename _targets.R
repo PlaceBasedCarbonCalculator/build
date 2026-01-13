@@ -168,15 +168,30 @@ tar_target(retrofit_lsoa_data,{
 
 
 tar_target(geojson_epc_dom,{
-  sub = readRDS(file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"))
+  sub = uprn_historical_epc_lr$domestic
+  sub$address2[is.na(sub$address2)] = ""
+  sub$address = ifelse(is.na(sub$addr), paste0(sub$address1," ",sub$address2),sub$addr)
+  sub = sub[,!names(sub) %in% c("date_first","date_last","X_COORDINATE","Y_COORDINATE","addr","address1","address2","ADDRESS2","ADDRESS3","POSTCODE")]
+  sub = sf::st_as_sf(sub, coords = c("LONGITUDE","LATITUDE"), crs = 4326)
   sub = wiggle_points(sub)
   make_geojson(sub, "outputdata/epc_dom.geojson")
 }, format = "file"),
 
 tar_target(geojson_epc_nondom,{
-  sub = readRDS(file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  sub = uprn_historical_epc_lr$nondomestic
+  sub$address = ifelse(is.na(sub$adr1), paste0(sub$address1),sub$adr1)
+  sub = sub[,!names(sub) %in% c("date_first","date_last","X_COORDINATE","Y_COORDINATE","address1","address2","adr1","adr2","POSTCODE","postcode","adr2","adr3")]
+  sub = sf::st_as_sf(sub, coords = c("LONGITUDE","LATITUDE"), crs = 4326)
   sub = wiggle_points(sub)
   make_geojson(sub, "outputdata/epc_nondom.geojson")
+}, format = "file"),
+
+tar_target(geojson_uprn_unknown,{
+  sub = uprn_historical_epc_lr$unknown
+  sub = sub[,!names(sub) %in% c("date_first","date_last","X_COORDINATE","Y_COORDINATE","domestic")]
+  sub = sf::st_as_sf(sub, coords = c("LONGITUDE","LATITUDE"), crs = 4326)
+  sub = wiggle_points(sub)
+  make_geojson(sub, "outputdata/uprn_unknown.geojson")
 }, format = "file"),
 
 # Boundaries
@@ -569,6 +584,13 @@ tar_target(house_prices_lsoa,{
 
 tar_target(house_prices_nowcast,{
   house_price_extrapolate(house_price_lr_uprn, lsoa_admin)
+}),
+
+tar_target(uprn_historical_epc_lr,{
+  combine_uprn_epc_lr(uprn_historical,
+                      house_prices_nowcast,
+                      path_epc_dom = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                      path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
 }),
 
 tar_target(housing_type_2021,{
@@ -1057,6 +1079,12 @@ tar_target(pmtiles_epc_dom,{
 tar_target(pmtiles_epc_nondom,{
   make_pmtiles(geojson_epc_nondom, "epc_nondom.geojson","epc_nondom.pmtiles",
                name = "epc_nondom", shared_borders = TRUE, extend_zoom = TRUE,
+               drop = TRUE, min_zoom = 6, max_zoom = 14)
+}, format = "file"),
+
+tar_target(pmtiles_uprn_unknown,{
+  make_pmtiles(geojson_uprn_unknown, "uprn_unknown.geojson","uprn_unknown.pmtiles",
+               name = "uprn_unknown", shared_borders = TRUE, extend_zoom = TRUE,
                drop = TRUE, min_zoom = 6, max_zoom = 14)
 }, format = "file"),
 
