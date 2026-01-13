@@ -3,4 +3,5 @@ warningcode,name,description,url
 2,Complex border change,"This LSOA had a complex border change between 2011 and 2021, historical data uses closest matching LSOA",/manual
 3,LSOAs merged,"This LSOA was formed in 2021 by merging two LSOAs, historical data has been merged",/manual
 4,LSOAs split,"This LSOA was formed in 2021 by splitting two LSOAs, historical data has been split",/manual
-5,Zero Population,At some point this LSOA has had zero residents,/manual
+5,Zero Population,In some years this LSOA has had zero residents,/manual
+6,Company Cars,In some years this LSOA has an unusually large number of company cars,/manual
