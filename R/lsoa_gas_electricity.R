@@ -1,36 +1,36 @@
-dowload_gas_electric <- function(path = file.path(data_path(),"gas_electric")){
-  if(!dir.exists(path)){
-    dir.create(path)
-  } else {
-    fls = list.files(path, pattern = "xlsx")
-    if(length(fls) > 3){
-      return(path)
-    }
-  }
-
-  url_elec = "https://assets.publishing.service.gov.uk/media/63a2ea3fd3bf7f375b61c12d/LSOA_domestic_elec_2010-21.xlsx"
-  download.file(url_elec, file.path(path,"lsoa_elec_dom.xlsx"), mode = "wb")
-
-  url_elec = "https://assets.publishing.service.gov.uk/media/63a2e9e58fa8f5390dfdf56b/MSOA_non-domestic_elec_2010-21.xlsx"
-  download.file(url_elec, file.path(path,"msoa_elec_nondom.xlsx"), mode = "wb")
-
-  url_gas = "https://assets.publishing.service.gov.uk/media/63a2ef098fa8f53913e8071b/LSOA_domestic_gas_2010-21.xlsx"
-  download.file(url_gas, file.path(path,"lsoa_gas_dom.xlsx"), mode = "wb")
-
-  url_gas = "https://assets.publishing.service.gov.uk/media/63a31f44e90e075870e2cf0f/MSOA_non-domestic_gas_2010-21.xlsx"
-  download.file(url_gas, file.path(path,"msoa_gas_nondom.xlsx"), mode = "wb")
-
-  return(path)
-
-}
+# dowload_gas_electric <- function(path = file.path(data_path(),"gas_electric")){
+#   if(!dir.exists(path)){
+#     dir.create(path)
+#   } else {
+#     fls = list.files(path, pattern = "xlsx")
+#     if(length(fls) > 3){
+#       return(path)
+#     }
+#   }
+#
+#   url_elec = "https://assets.publishing.service.gov.uk/media/63a2ea3fd3bf7f375b61c12d/LSOA_domestic_elec_2010-21.xlsx"
+#   download.file(url_elec, file.path(path,"lsoa_elec_dom.xlsx"), mode = "wb")
+#
+#   url_elec = "https://assets.publishing.service.gov.uk/media/63a2e9e58fa8f5390dfdf56b/MSOA_non-domestic_elec_2010-21.xlsx"
+#   download.file(url_elec, file.path(path,"msoa_elec_nondom.xlsx"), mode = "wb")
+#
+#   url_gas = "https://assets.publishing.service.gov.uk/media/63a2ef098fa8f53913e8071b/LSOA_domestic_gas_2010-21.xlsx"
+#   download.file(url_gas, file.path(path,"lsoa_gas_dom.xlsx"), mode = "wb")
+#
+#   url_gas = "https://assets.publishing.service.gov.uk/media/63a31f44e90e075870e2cf0f/MSOA_non-domestic_gas_2010-21.xlsx"
+#   download.file(url_gas, file.path(path,"msoa_gas_nondom.xlsx"), mode = "wb")
+#
+#   return(path)
+#
+# }
 
 
 
 load_lsoa_electric <- function(path){
 
   elec = list()
-  for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(path,"lsoa_elec_dom.xlsx"),
+  for(i in 2010:2024){
+    sub <- readxl::read_excel(file.path(path,"LSOA_domestic_elec_2010-2024.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -67,8 +67,8 @@ load_msoa_electric_nondom <- function(path){
 
 
   elec = list()
-  for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(path,"msoa_elec_nondom.xlsx"),
+  for(i in 2010:2024){
+    sub <- readxl::read_excel(file.path(path,"MSOA_non-domestic_elec_2010-2024.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -106,8 +106,8 @@ load_lsoa_gas <- function(path){
 
 
   gas = list()
-  for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(path,"lsoa_gas_dom.xlsx"),
+  for(i in 2010:2024){
+    sub <- readxl::read_excel(file.path(path,"LSOA_domestic_gas_2010-2024.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -156,7 +156,7 @@ load_msoa_gas_nondom <- function(path){
 
   gas = list()
   for(i in 2010:2021){
-    sub <- readxl::read_excel(file.path(path,"msoa_gas_nondom.xlsx"),
+    sub <- readxl::read_excel(file.path(path,"MSOA_non_domestic_gas_2010-2024.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
     sub <- sub[5:nrow(sub),]
@@ -182,8 +182,14 @@ load_msoa_gas_nondom <- function(path){
 
 lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
+  #Update new data uses 2021/22 boundaries from 2015 onwards!
   domestic_gas_11 = domestic_gas_11[,c("LSOA","year","meters","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
+
+  domestic_gas_11_done = domestic_gas_11[domestic_gas_11$year >= 2015,]
+  names(domestic_gas_11_done)[1] = "LSOA21CD"
+  domestic_gas_11 = domestic_gas_11[domestic_gas_11$year < 2015,]
   names(domestic_gas_11)[1] = "LSOA11CD"
+
 
   # Scotland
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
@@ -258,7 +264,8 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
   domestic_gas_U = domestic_gas_U[,nms]
   domestic_gas_Scot = domestic_gas_Scot[,nms]
 
-  final = rbind(domestic_gas_S, domestic_gas_M, domestic_gas_U, domestic_gas_Scot)
+  final = rbind(domestic_gas_S, domestic_gas_M, domestic_gas_U, domestic_gas_Scot, domestic_gas_11_done)
+
   final
 
 }
@@ -266,7 +273,13 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
 lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
   domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
+
+  #Update new data uses 2021/22 boundaries from 2015 onwards!
+  domestic_electricity_11_done = domestic_electricity_11[domestic_electricity_11$year >= 2015,]
+  names(domestic_electricity_11_done)[1] = "LSOA21CD"
+  domestic_electricity_11 = domestic_electricity_11[domestic_electricity_11$year < 2015,]
   names(domestic_electricity_11)[1] = "LSOA11CD"
+
 
   # Scotland
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
@@ -343,7 +356,7 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
   domestic_electricity_U = domestic_electricity_U[,nms]
   domestic_electricity_Scot = domestic_electricity_Scot[,nms]
 
-  final = rbind(domestic_electricity_S, domestic_electricity_M, domestic_electricity_U, domestic_electricity_Scot)
+  final = rbind(domestic_electricity_S, domestic_electricity_M, domestic_electricity_U, domestic_electricity_Scot, domestic_electricity_11_done)
   final
 
 }
@@ -412,6 +425,10 @@ lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population) {
 
 }
 
+
+
+
+
 calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
 
   domestic_gas = domestic_gas[,c("LSOA21CD","year","total_gas_kwh")]
@@ -467,6 +484,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   g20 <- read.csv(file.path(path,"Postcode_level_gas_2020.csv"))
   g21 <- read.csv(file.path(path,"Postcode_level_gas_2021.csv"))
   g22 <- read.csv(file.path(path,"Postcode_level_gas_2022.csv"))
+  g23 <- read.csv(file.path(path,"Postcode_level_gas_2023.csv"))
+  g24 <- read.csv(file.path(path,"Postcode_level_gas_2024.csv"))
 
   # Electric
   e15_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2015.csv"))
@@ -477,6 +496,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2020.csv"))
   e21_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2021.csv"))
   e22_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2022.csv"))
+  e23_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2023.csv"))
+  e24_all <- read.csv(file.path(path,"Postcode_level_all_meters_electricity_2024.csv"))
 
   e15_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2015.csv"))
   e16_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2016.csv"))
@@ -486,6 +507,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2020.csv"))
   e21_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2021.csv"))
   e22_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2022.csv"))
+  e23_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2023.csv"))
+  e24_st <- read.csv(file.path(path,"Postcode_level_standard_electricity_2024.csv"))
 
   e15_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2015.csv"))
   e16_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2016.csv"))
@@ -495,6 +518,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2020.csv"))
   e21_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2021.csv"))
   e22_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2022.csv"))
+  e23_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2023.csv"))
+  e24_eco7 <- read.csv(file.path(path,"Postcode_level_economy_7_electricity_2024.csv"))
 
   # Clean
   e15_all <- clean_postcode_elec(e15_all, 2015, "all")
@@ -505,6 +530,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_all <- clean_postcode_elec(e20_all, 2020, "all")
   e21_all <- clean_postcode_elec(e21_all, 2021, "all")
   e22_all <- clean_postcode_elec(e22_all, 2022, "all")
+  e23_all <- clean_postcode_elec(e23_all, 2023, "all")
+  e24_all <- clean_postcode_elec(e24_all, 2024, "all")
 
   e15_st <- clean_postcode_elec(e15_st, 2015, "std")
   e16_st <- clean_postcode_elec(e16_st, 2016, "std")
@@ -514,6 +541,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_st <- clean_postcode_elec(e20_st, 2020, "std")
   e21_st <- clean_postcode_elec(e21_st, 2021, "std")
   e22_st <- clean_postcode_elec(e22_st, 2022, "std")
+  e23_st <- clean_postcode_elec(e23_st, 2023, "std")
+  e24_st <- clean_postcode_elec(e24_st, 2024, "std")
 
   e15_eco7 <- clean_postcode_elec(e15_eco7, 2015, "eco7")
   e16_eco7 <- clean_postcode_elec(e16_eco7, 2016, "eco7")
@@ -523,6 +552,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   e20_eco7 <- clean_postcode_elec(e20_eco7, 2020, "eco7")
   e21_eco7 <- clean_postcode_elec(e21_eco7, 2021, "eco7")
   e22_eco7 <- clean_postcode_elec(e22_eco7, 2022, "eco7")
+  e23_eco7 <- clean_postcode_elec(e23_eco7, 2023, "eco7")
+  e24_eco7 <- clean_postcode_elec(e24_eco7, 2024, "eco7")
 
 
   g15 <- clean_postcode_gas(g15, 2015)
@@ -533,6 +564,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   g20 <- clean_postcode_gas(g20, 2020)
   g21 <- clean_postcode_gas(g21, 2021)
   g22 <- clean_postcode_gas(g22, 2022)
+  g23 <- clean_postcode_gas(g23, 2023)
+  g24 <- clean_postcode_gas(g24, 2024)
 
   gall <- dplyr::full_join(g22, g21, by = "postcode")
   gall <- dplyr::full_join(gall, g20, by = "postcode")
@@ -541,6 +574,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   gall <- dplyr::full_join(gall, g17, by = "postcode")
   gall <- dplyr::full_join(gall, g16, by = "postcode")
   gall <- dplyr::full_join(gall, g15, by = "postcode")
+  gall <- dplyr::full_join(gall, g23, by = "postcode")
+  gall <- dplyr::full_join(gall, g24, by = "postcode")
 
   eall_all <- dplyr::full_join(e22_all, e21_all, by = "postcode")
   eall_all <- dplyr::full_join(eall_all, e20_all, by = "postcode")
@@ -549,6 +584,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   eall_all <- dplyr::full_join(eall_all, e17_all, by = "postcode")
   eall_all <- dplyr::full_join(eall_all, e16_all, by = "postcode")
   eall_all <- dplyr::full_join(eall_all, e15_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e23_all, by = "postcode")
+  eall_all <- dplyr::full_join(eall_all, e24_all, by = "postcode")
 
   eall_st <- dplyr::full_join(e22_st, e21_st, by = "postcode")
   eall_st <- dplyr::full_join(eall_st, e20_st, by = "postcode")
@@ -557,6 +594,8 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   eall_st <- dplyr::full_join(eall_st, e17_st, by = "postcode")
   eall_st <- dplyr::full_join(eall_st, e16_st, by = "postcode")
   eall_st <- dplyr::full_join(eall_st, e15_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e23_st, by = "postcode")
+  eall_st <- dplyr::full_join(eall_st, e24_st, by = "postcode")
 
   eall_eco7 <- dplyr::full_join(e22_eco7, e21_eco7, by = "postcode")
   eall_eco7 <- dplyr::full_join(eall_eco7, e20_eco7, by = "postcode")
@@ -565,28 +604,32 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   eall_eco7 <- dplyr::full_join(eall_eco7, e17_eco7, by = "postcode")
   eall_eco7 <- dplyr::full_join(eall_eco7, e16_eco7, by = "postcode")
   eall_eco7 <- dplyr::full_join(eall_eco7, e15_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e23_eco7, by = "postcode")
+  eall_eco7 <- dplyr::full_join(eall_eco7, e24_eco7, by = "postcode")
 
   geall = dplyr::full_join(gall, eall_all, by = "postcode")
   geall = dplyr::full_join(geall, eall_st, by = "postcode")
   geall = dplyr::full_join(geall, eall_eco7, by = "postcode")
 
+  yrs = 2015:2024
+
   geall = geall[,c("postcode",
-                   paste0("gas_meters_",2015:2022),
-                   paste0("elec_meters_all_",2015:2022),
-                   paste0("elec_meters_std_",2015:2022),
-                   paste0("elec_meters_eco7_",2015:2022),
-                   paste0("gas_totalkwh_",2015:2022),
-                   paste0("elec_totalkwh_all_",2015:2022),
-                   paste0("elec_totalkwh_std_",2015:2022),
-                   paste0("elec_totalkwh_eco7_",2015:2022),
-                   paste0("gas_meankwh_",2015:2022),
-                   paste0("elec_meankwh_all_",2015:2022),
-                   paste0("elec_meankwh_std_",2015:2022),
-                   paste0("elec_meankwh_eco7_",2015:2022),
-                   paste0("gas_mediankwh_",2015:2022),
-                   paste0("elec_mediankwh_std_",2015:2022),
-                   paste0("elec_mediankwh_all_",2015:2022),
-                   paste0("elec_mediankwh_eco7_",2015:2022)
+                   paste0("gas_meters_",yrs),
+                   paste0("elec_meters_all_",yrs),
+                   paste0("elec_meters_std_",yrs),
+                   paste0("elec_meters_eco7_",yrs),
+                   paste0("gas_totalkwh_",yrs),
+                   paste0("elec_totalkwh_all_",yrs),
+                   paste0("elec_totalkwh_std_",yrs),
+                   paste0("elec_totalkwh_eco7_",yrs),
+                   paste0("gas_meankwh_",yrs),
+                   paste0("elec_meankwh_all_",yrs),
+                   paste0("elec_meankwh_std_",yrs),
+                   paste0("elec_meankwh_eco7_",yrs),
+                   paste0("gas_mediankwh_",yrs),
+                   paste0("elec_mediankwh_std_",yrs),
+                   paste0("elec_mediankwh_all_",yrs),
+                   paste0("elec_mediankwh_eco7_",yrs)
                    )]
 
   geall
@@ -670,7 +713,7 @@ sumNA = function(x, y){
 
 
 prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_postcodes_2024){
-  sub = postcode_gas_electricity_emissions[postcode_gas_electricity_emissions$year == 2022, ]
+  sub = postcode_gas_electricity_emissions[postcode_gas_electricity_emissions$year == max(postcode_gas_electricity_emissions$year, na.rm = TRUE), ]
   sub = sub[sub$postcode %in% bounds_postcodes_2024$POSTCODE,]
   sub = sub[,c("postcode","elec_mediankgco2e_all","gas_mediankgco2e")]
   sub$gas_elec_mediankgco2e = sumNA(sub$gas_mediankgco2e, sub$elec_mediankgco2e_all)
@@ -684,3 +727,31 @@ prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_
   sub
 }
 
+
+calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electricity, emissions_factors){
+  sub = dplyr::full_join(domestic_gas, domestic_electricity, by = c("LSOA21CD","year"))
+  names(sub)[names(sub) == "meters.x"] = "meters_gas"
+  names(sub)[names(sub) == "meters.y"] = "meters_elec"
+
+  emissions_factors = emissions_factors[,c("year","electricity_kgco2e","gas_kgco2e")]
+
+  bar = dplyr::left_join(sub, emissions_factors, by = "year")
+
+  bar$total_gas_kgco2e = bar$total_gas_kwh  * bar$gas_kgco2e
+  bar$median_gas_kgco2e = bar$median_gas_kwh * bar$gas_kgco2e
+  bar$mean_gas_kgco2e = bar$mean_gas_kwh   * bar$gas_kgco2e
+
+  bar$total_elec_kgco2e = bar$total_elec_kwh * bar$electricity_kgco2e
+  bar$mean_elec_kgco2e = bar$mean_elec_kwh * bar$electricity_kgco2e
+  bar$median_elec_kgco2e = bar$median_elec_kwh * bar$electricity_kgco2e
+
+  bar$gas_kgco2e = NULL
+  bar$electricity_kgco2e = NULL
+
+  bar$mean_elec_kgco2e[is.nan(bar$mean_elec_kgco2e)] = 0
+  bar$mean_elec_kwh[is.nan(bar$mean_elec_kwh)] = 0
+
+  bar
+
+
+}

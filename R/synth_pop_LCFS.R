@@ -12,7 +12,18 @@ match_income_lsoa_msoa = function(income_msoa,
 
   #income_msoa = income_msoa[income_msoa$year == income_year,]
 
-  income_lsoa = dplyr::left_join(lookup_OA_LSOA_MSOA_2021, income_msoa, by = c("MSOA11CD" = "MSOA11"))
+  income_msoa_11 = income_msoa[!is.na(income_msoa$MSOA11),]
+  income_msoa_21 = income_msoa[!is.na(income_msoa$MSOA21),]
+
+  income_msoa_11$MSOA21 = NULL
+  income_msoa_21$MSOA11 = NULL
+
+  income_lsoa_11 = dplyr::left_join(lookup_OA_LSOA_MSOA_2021, income_msoa_11, by = c("MSOA11CD" = "MSOA11"),
+                                    relationship = "many-to-many")
+  income_lsoa_21 = dplyr::left_join(lookup_OA_LSOA_MSOA_2021, income_msoa_21, by = c("MSOA21CD" = "MSOA21"))
+
+  income_lsoa = rbind(income_lsoa_11, income_lsoa_21)
+
   income_lsoa = income_lsoa[order(income_lsoa$LSOA21CD, income_lsoa$year),]
   income_lsoa = income_lsoa[,c("LSOA21CD","year","upper_limit" ,"lower_limit","total_annual_income")]
 

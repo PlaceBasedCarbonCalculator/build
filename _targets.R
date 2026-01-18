@@ -50,9 +50,9 @@ tar_target(population_2021,{
   load_population_2021(path = file.path(parameters$path_data,"nomis"))
 }),
 
-tar_target(population_2022,{
+tar_target(population_2022_24,{
   length(population_2002_2020)
-  build_lsoa_population_2022(path = file.path(parameters$path_data,"population"))
+  build_lsoa_population_2022_24(path = file.path(parameters$path_data,"population"))
 }),
 
 tar_target(population_scot,{
@@ -112,14 +112,11 @@ tar_target(household_pics_json,{
 
 
 # Gas and Electricity
-tar_target(dl_gas_electric,{
-  dowload_gas_electric(path = file.path(parameters$path_data,"gas_electric"))
-}),
 tar_target(domestic_gas_11,{
-  load_lsoa_gas(dl_gas_electric)
+  load_lsoa_gas(path = file.path(parameters$path_data,"gas_electric"))
 }),
 tar_target(domestic_electricity_11,{
-  load_lsoa_electric(dl_gas_electric)
+  load_lsoa_electric(path = file.path(parameters$path_data,"gas_electric"))
 }),
 tar_target(domestic_gas,{
   lsoa_gas_to_2021(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre)
@@ -134,10 +131,10 @@ tar_target(domestic_electricity_emissions,{
   calculate_electricity_emissions(domestic_electricity, emissions_factors, population)
 }),
 tar_target(nondomestic_gas,{
-  load_msoa_gas_nondom(dl_gas_electric)
+  load_msoa_gas_nondom(path = file.path(parameters$path_data,"gas_electric"))
 }),
 tar_target(nondomestic_electricity,{
-  load_msoa_electric_nondom(dl_gas_electric)
+  load_msoa_electric_nondom(path = file.path(parameters$path_data,"gas_electric"))
 }),
 tar_target(postcode_gas_electricity,{
   load_postcode_gas_electricity(path = file.path(parameters$path_data,"gas_electric/postcode"))
@@ -145,11 +142,32 @@ tar_target(postcode_gas_electricity,{
 tar_target(postcode_gas_electricity_emissions,{
   calculate_postcode_gas_electric_emissions(postcode_gas_electricity, emissions_factors)
 }),
-
+tar_target(bounds_dno,{
+  load_dno_areas(path = file.path(parameters$path_data,"gas_electric"))
+}),
+tar_target(lsoa_dno_lookup_GB,{
+  make_lsoa_to_dno_lookup(bounds_dno, centroids_lsoa21, centroids_dz22)
+}),
+tar_target(prices_gas_electric,{
+  load_gas_elec_prices(file.path(parameters$path_data,"gas_electric/prices"))
+}),
+tar_target(prices_other_heating,{
+  load_other_heating_prices(file.path(parameters$path_data,"gas_electric/prices"))
+}),
+tar_target(bills_gas_electric,{
+  estimate_gas_electric_bills(domestic_gas, domestic_electricity, prices_gas_electric, lsoa_dno_lookup_GB)
+}),
 tar_target(geojson_postcode,{
   sub = prep_postcode_gas_electic(postcode_gas_electricity_emissions, bounds_postcodes_2024)
   make_geojson(sub, "outputdata/postcodes.geojson")
 }, format = "file"),
+
+tar_target(build_historical_domestic_gas_elec_jsons,{
+  sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors)
+  export_zone_json(sub, idcol = "LSOA21CD", path = "outputdata/json/historical_domestic_gas_elec",
+                   dataframe = "columns",
+                   zip = FALSE, rounddp = 0)
+}),
 
 # EPC Points
 tar_target(epc_dom_summary,{
@@ -163,7 +181,9 @@ tar_target(build_epc_dom_jsons,{
 }),
 
 tar_target(retrofit_lsoa_data,{
-  select_retofit_vars(epc_dom_summary, population)
+  select_retofit_vars(epc_dom_summary, population, house_prices_nowcast,
+                      income_lsoa_msoa, domestic_electricity, domestic_gas,
+                      prices_gas_electric, prices_other_heating)
 }),
 
 
@@ -433,12 +453,7 @@ tar_target(households_cenus21,{
 
 
 # Income
-tar_target(dl_income,{
-  dowload_income_msoa(path = file.path(parameters$path_data,"income"))
-}),
-
 tar_target(income_msoa,{
-  dl_income
   load_msoa_income(path = file.path(parameters$path_data,"income"))
 }),
 
@@ -465,9 +480,9 @@ tar_target(income_lsoa_msoa,{
 #   estimate_income(experian_income, income_msoa, lookup_lsoa_2001_11, lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
 # }),
 
-tar_target(income_bands_lsoa,{
-  make_income_bands_lsoa(NSSEC_household,income_msoa,lookup_OA_LSOA_MSOA_classifications,lookup_lsoa_2011_21)
-}),
+# tar_target(income_bands_lsoa,{
+#   make_income_bands_lsoa(NSSEC_household,income_msoa,lookup_OA_LSOA_MSOA_classifications,lookup_lsoa_2011_21)
+# }),
 
 
 # Car Registration Statistics
@@ -655,7 +670,7 @@ tar_target(population_households_historical,{
   extrapolate_population_households(households_cenus11,households_cenus21,
                                     lookup_lsoa_2011_21,dwellings_tax_band,
                                     population_2002_2020,population_2021,
-                                    population_2022)
+                                    population_2022_24)
 }),
 
 tar_target(dwellings_type_backcast,{
@@ -1110,7 +1125,13 @@ tar_target(build_access_jsons,{
 }),
 
 tar_target(build_postcode_jsons,{
-  export_zone_json(postcode_gas_electricity_emissions, idcol = "postcode",
+  x = postcode_gas_electricity_emissions[,c("postcode","year","gas_meters","elec_meters_all",
+                                              "elec_meters_std","elec_meters_eco7","gas_totalkwh","elec_totalkwh_all",
+                                              "elec_totalkwh_std","elec_totalkwh_eco7","gas_meankwh","elec_meankwh_all",
+                                              "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
+                                              "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
+                                              "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
+  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
 }),
 

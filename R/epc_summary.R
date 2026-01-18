@@ -26,8 +26,17 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   certs$g_type[is.na(certs$g_type)] <- "not defined"
 
 
+  certs$roof_d = trimws(as.character(certs$roof_d), "both")
+  certs$wall_d = trimws(as.character(certs$wall_d), "both")
+  certs$floor_d = trimws(as.character(certs$floor_d), "both")
 
-    # Flag Roofs and Floors
+  certs$wall_d[grepl("\\|",certs$wall_d)] = "multiple types"
+  certs$roof_d[grepl("\\|",certs$roof_d)] = "multiple types"
+  certs$floor_d[grepl("\\|",certs$floor_d)] = "multiple types"
+
+
+
+  # Flag Roofs and Floors
   certs$floor_ee <- as.character(certs$floor_ee)
   certs$floor_ee <- ifelse(is.na(certs$floor_ee) &
                                      (certs$floor_d %in% c("(another dwelling below)", "(other premises below)")),
@@ -41,6 +50,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
 
   certs$sol_wat[is.na(certs$sol_wat)] = "no"
+  certs$pv[is.na(certs$pv)] = "no"
 
   certs$light_ee <- as.character(certs$light_ee)
   certs$wind_ee <- as.character(certs$wind_ee)
@@ -73,8 +83,8 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
   certs = certs[!is.na(certs$LSOA21CD),]
 
-  cert_summ <- dplyr::group_by(certs, LSOA21CD)
-  cert_summ <- dplyr::summarise(cert_summ,
+  cert_summ <- dplyr::group_by(certs, LSOA21CD) |>
+  dplyr::summarise(
               epc_total = dplyr::n(),
               epc_A = length(cur_rate[cur_rate == "A"]),
               epc_B = length(cur_rate[cur_rate == "B"]),
@@ -89,12 +99,12 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               type_house_semi = length(buidling_type[buidling_type == "Semi-Detached House"]),
               type_house_midterrace = length(buidling_type[buidling_type %in% c("Enclosed Mid-Terrace House", "Mid-Terrace House")]),
               type_house_endterrace = length(buidling_type[buidling_type %in% c("Enclosed End-Terrace House", "End-Terrace House")]),
-              type_house_detached = length(buidling_type[buidling_type == "Detached House"]),
+              type_house_detached = length(buidling_type[buidling_type %in% c("Detached House","House")]),
               type_flat = length(buidling_type[grepl("Flat",buidling_type)]),
               type_bungalow_semi = length(buidling_type[buidling_type == "Semi-Detached Bungalow"]),
               type_bungalow_midterrace = length(buidling_type[buidling_type %in% c("Enclosed Mid-Terrace Bungalow", "Mid-Terrace Bungalow")]),
               type_bungalow_endterrace = length(buidling_type[buidling_type %in% c("Enclosed End-Terrace Bungalow", "End-Terrace Bungalow")]),
-              type_bungalow_detached = length(buidling_type[buidling_type == "Detached Bungalow"]),
+              type_bungalow_detached = length(buidling_type[buidling_type %in% c("Detached Bungalow","Bungalow")]),
               type_maisonette = length(buidling_type[grepl("Maisonette",buidling_type)]),
               type_parkhome = length(buidling_type[grepl("Park home",buidling_type)]),
 
@@ -128,13 +138,14 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               floor_below = length(floor_ee[floor_ee == "dwelling below"]),
               floor_other = length(floor_ee[!floor_ee %in% c("Very Good","Good","Average","Poor","Very Poor","dwelling below")]),
 
-              floord_soliduninsulated = length(floor_d[grepl("solid, no insulation",floor_d)]),
-              floord_solidinsulated = length(floor_d[grepl("solid, insulated ",floor_d)]),
-              floord_solidlimitedinsulated = length(floor_d[grepl("solid, limited insulation",floor_d)]),
-              floord_suspendeduninsulated = length(floor_d[grepl("suspended, no insulation",floor_d)]),
-              floord_suspendedinsualted = length(floor_d[grepl("solid, insulated ",floor_d)]),
-              floord_suspendedlimitedinsulated = length(floor_d[grepl("suspended, limited insulation",floor_d)]),
-              floord_below = length(floor_d[floor_d == "(another dwelling below)" | floor_d == "(other premises below)"]),
+              floord_soliduninsulated = length(floor_d[grepl("^solid, no insulation",floor_d)]),
+              floord_solidinsulated = length(floor_d[grepl("^solid, insulated",floor_d)]),
+              floord_solidlimitedinsulated = length(floor_d[grepl("^solid, limited insulation",floor_d)]),
+              floord_suspendeduninsulated = length(floor_d[grepl("^suspended, no insulation",floor_d)]),
+              floord_suspendedinsualted = length(floor_d[grepl("^suspended, insulated ",floor_d)]),
+              floord_suspendedlimitedinsulated = length(floor_d[grepl("^suspended, limited insulation",floor_d)]),
+              floord_external = length(floor_d[grepl("(to external air)|(to unheated space)|(the sky outside)",floor_d)]),
+              floord_below = length(floor_d[floor_d == "(another dwelling below)" | floor_d == "(other premises below)" | floor_d == "(same dwelling below) insulated (assumed)"]),
 
               window_verygood = length(wind_ee[wind_ee == "Very Good"]),
               window_good = length(wind_ee[wind_ee == "Good"]),
@@ -175,6 +186,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               walld_sandlimestone = length(wall_d[grepl("sandstone or limestone",wall_d)]),
               walld_granitewhinstine = length(wall_d[grepl("granite or whinstone",wall_d)]),
               walld_system = length(wall_d[grepl("system built",wall_d)]),
+              walld_multiple = length(wall_d[wall_d == "multiple types"]),
 
               roof_verygood = length(roof_ee[roof_ee == "Very Good"]),
               roof_good = length(roof_ee[roof_ee == "Good"]),
@@ -186,9 +198,9 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
               roofd_pitched = length(roof_d[grepl("pitched",roof_d)]),
               roofd_flat = length(roof_d[grepl("flat",roof_d)]),
-              roofd_room = length(roof_d[grepl("roof room(s)",roof_d)]),
+              roofd_room = length(roof_d[grepl("roof room(s)",roof_d) & !grepl("thatched",roof_d)]),
               roofd_thatched = length(roof_d[grepl("thatched",roof_d)]),
-              roofd_above = length(roof_d[roof_d == "(another dwelling above)" | roof_d == "(other premises above)"]),
+              roofd_above = length(roof_d[roof_d == "(another dwelling above)" | roof_d == "(another premises above)" | roof_d == "(other premises above)" | roof_d == "(same dwelling above)"]),
 
               mainheat_verygood = length(heat_ee[heat_ee == "Very Good"]),
               mainheat_good = length(heat_ee[heat_ee == "Good"]),
@@ -197,11 +209,11 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               mainheat_verypoor = length(heat_ee[heat_ee == "Very Poor"]),
               mainheat_other = length(heat_ee[!heat_ee %in% c("Very Good","Good","Average","Poor","Very Poor")]),
 
-              mainheatdesc_gasboiler = length(heat_d[heat_d %in% c("boiler, underfloor heating, mains gas", "boiler, radiators, mains gas") ]),
+              mainheatdesc_gasboiler = length(heat_d[heat_d %in% c("boiler, underfloor heating, mains gas", "boiler, radiators, mains gas","boiler, mains gas","boiler, radiators, mains gas, boiler, underfloor heating, mains gas","boiler, radiators, mains gas, boiler, radiators, mains gas","boiler, underfloor heating, mains gas, boiler, radiators, mains gas","boiler with radiators, underfloor heating, mains gas","boiler, radiators, mains gas, electric underfloor heating") ]),
               mainheatdesc_oilboiler = length(heat_d[heat_d %in% c("boiler, underfloor heating, oil","boiler, radiators, oil")]),
-              mainheatdesc_storageheater = length(heat_d[grepl("electric storage heaters",heat_d)]),
-              mainheatdesc_portableheater = length(heat_d[grepl("electric heaters",heat_d)]),
-              mainheatdesc_roomheater = length(heat_d[grepl("room heaters",heat_d)]),
+              mainheatdesc_storageheater = length(heat_d[grepl("electric storage heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)",heat_d)]),
+              mainheatdesc_portableheater = length(heat_d[grepl("electric heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)",heat_d)]),
+              mainheatdesc_roomheater = length(heat_d[grepl("room heaters",heat_d) & !grepl("(boiler)|(storage)|(heat pump)|(community)",heat_d)]),
               mainheatdesc_heatpump = length(heat_d[grepl("heat pump",heat_d)]),
               mainheatdesc_community = length(heat_d[grepl("community",heat_d)]),
 
@@ -246,6 +258,68 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   cert_summ$walld_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("walld_",names(cert_summ))])
   cert_summ$roofd_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("roofd_",names(cert_summ))])
   cert_summ$controld_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("controld_",names(cert_summ))])
+
+  # Checks
+
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("type_house_semi",
+                                                      "type_house_midterrace",
+                                                      "type_house_endterrace",
+                                                      "type_house_detached",
+                                                      "type_flat",
+                                                      "type_bungalow_semi",
+                                                      "type_bungalow_midterrace",
+                                                      "type_bungalow_endterrace",
+                                                      "type_bungalow_detached",
+                                                      "type_maisonette",
+                                                      "type_parkhome")]))
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("tenure_owner",
+                                                      "tenure_privaterent",
+                                                      "tenure_socialrent",
+                                                      "tenure_unknown")]))
+
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("age_pre1900",
+                                                      "age_19001929",
+                                                      "age_19301949",
+                                                      "age_19501966",
+                                                      "age_19671975",
+                                                      "age_19761982",
+                                                      "age_19831990",
+                                                      "age_19911995",
+                                                      "age_19962002",
+                                                      "age_20032006",
+                                                      "age_20072011",
+                                                      "age_20122021",
+                                                      "age_post2022",
+                                                      "age_unknown"
+                                                      )]))
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("waterd_mainsystem",
+                                                      "waterd_immersion",
+                                                      "waterd_community",
+                                                      "waterd_instantaneous",
+                                                      "waterd_gasmultipoint",
+                                                      "waterd_other"
+  )]))
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("glazing_single",
+                                                      "glazing_double",
+                                                      "glazing_triple",
+                                                      "glazing_secondary",
+                                                      "glazing_unknown"
+  )]))
+
+  summary(cert_summ$epc_total == rowSums(cert_summ[,c("mainheatdesc_gasboiler",
+                                                      "mainheatdesc_oilboiler",
+                                                      "mainheatdesc_storageheater",
+                                                      "mainheatdesc_portableheater",
+                                                      "mainheatdesc_roomheater",
+                                                      "mainheatdesc_heatpump",
+                                                      "mainheatdesc_community",
+                                                      "mainheatdesc_other"
+  )]))
 
 
 

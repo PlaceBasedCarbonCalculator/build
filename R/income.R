@@ -42,6 +42,7 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   income2016 = readxl::read_excel(file.path(path, "income2016.xls"), "Total annual income")
   income2018 = readxl::read_excel(file.path(path, "income2018.xls"), "Total annual income")
   income2020 = readxl::read_excel(file.path(path, "income2020.xlsx"), "Total annual income")
+  income2023 = readxl::read_excel(file.path(path, "income2023.xlsx"), "Total annual income")
 
   names(income2012) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
                         "total_weekly_income","upper_limit","lower_limit","interval")
@@ -93,6 +94,15 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   income2020$lower_limit = as.numeric(income2020$lower_limit)
   income2020$year = 2020
 
+  names(income2023) = c("MSOA21","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
+                        "total_annual_income","upper_limit","lower_limit","interval")
+  income2023 = income2023[4:nrow(income2023), ]
+  income2023 = income2023[!is.na(income2023$MSOAname),]
+  income2023 = income2023[,c("MSOA21","total_annual_income","upper_limit","lower_limit")]
+  income2023$total_annual_income = as.numeric(income2023$total_annual_income)
+  income2023$upper_limit = as.numeric(income2023$upper_limit)
+  income2023$lower_limit = as.numeric(income2023$lower_limit)
+  income2023$year = 2023
 
   income2012$total_annual_income = round(income2012$total_weekly_income * (365/7))
   income2014$total_annual_income = round(income2014$total_weekly_income * (365/7))
@@ -106,7 +116,7 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   income2012$total_weekly_income = NULL
   income2014$total_weekly_income = NULL
 
-  income = rbind(income2012,income2014,income2016,income2018,income2020)
+  income = dplyr::bind_rows(income2012,income2014,income2016,income2018,income2020,income2023)
 
   income
 

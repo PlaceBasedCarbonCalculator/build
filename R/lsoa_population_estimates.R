@@ -293,3 +293,61 @@ build_lsoa_population_2022 = function(path) {
 
 }
 
+
+build_lsoa_population_2022_24 = function(path = "../inputdata/population/") {
+  #2022
+  pop22 <- readxl::read_excel(file.path(path,"pop2022-2024.xlsx"),
+                              sheet = "Mid-2022 LSOA 2021")
+  pop22 <- as.data.frame(pop22)
+  names(pop22) <- pop22[3,]
+  pop22 <- pop22[4:nrow(pop22),]
+  pop22[5:ncol(pop22)] <- lapply(pop22[5:ncol(pop22)], as.numeric)
+  pop22$year = 2022
+
+  #2023
+  pop23 <- readxl::read_excel(file.path(path,"pop2022-2024.xlsx"),
+                              sheet = "Mid-2023 LSOA 2021")
+  pop23 <- as.data.frame(pop23)
+  names(pop23) <- pop23[3,]
+  pop23 <- pop23[4:nrow(pop23),]
+  pop23[5:ncol(pop23)] <- lapply(pop23[5:ncol(pop23)], as.numeric)
+  pop23$year = 2023
+
+  #2024
+  pop24 <- readxl::read_excel(file.path(path,"pop2022-2024.xlsx"),
+                              sheet = "Mid-2024 LSOA 2021")
+  pop24 <- as.data.frame(pop24)
+  names(pop24) <- pop24[3,]
+  pop24 <- pop24[4:nrow(pop24),]
+  pop24[5:ncol(pop24)] <- lapply(pop24[5:ncol(pop24)], as.numeric)
+  pop24$year = 2024
+
+  popall = rbind(pop22,pop23,pop24)
+
+  for(i in 0:90){
+    popall[paste0("A",i)] = popall[paste0("M",i)] + popall[paste0("F",i)]
+  }
+
+  popall = popall[,c("LSOA 2021 Code","year","Total",paste0("A",0:90))]
+
+  bands = c("0-4","5-9","10-14","15-19","20-24","25-29",
+            "30-34","35-39","40-44","45-49",
+            "50-54","55-59","60-64","65-69",
+            "70-74","75-79","80-84","85-89")
+
+  for(i in 1:length(bands)){
+    bnd = bands[i]
+    b1 = unlist(strsplit(bnd,"-"))
+    b2 = as.numeric(b1[2])
+    b1 = as.numeric(b1[1])
+    popall[bnd] = rowSums(popall[paste0("A",b1:b2)], na.rm = TRUE)
+  }
+  popall["90+"] = popall$A90
+
+  popall = popall[,c("LSOA 2021 Code","year","Total",bands,"90+")]
+  names(popall)[1:3] = c("LSOA21CD","year","all_ages")
+
+  popall
+
+}
+

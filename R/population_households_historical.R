@@ -19,7 +19,7 @@ extrapolate_population_households = function(households_cenus11,
                                              dwellings_tax_band,
                                              population_2002_2020,
                                              population_2021,
-                                             population_2022
+                                             population_2022_24
                                              ){
 
 
@@ -43,12 +43,11 @@ extrapolate_population_households = function(households_cenus11,
   population_2002_2020$adults = rowSums(population_2002_2020[,adult_bands])
 
 
-  population_2022$`85+` = rowSums(population_2022[,c("85-89","90+")])
-  population_2022$`85-89` = NULL
-  population_2022$`90+` = NULL
-  population_2022$year = 2022
+  population_2022_24$`85+` = rowSums(population_2022_24[,c("85-89","90+")])
+  population_2022_24$`85-89` = NULL
+  population_2022_24$`90+` = NULL
 
-  population_2022$adults = rowSums(population_2022[,adult_bands])
+  population_2022_24$adults = rowSums(population_2022_24[,adult_bands])
 
   population_2021$adults = rowSums(population_2021[,adult_bands])
 
@@ -89,7 +88,7 @@ extrapolate_population_households = function(households_cenus11,
 
 
   pop_U_21 = population_2021[population_2021$LSOA21CD %in% lookup_U$LSOA21CD,]
-  pop_U_22 = population_2022[population_2022$LSOA21CD %in% lookup_U$LSOA21CD,]
+  pop_U_22 = population_2022_24[population_2022_24$LSOA21CD %in% lookup_U$LSOA21CD,]
 
   pop_U = rbind(pop_U_old, pop_U_21, pop_U_22)
   pop_U = pop_U[order(pop_U$LSOA21CD, pop_U$year),]
@@ -142,7 +141,7 @@ extrapolate_population_households = function(households_cenus11,
   pop_M_old = dplyr::ungroup(pop_M_old)
 
   pop_M_21 = population_2021[population_2021$LSOA21CD %in% lookup_M$LSOA21CD,]
-  pop_M_22 = population_2022[population_2022$LSOA21CD %in% lookup_M$LSOA21CD,]
+  pop_M_22 = population_2022_24[population_2022_24$LSOA21CD %in% lookup_M$LSOA21CD,]
 
   pop_M = rbind(pop_M_old, pop_M_21, pop_M_22)
   pop_M = pop_M[order(pop_M$LSOA21CD, pop_M$year),]
@@ -173,7 +172,7 @@ extrapolate_population_households = function(households_cenus11,
   #pop_S_old = dplyr::left_join(pop_S_old, lookup_S, by = "LSOA11CD")
 
   pop_S_21 = population_2021[population_2021$LSOA21CD %in% lookup_S$LSOA21CD,]
-  pop_S_22 = population_2022[population_2022$LSOA21CD %in% lookup_S$LSOA21CD,]
+  pop_S_22 = population_2022_24[population_2022_24$LSOA21CD %in% lookup_S$LSOA21CD,]
 
   pop_S_new = rbind(pop_S_21, pop_S_22)
   pop_S_new = dplyr::left_join(pop_S_new, lookup_S, by = "LSOA21CD")
@@ -245,7 +244,7 @@ extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
     hh$adults_per_household = hh$adults / hh$households_total
 
     m = lm(adults_per_household ~ year, hh)
-    aph = data.frame(year = 2002:2022)
+    aph = data.frame(year = 2002:max(p$year))
     aph$adults_per_household = predict(m, newdata = aph)
     aph$adults_per_household = ifelse(aph$adults_per_household < 1,1,aph$adults_per_household)
     p = dplyr::left_join(p, aph, by = "year")

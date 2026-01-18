@@ -1,4 +1,11 @@
-select_retofit_vars = function(epc_dom_summary, population) {
+select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast,
+                               income_lsoa_msoa,
+                               domestic_electricity, domestic_gas,
+                               bills_gas_electric, prices_other_heating) {
+
+  bills_gas_electric = bills_gas_electric[,c("LSOA21CD","year","energy_average_bill")]
+  bills_gas_electric = bills_gas_electric[bills_gas_electric$year == max(bills_gas_electric$year),]
+
   sub = epc_dom_summary[,c("LSOA21CD","epc_total","epc_score_avg","floor_area_avg")]
   sub$modal_age = modal(epc_dom_summary[,c("age_pre1900",
                                            "age_19001929","age_19301949","age_19501966",
@@ -57,6 +64,57 @@ select_retofit_vars = function(epc_dom_summary, population) {
   sub$percent_EPC = as.character(cut(sub$percent_EPC, breaks = c(0,30,50,60,70,80,90,200)))
   sub$percent_EPC = gsub("\\(|\\[|\\)|\\]","",sub$percent_EPC)
   sub$percent_EPC = gsub(",","-",sub$percent_EPC)
+
+  # House Prices
+  # Not all areas have a transaction in 2024, so take most recent year
+
+  # house_prices_lsoa = house_prices_lsoa[,c("LSOA21CD","year","transactions","price_median")]
+  # house_prices_lsoa = house_prices_lsoa |>
+  #   dplyr::group_by(LSOA21CD) |>
+  #   dplyr::summarise(max_year = max(year),
+  #     price_median = price_median[year == max_year],
+  #     transactions = transactions[year == max_year]
+  #     )
+  # house_prices_lsoa = house_prices_lsoa[substr(house_prices_lsoa$LSOA21CD,1,1) != "S",] #Attribution error
+  # house_prices_lsoa$price_median[house_prices_lsoa$transactions < 3] = NA
+  # TODO: 373 LSOAs have less than 5 transactions per year
+  # sub = dplyr::left_join(sub, house_prices_lsoa[,c("LSOA21CD","price_median")], by = "LSOA21CD")
+
+  house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2024")]
+  house_prices_nowcast = house_prices_nowcast |>
+    dplyr::group_by(LSOA21CD) |>
+    dplyr::summarise(price_2024 = median(price_2024))
+  sub = dplyr::left_join(sub, house_prices_nowcast, by = "LSOA21CD")
+
+
+  # Income
+  income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == max(income_lsoa_msoa$year),]
+  income_lsoa_msoa = income_lsoa_msoa[,c("LSOA21CD","total_annual_income")]
+
+  sub = dplyr::left_join(sub, income_lsoa_msoa, by = "LSOA21CD")
+  #sub$house_income_ratio = round(sub$price_median / sub$total_annual_income,1)
+
+  sub$house_income_ratio = round(sub$price_2024 / sub$total_annual_income,1)
+
+  #Energy
+  domestic_gas = domestic_gas[domestic_gas$year == max(domestic_gas$year),]
+  domestic_electricity = domestic_electricity[domestic_electricity$year == max(domestic_electricity$year),]
+
+  domestic_gas = domestic_gas[,c("LSOA21CD","median_gas_kwh")]
+  domestic_electricity = domestic_electricity[,c("LSOA21CD","median_elec_kwh")]
+
+  sub = dplyr::left_join(sub, domestic_gas, by = "LSOA21CD")
+  sub = dplyr::left_join(sub, domestic_electricity, by = "LSOA21CD")
+
+  sub = dplyr::left_join(sub, bills_gas_electric, by = "LSOA21CD")
+
+  # Bivariate
+  sub$fuelcost_bivaraite = bivariate_categories(sub$energy_average_bill, sub$total_annual_income)
+
+  sub = sub[,c("LSOA21CD","epc_score_avg","floor_area_avg","modal_age","modal_wall",
+               "modal_roof","modal_heat","modal_window","modal_mainheat","modal_mainfuel",
+               "modal_floord","modal_type","modal_tenure","percent_EPC","price_2024",
+               "house_income_ratio","median_gas_kwh","median_elec_kwh","fuelcost_bivaraite" )]
 
   sub
 

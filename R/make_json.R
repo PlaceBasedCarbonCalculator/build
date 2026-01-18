@@ -56,25 +56,30 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
     }
   }
 
+  x <- dplyr::group_split(x, .data[[idcol]], .keep = TRUE)
+
+
   # Avoid building a large list in memory; iterate unique ids and write files per id.
-  ids <- unique(x[[idcol]])
+  #ids <- unique(x[[idcol]])
 
   # Prepare output directory (for zip we write to a temp dir first)
-  temp_json_dir <- file.path(tempdir(), paste0("jsonzip", idcol))
+
   if(zip){
+    temp_json_dir <- file.path(tempdir(), paste0("jsonzip", idcol))
     if(!dir.exists(temp_json_dir)) dir.create(temp_json_dir, recursive = TRUE)
   } else {
     if(!dir.exists(path)) dir.create(path, recursive = TRUE)
+    temp_json_dir <- path
   }
 
   # writer for a single id
-  write_one <- function(idv){
-    sub <- x[x[[idcol]] == idv, , drop = FALSE]
+  write_one <- function(sub, idcol, path = "", dataframe, na){
+    #sub <- x[x[[idcol]] == idv, , drop = FALSE]
     # ensure a data.frame (avoid tibble overhead)
     sub <- as.data.frame(sub)
     nmsub <- sub[[idcol]][1]
     sub[[idcol]] <- NULL
-    outfile <- if(zip) file.path(temp_json_dir, paste0(nmsub, ".json")) else file.path(path, paste0(nmsub, ".json"))
+    outfile <- file.path(path, paste0(nmsub, ".json"))
     yyjsonr::write_json_file(sub, outfile, dataframe = dataframe, na = na)
     outfile
   }
@@ -85,18 +90,18 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
   if(parallel && requireNamespace("future", quietly = TRUE) && requireNamespace("furrr", quietly = TRUE)){
     # choose workers
     if(is.null(workers)) workers <- max(1, future::availableCores() - 1)
-    old_plan <- NULL
-    # set multisession plan on Windows-friendly mode
-    try({
-      old_plan <- future::plan()
-      future::plan(future::multisession, workers = workers)
-      ignr <- furrr::future_map_chr(ids, write_one, .progress = TRUE)
-    }, silent = TRUE)
-    # restore plan if possible
-    try({ if(!is.null(old_plan)) future::plan(old_plan) }, silent = TRUE)
+    future::plan(future::multisession, workers = workers)
+    ignr <- furrr::future_map_chr(x, write_one, idcol = idcol,
+                                  path = temp_json_dir,
+                                  dataframe = dataframe,
+                                  na = na, .progress = TRUE)
+    future::plan(future::sequential)
   } else {
     # fallback to serial purrr map (fast and robust)
-    ignr <- purrr::map_chr(ids, write_one, .progress = TRUE)
+    ignr <- purrr::map_chr(x, write_one, idcol = idcol,
+                           path = temp_json_dir,
+                           dataframe = dataframe,
+                           na = na, .progress = TRUE)
   }
 
   if(zip){

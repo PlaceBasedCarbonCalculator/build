@@ -5,9 +5,6 @@ calculate_other_heating = function(central_heating_2021,
                                    domestic_gas,
                                    population){
 
-
-  #TODO: Add Scotland
-
   population = population[,c("year","LSOA21CD","all_ages","all_properties")]
 
   # Emission Factors
@@ -22,7 +19,7 @@ calculate_other_heating = function(central_heating_2021,
   emissions_heat_network <- 0.3 # Gas CHP
 
 
-  # For houses not heated by gas/electricty we assume they use the avaege amount of heat a gas home uses
+  # For houses not heated by gas/electricity we assume they use the average amount of heat a gas home uses
   gas_average <- dplyr::group_by(domestic_gas, year)
   gas_average <- dplyr::summarise(gas_average,
                                   median_gas_kwh = median(median_gas_kwh, na.rm = TRUE))
@@ -50,87 +47,97 @@ calculate_other_heating = function(central_heating_2021,
   central_heating_2021$heat_network[is.na(central_heating_2021$heat_network)] = 0
   central_heating_2021$two_types_inc_renewable_energy[is.na(central_heating_2021$two_types_inc_renewable_energy)] = 0
 
-  # Use 2011 for 2010 - 2015, then 2021
+  central_heating_2021_list = dplyr::group_split(central_heating_2021, LSOA21CD)
+  central_heating_2011_list = dplyr::group_split(central_heating_2011, LSOA21CD)
 
-  ch_2011 = list()
-  for(i in 2010:2015){
-    sub = central_heating_2011
-    sub$year = i
-    pop_sub = population[population$year == i,]
-    sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
-    sub$splitratio = ifelse(sub$all_households != 0,
-                            sub$all_properties / sub$all_households,
-                            0)
+  res = purrr::map2(.x = central_heating_2021_list,
+                    .y = central_heating_2011_list,
+                    .f = distribute_other_heating,
+                    .progress = TRUE)
 
-    sub$oil = sub$oil * sub$splitratio
-    sub$solid_fuel = sub$solid_fuel * sub$splitratio
-    sub$other = sub$other * sub$splitratio
-    sub$two_or_more = sub$two_or_more * sub$splitratio
+  # # Use 2011 for 2010 - 2015, then 2021
+  #
+  # ch_2011 = list()
+  # for(i in 2010:2015){
+  #   sub = central_heating_2011
+  #   sub$year = i
+  #   pop_sub = population[population$year == i,]
+  #   sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
+  #   sub$splitratio = ifelse(sub$all_households != 0,
+  #                           sub$all_properties / sub$all_households,
+  #                           0)
+  #
+  #   sub$oil = sub$oil * sub$splitratio
+  #   sub$solid_fuel = sub$solid_fuel * sub$splitratio
+  #   sub$other = sub$other * sub$splitratio
+  #   sub$two_or_more = sub$two_or_more * sub$splitratio
+  #
+  #   sub = sub[,c("LSOA21CD","year","oil","solid_fuel","other","two_or_more")]
+  #
+  #   ch_2011[[i - 2009]] = sub
+  # }
+  # ch_2011 = dplyr::bind_rows(ch_2011)
+  #
+  # ch_2021 = list()
+  # for(i in 2016:2021){
+  #   sub = central_heating_2021
+  #   sub$year = i
+  #
+  #   pop_sub = population[population$year == i,]
+  #   sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
+  #   sub$splitratio = ifelse(sub$all_households != 0,
+  #                           sub$all_properties / sub$all_households,
+  #                           0)
+  #
+  #   sub$bottled_gas = sub$bottled_gas * sub$splitratio
+  #   sub$oil = sub$oil * sub$splitratio
+  #   sub$wood = sub$wood * sub$splitratio
+  #   sub$solid_fuel = sub$solid_fuel * sub$splitratio
+  #   sub$heat_network = sub$heat_network * sub$splitratio
+  #   sub$other_central_heating = sub$other_central_heating * sub$splitratio
+  #   sub$two_types_no_renewable_energy = sub$two_types_no_renewable_energy * sub$splitratio
+  #   sub$two_types_inc_renewable_energy = sub$two_types_inc_renewable_energy * sub$splitratio
+  #
+  #   sub = sub[,c("LSOA21CD","year","bottled_gas",
+  #               "oil","wood","solid_fuel",
+  #               "heat_network","other_central_heating",
+  #               "two_types_no_renewable_energy",
+  #                "two_types_inc_renewable_energy")]
+  #
+  #   ch_2021[[i - 2015]] = sub
+  # }
+  # ch_2021 = dplyr::bind_rows(ch_2021)
+  #
+  # ch_2011$bottled_gas = 0
+  # ch_2011$wood = 0
+  # ch_2011$heat_network = 0
+  # ch_2011$two_types_no_renewable_energy = 0
+  # ch_2011$two_types_inc_renewable_energy = 0
+  #
+  # ch_2021$other = ch_2021$other_central_heating
+  # ch_2021$other_central_heating = NULL
+  # ch_2021$two_or_more = 0
+  #
+  # ch_all = rbind(ch_2011, ch_2021)
 
-    sub = sub[,c("LSOA21CD","year","oil","solid_fuel","other","two_or_more")]
-
-    ch_2011[[i - 2009]] = sub
-  }
-  ch_2011 = dplyr::bind_rows(ch_2011)
-
-  ch_2021 = list()
-  for(i in 2016:2021){
-    sub = central_heating_2021
-    sub$year = i
-
-    pop_sub = population[population$year == i,]
-    sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
-    sub$splitratio = ifelse(sub$all_households != 0,
-                            sub$all_properties / sub$all_households,
-                            0)
-
-    sub$bottled_gas = sub$bottled_gas * sub$splitratio
-    sub$oil = sub$oil * sub$splitratio
-    sub$wood = sub$wood * sub$splitratio
-    sub$solid_fuel = sub$solid_fuel * sub$splitratio
-    sub$heat_network = sub$heat_network * sub$splitratio
-    sub$other_central_heating = sub$other_central_heating * sub$splitratio
-    sub$two_types_no_renewable_energy = sub$two_types_no_renewable_energy * sub$splitratio
-    sub$two_types_inc_renewable_energy = sub$two_types_inc_renewable_energy * sub$splitratio
-
-    sub = sub[,c("LSOA21CD","year","bottled_gas",
-                "oil","wood","solid_fuel",
-                "heat_network","other_central_heating",
-                "two_types_no_renewable_energy",
-                 "two_types_inc_renewable_energy")]
-
-    ch_2021[[i - 2015]] = sub
-  }
-  ch_2021 = dplyr::bind_rows(ch_2021)
-
-  ch_2011$bottled_gas = 0
-  ch_2011$wood = 0
-  ch_2011$heat_network = 0
-  ch_2011$two_types_no_renewable_energy = 0
-  ch_2011$two_types_inc_renewable_energy = 0
-
-  ch_2021$other = ch_2021$other_central_heating
-  ch_2021$other_central_heating = NULL
-  ch_2021$two_or_more = 0
-
-  ch_all = rbind(ch_2011, ch_2021)
-
+  ch_all = dplyr::bind_rows(res)
   ch_all = dplyr::left_join(ch_all, gas_average, by = "year")
 
   ch_all$heat_oil_emis_total        = ch_all$median_gas_kwh * emissions_oil *   ch_all$oil
   ch_all$heat_solid_fuel_emis_total = ch_all$median_gas_kwh * emissions_solid * ch_all$solid_fuel
-  ch_all$heat_wood_emis_total       = ch_all$median_gas_kwh * emissions_wood  * ch_all$wood
+  #ch_all$heat_wood_emis_total       = ch_all$median_gas_kwh * emissions_wood  * ch_all$wood
   ch_all$heat_other_emis_total      = ch_all$median_gas_kwh * emissions_other * (ch_all$other)
-  ch_all$heat_bottle_gas_emis_total = ch_all$median_gas_kwh * emissions_gas *   ch_all$bottled_gas
-  ch_all$heat_network_emis_total    = ch_all$median_gas_kwh * emissions_heat_network *   ch_all$heat_network
-  ch_all$heat_two_emis_total        = ch_all$median_gas_kwh * emissions_gas *   (ch_all$two_types_no_renewable_energy + ch_all$two_types_inc_renewable_energy)
+  #ch_all$heat_bottle_gas_emis_total = ch_all$median_gas_kwh * emissions_gas *   ch_all$bottled_gas
+  #ch_all$heat_network_emis_total    = ch_all$median_gas_kwh * emissions_heat_network *   ch_all$heat_network
+  #ch_all$heat_two_emis_total        = ch_all$median_gas_kwh * emissions_gas *   (ch_all$two_types_no_renewable_energy + ch_all$two_types_inc_renewable_energy)
+  ch_all$heat_two_emis_total        = ch_all$median_gas_kwh * emissions_gas *   ch_all$two_or_more
 
   ch_all$heating_other_emissions_total = ch_all$heat_oil_emis_total  +
     ch_all$heat_solid_fuel_emis_total +
-    ch_all$heat_wood_emis_total +
+    #ch_all$heat_wood_emis_total +
     ch_all$heat_other_emis_total +
-    ch_all$heat_bottle_gas_emis_total +
-    ch_all$heat_network_emis_total +
+    #ch_all$heat_bottle_gas_emis_total +
+    #ch_all$heat_network_emis_total +
     ch_all$heat_two_emis_total
 
   #ch_all = ch_all[,c("LSOA21CD","year","heating_other_emissions_total")]
@@ -152,6 +159,47 @@ load_central_heating_2011 = function(path = file.path(parameters$path_data,"nomi
                  "other","two_or_more")
   dat$Area = NULL
   dat
+}
+
+
+distribute_other_heating = function(ch21, ch11){
+
+  if(length(unique(c(ch21$LSOA21CD,ch11$LSOA21CD))) != 1){
+    stop("LSOAs don't match")
+  }
+
+  if(nrow(ch21) != 1 & nrow(ch11) != 1){
+    stop("muliple rows")
+  }
+
+  dat = data.frame(LSOA21CD = ch21$LSOA21CD[1],
+                   year = c(2011,2021),
+                   oil = c(ch11$oil, ch21$oil),
+                   solid_fuel = c(ch11$solid_fuel,
+                                  sum(ch21$solid_fuel,ch21$wood)),
+                   other = c(ch11$other,
+                             sum(ch21$heat_network,ch21$other_central_heating, ch21$renewable_energy)
+                   ),
+                   two_or_more = c(ch11$two_or_more,
+                                   sum(ch21$two_types_inc_renewable_energy, ch21$two_types_no_renewable_energy)
+                   )
+  )
+
+  dat_predict = data.frame(LSOA21CD = ch21$LSOA21CD[1], year = 2012:2020)
+  dat_predict$oil = unname(round(predict(lm(oil ~ year, data = dat), newdata = dat_predict)))
+  dat_predict$solid_fuel = unname(round(predict(lm(solid_fuel ~ year, data = dat), newdata = dat_predict)))
+  dat_predict$other = unname(round(predict(lm(other ~ year, data = dat), newdata = dat_predict)))
+  dat_predict$two_or_more = unname(round(predict(lm(two_or_more ~ year, data = dat), newdata = dat_predict)))
+
+  dat_final = rbind(dat[c(1,1),],
+                    dat_predict,
+                    dat[c(2,2,2,2),]
+  )
+  dat_final$year = 2010:2024
+
+  dat_final
+
+
 }
 
 central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
@@ -250,5 +298,42 @@ central_heating_2011_to_2022_scotland = function(sub, lookup_dz_2011_22_pre){
                      )
   sub2
 
+
+}
+
+load_other_heating_prices = function(path = "../inputdata/gas_electric/prices"){
+
+  prices = readxl::read_excel(file.path(path,"table_211_213.xlsx"), sheet = "2.1.3a")
+  names(prices) = c("year","month","coal","smokeless1","oil1","smokeless2","oil2")
+  prices = prices[16:nrow(prices),]
+  prices$year = as.integer(prices$year)
+
+  prices$coal = as.numeric(prices$coal)
+  prices$smokeless1 = as.numeric(prices$smokeless1)
+  prices$oil1 = as.numeric(prices$oil1)
+  prices$smokeless2 = as.numeric(prices$smokeless2)
+  prices$oil2 = as.numeric(prices$oil2)
+
+  prices = prices[prices$year >= 2010,]
+
+  prices2 = prices |>
+    dplyr::group_by(year) |>
+    dplyr::summarise(coal = mean(coal, na.rm = TRUE),
+                     smokeless1 = mean(smokeless1, na.rm = TRUE),
+                     oil1 = mean(oil1, na.rm = TRUE),
+                     smokeless2 = mean(smokeless2, na.rm = TRUE),
+                     oil2 = mean(oil2, na.rm = TRUE))
+
+  prices2$smokeless = ifelse(is.na(prices2$smokeless2), prices2$smokeless1, prices2$smokeless2)
+  prices2$oil = ifelse(is.na(prices2$oil2), prices2$oil1, prices2$oil2)
+
+  # Price for 50kg of coal or smokless fuel, or 1000 litres of oil
+  prices2$coal_pound_kwh = prices2$coal / (8.47 * 50)
+  prices2$oil_pound_kwh = prices2$oil / (9.8 * 1000)
+  prices2$smokeless_pound_kwh = prices2$smokeless / (7.5 * 50)
+
+  prices2 = prices2[,c("year","coal_pound_kwh","smokeless_pound_kwh","oil_pound_kwh")]
+
+  prices2
 
 }

@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|eb5df25db5764f25|||||||||||||||
+.Random.seed|object|5c2a6be9230a0f9f|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -20,7 +20,10 @@ backcast_dwelling_types|function|ce44fa6e72a3ae55|||||||||||||||
 bal_func|function|3d84c2b06b3a8ace|||||||||||||||
 balance_nssec|function|9663990c20e9b3fc|||||||||||||||
 balance_nssec2|function|9b19e94c84f6f2c6|||||||||||||||
+bills_gas_electric|stem|608a2832ede4a487|695ae535e1f9233b|55f3007be0f41048|-399170320||t20470.5303069611s|480db59f40ea891a|14804395|rds|local|vector|||2.43||
 bind_sf|function|394cecd3caf06a56|||||||||||||||
+bivariate_categories|function|d9784af2ba14f1a0|||||||||||||||
+bounds_dno|stem|f641188f1fc6a1d4|34f7f16d5dd9d444|2cf3270d83b54e86|1531793115||t20470.4639103402s|a0e0a6ff40e33b48|765135|rds|local|vector|||0.15||
 bounds_dz11|stem|e488ed73efc4a13d|589fb79c5262f8a4|224eef61da50beb8|886235684||t20294.6674375096s|92133f8a79ac86de|20406895|rds|local|vector|||10.11||
 bounds_dz22|stem|d9a011a1b3c76b72|4f7f7127fc8a2148|88207d1fc8ec5e4e|257205122||t20322.33220691s|7f4a5d67bc4fc59a|26238431|rds|local|vector|||11.5||
 bounds_iz22|stem|ec0f15f17e84faaf|aeb079a0ba09710a|4c22fc7f95860973|513640664||t20251.7192607976s|80329a912e2145d4|22574565|rds|local|vector|||1.48||
@@ -43,16 +46,18 @@ bounds_wards|stem|fbb102e21f3c26e8|b37faa55286577b1|361e66e90c13ad18|128645437||
 bounds_westminster|stem|31b70598de2450f3|3b5ce7420002c1ec|48ce936f0c50390f|1635228681||t20074.618150434s|abb5245acb8fac04|67499414|rds|local|vector|||1.72||
 build_access_jsons|stem|8b017c9a0dce24f5|55945aad428f8f00|fc8c9f1d7fcf4e17|1370075298||t20376.665258475s|63e5c65d6d1ce375|134|rds|local|vector|||11.91||
 build_backcasts_dwellings|function|33285c0ecb23dc20|||||||||||||||
-build_epc_dom_jsons|stem|b524ec7ecde3e77c|3a0bd5d49e15c43b|39f33a4ab0496d96|974314826||t20416.8727342248s|094cdf8ee71e1e88|135|rds|local|vector|||482.16|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
+build_epc_dom_jsons|stem|b524ec7ecde3e77c|3a0bd5d49e15c43b|1a819e2d1d16ae4a|974314826||t20468.6083159304s|094cdf8ee71e1e88|135|rds|local|vector|||323.74|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
+build_historical_domestic_gas_elec_jsons|stem|4aee26f69383c631|867052754e5777ee|e02df45918bbe25f|-1944609059||t20467.9488984501s|f0d5811415b6b792|97|rds|local|vector|||331.75|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
 build_historical_emissions_jsons|stem|fed3003981cf8da2|2df5d64b3a5d55f0|99efea80d5ff1d7e|1811032421||t20406.8585539214s|bb4e721372eac6a0|88|rds|local|vector|||520.95|NAs introduced by coercion to integer range. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
 build_household_types|function|b3c432e74bc2bbd3|||||||||||||||
 build_lsoa_jsons|stem|1ca02f4f8ff37a3e|3a45e1d32ff94f29|0ce8bad5e3f32746|486560279||t20336.3894609049s|e92536e5890953e5|126|rds|local|vector|||206.75||
 build_lsoa_population|function|16788b7cff0945bf|||||||||||||||
 build_lsoa_population_2022|function|4bba38ad09c4b8f9|||||||||||||||
+build_lsoa_population_2022_24|function|7e3d223a109e4b05|||||||||||||||
 build_nts_zones|function|ddf367767ed820d8|||||||||||||||
 build_overview_jsons|stem|5e645d0dc9830fd3|f9400539cfd5e37a|6cb87bec722be06b|2061583066||t20396.6540191676s|0b52c5847220add9|82|rds|local|vector|||223.84|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
 build_population_jsons|stem|d9eb1007e15358c9|8ec27dd33f205731|bc555ab9e36211a8|-842498390||t20376.8611562222s|094cdf8ee71e1e88|135|rds|local|vector|||409.98|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
-build_postcode_jsons|stem|97ed68e0dc95aac5|049c099f5d29d771|ad9bf9acbbc2205a|-1252984890||t20376.6465121525s|f02b269bc80ae470|129|rds|local|vector|||6.09||
+build_postcode_jsons|stem|97ed68e0dc95aac5|157aa6c83a136484|41d4da90fb064782|-1252984890||t20470.6475163585s||129|rds|local|vector|||11441.86||MultisessionFuture none failed to call gassign on cluster RichSOCKnode 29 PID 34252 on localhost localhost. The reason reported was error writing to connection. Postmortem diagnostic Failed to determined whether a process with this PID exists or not, i.e. cannot infer whether localhost worker is alive or not. The total size of the 8 globals exported is 2.49 GiB. The three largest globals are ...furrr_fn 2.42 GiB of class function, ...furrr_chunk_args 70.91 MiB of class list and as.data.frame 33.67 KiB of class function
 build_pt_analysis|function|07d589e8edfbbcc6|||||||||||||||
 build_synth_pop_seed|function|935860f1a33808e6|||||||||||||||
 build_synth_pop_seed_scotland|function|0bebfdaccfec85c5|||||||||||||||
@@ -90,8 +95,10 @@ calcualte_other_heating|function|3a250485297c90a7|||||||||||||||
 calculate_car_emissions|function|3df6ca1f236a223b|||||||||||||||
 calculate_consumption_lsoa|function|89d8d9c9060dc5af|||||||||||||||
 calculate_electricity_emissions|function|a4ac967cf6353fba|||||||||||||||
+calculate_energy_bills|function|9856cb3bc0e1517e|||||||||||||||
 calculate_gas_emissions|function|4eb04717f0744ace|||||||||||||||
-calculate_other_heating|function|264543df787b1547|||||||||||||||
+calculate_lsoa_gas_electric_emissions|function|9c2a4234219f3c83|||||||||||||||
+calculate_other_heating|function|dc4944251c16d29a|||||||||||||||
 calculate_postcode_gas_electric_emissions|function|814a5f44cd6f0be4|||||||||||||||
 car_emissions|stem|92662aa5b818f32d|cb2eeff0976da1e5|c04e1d6bba8015c8|-621909212||t20355.4900323359s|d0cb6153b0b0e5e2|33504519|rds|local|vector|||1.11||
 car_emissions_11|stem|2e711b9286d13eb5|dc57d15ddd561e99|76d70212b85f87bf|-295208083||t20343.9323454219s|0b62b0b8c5873e74|4521176|rds|local|vector|||34.43||
@@ -160,6 +167,7 @@ count_weekday_runs|function|de67829ee1974cc2|||||||||||||||
 data_path|function|6d53aa1afdf688d9|||||||||||||||
 data_path_secure|function|200bda2b7006a333|||||||||||||||
 distribute|function|75c3b2060d8ecba9|||||||||||||||
+distribute_other_heating|function|adbfccb23788d41d|||||||||||||||
 dl_area_classifications|stem|092444f146f24ffc|3c64757a071ae41b|a8aa030183945662|-290411486||t19825.9331728498s|b3654bf3682c79ca|86|rds|local|vector|||0||
 dl_boundaries|stem|7436dcc2488c84b1|41c98751194182a4|09cdf2d9f89f2963|1538337568||t20294.6672804585s|abbdb7fe746336f0|76|rds|local|vector|||0||
 dl_consumption|stem|bd8245968b70651e|7077da9e14b7f6f4|1e63ebb1bf02112f|573082334||t19826.2855569423s|4ff05336d644dae2|106|rds|local|vector|||0||
@@ -169,11 +177,11 @@ dl_nomis|stem|2a59d22ca4fcc05e|afb7cfc4ff15e644|f6f60f3a5a106a48|831662753||t198
 dl_os_zoomstack|stem|984c1fb58a278375|33160b563cba39a6|f1214e0eabc2e1f3|-1064360665||t19825.8900492006s|9903306e1685fb67|94|rds|local|vector|||0||
 dl_pct|stem|35f02fc4ac337e39|4ff80f59614c9b79|2ae4e72ffb49d083|2055201872||t19825.9431349314s|d586f792a395948c|68|rds|local|vector|||0||
 dl_vehicle_registrations|stem|7b085b3b06e8e01b|df6128c247fc66c5|6549db78cdf4d786|-1702486100||t20143.5762099687s|e7d9c43b1c994be3|87|rds|local|vector|||45.52||
-domestic_electricity|stem|4b05cb9311d5033a|8ed15209537750e3|769c7f4d1e9af6c4|1613811675||t20343.9327608385s|43dfb0d1ea842af9|10454439|rds|local|vector|||3.53||
-domestic_electricity_11|stem|1b0dd3844310ee53|a970aaa73c6c1d9f|8881a8b9097f2a66|1084179350||t20343.5799560776s|9a0f02be8e2040c2|12571929|rds|local|vector|||17.28||
+domestic_electricity|stem|b6abbac71b26281e|8ed15209537750e3|8a114e30e1bb7d24|1613811675||t20470.5276098983s|58c9ec48d4688b72|15214974|rds|local|vector|||2.81||
+domestic_electricity_11|stem|d62f5c90fbe36d99|62285ed861acec11|74be87489b7da58f|1084179350||t20469.8901631766s|6e4b9e0681fc1379|16701935|rds|local|vector|||24.7||
 domestic_electricity_emissions|stem|2594a3a4803d5a8a|5539fb5d2336d012|b4b64afddab0ea55|1639887079||t20361.7197936496s|c2270b1450c2e527|8870547|rds|local|vector|||0.33||
-domestic_gas|stem|4e26a32b26486702|979b1f57b7c15437|1b09e91192ae8a5a|-867186464||t20343.9319351101s|35b9284cf473ad38|11403981|rds|local|vector|||3.31||
-domestic_gas_11|stem|937164b7fb2fb5e5|dd9ec31996485d13|51b80b5929161471|-658521949||t20343.5505606883s|4b62b48a579ed345|13852946|rds|local|vector|||16.75||
+domestic_gas|stem|023b6d3047a652fb|979b1f57b7c15437|9e27838f915c4ae1|-867186464||t20470.5276640199s|5708904ff66828b4|16464837|rds|local|vector|||1.83||
+domestic_gas_11|stem|ba3ad9c11965f8d2|3e1eeb7dc6ccf658|c0cad79088723e11|-658521949||t20469.8792148628s|7b7a9dd2f659ea63|18285279|rds|local|vector|||21.25||
 domestic_gas_emissions|stem|6ff4fa18be0cdf03|be5bf9d6f4b9a82d|0e5a12ae787f11ea|467753552||t20357.7624938948s|c8544be8f9e8ef3d|8626353|rds|local|vector|||0.8||
 dowload_gas_electric|function|959ff56360c0b581|||||||||||||||
 dowload_income_msoa|function|a8f82b059ba3bdbe|||||||||||||||
@@ -192,20 +200,21 @@ dwellings_tax_band|stem|4bc5c3518eb2cd36|efe22c182a253610|f38776dac4d4f381|-1298
 dwellings_tax_band_scotland|stem|509bcae8cd38d3ce|12a71815e8a929d5|fff64a47332bf5cf|-1691391911||t20033.6218406118s|8c162d4e47b1671f|1343835|rds|local|vector|||5.89||
 dwellings_type|stem|71e2c29b1a3c3c76|ce78354eb2055952|88daf45818be6115|253687054||t20017.439627738s|cfc7cebde01b9aad|14464113|rds|local|vector|||10.94||
 dwellings_type_backcast|stem|9310f790b46003f4|669b79ff4968da03|40f77ad755c49a29|161296538||t20178.7331658562s|1715874c016f2a48|3711138|rds|local|vector|||420.36||
-emissions_factors|stem|cef30f513a70e78d|65fb39d66d575fff|383da01761420680|-407640325||t19825.8894656948s|c0bcc022442a2701|569|rds|local|vector|||3.58||
-epc_dom_summary|stem|8df8ac46e039d16d|5ee20abf53f340b6|e4f4a7006599aca5|-698757306||t20416.8671204085s|431dd2e0f7bb5e33|7362510|rds|local|vector|||1564.14||
-epc_summarise_domestic|function|1f0f342e30f50f5e|||||||||||||||
+emissions_factors|stem|b36ef9f216d2df41|65fb39d66d575fff|52a669e11623d26b|-407640325||t20470.4665221832s|7e5949761d67f501|620|rds|local|vector|||4.47||
+epc_dom_summary|stem|01f1310672e165ea|5ee20abf53f340b6|386971446ea9b712|-698757306||t20468.5891672224s|53d1deb914c29edd|7390581|rds|local|vector|||1583.93||
+epc_summarise_domestic|function|84f781927d031a61|||||||||||||||
 esimate_income_scotland_dz22|function|94102eeadd5ea034|||||||||||||||
 estimate_car_meissions_post2018|function|7f751aef04cd03cd|||||||||||||||
+estimate_gas_electric_bills|function|a19eee6b988c0d59|||||||||||||||
 estimate_income|function|1901a1e9a1e5541a|||||||||||||||
 ev_registrations|stem|bebbfd1d6b2193eb|18ea528277664ccb|3c6b0353b127cae5|1707219932||t20143.8529661199s|6da0b1ebdc0c1c4f|1328736|rds|local|vector|||1329.88||
 ev_registrations_21|stem|bf9e8a528d323731|fda3641d2bc7b2e7|52f27e6ebc239278|1163914246||t20344.8227937067s|452f7e622017d265|1417837|rds|local|vector|||3.34||
 experian_income|stem|fa876ab8f4604443|24ebd7c7e83ba505|6a5514a931fc22ad|-331343829||t19825.9430833718s|4bf226ec968bfcde|327310|rds|local|vector|||2.56||
-export_zone_json|function|b352c0e63dfcdc03|||||||||||||||
+export_zone_json|function|e0469042e6fd1421|||||||||||||||
 extraplote_car_km_trends|function|faa541d228a79ed6|||||||||||||||
 extraplote_car_km_trends2|function|2805fe493c3de546|||||||||||||||
-extrapolate_households|function|61c2e08176ce02e8|||||||||||||||
-extrapolate_population_households|function|d6ca3440af5d6a99|||||||||||||||
+extrapolate_households|function|8cbb1e88ed53e450|||||||||||||||
+extrapolate_population_households|function|a9b1c8725af46739|||||||||||||||
 fast_st_difference|function|4b9b779283df6d0f|||||||||||||||
 fill_gaps|function|33cdb8883b9fe473|||||||||||||||
 fill_gaps_135|function|10a349c80ecf651f|||||||||||||||
@@ -227,7 +236,7 @@ geojson_epc_dom|stem|fe5055b733081118|2191922200b8cbef|04139f1e89a87c71|-2658922
 geojson_epc_nondom|stem|40cd53a63751351e|8a282535128a938f|04139f1e89a87c71|165717121|outputdata/epc_nondom.geojson|t20466.6941561025s|95b60ad9a4e05570|1061118972|file|local|vector|||123.36|Thats a lot of columns for the GeoJSON, are they all needed|
 geojson_la|stem|118f6efadb3ca16b|9455f525a3600684|514f59c8ea8d90ba|1656481300|outputdata/la.geojson|t20364.7351342042s|305857ee885a173c|194662168|file|local|vector|||43.14||
 geojson_parish|stem|4350c9742d5e736e|7826a3416fd82f8e|941816da51d3eee3|-1441095983|outputdata/parish.geojson|t20324.5617693481s|343ed0611b6f78b5|424488857|file|local|vector|||107.02||
-geojson_postcode|stem|28529b283fd94eac|6c63eb0433f5e96a|97f9f350e1f167ac|1560777580|outputdata/postcodes.geojson|t20364.7420318164s|c322a4486c0c990b|2129743007|file|local|vector|||457.44||
+geojson_postcode|stem|b5e35860933d6b86|6c63eb0433f5e96a|e6e4d56844e765c0|1560777580|outputdata/postcodes.geojson|t20470.807655257s|29b7446c76bf3cb0|2139371232|file|local|vector|||456.86||
 geojson_uprn_unknown|stem|38e697ff4cf6d995|9c09e0fc1d7abff0|04139f1e89a87c71|761190457|outputdata/uprn_unknown.geojson|t20466.5696948402s|0e73297dc51571fd|2945873701|file|local|vector|||701.91||
 geojson_wards|stem|e03fea08d7efba73|496f8f9b53bea9da|8cc268d494a22a1c|2025176598|outputdata/wards.geojson|t20364.7363437843s|ac46a9dc625bf58d|475525412|file|local|vector|||100.52||
 geojson_westminster|stem|b5b2768194bd89af|a41ed2e36e2a0360|3653de33b8b6239c|-1642132512|outputdata/westminster.geojson|t20324.5605109654s|be6dd0d5268d0239|228625356|file|local|vector|||61.97||
@@ -267,8 +276,8 @@ income_bands|function|7c095a6159168132|||||||||||||||
 income_bands_lsoa|stem|08c88c0f6125acba|0359379a72dbfbc4|769e1216425b15d1|-882523201||t20315.3819530589s|7f9db67d607e5012|459302|rds|local|vector|||212.13||
 income_limit_estimator|function|6716363b6086eeef|||||||||||||||
 income_lsoa|stem|0571b04f02651d4e|6fe3b5a3de5d7df8|c6a52563ed9c1ddb|-245472229||t20076.4964616263s|8366f0a6831b8a4e|352479|rds|local|vector|||1.86||
-income_lsoa_msoa|stem|3d12cdbc36ab2216|5310f08ca9cd5e5b|12e1191adce8d986|-1804975333||t20315.3789891131s|6cff86d4b864fc4c|516657|rds|local|vector|||1.23|Detected an unexpected manytomany relationship between x and y.ℹ Row 1 of x matches multiple rows in y.ℹ Row 82 of y matches multiple rows in x.ℹ If a manytomany relationship is expected, set relationship   manytomany to silence this warning.|
-income_msoa|stem|aa5e65d56941e905|5bbb993c0b7308c5|83152b9b8d7a6e4e|1577550304||t20315.3784550813s|8f132e51345b5689|293995|rds|local|vector|||2.39||
+income_lsoa_msoa|stem|b908244dca46b56a|5310f08ca9cd5e5b|5492efb596ba1a87|-1804975333||t20470.4653624111s|ea88ef8c2777dd66|616476|rds|local|vector|||2.05||
+income_msoa|stem|6b417f00344f2019|b3880f013af51e9a|d0c83f3fe5cb806b|1577550304||t20470.4616466606s|e83e0a5f27281a5f|390188|rds|local|vector|||1.88||
 income_scot_dz11|stem|bdf522cee104455c|80b29c6c3c86267d|06d1b632e3fb1857|-1472994348||t20314.5793584034s|5f7061b8aa421d8e|171879|rds|local|vector|||7.7||
 income_scot_dz12|stem||4b30e63c81b94b6d|ef59d0f222438d4b|1856461610||t20314.5922361443s||0|rds|local|vector|||0.03||unused argument path  file.pathparameterspath_data, incomescotland
 income_scot_dz22|stem|74ea9a198f2043cd|cf2570eb132a938e|6fc6e20fa4361005|-1896752736||t20322.3559239012s|6131214c0e2368d3|350555|rds|local|vector|||374.4||
@@ -304,10 +313,12 @@ load_consumption_multipliers|function|cd907c6231d681f0|||||||||||||||
 load_dft_ev_registrations|function|0ede6a4d9ba60762|||||||||||||||
 load_dft_ulev_registrations|function|a979b562f00b37d0|||||||||||||||
 load_dft_vehicle_registrations|function|644b306a8348a9a6|||||||||||||||
-load_emissions_factors|function|7176c93f70f81be7|||||||||||||||
+load_dno_areas|function|c5638661df981461|||||||||||||||
+load_emissions_factors|function|31e3782bfb020cda|||||||||||||||
 load_experian_income|function|ffc606296b7c4540|||||||||||||||
 load_flights_airports|function|e584f42232925e3f|||||||||||||||
 load_flights_od|function|a6ec3227428a9170|||||||||||||||
+load_gas_elec_prices|function|c6d1eccbc0359b9c|||||||||||||||
 load_house_prices|function|4f738104591d2c6a|||||||||||||||
 load_house_transactions|function|199803dbeb6942a1|||||||||||||||
 load_housing_type_2021|function|8239f284977327bc|||||||||||||||
@@ -321,12 +332,12 @@ load_LCFS_single|function|d46f4a8d9a3a0fab|||||||||||||||
 load_lr_price_paid|function|048d800420da639e|||||||||||||||
 load_LSOA_2001_2011_lookup|function|339e62d02f7d8bd0|||||||||||||||
 load_LSOA_2011_2021_lookup|function|9db7e00257cf0dda|||||||||||||||
-load_lsoa_electric|function|300501a75a0ad104|||||||||||||||
-load_lsoa_gas|function|ad70da1f12091ec9|||||||||||||||
+load_lsoa_electric|function|bc062f19853093de|||||||||||||||
+load_lsoa_gas|function|f03f0f316e037427|||||||||||||||
 load_MSOA_2011_2021_lookup|function|bb0d7bfde2d98ea8|||||||||||||||
-load_msoa_electric_nondom|function|1245296bda25e5aa|||||||||||||||
-load_msoa_gas_nondom|function|75cd9cd3196ec9ec|||||||||||||||
-load_msoa_income|function|cb34c8ca04bdf38c|||||||||||||||
+load_msoa_electric_nondom|function|55c02fd324e7b58e|||||||||||||||
+load_msoa_gas_nondom|function|b89efb4dd3d37d04|||||||||||||||
+load_msoa_income|function|30e98c8ef449a71c|||||||||||||||
 load_NTS|function|2d86b21fd5eb1838|||||||||||||||
 load_OA_DZ_IZ_2022_lookup|function|165eefdd4b8bfec9|||||||||||||||
 load_OA_LSOA_MSOA_2021_lookup|function|5d0adcf888be8c6b|||||||||||||||
@@ -336,9 +347,10 @@ load_OAC21|function|73eed7738c8ffbbe|||||||||||||||
 load_ons_isochrones|function|f0f1a776e69ee05a|||||||||||||||
 load_os_10k_grid|function|3d36b1a8f7ed4135|||||||||||||||
 load_os_greenspace|function|279462c84d46128e|||||||||||||||
+load_other_heating_prices|function|5c5633fba9e209ec|||||||||||||||
 load_plef|function|8889855193e4c143|||||||||||||||
 load_population_2021|function|a859d87429c1de0e|||||||||||||||
-load_postcode_gas_electricity|function|0d2132410f695324|||||||||||||||
+load_postcode_gas_electricity|function|f9e65f7e4760feff|||||||||||||||
 load_postcode_OA_LSOA_MSOA_class_2021_lookup|function|1c0fd31bc70e6208|||||||||||||||
 load_pt_frequency|function|f91f53ecf73e2167|||||||||||||||
 load_scotland_council_tax|function|faa11f8858c8b9db|||||||||||||||
@@ -365,14 +377,15 @@ lookup_OA_LSOA_MSOA_classifications|stem|5da693e44bd6ed9a|5528856df26ea22a|c6052
 lookup_oa2021_lsoa2011|stem|079662fef9a8f2d4|cbe8a457930ae259|3c33218556d4adb6|2128238553||t19826.3476074779s|9de603ac9dac38cf|456263|rds|local|vector|||0.91||
 lookup_oa2021_lsoa2021|stem|3d21e39e6d821214|e281fd7c5ca3a212|c1a8784727279ed7|-505690643||t19934.2855082092s|ede19f0682bdf8f1|490678|rds|local|vector|||0.84||
 lookup_postcode_OA_LSOA_MSOA_2021|stem|10d1324ca7cb466c|571ccae9bc9ff1c8|291eb17900e608f4|1759155096||t19990.4123426078s|179c987a840659ca|13147698|rds|local|vector|||11.47||
-lsoa_11_21_tools|stem|b7fe8dde07604a49|1a3b64048ec52377|56d04905e2df2d1f|993956763||t20343.7318552758s|723eb7b594d0fcb7|1071970|rds|local|vector|||0.3||
+lsoa_11_21_tools|stem|40b46454778cffdf|1a3b64048ec52377|ebe0a04a5302189e|993956763||t20470.5275312931s|94ef777b77ec2fa2|1181787|rds|local|vector|||0.2||
 lsoa_admin|stem|132c6763ebba0f97|f216c25240f7463a|26ed6a47524949ab|-1485952592||t20355.4366324662s|04eb99975a2b1759|324437|rds|local|vector|||20.56|st_point_on_surface assumes attributes are constant over geometries|
 lsoa_admin_summary|function|0f482dba064e3390|||||||||||||||
 lsoa_convert_2011_2021_pre_data|function|44115f7dc2a70b75|||||||||||||||
-lsoa_electric_to_2021|function|9f0fdc793c920658|||||||||||||||
+lsoa_dno_lookup_GB|stem|8ddeae7deadbb77e|2de7dbd1317d7a9f|3d57e74157dced5c|-1192285851||t20470.4639201982s|2ee852667e5f95ab|150743|rds|local|vector|||0.58||
+lsoa_electric_to_2021|function|397d1eb44c8c41ef|||||||||||||||
 lsoa_emissions_all|stem|ccbd7efbe5ae67b9|d45519306d6ba5a3|5083b251e218496e|1303375064||t20406.8525118685s|d20b9e3210cf6b28|192927574|rds|local|vector|||5.6||
 lsoa_emissions_all_forcasts|stem|96ddf8eb31ce0607|cb5695f963e55445|896c99fd66edfc94|1643343737||t19838.551835469s||73117033|rds|local|vector|||0.01||could not load dependencies of target lsoa_emissions_all_forcasts. invalid description argument
-lsoa_gas_to_2021|function|b00c620e73c03b32|||||||||||||||
+lsoa_gas_to_2021|function|257534189fc469a2|||||||||||||||
 lsoa_map_data|stem|dc150cb0227f4ee9|68dcbedfd142192e|414322508c21e1a0|1195666468||t20406.8585622571s|9c2e2c7c07a0a4d8|451406|rds|local|vector|||0.29||
 lsoa_warnings|stem|87581988e0579896|6e2e802c50748d4c|ea60113c444ee1ca|-740085556||t20396.6514226811s|b3093d0ff188e032|24778|rds|local|vector|||0.07||
 lsoa21_OAC21_summary|stem|c787222169304078|a8f2cc9a30c710f6|15c5f8bfc11942c7|71114060||t20129.5709601373s|1f1b42b76c1edaec|909424|rds|local|vector|||44.53||
@@ -383,7 +396,8 @@ make_dz_11_22_lookup_simple|function|9035156e39c66704|||||||||||||||
 make_geojson|function|b345c3608ac5b125|||||||||||||||
 make_income_bands_lsoa|function|bc47ebe1ddb159ee|||||||||||||||
 make_la_summary|function|ba5b2e7949c40486|||||||||||||||
-make_lsoa_overview_json|function|ab310562ead910d9|||||||||||||||
+make_lsoa_overview_json|function|7f32e21f97177a6b|||||||||||||||
+make_lsoa_to_dno_lookup|function|fa1bfe232d7d1ed8|||||||||||||||
 make_lsoa_warnings|function|3a67b78e39ca4572|||||||||||||||
 make_oac_summary|function|115bf410def81b1a|||||||||||||||
 make_pmtiles|function|0dc47744893b7675|||||||||||||||
@@ -394,7 +408,7 @@ match_2011_classifications_2021|function|211d80dc8f2ac872|||||||||||||||
 match_hh_census|function|013abc3181ca7151|||||||||||||||
 match_hh_census2|function|96640892b23d3e21|||||||||||||||
 match_hh_census3|function|68d9454a4b7477ad|||||||||||||||
-match_income_lsoa_msoa|function|1abac8cd92f4cbda|||||||||||||||
+match_income_lsoa_msoa|function|e1b033060fc1b616|||||||||||||||
 match_LCFS_synth_pop|function|0f12726c460560bf|||||||||||||||
 match_LCFS_synth_pop_scotland|function|552c9ee48ed59c9c|||||||||||||||
 match_matrix_csums|function|0cbf9af72a01b1e3|||||||||||||||
@@ -402,8 +416,8 @@ match_matrix_rsums|function|9ef50828098d91fd|||||||||||||||
 match_matrix_rsums_csums|function|87aea58ab10a59b9|||||||||||||||
 merge_woods|function|22a357b14df90794|||||||||||||||
 modal|function|c3137679039dca4b|||||||||||||||
-nondomestic_electricity|stem|15f7c80c37b2ee31|d74e47c8b0a6790a|8f7b7839ea7a54b8|1461618057||t20344.3197924228s|92322925ea96cadf|2608787|rds|local|vector|||4.4||
-nondomestic_gas|stem|56441cd0450bfaba|48896da2d3d9f38c|a9337c28d47ceef5|1509463978||t20344.3197359938s|10a6172af4edfbca|2689251|rds|local|vector|||4.33||
+nondomestic_electricity|stem|fd858a74ed883a63|9be8b460e1dbbd00|9bbd06b94c860494|1461618057||t20470.5453164629s|e177e38645687118|3393133|rds|local|vector|||7.56||
+nondomestic_gas|stem|e45cc46e194412c7|397907ae6afdd8cd|5c42e575529ba3b7|1509463978||t20470.5452220727s|4e100ccbd0625eae|2684688|rds|local|vector|||5.39||
 NSSEC_ethinic_residents|stem|3955d2f7b36c9ab7|43c87b1ff583cabe|0dec6f8990695400|-1382418143||t20010.4072193331s|34c87aa1f6e2595b|5746153|rds|local|vector|||13.8||
 NSSEC_household|stem|24f647cb75b4a777|fac6d9c6aa2f56a8|3d019bbb1b2e7e99|642119344||t20012.5946223561s|80de653200bb7602|1888284|rds|local|vector|||1640.12||
 nssec10_to_nssec5|function|89799122a902fe21|||||||||||||||
@@ -448,8 +462,8 @@ pmtiles_epc_nondom|stem|e8233cd03f53bec5|6a5d71f20a0dd7e4|28e468d3673457a2|-8321
 pmtiles_la|stem|aebf2882dbebe21d|909f63d0f3ded0a6|fe03e757f7d375c2|2059785649|outputdata/la.pmtiles|t20365.2910746376s|62b0d4539d0a8018|5134034|file|local|vector|||39.89||
 pmtiles_parish|stem|df3eff3a1e355144|61b298874b1189b9|257479f04b27360f|100742970|outputdata/parish.pmtiles|t19998.7208823352s|c371432a1842e564|13635241|file|local|vector|||28.89||
 pmtiles_pbcc|stem|1b06e14765415e29|4ef991e0225fad6c|9d0021bb78e3befd|-800414012|outputdata/pbcc/zones_pbcc.pmtiles|t20414.1767684191s|bcd4197aac16dc74|59211905|file|local|vector|||9451.76||
-pmtiles_postcode|stem|8d6acb42ce1bf77e|ba78588cd5f217c9|311d24f68c81a66c|-1011986628|outputdata/postcodes.pmtiles|t20365.3009927004s|95ba30ffa3dd030f|519634351|file|local|vector|||804.14||
-pmtiles_retrofit|stem|f49089f632487549|8c36f0bafd5e6a15|b26c18d69cc876ed|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20416.8831297551s|4a05d50457e5d702|61642707|file|local|vector|||13098.41|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
+pmtiles_postcode|stem|2fc48842c7f841e7|ba78588cd5f217c9|2783d79670be10d2|-1011986628|outputdata/postcodes.pmtiles|t20470.8187391488s|43ea0e43cb88484b|521202799|file|local|vector|||955.72||
+pmtiles_retrofit|stem|67428239b378d69e|8c36f0bafd5e6a15|c84a2d71f9c86b45|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20467.789908028s|1e90c3585f12c656|79483558|file|local|vector|||12794.8|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
 pmtiles_transport|stem|50899088a587d4f1|24d6f3fefcc24af1|c05074f0ac1395dd|50855935|outputdata/transport/zones_transport.pmtiles|t20414.4206039072s|11b30b1f1cbc32cb|53984077|file|local|vector|||10887.55||
 pmtiles_uprn_unknown|stem|5fb025101579c60c|262b73bf1c05b7f8|094e11ceda40d177|-1447060186|outputdata/uprn_unknown.pmtiles|t20466.5792136125s|e0b54bae2a22ef7e|340528874|file|local|vector|||817.98||
 pmtiles_wards|stem|757ff0d569fa5791|d359249a336c3b34|0f3dbbef8fcfa570|-1064363007|outputdata/wards.pmtiles|t20365.2916639042s|8d73a57de9c54bdc|14202357|file|local|vector|||49.34||
@@ -463,20 +477,23 @@ pmtiles_zones_transport_low|stem|20442dd220db0500|77d2f349ff995292|53125725922ed
 pmtiles_zones_transport_medium|stem|a49041b207857938|8240c2fbc2cc69f5|82cb045414e95d7d|-1895324032|outputdata/zones_transport_medium.pmtiles|t19998.7235884688s|f7356bb7f9a787e7|13936149|file|local|vector|||6.98||
 pmtiles_zones_transport_merge|stem|721734ba2196b025|f71ea393495b3a91|d78e8f8afd545598|-482766408||t19998.7239497444s|e7d9c43b1c994be3|87|rds|local|vector|||23||
 poi|stem|25d9bb30965419be|41232fd9ac7f2ed6|619be6fc827f2f91|1830629348||t19825.932824882s|5e70ae671998b382|74968224|rds|local|vector|||255.95||
-population|stem|b98a9817fa61ae69|8bd933185343ca44|a11b603226866969|217663074||t20343.7318486835s|16e80376483cfe74|33735089|rds|local|vector|||1.16||
+population|stem|e3b24bfd20d85c7c|8bd933185343ca44|38df60f090ddd012|217663074||t20470.4476308975s|a482ed357d7f5271|36540178|rds|local|vector|||1.22||
 population_2002_2020|stem|6da2c4c9c2d3060d|2739a300c1e16791|c74082cc6d935562|1635552781||t19825.908707589s|452c80e70d1b4885|20157472|rds|local|vector|||180.34||
 population_2021|stem|f7930a0b00b2a254|9c6a5a92f3061650|7399bb5640968435|-1277444965||t19826.0948747835s|d14f0fca20e79693|1042959|rds|local|vector|||0.79||
 population_2022|stem|38fdaaf33485b79b|36595492de816f8f|06944417e70134de|-1790118086||t19825.9578504235s|55dd9e4cd71fc97e|1337311|rds|local|vector|||265.8||
-population_households_historical|stem|3df46eb7a154e417|c692ebe46c442e40|9c6a01217cec98a8|1326867143||t20343.731716417s|16e92f7513bcfbfd|30207370|rds|local|vector|||333.65||
+population_2022_24|stem|51d26b50c2da6968|3ab36f3096537cd8|3cfe3b22b8ec94d1|1062926837||t20470.0084879346s|14ec7beb657b3101|4046562|rds|local|vector|||45.27||
+population_households_historical|stem|60f748569812cf41|4e0265b4f9c8679e|a784c726c0063e47|1326867143||t20470.4474947773s|2031bd029fd44b41|33006160|rds|local|vector|||411.91||
 population_oa21|stem|4a2f8ba31406e738|d0d734a0934d7c83|360693fd44151279|-1046050575||t19825.9328572566s|f58a0f1f61d25e48|2484763|rds|local|vector|||1.78|One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat|
 population_scot|stem|832ac2629e31fc0d|64885ccde220cf2e|f78e40e6f1a56390|-396114242||t19825.9441837541s|a2fc7ce830828a96|4470276|rds|local|vector|||89.33||
 population_scot_dz22|stem|1e37136b3b4d5635|a9825fc214e40878|daf12a40dde1e05a|1998369247||t20322.3651703963s|474d3ddf097abc77|3645780|rds|local|vector|||797.23||
 population_summary|stem|57cd17dd7550def9|4b903162aeae2f96|ec756203260101f3|-1271921199||t20344.8192982441s|d4944e8c9d383f29|15884588|rds|local|vector|||0.08||
-postcode_gas_electricity|stem|4540d9d1c188cb78|c633a56c4473a602|7e0b009c533b5ed5|-1585031376||t19937.7125755793s|190a7ab4762979bf|457528601|rds|local|vector|||218.58||
-postcode_gas_electricity_emissions|stem|53a61944ee5bd2db|35f4f621cdd4247a|a7df5442573428e0|361552183||t19997.5466061788s|ade7f3beef407b1c|1034251118|rds|local|vector|||64.02||
+postcode_gas_electricity|stem|0d750f5eef44b970|c633a56c4473a602|b74570c2aef003bf|-1585031376||t20470.5501667299s|9c14e4aac956706c|588223693|rds|local|vector|||294.05||
+postcode_gas_electricity_emissions|stem|bdad35018e068763|35f4f621cdd4247a|30ea67e96d4c6029|361552183||t20470.5521926139s|9a42a5ec5eda3ff6|1316540156|rds|local|vector|||73.07||
 postcode_points|stem|11ecb60d3e0e53a1|a8452dcfefd54b3f|2e16afd28dc404df|1745915707||t20452.8983699592s|34a35d3626b0f36c|15908807|rds|local|vector|||24.19||
-prep_postcode_gas_electic|function|0ca6e23acf61889e|||||||||||||||
+prep_postcode_gas_electic|function|0eb64f52e5f5c3e2|||||||||||||||
+prices_gas_electric|stem|5a0b565afff50c69|a174ed9fb2ecf769|e8579734a7429913|-1910218268||t20470.4931298234s|80fa0a3986119a6c|8074|rds|local|vector|||0.7||
 prices_json|stem|75e5bacc4f85e874|6762f2246b4d99b4|2cbba2f75990faeb|-1533054425||t20462.4283721585s|ff026697d66e9a9f|75|rds|local|vector|||302.59|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
+prices_other_heating|stem|6b15c607894e07b6|751542acae7c5314|d7ba7bf184343b41|-283762017||t20471.6956715838s|5a04a2bfcda35a41|611|rds|local|vector|||0.51||
 pt_frequency|stem|00acb1711eb6c7da|9b5cb8e669c06252|fe6488412a2c329a|971799777||t20414.4046522001s|515bd911947d1622|24455801|rds|local|vector|||10.4||
 pt_json|stem|d5b49f3f34c74c23|b600011148955de4|d5f4748315dd21aa|372774427||t20426.5012565891s|e655bbbdcbba1d63|81|rds|local|vector|||497.06|Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na. Unknown option ignored na|
 read_Acc_CarVan|function|ab16ce5add9a3836|||||||||||||||
@@ -589,7 +606,7 @@ remove_inf|function|1478c87cbcce1bab|||||||||||||||
 remove_small_holes|function|63d1099bd9da14c5|||||||||||||||
 remove_small_holes_single|function|a19182f8b3ab2eb0|||||||||||||||
 rep_lables|function|9471828ef0d94cb2|||||||||||||||
-retrofit_lsoa_data|stem|f597cb17fbb5de89|dda4014cd8135e4b|240663a39b4a5d13|-2108320529||t20416.8734618302s|bb46c7786da295d4|320169|rds|local|vector|||6.74||
+retrofit_lsoa_data|stem|8060616e7d39bd92|0df17c519661e5fc|563f5270ee014351|-2108320529||t20467.6286665511s|d77df09aba123bbc|980916|rds|local|vector|||7.49||
 round_half_random|function|08ffba3445788f71|||||||||||||||
 scot_synth_households|stem|fbc6970e4ce8b9a7|438efce20addf2de|8e140ab7ff6c926a|1681139009||t20361.4965715654s|85d5de7f1a5ba1f6|6190887|rds|local|vector|||199880.77|One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. Target not consistents  shifting to probabilities                  Check input data. Using all_of outside of a selecting function was deprecated in tidyselect1.2.0.ℹ See details at  httpstidyselect.rlib.orgreference|
 scot_syth_combine|function|dfd6a1d5c8b95017|||||||||||||||
@@ -597,7 +614,7 @@ scot_syth_combine_old|function|af913feb36a0ab29|||||||||||||||
 select_household_pics|function|3002825fe4ee9df4|||||||||||||||
 select_id_income|function|2fb4f1bba39eb727|||||||||||||||
 select_map_outputs|function|6c14dd992370351e|||||||||||||||
-select_retofit_vars|function|6d43b7f6f8ee32ab|||||||||||||||
+select_retofit_vars|function|5eb4e69fc30241a1|||||||||||||||
 select_synth_pop_year|function|22dc4dfa69b628b4|||||||||||||||
 select_synth_pop_year_scot|function|678d1682ca0540d4|||||||||||||||
 select_transport_vars|function|5b8e0e669f9986b3|||||||||||||||

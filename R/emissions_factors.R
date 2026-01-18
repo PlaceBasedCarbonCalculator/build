@@ -1,7 +1,7 @@
 load_emissions_factors = function(){
 
   # Defra Emissions Factors
-  fac = data.frame( year = 2010:2023,
+  fac = data.frame( year = 2010:2025,
                     electricity_kgco2e = c(
                       0.48531, # 2010
                       0.45205,
@@ -16,7 +16,9 @@ load_emissions_factors = function(){
                       0.23314,
                       0.21233,
                       0.19338, #2022
-                      0.207074),
+                      0.207074,
+                      0.20705,
+                      0.17700),
 
                     gas_kgco2e = c(
                       0.20444,# 2010
@@ -32,7 +34,9 @@ load_emissions_factors = function(){
                       0.20374,
                       0.20297,
                       0.20227,
-                      0.20267),
+                      0.20267,
+                      0.20264,
+                      0.20270),
 
                     oil_kgco2e = c(
                       0.26826,
@@ -48,6 +52,8 @@ load_emissions_factors = function(){
                       0.28484, # 2020
                       0.28527,
                       0.28526,
+                      0.28523,
+                      0.28523,
                       0.28523
                     ),
 
@@ -65,7 +71,9 @@ load_emissions_factors = function(){
                       0.36276,
                       0.36276,
                       0.36276,
-                      0.36548
+                      0.36548,
+                      0.36549,
+                      0.33621
                     )
 
 
