@@ -24,7 +24,7 @@ download_scotland_population = function(path = file.path(parameters$path_data,"p
 load_scotland_population = function(path = file.path(parameters$path_data,"population_scotland")){
 
   pops = list()
-  for(i in 2001:2021){
+  for(i in 2001:2022){
     sub = readxl::read_excel(file.path(path,paste0("pop",i,".xlsx")), sheet = "Persons")
     names(sub) = as.character(sub[3,])
     sub = sub[4:nrow(sub),]

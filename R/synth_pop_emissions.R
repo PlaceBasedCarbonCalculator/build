@@ -45,15 +45,15 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
                                                 values_from = "wales")
 
 
-  names(consumption_england_wide) = paste0("total_emisions_",names(consumption_england_wide))
-  names(consumption_scotland_wide) = paste0("total_emisions_",names(consumption_scotland_wide))
-  names(consumption_wales_wide) = paste0("total_emisions_",names(consumption_wales_wide))
+  names(consumption_england_wide) = paste0("total_emissions_",names(consumption_england_wide))
+  names(consumption_scotland_wide) = paste0("total_emissions_",names(consumption_scotland_wide))
+  names(consumption_wales_wide) = paste0("total_emissions_",names(consumption_wales_wide))
 
   # Make synth pop for alternate years
   #TODO: Need fix for missing pops in even year, e.g. firs year of population is 2019
   consumption_syth_pop_odd = consumption_syth_pop
   consumption_syth_pop_odd$year = consumption_syth_pop_odd$year + 1
-  consumption_syth_pop_odd = consumption_syth_pop_odd[consumption_syth_pop_odd$year <= max(consumption_england_wide$total_emisions_year),]
+  consumption_syth_pop_odd = consumption_syth_pop_odd[consumption_syth_pop_odd$year <= max(consumption_england_wide$total_emissions_year),]
 
   consumption_syth_pop = rbind(consumption_syth_pop, consumption_syth_pop_odd)
   rm(consumption_syth_pop_odd)
@@ -65,9 +65,9 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
   consumption_syth_pop_S = consumption_syth_pop[consumption_syth_pop$country == "S",]
   consumption_syth_pop_W = consumption_syth_pop[consumption_syth_pop$country == "W",]
 
-  consumption_syth_pop_E = dplyr::left_join(consumption_syth_pop_E, consumption_england_wide, by = c("year" = "total_emisions_year"))
-  consumption_syth_pop_S = dplyr::left_join(consumption_syth_pop_S, consumption_scotland_wide, by = c("year" = "total_emisions_year"))
-  consumption_syth_pop_W = dplyr::left_join(consumption_syth_pop_W, consumption_wales_wide, by = c("year" = "total_emisions_year"))
+  consumption_syth_pop_E = dplyr::left_join(consumption_syth_pop_E, consumption_england_wide, by = c("year" = "total_emissions_year"))
+  consumption_syth_pop_S = dplyr::left_join(consumption_syth_pop_S, consumption_scotland_wide, by = c("year" = "total_emissions_year"))
+  consumption_syth_pop_W = dplyr::left_join(consumption_syth_pop_W, consumption_wales_wide, by = c("year" = "total_emissions_year"))
 
   consumption_syth_pop = rbind(consumption_syth_pop_E,
                                consumption_syth_pop_S,
@@ -100,23 +100,23 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
   # Summarise Emissions
   consumption_syth_emiss = consumption_syth_pop |>
     dplyr::group_by(year, country) |>
-    dplyr::mutate(emissions_food = spend_food * total_emisions_food * 1e6 / sum(spend_food),
-                  emissions_alcohol = spend_alcohol * total_emisions_alcohol * 1e6 / sum(spend_alcohol),
-                  emissions_clothing = spend_clothing * total_emisions_clothing * 1e6 / sum(spend_clothing),
-                  emissions_communication = spend_communication * total_emisions_communication * 1e6 / sum(spend_communication),
-                  emissions_housing_gaselecfuel = spend_housing_gaselecfuel * total_emisions_housing_gaselecfuel * 1e6 / sum(spend_housing_gaselecfuel),
-                  emissions_housing_other = (spend_housing - spend_housing_gaselecfuel)  * total_emisions_housing * 1e6 / sum((spend_housing - spend_housing_gaselecfuel)),
-                  emissions_furnish = spend_furnish * total_emisions_furnish * 1e6 / sum(spend_furnish),
-                  emissions_recreation = spend_recreation * total_emisions_recreation * 1e6 / sum(spend_recreation),
-                  emissions_transport_optranequip = (spend_transport_optranequip_fuel + spend_transport_optranequip_other) * total_emisions_transport_optranequip * 1e6 / sum((spend_transport_optranequip_fuel + spend_transport_optranequip_other)),
+    dplyr::mutate(emissions_food = spend_food * total_emissions_food * 1e6 / sum(spend_food),
+                  emissions_alcohol = spend_alcohol * total_emissions_alcohol * 1e6 / sum(spend_alcohol),
+                  emissions_clothing = spend_clothing * total_emissions_clothing * 1e6 / sum(spend_clothing),
+                  emissions_communication = spend_communication * total_emissions_communication * 1e6 / sum(spend_communication),
+                  emissions_housing_gaselecfuel = spend_housing_gaselecfuel * total_emissions_housing_gaselecfuel * 1e6 / sum(spend_housing_gaselecfuel),
+                  emissions_housing_other = (spend_housing - spend_housing_gaselecfuel)  * total_emissions_housing * 1e6 / sum((spend_housing - spend_housing_gaselecfuel)),
+                  emissions_furnish = spend_furnish * total_emissions_furnish * 1e6 / sum(spend_furnish),
+                  emissions_recreation = spend_recreation * total_emissions_recreation * 1e6 / sum(spend_recreation),
+                  emissions_transport_optranequip = (spend_transport_optranequip_fuel + spend_transport_optranequip_other) * total_emissions_transport_optranequip * 1e6 / sum((spend_transport_optranequip_fuel + spend_transport_optranequip_other)),
                   emissions_transport_optranequip_other = spend_transport_optranequip_other * multip_optranequip_other * (365/7), #Alt approach
-                  emissions_transport_services = (spend_transport_services_pt + spend_transport_services_air) * total_emisions_transport_services * 1e6 / sum((spend_transport_services_pt + spend_transport_services_air)),
+                  emissions_transport_services = (spend_transport_services_pt + spend_transport_services_air) * total_emissions_transport_services * 1e6 / sum((spend_transport_services_pt + spend_transport_services_air)),
                   emissions_transport_pt = spend_transport_services_pt * multip_pt * (365/7), #Alt approach
-                  emissions_transport_vehiclepurchase = spend_transport_vehiclepurchase * total_emisions_transport_vehiclepurchase * 1e6 / sum(spend_transport_vehiclepurchase),
-                  emissions_health = spend_health * total_emisions_health * 1e6 / sum(spend_health),
-                  emissions_education = spend_education * total_emisions_education * 1e6 / sum(spend_education),
-                  emissions_restaurant = spend_restaurant * total_emisions_restaurant * 1e6 / sum(spend_restaurant),
-                  emissions_misc = spend_misc * total_emisions_misc * 1e6 / sum(spend_misc)
+                  emissions_transport_vehiclepurchase = spend_transport_vehiclepurchase * total_emissions_transport_vehiclepurchase * 1e6 / sum(spend_transport_vehiclepurchase),
+                  emissions_health = spend_health * total_emissions_health * 1e6 / sum(spend_health),
+                  emissions_education = spend_education * total_emissions_education * 1e6 / sum(spend_education),
+                  emissions_restaurant = spend_restaurant * total_emissions_restaurant * 1e6 / sum(spend_restaurant),
+                  emissions_misc = spend_misc * total_emissions_misc * 1e6 / sum(spend_misc)
     ) |>
     dplyr::ungroup()
 

@@ -146,7 +146,7 @@ calculate_other_heating = function(central_heating_2021,
                                               ch_all$heating_other_emissions_total / ch_all$all_ages,
                                               0)
 
-  ch_all = ch_all[,c("LSOA21CD","year","heating_other_emissions_total","heating_other_kgco2e_percap")]
+  #ch_all = ch_all[,c("LSOA21CD","year","heating_other_emissions_total","heating_other_kgco2e_percap")]
   ch_all
 }
 

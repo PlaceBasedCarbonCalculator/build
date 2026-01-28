@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|5c2a6be9230a0f9f|||||||||||||||
+.Random.seed|object|b33ebd2b9b744d6e|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -20,7 +20,8 @@ backcast_dwelling_types|function|ce44fa6e72a3ae55|||||||||||||||
 bal_func|function|3d84c2b06b3a8ace|||||||||||||||
 balance_nssec|function|9663990c20e9b3fc|||||||||||||||
 balance_nssec2|function|9b19e94c84f6f2c6|||||||||||||||
-bills_gas_electric|stem|608a2832ede4a487|695ae535e1f9233b|55f3007be0f41048|-399170320||t20470.5303069611s|480db59f40ea891a|14804395|rds|local|vector|||2.43||
+bills_gas_electric|stem|608a2832ede4a487|695ae535e1f9233b|742605634abb5ddc|-399170320||t20481.73713684s|480db59f40ea891a|14804395|rds|local|vector|||0.81||
+bills_other_heating|stem|b0bf15ee5b572120|a55f4f2c3d3b9ed9|f3ea8d2a8ba35562|-333798051||t20481.7371608077s|077e58f76073b479|6185851|rds|local|vector|||1.01||
 bind_sf|function|394cecd3caf06a56|||||||||||||||
 bivariate_categories|function|d9784af2ba14f1a0|||||||||||||||
 bounds_dno|stem|f641188f1fc6a1d4|34f7f16d5dd9d444|2cf3270d83b54e86|1531793115||t20470.4639103402s|a0e0a6ff40e33b48|765135|rds|local|vector|||0.15||
@@ -93,12 +94,12 @@ bulk_pt_frequency|stem|0a2ad95d17a84dcc|4cf3aa8933084c41|d76fcf44d4612396|197240
 calcualte_consumption_lsoa|function|4c5f25458fa6e3a5|||||||||||||||
 calcualte_other_heating|function|3a250485297c90a7|||||||||||||||
 calculate_car_emissions|function|3df6ca1f236a223b|||||||||||||||
-calculate_consumption_lsoa|function|89d8d9c9060dc5af|||||||||||||||
+calculate_consumption_lsoa|function|88cc4a1a62d4eac6|||||||||||||||
 calculate_electricity_emissions|function|a4ac967cf6353fba|||||||||||||||
 calculate_energy_bills|function|9856cb3bc0e1517e|||||||||||||||
 calculate_gas_emissions|function|4eb04717f0744ace|||||||||||||||
 calculate_lsoa_gas_electric_emissions|function|9c2a4234219f3c83|||||||||||||||
-calculate_other_heating|function|dc4944251c16d29a|||||||||||||||
+calculate_other_heating|function|7fed5c228610d08f|||||||||||||||
 calculate_postcode_gas_electric_emissions|function|814a5f44cd6f0be4|||||||||||||||
 car_emissions|stem|92662aa5b818f32d|cb2eeff0976da1e5|c04e1d6bba8015c8|-621909212||t20355.4900323359s|d0cb6153b0b0e5e2|33504519|rds|local|vector|||1.11||
 car_emissions_11|stem|2e711b9286d13eb5|dc57d15ddd561e99|76d70212b85f87bf|-295208083||t20343.9323454219s|0b62b0b8c5873e74|4521176|rds|local|vector|||34.43||
@@ -115,7 +116,7 @@ car_km_pc|stem|340a6c6ed99c5d42|c3236f367f6e9a7b|760dd06b41140ab5|305535931||t19
 car_km_pc_2005_2030|stem|33b0fbb6532ebe07|fcc9942102b4c9d5|e62f27878e760686|-485759429||t19809.6126999113s|e0a22a6ecd1ef55e|33579953|rds|local|vector|||0.219||
 census_syth_combine_v4|function|520cdc3d105bf290|||||||||||||||
 census21_synth_households|stem|aae0af1c3951f22a|023bd5f28f9538da|d29de88002546a3f|1163979400||t20359.1806734686s|85f6a1c50b218310|41117179|rds|local|vector|||108708.94|Target not consistents  shifting to probabilities                  Check input data. Using all_of outside of a selecting function was deprecated in tidyselect1.2.0.ℹ See details at  httpstidyselect.rlib.orgreferencefaqselectioncontext.html. Using an external vector in selections was deprecated in tidyselect 1.1.0.ℹ Please use all_of or any_of instead.   Was  data  selectvar2   Now  data  selectall_ofvar2See httpstidyselect.rlib.orgreferencefaqexternalvector.html.. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. IPFP did not converged after 20000 iterations             This migh be due to 0 cells in the seed, maximum number             of iteration too low or tolerance too small. Target not consistents  shifting to probabilities                  Check input data. IPFP did not converged after 20000 iterations             This migh be due to 0 cells in the seed, maximum number             of iteration too low or tolerance too small. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input data. Target not consistents  shifting to probabilities                  Check input|
-central_heating_2011|stem|688846267aa4b127|2d228b2315c19e98|4a48acb303fb8284|739293567||t20343.9326930574s|77b975364e18c01c|573089|rds|local|vector|||0.3||
+central_heating_2011|stem|688846267aa4b127|2d228b2315c19e98|d83f5d1ddc4074b0|739293567||t20481.4369635721s|77b975364e18c01c|573089|rds|local|vector|||0.48||
 central_heating_2011_21|stem|78a1b95a42c751de|9d43e785d2ba6df5|27c5e276544d0aa0|-1819136710||t19828.8809987933s|36b49abaa036dc18|590865|rds|local|vector|||0.19||
 central_heating_2011_scotland|stem|69ed750e99a43884|2768dec17c6a80a9|c7d9686b19b30d14|-664623675||t20322.365192184s|eb7823d4c9edda9c|96646|rds|local|vector|||1.71||
 central_heating_2011_to_2021|function|2dd2b76850958a95|||||||||||||||
@@ -142,7 +143,7 @@ clean_postcode_gas|function|28efbb4a3df87fb8|||||||||||||||
 combine_bounds_full|function|83a3606c5c07cd87|||||||||||||||
 combine_land_use|function|9c90992d112e442d|||||||||||||||
 combine_lsoa_bounds|function|82444336e925a571|||||||||||||||
-combine_lsoa_emissions|function|125817d6b3f799bb|||||||||||||||
+combine_lsoa_emissions|function|38155d2bb2679ec3|||||||||||||||
 combine_nssec_enthinic|function|a5e88a8e14ea38bf|||||||||||||||
 combine_os_osm_buildings|function|977ac3a6bc835da8|||||||||||||||
 combine_populations|function|0ac4f839beb7b80d|||||||||||||||
@@ -177,10 +178,10 @@ dl_nomis|stem|2a59d22ca4fcc05e|afb7cfc4ff15e644|f6f60f3a5a106a48|831662753||t198
 dl_os_zoomstack|stem|984c1fb58a278375|33160b563cba39a6|f1214e0eabc2e1f3|-1064360665||t19825.8900492006s|9903306e1685fb67|94|rds|local|vector|||0||
 dl_pct|stem|35f02fc4ac337e39|4ff80f59614c9b79|2ae4e72ffb49d083|2055201872||t19825.9431349314s|d586f792a395948c|68|rds|local|vector|||0||
 dl_vehicle_registrations|stem|7b085b3b06e8e01b|df6128c247fc66c5|6549db78cdf4d786|-1702486100||t20143.5762099687s|e7d9c43b1c994be3|87|rds|local|vector|||45.52||
-domestic_electricity|stem|b6abbac71b26281e|8ed15209537750e3|8a114e30e1bb7d24|1613811675||t20470.5276098983s|58c9ec48d4688b72|15214974|rds|local|vector|||2.81||
+domestic_electricity|stem|050fb45f2479b146|8ed15209537750e3|8ea937cbc3250c8a|1613811675||t20481.7336871739s|f097d523a934d556|15214211|rds|local|vector|||2.36||
 domestic_electricity_11|stem|d62f5c90fbe36d99|62285ed861acec11|74be87489b7da58f|1084179350||t20469.8901631766s|6e4b9e0681fc1379|16701935|rds|local|vector|||24.7||
 domestic_electricity_emissions|stem|2594a3a4803d5a8a|5539fb5d2336d012|b4b64afddab0ea55|1639887079||t20361.7197936496s|c2270b1450c2e527|8870547|rds|local|vector|||0.33||
-domestic_gas|stem|023b6d3047a652fb|979b1f57b7c15437|9e27838f915c4ae1|-867186464||t20470.5276640199s|5708904ff66828b4|16464837|rds|local|vector|||1.83||
+domestic_gas|stem|3ac3791161ada8ab|979b1f57b7c15437|c6662063ac9e7a10|-867186464||t20481.7336188144s|e627f706f6efb4d2|16464221|rds|local|vector|||2.93||
 domestic_gas_11|stem|ba3ad9c11965f8d2|3e1eeb7dc6ccf658|c0cad79088723e11|-658521949||t20469.8792148628s|7b7a9dd2f659ea63|18285279|rds|local|vector|||21.25||
 domestic_gas_emissions|stem|6ff4fa18be0cdf03|be5bf9d6f4b9a82d|0e5a12ae787f11ea|467753552||t20357.7624938948s|c8544be8f9e8ef3d|8626353|rds|local|vector|||0.8||
 dowload_gas_electric|function|959ff56360c0b581|||||||||||||||
@@ -207,6 +208,7 @@ esimate_income_scotland_dz22|function|94102eeadd5ea034|||||||||||||||
 estimate_car_meissions_post2018|function|7f751aef04cd03cd|||||||||||||||
 estimate_gas_electric_bills|function|a19eee6b988c0d59|||||||||||||||
 estimate_income|function|1901a1e9a1e5541a|||||||||||||||
+estimate_other_heating_bills|function|afb3d7bf0f572442|||||||||||||||
 ev_registrations|stem|bebbfd1d6b2193eb|18ea528277664ccb|3c6b0353b127cae5|1707219932||t20143.8529661199s|6da0b1ebdc0c1c4f|1328736|rds|local|vector|||1329.88||
 ev_registrations_21|stem|bf9e8a528d323731|fda3641d2bc7b2e7|52f27e6ebc239278|1163914246||t20344.8227937067s|452f7e622017d265|1417837|rds|local|vector|||3.34||
 experian_income|stem|fa876ab8f4604443|24ebd7c7e83ba505|6a5514a931fc22ad|-331343829||t19825.9430833718s|4bf226ec968bfcde|327310|rds|local|vector|||2.56||
@@ -354,7 +356,7 @@ load_postcode_gas_electricity|function|f9e65f7e4760feff|||||||||||||||
 load_postcode_OA_LSOA_MSOA_class_2021_lookup|function|1c0fd31bc70e6208|||||||||||||||
 load_pt_frequency|function|f91f53ecf73e2167|||||||||||||||
 load_scotland_council_tax|function|faa11f8858c8b9db|||||||||||||||
-load_scotland_population|function|86bf47bfd6945811|||||||||||||||
+load_scotland_population|function|69772620e5ca0064|||||||||||||||
 load_SIPHER|function|ed023ee52234d994|||||||||||||||
 load_travel2work|function|fe9f7336a7b5f8c8|||||||||||||||
 load_ubdc_house_prices|function|6adbd9193b8e8ed0|||||||||||||||
@@ -377,15 +379,15 @@ lookup_OA_LSOA_MSOA_classifications|stem|5da693e44bd6ed9a|5528856df26ea22a|c6052
 lookup_oa2021_lsoa2011|stem|079662fef9a8f2d4|cbe8a457930ae259|3c33218556d4adb6|2128238553||t19826.3476074779s|9de603ac9dac38cf|456263|rds|local|vector|||0.91||
 lookup_oa2021_lsoa2021|stem|3d21e39e6d821214|e281fd7c5ca3a212|c1a8784727279ed7|-505690643||t19934.2855082092s|ede19f0682bdf8f1|490678|rds|local|vector|||0.84||
 lookup_postcode_OA_LSOA_MSOA_2021|stem|10d1324ca7cb466c|571ccae9bc9ff1c8|291eb17900e608f4|1759155096||t19990.4123426078s|179c987a840659ca|13147698|rds|local|vector|||11.47||
-lsoa_11_21_tools|stem|40b46454778cffdf|1a3b64048ec52377|ebe0a04a5302189e|993956763||t20470.5275312931s|94ef777b77ec2fa2|1181787|rds|local|vector|||0.2||
+lsoa_11_21_tools|stem|40b46454778cffdf|1a3b64048ec52377|c7ac7c1b1feb5600|993956763||t20481.4872700738s|94ef777b77ec2fa2|1181787|rds|local|vector|||0.66||
 lsoa_admin|stem|132c6763ebba0f97|f216c25240f7463a|26ed6a47524949ab|-1485952592||t20355.4366324662s|04eb99975a2b1759|324437|rds|local|vector|||20.56|st_point_on_surface assumes attributes are constant over geometries|
 lsoa_admin_summary|function|0f482dba064e3390|||||||||||||||
 lsoa_convert_2011_2021_pre_data|function|44115f7dc2a70b75|||||||||||||||
 lsoa_dno_lookup_GB|stem|8ddeae7deadbb77e|2de7dbd1317d7a9f|3d57e74157dced5c|-1192285851||t20470.4639201982s|2ee852667e5f95ab|150743|rds|local|vector|||0.58||
-lsoa_electric_to_2021|function|397d1eb44c8c41ef|||||||||||||||
+lsoa_electric_to_2021|function|5d3299b4ab730887|||||||||||||||
 lsoa_emissions_all|stem|ccbd7efbe5ae67b9|d45519306d6ba5a3|5083b251e218496e|1303375064||t20406.8525118685s|d20b9e3210cf6b28|192927574|rds|local|vector|||5.6||
 lsoa_emissions_all_forcasts|stem|96ddf8eb31ce0607|cb5695f963e55445|896c99fd66edfc94|1643343737||t19838.551835469s||73117033|rds|local|vector|||0.01||could not load dependencies of target lsoa_emissions_all_forcasts. invalid description argument
-lsoa_gas_to_2021|function|257534189fc469a2|||||||||||||||
+lsoa_gas_to_2021|function|feb451bcb10ab5b7|||||||||||||||
 lsoa_map_data|stem|dc150cb0227f4ee9|68dcbedfd142192e|414322508c21e1a0|1195666468||t20406.8585622571s|9c2e2c7c07a0a4d8|451406|rds|local|vector|||0.29||
 lsoa_warnings|stem|87581988e0579896|6e2e802c50748d4c|ea60113c444ee1ca|-740085556||t20396.6514226811s|b3093d0ff188e032|24778|rds|local|vector|||0.07||
 lsoa21_OAC21_summary|stem|c787222169304078|a8f2cc9a30c710f6|15c5f8bfc11942c7|71114060||t20129.5709601373s|1f1b42b76c1edaec|909424|rds|local|vector|||44.53||
@@ -445,7 +447,7 @@ os_greenspace|stem|92553da9d3db697a|6abc9499ad72c169|008728867627db62|-489713610
 os_land|stem|c8ac5263e0b1a57d|d234636b05b0f5b3|d508b6802b172da0|-892337999||t19826.2937614886s|14a66efcc4253c30|631304191|rds|local|vector|||209.71||
 osm_buildings|stem|4d1d55d8931c03d0|6ab924a0ca23ab0a|ceeb7fe421a24fd5|-314795613||t19842.8703243495s|86f5aef36a609490|1031629331|rds|local|vector|||1575.39|repeating attributes for all subgeometries for which they may not be constant|
 osm_land|stem|f7303a0da6c8fb70|ecbf0f4e7b8f8582|42d19dcf225a315b|-50450555||t19858.8100104878s|761d61c359a3827e|534036769|rds|local|vector|||2028.16|GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non closed ring detected. To avoid accepting it, set the OGR_GEOMETRY_ACCEPT_UNCLOSED_RING configuration option to NO. GDAL Message 1 Non clo|
-other_heating_emissions|stem|dbc7584a3d9c2bce|d9201179ba012795|170f3299761c056f|809116377||t20355.4899798396s|03c39c202862dfbe|8941931|rds|local|vector|||1.98||
+other_heating_emissions|stem|2aed7e47dbf5ee2a|d9201179ba012795|3a98b516818e6873|809116377||t20481.7371114811s|bb5e7733d23bbe04|14430700|rds|local|vector|||292.68|Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy.. Unknown or uninitialised column renewable_energy|
 param_file|stem|32e425a7d6eddbc8|9c1a31a16c352029|ef46db3751d8e999|116550215|parameters.json|t19733.8883065033s|4ff05336d644dae2|106|file|local|vector|||8.75||
 parameters|stem|658b579c10f17f84|af4c02dd2edf3aec|c8a29bf1f4d7d8db|105499064||t20291.7663485565s|5377f570336eb2d2|149|rds|local|vector|||0||
 percentile|function|58653abca9a5f747|||||||||||||||
@@ -463,7 +465,7 @@ pmtiles_la|stem|aebf2882dbebe21d|909f63d0f3ded0a6|fe03e757f7d375c2|2059785649|ou
 pmtiles_parish|stem|df3eff3a1e355144|61b298874b1189b9|257479f04b27360f|100742970|outputdata/parish.pmtiles|t19998.7208823352s|c371432a1842e564|13635241|file|local|vector|||28.89||
 pmtiles_pbcc|stem|1b06e14765415e29|4ef991e0225fad6c|9d0021bb78e3befd|-800414012|outputdata/pbcc/zones_pbcc.pmtiles|t20414.1767684191s|bcd4197aac16dc74|59211905|file|local|vector|||9451.76||
 pmtiles_postcode|stem|2fc48842c7f841e7|ba78588cd5f217c9|2783d79670be10d2|-1011986628|outputdata/postcodes.pmtiles|t20470.8187391488s|43ea0e43cb88484b|521202799|file|local|vector|||955.72||
-pmtiles_retrofit|stem|67428239b378d69e|8c36f0bafd5e6a15|c84a2d71f9c86b45|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20467.789908028s|1e90c3585f12c656|79483558|file|local|vector|||12794.8|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
+pmtiles_retrofit|stem|3bde9e44aabb73d3|8c36f0bafd5e6a15|346b502bdb713f77|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20481.7480796248s|e44fbc0ea37d750c|79184897|file|local|vector|||12843.86|Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed. Thats a lot of columns for the GeoJSON, are they all needed|
 pmtiles_transport|stem|50899088a587d4f1|24d6f3fefcc24af1|c05074f0ac1395dd|50855935|outputdata/transport/zones_transport.pmtiles|t20414.4206039072s|11b30b1f1cbc32cb|53984077|file|local|vector|||10887.55||
 pmtiles_uprn_unknown|stem|5fb025101579c60c|262b73bf1c05b7f8|094e11ceda40d177|-1447060186|outputdata/uprn_unknown.pmtiles|t20466.5792136125s|e0b54bae2a22ef7e|340528874|file|local|vector|||817.98||
 pmtiles_wards|stem|757ff0d569fa5791|d359249a336c3b34|0f3dbbef8fcfa570|-1064363007|outputdata/wards.pmtiles|t20365.2916639042s|8d73a57de9c54bdc|14202357|file|local|vector|||49.34||
@@ -477,15 +479,15 @@ pmtiles_zones_transport_low|stem|20442dd220db0500|77d2f349ff995292|53125725922ed
 pmtiles_zones_transport_medium|stem|a49041b207857938|8240c2fbc2cc69f5|82cb045414e95d7d|-1895324032|outputdata/zones_transport_medium.pmtiles|t19998.7235884688s|f7356bb7f9a787e7|13936149|file|local|vector|||6.98||
 pmtiles_zones_transport_merge|stem|721734ba2196b025|f71ea393495b3a91|d78e8f8afd545598|-482766408||t19998.7239497444s|e7d9c43b1c994be3|87|rds|local|vector|||23||
 poi|stem|25d9bb30965419be|41232fd9ac7f2ed6|619be6fc827f2f91|1830629348||t19825.932824882s|5e70ae671998b382|74968224|rds|local|vector|||255.95||
-population|stem|e3b24bfd20d85c7c|8bd933185343ca44|38df60f090ddd012|217663074||t20470.4476308975s|a482ed357d7f5271|36540178|rds|local|vector|||1.22||
+population|stem|77f94e0d5ba3c11f|8bd933185343ca44|47958118da41079d|217663074||t20481.4814395335s|6a11f2acd9e58e08|36767392|rds|local|vector|||1.69||
 population_2002_2020|stem|6da2c4c9c2d3060d|2739a300c1e16791|c74082cc6d935562|1635552781||t19825.908707589s|452c80e70d1b4885|20157472|rds|local|vector|||180.34||
 population_2021|stem|f7930a0b00b2a254|9c6a5a92f3061650|7399bb5640968435|-1277444965||t19826.0948747835s|d14f0fca20e79693|1042959|rds|local|vector|||0.79||
 population_2022|stem|38fdaaf33485b79b|36595492de816f8f|06944417e70134de|-1790118086||t19825.9578504235s|55dd9e4cd71fc97e|1337311|rds|local|vector|||265.8||
 population_2022_24|stem|51d26b50c2da6968|3ab36f3096537cd8|3cfe3b22b8ec94d1|1062926837||t20470.0084879346s|14ec7beb657b3101|4046562|rds|local|vector|||45.27||
 population_households_historical|stem|60f748569812cf41|4e0265b4f9c8679e|a784c726c0063e47|1326867143||t20470.4474947773s|2031bd029fd44b41|33006160|rds|local|vector|||411.91||
 population_oa21|stem|4a2f8ba31406e738|d0d734a0934d7c83|360693fd44151279|-1046050575||t19825.9328572566s|f58a0f1f61d25e48|2484763|rds|local|vector|||1.78|One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat|
-population_scot|stem|832ac2629e31fc0d|64885ccde220cf2e|f78e40e6f1a56390|-396114242||t19825.9441837541s|a2fc7ce830828a96|4470276|rds|local|vector|||89.33||
-population_scot_dz22|stem|1e37136b3b4d5635|a9825fc214e40878|daf12a40dde1e05a|1998369247||t20322.3651703963s|474d3ddf097abc77|3645780|rds|local|vector|||797.23||
+population_scot|stem|418ffef1046ec20e|64885ccde220cf2e|a9becf5cc6237933|-396114242||t20481.4704678945s|6a8a1a3ccaa75595|4691192|rds|local|vector|||42.9||
+population_scot_dz22|stem|74d20d8d8301b24b|a9825fc214e40878|700d8bb44f42bd91|1998369247||t20481.4812846158s|eb308a91197630e3|3877010|rds|local|vector|||932.33||
 population_summary|stem|57cd17dd7550def9|4b903162aeae2f96|ec756203260101f3|-1271921199||t20344.8192982441s|d4944e8c9d383f29|15884588|rds|local|vector|||0.08||
 postcode_gas_electricity|stem|0d750f5eef44b970|c633a56c4473a602|b74570c2aef003bf|-1585031376||t20470.5501667299s|9c14e4aac956706c|588223693|rds|local|vector|||294.05||
 postcode_gas_electricity_emissions|stem|bdad35018e068763|35f4f621cdd4247a|30ea67e96d4c6029|361552183||t20470.5521926139s|9a42a5ec5eda3ff6|1316540156|rds|local|vector|||73.07||
@@ -606,7 +608,7 @@ remove_inf|function|1478c87cbcce1bab|||||||||||||||
 remove_small_holes|function|63d1099bd9da14c5|||||||||||||||
 remove_small_holes_single|function|a19182f8b3ab2eb0|||||||||||||||
 rep_lables|function|9471828ef0d94cb2|||||||||||||||
-retrofit_lsoa_data|stem|8060616e7d39bd92|0df17c519661e5fc|563f5270ee014351|-2108320529||t20467.6286665511s|d77df09aba123bbc|980916|rds|local|vector|||7.49||
+retrofit_lsoa_data|stem|f17acca298f26e0a|8e0a627fb1441422|101b21fdd517f141|-2108320529||t20481.7391770479s|21caddd27eca01b6|967803|rds|local|vector|||10.08||
 round_half_random|function|08ffba3445788f71|||||||||||||||
 scot_synth_households|stem|fbc6970e4ce8b9a7|438efce20addf2de|8e140ab7ff6c926a|1681139009||t20361.4965715654s|85d5de7f1a5ba1f6|6190887|rds|local|vector|||199880.77|One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. Target not consistents  shifting to probabilities                  Check input data. Using all_of outside of a selecting function was deprecated in tidyselect1.2.0.ℹ See details at  httpstidyselect.rlib.orgreference|
 scot_syth_combine|function|dfd6a1d5c8b95017|||||||||||||||
@@ -614,7 +616,7 @@ scot_syth_combine_old|function|af913feb36a0ab29|||||||||||||||
 select_household_pics|function|3002825fe4ee9df4|||||||||||||||
 select_id_income|function|2fb4f1bba39eb727|||||||||||||||
 select_map_outputs|function|6c14dd992370351e|||||||||||||||
-select_retofit_vars|function|5eb4e69fc30241a1|||||||||||||||
+select_retofit_vars|function|9959c8411707d756|||||||||||||||
 select_synth_pop_year|function|22dc4dfa69b628b4|||||||||||||||
 select_synth_pop_year_scot|function|678d1682ca0540d4|||||||||||||||
 select_transport_vars|function|5b8e0e669f9986b3|||||||||||||||

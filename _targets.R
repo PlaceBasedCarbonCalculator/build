@@ -157,13 +157,16 @@ tar_target(prices_other_heating,{
 tar_target(bills_gas_electric,{
   estimate_gas_electric_bills(domestic_gas, domestic_electricity, prices_gas_electric, lsoa_dno_lookup_GB)
 }),
+tar_target(bills_other_heating,{
+  estimate_other_heating_bills(other_heating_emissions, prices_other_heating, population)
+}),
 tar_target(geojson_postcode,{
   sub = prep_postcode_gas_electic(postcode_gas_electricity_emissions, bounds_postcodes_2024)
   make_geojson(sub, "outputdata/postcodes.geojson")
 }, format = "file"),
 
 tar_target(build_historical_domestic_gas_elec_jsons,{
-  sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors)
+  sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors, bills_gas_electric, bills_other_heating)
   export_zone_json(sub, idcol = "LSOA21CD", path = "outputdata/json/historical_domestic_gas_elec",
                    dataframe = "columns",
                    zip = FALSE, rounddp = 0)
@@ -182,8 +185,9 @@ tar_target(build_epc_dom_jsons,{
 
 tar_target(retrofit_lsoa_data,{
   select_retofit_vars(epc_dom_summary, population, house_prices_nowcast,
-                      income_lsoa_msoa, domestic_electricity, domestic_gas,
-                      prices_gas_electric, prices_other_heating)
+                      income_lsoa_msoa, income_scot_dz22,
+                      domestic_electricity, domestic_gas,
+                      bills_gas_electric, bills_other_heating)
 }),
 
 

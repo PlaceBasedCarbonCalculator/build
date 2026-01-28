@@ -1,10 +1,18 @@
 select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast,
-                               income_lsoa_msoa,
+                               income_lsoa_msoa, income_scot_dz22,
                                domestic_electricity, domestic_gas,
-                               bills_gas_electric, prices_other_heating) {
+                               bills_gas_electric, bills_other_heating) {
 
   bills_gas_electric = bills_gas_electric[,c("LSOA21CD","year","energy_average_bill")]
   bills_gas_electric = bills_gas_electric[bills_gas_electric$year == max(bills_gas_electric$year),]
+
+  bills_other_heating = bills_other_heating[bills_other_heating$year == max(bills_other_heating$year),]
+
+  if(length(unique(c(bills_gas_electric$year[1]),c(bills_other_heating$year[1]))) != 1){
+    stop("Other heating and gas/electric bills are from different years")
+  }
+  bills_gas_electric$year = NULL
+  bills_other_heating$year = NULL
 
   sub = epc_dom_summary[,c("LSOA21CD","epc_total","epc_score_avg","floor_area_avg")]
   sub$modal_age = modal(epc_dom_summary[,c("age_pre1900",
@@ -49,9 +57,9 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
   sub = dplyr::left_join(sub, population, by = "LSOA21CD")
 
   sub$percent_EPC = round(sub$epc_total / sub$all_properties * 100)
-  sub$households_est = NULL
-  sub$all_properties = NULL
-  sub$epc_total = NULL
+  # sub$households_est = NULL
+  # sub$all_properties = NULL
+  # sub$epc_total = NULL
 
   sub$epc_score_avg = as.character(cut(sub$epc_score_avg, breaks = c(0,50,55,60,65,70,80,100)))
   sub$epc_score_avg = gsub("\\(|\\[|\\)|\\]","",sub$epc_score_avg)
@@ -91,7 +99,13 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
   income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == max(income_lsoa_msoa$year),]
   income_lsoa_msoa = income_lsoa_msoa[,c("LSOA21CD","total_annual_income")]
 
-  sub = dplyr::left_join(sub, income_lsoa_msoa, by = "LSOA21CD")
+  income_scot_dz22 = income_scot_dz22[income_scot_dz22$year == max(income_scot_dz22$year),]
+  income_scot_dz22 = income_scot_dz22[,c("DataZone22","total_annual_income")]
+  names(income_scot_dz22) = c("LSOA21CD","total_annual_income")
+
+  income = rbind(income_lsoa_msoa, income_scot_dz22)
+
+  sub = dplyr::left_join(sub, income, by = "LSOA21CD")
   #sub$house_income_ratio = round(sub$price_median / sub$total_annual_income,1)
 
   sub$house_income_ratio = round(sub$price_2024 / sub$total_annual_income,1)
@@ -107,9 +121,13 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
   sub = dplyr::left_join(sub, domestic_electricity, by = "LSOA21CD")
 
   sub = dplyr::left_join(sub, bills_gas_electric, by = "LSOA21CD")
+  sub = dplyr::left_join(sub, bills_other_heating, by = "LSOA21CD")
+
+  #sub$energy_average_bill_other = sub$otherheating_spend_total / sub$households_est
+  sub$energy_average_bill_both =  sub$energy_average_bill + sub$otherheating_average_bill
 
   # Bivariate
-  sub$fuelcost_bivaraite = bivariate_categories(sub$energy_average_bill, sub$total_annual_income)
+  sub$fuelcost_bivaraite = bivariate_categories(sub$energy_average_bill_both, sub$total_annual_income)
 
   sub = sub[,c("LSOA21CD","epc_score_avg","floor_area_avg","modal_age","modal_wall",
                "modal_roof","modal_heat","modal_window","modal_mainheat","modal_mainfuel",

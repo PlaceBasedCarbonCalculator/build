@@ -184,6 +184,7 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
 
   #Update new data uses 2021/22 boundaries from 2015 onwards!
   domestic_gas_11 = domestic_gas_11[,c("LSOA","year","meters","total_gas_kwh","mean_gas_kwh","median_gas_kwh")]
+  domestic_gas_11 = domestic_gas_11[domestic_gas_11$LSOA != "Unallocated",]
 
   domestic_gas_11_done = domestic_gas_11[domestic_gas_11$year >= 2015,]
   names(domestic_gas_11_done)[1] = "LSOA21CD"
@@ -273,6 +274,7 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
 lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
   domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
+  domestic_electricity_11 = domestic_electricity_11[domestic_electricity_11$LSOA != "Unallocated",]
 
   #Update new data uses 2021/22 boundaries from 2015 onwards!
   domestic_electricity_11_done = domestic_electricity_11[domestic_electricity_11$year >= 2015,]

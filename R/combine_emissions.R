@@ -7,6 +7,9 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                   max_year = 2020
                                   ) {
 
+
+  other_heating_emissions = other_heating_emissions[,c("LSOA21CD","year","heating_other_emissions_total","heating_other_kgco2e_percap")]
+
   #TODO: some NA grades, check for consistency of 0 population zones.
   lsoa = dplyr::left_join(domestic_gas_emissions, domestic_electricity_emissions, by = c("LSOA21CD","year"))
 
@@ -17,7 +20,7 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
 
   other_heating_emissions = other_heating_emissions[other_heating_emissions$year <= max_year,]
 
-  names(consumption_emissions) = gsub("emisions","emissions",names(consumption_emissions)) #TODO Fix typo
+  #names(consumption_emissions) = gsub("emisions","emissions",names(consumption_emissions)) #TODO Fix typo
 
   consumption_emissions = consumption_emissions[,c("LSOA21CD","year",
                                                    "emissions_percap_food","emissions_percap_alcohol","emissions_percap_clothing",
