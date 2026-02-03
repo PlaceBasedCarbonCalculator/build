@@ -730,7 +730,8 @@ prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_
 }
 
 
-calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electricity, emissions_factors){
+calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electricity, emissions_factors,
+                                                 bills_gas_electric, bills_other_heating, other_heating_emissions){
   sub = dplyr::full_join(domestic_gas, domestic_electricity, by = c("LSOA21CD","year"))
   names(sub)[names(sub) == "meters.x"] = "meters_gas"
   names(sub)[names(sub) == "meters.y"] = "meters_elec"
@@ -753,7 +754,27 @@ calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electric
   bar$mean_elec_kgco2e[is.nan(bar$mean_elec_kgco2e)] = 0
   bar$mean_elec_kwh[is.nan(bar$mean_elec_kwh)] = 0
 
-  bar
+  bills_gas_electric = bills_gas_electric[,c("LSOA21CD","year","gas_average_bill","elec_average_bill","energy_average_bill")]
+  bills_other_heating = bills_other_heating[,c("LSOA21CD","year","otherheating_average_bill")]
+  other_heating_emissions = other_heating_emissions[,c("LSOA21CD","year","heating_other_emissions_total","all_properties")]
 
+  other_heating_emissions$mean_other_kgco2e = round(other_heating_emissions$heating_other_emissions_total / other_heating_emissions$all_properties)
+
+  names(other_heating_emissions)[names(other_heating_emissions) == "heating_other_emissions_total"] = "total_other_kgco2e"
+
+  other_heating_emissions = other_heating_emissions[,c("LSOA21CD","year","mean_other_kgco2e")]
+
+  bar2 = dplyr::full_join(bills_gas_electric, bills_other_heating, by = c("LSOA21CD","year"))
+  bar2 = dplyr::full_join(bar2, other_heating_emissions, by = c("LSOA21CD","year"))
+
+  bar3 = dplyr::full_join(bar, bar2, by = c("LSOA21CD","year"))
+
+  # TODO: Missing Scotland data for 2023 and 2024
+  bar3$energy_average_bill = ifelse(!is.na(bar3$energy_average_bill + bar3$otherheating_average_bill),
+                                    bar3$energy_average_bill + bar3$otherheating_average_bill,
+                                    bar3$energy_average_bill
+                                    )
+
+  bar3
 
 }
