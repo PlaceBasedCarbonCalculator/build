@@ -166,7 +166,7 @@ tar_target(geojson_postcode,{
 }, format = "file"),
 
 tar_target(build_historical_domestic_gas_elec_jsons,{
-  sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors, bills_gas_electric, bills_other_heating)
+  sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors, bills_gas_electric, bills_other_heating,other_heating_emissions)
   export_zone_json(sub, idcol = "LSOA21CD", path = "outputdata/json/historical_domestic_gas_elec",
                    dataframe = "columns",
                    zip = FALSE, rounddp = 0)
@@ -1128,16 +1128,16 @@ tar_target(build_access_jsons,{
   export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
 }),
 
-tar_target(build_postcode_jsons,{
-  x = postcode_gas_electricity_emissions[,c("postcode","year","gas_meters","elec_meters_all",
-                                              "elec_meters_std","elec_meters_eco7","gas_totalkwh","elec_totalkwh_all",
-                                              "elec_totalkwh_std","elec_totalkwh_eco7","gas_meankwh","elec_meankwh_all",
-                                              "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
-                                              "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
-                                              "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
-  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
-                   path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
-}),
+# tar_target(build_postcode_jsons,{
+#   x = postcode_gas_electricity_emissions[,c("postcode","year","gas_meters","elec_meters_all",
+#                                               "elec_meters_std","elec_meters_eco7","gas_totalkwh","elec_totalkwh_all",
+#                                               "elec_totalkwh_std","elec_totalkwh_eco7","gas_meankwh","elec_meankwh_all",
+#                                               "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
+#                                               "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
+#                                               "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
+#   export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
+#                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
+# }),
 
 tar_target(build_overview_jsons,{
   make_lsoa_overview_json(lsoa_admin, area_classifications_11_21, lsoa_warnings)
