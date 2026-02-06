@@ -41,7 +41,7 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
   # Tests c(10624, 74860, 74862, 27538)
   future::plan("multisession")
   d125_clean = furrr::future_map(d125_long, .f = fill_gaps,
-                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .options = furrr::furrr_options(seed = 1234L),
                                  .progress = TRUE)
   future::plan("sequential")
 
@@ -76,7 +76,7 @@ load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_re
   #d135_clean = pbapply::pblapply(d135_list, fill_gaps_135)
   future::plan("multisession")
   d135_clean = furrr::future_map(d135_long, .f = fill_gaps_135,
-                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .options = furrr::furrr_options(seed = 1234L),
                                  .progress = TRUE)
   future::plan("sequential")
 
@@ -112,7 +112,7 @@ load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_regi
   #d145_clean = pbapply::pblapply(d145_list, fill_gaps_135)
   future::plan("multisession")
   d145_clean = furrr::future_map(d145_long, .f = fill_gaps_135,
-                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .options = furrr::furrr_options(seed = 1234L),
                                  .progress = TRUE)
   future::plan("sequential")
 
