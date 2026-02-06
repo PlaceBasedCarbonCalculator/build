@@ -34,18 +34,33 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   certs$roof_d[grepl("\\|",certs$roof_d)] = "multiple types"
   certs$floor_d[grepl("\\|",certs$floor_d)] = "multiple types"
 
+  certs$floor_d[certs$floor_d %in% c("(another premises below)","(another dwelling below)",
+                                     "(other dwelling below)", "(other premises below)",
+                                     "(same dwelling below)","(same premises below)")] = "(another dwelling below)"
 
+  certs$roof_d[certs$roof_d %in% c("(another dwelling above)",
+                                   "(another dwelling above) ",
+                                   "(other dwelling above)",
+                                   "(other premises above)",
+                                   "(same dwelling above)",
+                                   "(same premises above)",
+                                   "(another premises above)" )] = "(another dwelling above)"
+
+  trueNA = function(x){
+    x[is.na(x)] = FALSE
+    x
+  }
 
   # Flag Roofs and Floors
   certs$floor_ee <- as.character(certs$floor_ee)
   certs$floor_ee <- ifelse(is.na(certs$floor_ee) &
-                                     (certs$floor_d %in% c("(another dwelling below)", "(other premises below)")),
-                                   "dwelling below",certs$floor_ee)
+                             trueNA(certs$floor_d == "(another dwelling below)"),
+                          "dwelling below",certs$floor_ee)
 
 
   certs$roof_ee <- as.character(certs$roof_ee)
   certs$roof_ee <- ifelse(is.na(certs$roof_ee) &
-                                    (certs$roof_d %in% c("(another dwelling above)", "(other premises above)")),
+                            trueNA(certs$roof_d == "(another dwelling above)"),
                                   "dwelling above",certs$roof_ee)
 
 
@@ -145,7 +160,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               floord_suspendedinsualted = length(floor_d[grepl("^suspended, insulated ",floor_d)]),
               floord_suspendedlimitedinsulated = length(floor_d[grepl("^suspended, limited insulation",floor_d)]),
               floord_external = length(floor_d[grepl("(to external air)|(to unheated space)|(the sky outside)",floor_d)]),
-              floord_below = length(floor_d[floor_d == "(another dwelling below)" | floor_d == "(other premises below)" | floor_d == "(same dwelling below) insulated (assumed)"]),
+              floord_below = length(floor_d[floor_d == "(another dwelling below)"]),
 
               window_verygood = length(wind_ee[wind_ee == "Very Good"]),
               window_good = length(wind_ee[wind_ee == "Good"]),
@@ -200,7 +215,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               roofd_flat = length(roof_d[grepl("flat",roof_d)]),
               roofd_room = length(roof_d[grepl("roof room(s)",roof_d) & !grepl("thatched",roof_d)]),
               roofd_thatched = length(roof_d[grepl("thatched",roof_d)]),
-              roofd_above = length(roof_d[roof_d == "(another dwelling above)" | roof_d == "(another premises above)" | roof_d == "(other premises above)" | roof_d == "(same dwelling above)"]),
+              roofd_above = length(roof_d[roof_d == "(another dwelling above)"]),
 
               mainheat_verygood = length(heat_ee[heat_ee == "Very Good"]),
               mainheat_good = length(heat_ee[heat_ee == "Good"]),

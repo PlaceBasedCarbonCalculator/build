@@ -6,7 +6,17 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
   bills_gas_electric = bills_gas_electric[,c("LSOA21CD","year","energy_average_bill")]
   bills_gas_electric = bills_gas_electric[bills_gas_electric$year == max(bills_gas_electric$year),]
 
-  bills_other_heating = bills_other_heating[bills_other_heating$year == max(bills_other_heating$year),]
+  #bills_other_heating = bills_other_heating[bills_other_heating$year == max(bills_other_heating$year),]
+  # Scotland late on other heating data
+  bills_other_heating = bills_other_heating[bills_other_heating$year >= 2022,]
+  bills_other_heating_EW = bills_other_heating[substr(bills_other_heating$LSOA21CD,1,1) %in% c("E","W"),]
+  bills_other_heating_EW = bills_other_heating_EW[bills_other_heating_EW$year == max(bills_other_heating_EW$year),]
+
+  bills_other_heating_S = bills_other_heating[substr(bills_other_heating$LSOA21CD,1,1) == "S",]
+  bills_other_heating_S = bills_other_heating_S[!is.na(bills_other_heating_S$otherheating_average_bill),]
+  bills_other_heating_S = bills_other_heating_S[bills_other_heating_S$year == max(bills_other_heating_S$year),]
+
+  bills_other_heating = rbind(bills_other_heating_EW, bills_other_heating_S)
 
   if(length(unique(c(bills_gas_electric$year[1]),c(bills_other_heating$year[1]))) != 1){
     stop("Other heating and gas/electric bills are from different years")
