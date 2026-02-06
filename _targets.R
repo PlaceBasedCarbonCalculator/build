@@ -490,30 +490,30 @@ tar_target(income_lsoa_msoa,{
 
 
 # Car Registration Statistics
-tar_target(dl_vehicle_registrations,{
-  download_dft_vehicle_registrations(path = file.path(parameters$path_data,"vehicle_registrations"))
-}),
+# tar_target(dl_vehicle_registrations,{
+#   download_dft_vehicle_registrations(path = file.path(parameters$path_data,"vehicle_registrations"))
+# }),
 tar_target(vehicle_registrations,{
   # Long running target ~2 hour
-  load_dft_vehicle_registrations(dl_vehicle_registrations)
+  load_dft_vehicle_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(ulev_registrations,{
   # Long running target ~2 hour
-  load_dft_ulev_registrations(dl_vehicle_registrations)
+  load_dft_ulev_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(ev_registrations,{
   # Long running target ~2 hour
-  load_dft_ev_registrations(dl_vehicle_registrations)
+  load_dft_ev_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
-tar_target(vehicle_registrations_21,{
-  vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"vehicle_registrations")
-}),
-tar_target(ulev_registrations_21,{
-  vehicle_reg_to_21(ulev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ulev_registrations")
-}),
-tar_target(ev_registrations_21,{
-  vehicle_reg_to_21(ev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ev_registrations")
-}),
+# tar_target(vehicle_registrations_21,{
+#   vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"vehicle_registrations")
+# }),
+# tar_target(ulev_registrations_21,{
+#   vehicle_reg_to_21(ulev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ulev_registrations")
+# }),
+# tar_target(ev_registrations_21,{
+#   vehicle_reg_to_21(ev_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"ev_registrations")
+# }),
 
 # Car Emissions
 tar_target(car_emissions_11,{
@@ -521,7 +521,7 @@ tar_target(car_emissions_11,{
   car_emissions_to_21(sub, lsoa_11_21_tools)
 }),
 tar_target(car_emissions_perkm,{
-  car_emissions_post2018(car_emissions_11,vehicle_registrations_21,ulev_registrations_21)
+  car_emissions_post2018(car_emissions_11,vehicle_registrations,ulev_registrations)
 }),
 tar_target(car_emissions,{
   calculate_car_emissions(car_km_lsoa_21, car_emissions_perkm, population)
@@ -546,7 +546,7 @@ tar_target(car_km_pc,{
 
 tar_target(car_km_lsoa_21,{
   extraplote_car_km_trends2(car_km_pc, car_km_2009_2011, centroids_lsoa21,
-                            centroids_dz22, vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22)
+                            centroids_dz22, vehicle_registrations, lookup_lsoa_2011_21, lookup_dz_2011_22)
 }),
 
 # tar_target(car_km_lsoa,{
@@ -1128,16 +1128,16 @@ tar_target(build_access_jsons,{
   export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
 }),
 
-# tar_target(build_postcode_jsons,{
-#   x = postcode_gas_electricity_emissions[,c("postcode","year","gas_meters","elec_meters_all",
-#                                               "elec_meters_std","elec_meters_eco7","gas_totalkwh","elec_totalkwh_all",
-#                                               "elec_totalkwh_std","elec_totalkwh_eco7","gas_meankwh","elec_meankwh_all",
-#                                               "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
-#                                               "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
-#                                               "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
-#   export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
-#                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
-# }),
+tar_target(build_postcode_jsons,{
+  x = postcode_gas_electricity_emissions[,c("postcode","year","gas_meters","elec_meters_all",
+                                              "elec_meters_std","elec_meters_eco7","gas_totalkwh","elec_totalkwh_all",
+                                              "elec_totalkwh_std","elec_totalkwh_eco7","gas_meankwh","elec_meankwh_all",
+                                              "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
+                                              "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
+                                              "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
+  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = FALSE,
+                   path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
+}),
 
 tar_target(build_overview_jsons,{
   make_lsoa_overview_json(lsoa_admin, area_classifications_11_21, lsoa_warnings)

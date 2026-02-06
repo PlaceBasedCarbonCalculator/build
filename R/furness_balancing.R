@@ -168,17 +168,19 @@ furness_incomplete <- function(mat, rsum, csum, tt){
 
 
 generate_combinations <- function(t, n, prefix = numeric()) {
-  result <- list()
+  # Generate all length-n vectors of non-negative integers that sum to t.
+  # Returns a list of numeric vectors. Order matters (compositions).
+  if (n < 1 || t < 0) return(list())
   if (n == 1) {
-    if (t > 0) {
-      result <- list(c(prefix, t))
-    }
-  } else {
-    if (n < 1 || t <= 0) return(list())
-    for (i in t:1) {
-      temp <- generate_combinations(t - i, n - 1, c(prefix, i))
-      result <- c(result, temp)
-    }
+    # single remaining slot must take the remainder (including 0)
+    return(list(c(prefix, t)))
+  }
+
+  result <- list()
+  # allow zeros: iterate i from 0..t
+  for (i in 0:t) {
+    temp <- generate_combinations(t - i, n - 1, c(prefix, i))
+    result <- c(result, temp)
   }
   return(result)
 }

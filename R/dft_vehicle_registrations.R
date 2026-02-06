@@ -34,17 +34,22 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
   # [c] (1-4)    [x] (Not Available)  [z](Not applicable)
   # 5908204      388550
   d125_long <- d125_long[grepl("Q1",d125_long$quarter),]
-  d125_long$LSOA11NM <- NULL
-  d125_list <- dplyr::group_by(d125_long, LSOA11CD, quarter, LicenceStatus)
-  d125_list <- dplyr::group_split(d125_list)
+  d125_long$LSOA21NM <- NULL
+  d125_long <- dplyr::group_by(d125_long, LSOA21CD, quarter, LicenceStatus)
+  d125_long <- dplyr::group_split(d125_long)
 
   # Tests c(10624, 74860, 74862, 27538)
-  d125_clean = pbapply::pblapply(d125_list, fill_gaps)
-  d125_clean = data.table::rbindlist(d125_clean)
+  future::plan("multisession")
+  d125_clean = furrr::future_map(d125_long, .f = fill_gaps,
+                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .progress = TRUE)
+  future::plan("sequential")
 
+  d125_clean = data.table::rbindlist(d125_clean)
+  rm(d125_long)
 
   d125_wide = tidyr::pivot_wider(d125_clean,
-                          id_cols = c("LSOA11CD","quarter"),
+                          id_cols = c("LSOA21CD","quarter"),
                           names_from = c("BodyType","Keepership","LicenceStatus"),
                           values_from = "count"
   )
@@ -64,16 +69,23 @@ load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_re
 
   d135_long <- d135_long[grepl("Q1",d135_long$quarter),]
   d135_long$LSOA11NM <- NULL
-  d135_list <- dplyr::group_by(d135_long, LSOA11CD, quarter)
-  d135_list <- dplyr::group_split(d135_list)
+  d135_long <- dplyr::group_by(d135_long, LSOA21CD, quarter)
+  d135_long <- dplyr::group_split(d135_long)
 
   # Tests c(10624, 74860, 74862, 27538)
-  d135_clean = pbapply::pblapply(d135_list, fill_gaps_135)
-  d135_clean = data.table::rbindlist(d135_clean)
+  #d135_clean = pbapply::pblapply(d135_list, fill_gaps_135)
+  future::plan("multisession")
+  d135_clean = furrr::future_map(d135_long, .f = fill_gaps_135,
+                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .progress = TRUE)
+  future::plan("sequential")
 
+
+  d135_clean = data.table::rbindlist(d135_clean)
+  rm(d135_long)
 
   d135_wide = tidyr::pivot_wider(d135_clean,
-                                 id_cols = c("LSOA11CD","quarter"),
+                                 id_cols = c("LSOA21CD","quarter"),
                                  names_from = c("Fuel","Keepership",),
                                  values_from = "count"
   )
@@ -93,16 +105,22 @@ load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_regi
 
   d145_long <- d145_long[grepl("Q1",d145_long$quarter),]
   d145_long$LSOA11NM <- NULL
-  d145_list <- dplyr::group_by(d145_long, LSOA11CD, quarter)
-  d145_list <- dplyr::group_split(d145_list)
+  d145_long <- dplyr::group_by(d145_long, LSOA21CD, quarter)
+  d145_long <- dplyr::group_split(d145_long)
 
   # Tests c(10624, 74860, 74862, 27538)
-  d145_clean = pbapply::pblapply(d145_list, fill_gaps_135)
-  d145_clean = data.table::rbindlist(d145_clean)
+  #d145_clean = pbapply::pblapply(d145_list, fill_gaps_135)
+  future::plan("multisession")
+  d145_clean = furrr::future_map(d145_long, .f = fill_gaps_135,
+                                 .options = furrr::furrr_options(seed = TRUE),
+                                 .progress = TRUE)
+  future::plan("sequential")
 
+  d145_clean = data.table::rbindlist(d145_clean)
+  rm(d145_long)
 
   d145_wide = tidyr::pivot_wider(d145_clean,
-                                 id_cols = c("LSOA11CD","quarter"),
+                                 id_cols = c("LSOA21CD","quarter"),
                                  names_from = c("Fuel","Keepership",),
                                  values_from = "count"
   )
@@ -162,7 +180,7 @@ fill_gaps = function(x){
   # Make Matrix
   y = x_others[,c("BodyType","Keepership","count2")]
   y$id = paste0(y$BodyType, y$Keepership)
-  y_missing = data.frame(BodyType = rep(c("Cars","Motorcycles","Other body types"), 2),
+  y_missing = data.frame(BodyType = rep(c("Cars","Motorcycles","Other vehicles"), 2),
                          Keepership = rep(c("Company","Private"), each = 3),
                          count2 = 0
   )
@@ -187,11 +205,11 @@ fill_gaps = function(x){
   }
   newdf = as.data.frame(newmat)
   newdf$BodyType <- rownames(newdf)
-  newdf = tidyr::pivot_longer(newdf, cols = c("Company","Private"),names_to = "Keepership", values_to = "count")
-  newdf$LSOA11CD = x_others$LSOA11CD[1]
+  newdf = tidyr::pivot_longer(newdf, cols = c("COMPANY","PRIVATE"),names_to = "Keepership", values_to = "count")
+  newdf$LSOA21CD = x_others$LSOA21CD[1]
   newdf$LicenceStatus = x_others$LicenceStatus[1]
   newdf$quarter = x_others$quarter[1]
-  newdf = newdf[,c("LSOA11CD","BodyType","Keepership","LicenceStatus", "quarter","count")]
+  newdf = newdf[,c("LSOA21CD","BodyType","Keepership","LicenceStatus", "quarter","count")]
   return(newdf)
 }
 
@@ -300,10 +318,10 @@ fill_gaps_135 = function(x){
   newdf = as.data.frame(newmat)
   newdf$Fuel <- rownames(newdf)
   newdf = tidyr::pivot_longer(newdf, cols = dplyr::all_of(keeperships), names_to = "Keepership", values_to = "count")
-  newdf$LSOA11CD = x_others$LSOA11CD[1]
+  newdf$LSOA21CD = x_others$LSOA21CD[1]
   #newdf$LicenceStatus = x_others$LicenceStatus[1]
   newdf$quarter = x_others$quarter[1]
-  newdf = newdf[,c("LSOA11CD","Fuel","Keepership", "quarter","count")]
+  newdf = newdf[,c("LSOA21CD","Fuel","Keepership", "quarter","count")]
   return(newdf)
 
 
