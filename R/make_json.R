@@ -83,24 +83,38 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
     outfile
   }
 
+  convert2json <- function(sub, idcol, dataframe){
+    sub <- as.data.frame(sub)
+    nmsub <- sub[[idcol]][1]
+    sub[[idcol]] <- NULL
+    json = yyjsonr::write_json_str(sub, dataframe = dataframe)
+    names(json) = nmsub
+    json
+  }
+
+  write2file <- function(content, filename) {
+    writeLines(content, filename)
+  }
+
+  message("Converting JSON ",Sys.time())
+
+  json <- purrr::map(x, convert2json, idcol = idcol,
+                     dataframe = dataframe,
+                     .progress = TRUE)
+  json <- unlist(json)
+  paths = file.path(path,paste0(names(json),".json"))
+
   message("Writing JSON ",Sys.time())
 
   # Try to use parallel execution if requested and available (furrr + future).
   if(parallel && requireNamespace("future", quietly = TRUE) && requireNamespace("furrr", quietly = TRUE)){
     # choose workers
     if(is.null(workers)) workers <- max(1, future::availableCores() - 1)
-    future::plan(future::multisession, workers = workers)
-    ignr <- furrr::future_map_chr(x[1:100], write_one, idcol = idcol,
-                                  path = temp_json_dir,
-                                  dataframe = dataframe,
-                                  .progress = TRUE)
-    future::plan(future::sequential)
+    future::plan("multisession")
+    foo = furrr::future_map2(.x = json, .y = paths, .f = write2file, .progress = TRUE)
+    future::plan("sequential")
   } else {
-    # fallback to serial purrr map (fast and robust)
-    ignr <- purrr::map_chr(x, write_one, idcol = idcol,
-                           path = temp_json_dir,
-                           dataframe = dataframe,
-                           .progress = TRUE)
+    foo = purrr::map2(.x = json, .y = paths, .f = write2file, .progress = TRUE)
   }
 
   if(zip){
