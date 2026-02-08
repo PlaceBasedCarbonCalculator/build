@@ -580,7 +580,7 @@ tar_target(pt_json,{
 }),
 
 tar_target(transport_lsoa_data,{
-  select_transport_vars(pt_frequency)
+  select_transport_vars(pt_frequency, vehicle_summary)
 }),
 
 

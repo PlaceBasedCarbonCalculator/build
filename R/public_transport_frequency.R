@@ -152,9 +152,13 @@ load_pt_frequency = function(path = parameters$path_data){
 
 
 
-select_transport_vars = function(pt_frequency){
+select_transport_vars = function(pt_frequency, vehicle_summary){
+
+  vehicle_summary = vehicle_summary[vehicle_summary$year == max(vehicle_summary$year),]
+  vehicle_summary = vehicle_summary[,c("LSOA21CD","pBEV_COMPANY","pBEV_PRIVATE","pULEV_COMPANY","pULEV_PRIVATE")]
 
   pt_frequency = pt_frequency[!is.na(pt_frequency$zone_id),]
+
 
   pt_frequency$maxbus_2006_2008 = pmax(pt_frequency$tph_daytime_avg_2006_3,
                                        pt_frequency$tph_daytime_avg_2007_3,
@@ -170,6 +174,8 @@ select_transport_vars = function(pt_frequency){
                                  "tph_daytime_avg_2023_4")]
 
   names(pt_frequency)[1] = "LSOA21CD"
-  pt_frequency
+
+  join = dplyr::left_join(vehicle_summary, pt_frequency, by = "LSOA21CD")
+  join
 
 }
