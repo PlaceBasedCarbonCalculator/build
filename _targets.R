@@ -494,7 +494,6 @@ tar_target(income_lsoa_msoa,{
 #   download_dft_vehicle_registrations(path = file.path(parameters$path_data,"vehicle_registrations"))
 # }),
 tar_target(vehicle_registrations,{
-  # Long running target ~2 hour
   load_dft_vehicle_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(ulev_registrations,{
@@ -502,7 +501,6 @@ tar_target(ulev_registrations,{
   load_dft_ulev_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
 tar_target(ev_registrations,{
-  # Long running target ~2 hour
   load_dft_ev_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
 # tar_target(vehicle_registrations_21,{

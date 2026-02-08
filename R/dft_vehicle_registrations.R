@@ -45,7 +45,7 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
                                  .progress = TRUE)
   future::plan("sequential")
 
-  d125_clean = data.table::rbindlist(d125_clean)
+  d125_clean = data.table::rbindlist(d125_clean, fill=TRUE)
   rm(d125_long)
 
   d125_wide = tidyr::pivot_wider(d125_clean,
@@ -58,17 +58,20 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
 }
 
 
-load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
+load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
   d135 <- readr::read_csv(file.path(path,"df_VEH0135.csv"))
+  d135 <- d135[d135$LSOA21CD != "Miscellaneous",]
+
 
   d135_long <- tidyr::pivot_longer(d135,
                                    cols = names(d135)[5:ncol(d135)],
                                    names_to = "quarter",
                                    values_to = "count")
+  rm(d135)
 
   d135_long <- d135_long[grepl("Q1",d135_long$quarter),]
-  d135_long$LSOA11NM <- NULL
+  d135_long$LSOA21NM <- NULL
   d135_long <- dplyr::group_by(d135_long, LSOA21CD, quarter)
   d135_long <- dplyr::group_split(d135_long)
 
@@ -76,9 +79,11 @@ load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_re
   #d135_clean = pbapply::pblapply(d135_list, fill_gaps_135)
   future::plan("multisession")
   d135_clean = furrr::future_map(d135_long, .f = fill_gaps_135,
-                                 .options = furrr::furrr_options(seed = 1234L),
-                                 .progress = TRUE)
+                                   .options = furrr::furrr_options(seed = 1234L),
+                                   .progress = TRUE)
   future::plan("sequential")
+
+
 
 
   d135_clean = data.table::rbindlist(d135_clean)
@@ -97,21 +102,21 @@ load_dft_ulev_registrations <- function(path = file.path(data_path(),"vehicle_re
 load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
 
   d145 <- readr::read_csv(file.path(path,"df_VEH0145.csv"))
+  d145 <- d145[d145$LSOA21CD != "Miscellaneous",]
 
   d145_long <- tidyr::pivot_longer(d145,
                                    cols = names(d145)[5:ncol(d145)],
                                    names_to = "quarter",
                                    values_to = "count")
+  rm(d145)
 
   d145_long <- d145_long[grepl("Q1",d145_long$quarter),]
-  d145_long$LSOA11NM <- NULL
+  d145_long$LSOA21NM <- NULL
   d145_long <- dplyr::group_by(d145_long, LSOA21CD, quarter)
   d145_long <- dplyr::group_split(d145_long)
 
-  # Tests c(10624, 74860, 74862, 27538)
-  #d145_clean = pbapply::pblapply(d145_list, fill_gaps_135)
   future::plan("multisession")
-  d145_clean = furrr::future_map(d145_long, .f = fill_gaps_135,
+  d145_clean = furrr::future_map(d145_long, .f = fill_gaps_145,
                                  .options = furrr::furrr_options(seed = 1234L),
                                  .progress = TRUE)
   future::plan("sequential")
@@ -132,6 +137,36 @@ load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_regi
 fill_gaps = function(x){
   incomplete = FALSE
   suppressWarnings(x$count2 <- as.numeric(x$count))
+
+
+  # Sometimes data is missing
+  if(nrow(x) != 12){
+    x_missing = data.frame(LSOA21CD = x$LSOA21CD[1],
+                           BodyType = rep(c("Cars","Motorcycles","Other vehicles","Total"), 3),
+                           Keepership = rep(c("COMPANY","PRIVATE","Total"), each = 4),
+                           LicenceStatus = x$LicenceStatus[1],
+                           quarter = x$quarter[1],
+                           count2 = 0
+    )
+    # Better to assume missing rows are 0???
+    x$id = paste0(x$BodyType,"-",x$Keepership)
+    x_missing$id = paste0(x_missing$BodyType,"-",x_missing$Keepership)
+    x_missing = x_missing[!x_missing$id %in% x$id,]
+    # Special case we only have totals e.g. E01000005 2019 Q1 there are [c] Private vehicles in total but no rows about them
+
+    # Check for missing totals
+    if(any(c(x_missing$Keepership == "Total", x_missing$BodyType == "Total"))){
+      x_missing$count2 = NA
+    } else {
+      x_total_Keepership = unique(x$Keepership[x$BodyType == "Total"])
+      x_total_Keepership = x_total_Keepership[x_total_Keepership != "Total"]
+      x_total_body = unique(x$BodyType[x$Keepership == "Total"])
+      x_total_body = x_total_body[x_total_body != "Total"]
+      x_missing$count2 = ifelse(x_missing$BodyType %in% x_total_body & x_missing$Keepership %in% x_total_Keepership, NA, 0)
+    }
+    x = dplyr::bind_rows(x, x_missing)
+  }
+
   if(all(is.na(x$count2))){
     # No Data
     return(NULL)
@@ -141,6 +176,7 @@ fill_gaps = function(x){
     # All Data
     x$count = x$count2
     x$count2 = NULL
+    x$id = NULL
     x = x[x$BodyType != "Total",]
     x = x[x$Keepership != "Total",]
     return(x)
@@ -156,15 +192,27 @@ fill_gaps = function(x){
     if(is.na(tt)){
       # Overall Total is between 1 and 4
       # Missing Totals
-      x_others$count2 = ifelse(x_others$count == "[c]",1,x_others$count2)
+      if(sum(is.na(x_others$count2)) > 4){
+        # Too many options, pefer option where known [c] over generated option
+        x_others$count2[is.na(x_others$count)] = 0
+      }
+      if(sum(is.na(x_others$count2)) > 4){
+        # If there are still too many options, sick 1 in just the first 4 options
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+      } else {
+        x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
+      }
+
       x_others$count = x_others$count2
-      x_others$count2 = NULL
 
       #check
       if(sum(x_others$count) > 4){
         print(x)
         stop("Assumed values greater than total ")
       }
+
+
+      x_others = x_others[,c("LSOA21CD","BodyType","Keepership","LicenceStatus", "quarter","count")]
 
       return(x_others)
 
@@ -179,15 +227,15 @@ fill_gaps = function(x){
   # Fill Gaps
   # Make Matrix
   y = x_others[,c("BodyType","Keepership","count2")]
-  y$id = paste0(y$BodyType, y$Keepership)
-  y_missing = data.frame(BodyType = rep(c("Cars","Motorcycles","Other vehicles"), 2),
-                         Keepership = rep(c("Company","Private"), each = 3),
-                         count2 = 0
-  )
-  y_missing$id = paste0(y_missing$BodyType, y_missing$Keepership)
-  y_missing = y_missing[!y_missing$id %in% y$id,]
-  y = rbind(y, y_missing)
-  y$id <- NULL
+  # y$id = paste0(y$BodyType, y$Keepership)
+  # y_missing = data.frame(BodyType = rep(c("Cars","Motorcycles","Other vehicles"), 2),
+  #                        Keepership = rep(c("COMPANY","PRIVATE"), each = 3),
+  #                        count2 = 0
+  # )
+  # y_missing$id = paste0(y_missing$BodyType, y_missing$Keepership)
+  # y_missing = y_missing[!y_missing$id %in% y$id,]
+  # y = rbind(y, y_missing)
+  # y$id <- NULL
   y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
   y2_mat = as.matrix(y2[,2:3])
   rownames(y2_mat) = y2$BodyType
@@ -218,6 +266,37 @@ fill_gaps_135 = function(x){
 
   incomplete = FALSE
   suppressWarnings(x$count2 <- as.numeric(x$count))
+
+  # Sometimes data is missing
+  if(nrow(x) != 30){
+    x_missing = data.frame(LSOA21CD = x$LSOA21CD[1],
+                           Fuel = rep(c("PETROL","DIESEL","BATTERY ELECTRIC","HYBRID ELECTRIC (DIESEL)",
+                                            "HYBRID ELECTRIC (PETROL)","PLUG-IN HYBRID ELECTRIC (DIESEL)",
+                                            "PLUG-IN HYBRID ELECTRIC (PETROL)","RANGE EXTENDED ELECTRIC",
+                                            "FUEL CELLS","Total"), 3),
+                           Keepership = rep(c("COMPANY","PRIVATE","Total"), each = 10),
+                           quarter = x$quarter[1],
+                           count2 = 0
+    )
+    # Better to assume missing rows are 0???
+    x$id = paste0(x$Fuel,"-",x$Keepership)
+    x_missing$id = paste0(x_missing$Fuel,"-",x_missing$Keepership)
+    x_missing = x_missing[!x_missing$id %in% x$id,]
+    # Special case we only have totals e.g. E01000005 2019 Q1 there are [c] Private vehicles in total but no rows about them
+
+    if(any(c(x_missing$Fuel == "Total", x_missing$BodyType == "Total"))){
+      x_missing$count2 = NA
+    } else {
+      x_total_fuel = unique(x$Fuel[x$Keepership == "Total"])
+      x_total_Keepership = unique(x$Keepership[x$Fuel == "Total"])
+      x_total_fuel = x_total_fuel[x_total_fuel != "Total"]
+      x_total_Keepership = x_total_Keepership[x_total_Keepership != "Total"]
+      x_missing$count2 = ifelse(x_missing$Fuel %in% x_total_fuel & x_missing$Keepership %in% x_total_Keepership, NA, 0)
+    }
+
+    x = dplyr::bind_rows(x, x_missing)
+  }
+
   if(all(is.na(x$count2))){
     # No Data
     return(NULL)
@@ -227,6 +306,7 @@ fill_gaps_135 = function(x){
     # All Data
     x$count = x$count2
     x$count2 = NULL
+    x$id = NULL
     x = x[x$Keepership != "Total",]
     x = x[x$Fuel != "Total",]
     return(x)
@@ -242,9 +322,19 @@ fill_gaps_135 = function(x){
     if(is.na(tt)){
       # Overall Total is between 1 and 4
       # Missing Totals
-      x_others$count2 = ifelse(x_others$count == "[c]",1,x_others$count2)
+      if(sum(is.na(x_others$count2)) > 4){
+        # Too many options, pefer option where known [c] over generated option
+        x_others$count2[is.na(x_others$count)] = 0
+      }
+      if(sum(is.na(x_others$count2)) > 4){
+        # If there are still too many options, sick 1 in just the first 4 options
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+      } else {
+        x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
+      }
+
       x_others$count = x_others$count2
-      x_others$count2 = NULL
+      #x_others$count2 = NULL
 
       #check
       if(sum(x_others$count) > 4){
@@ -252,35 +342,13 @@ fill_gaps_135 = function(x){
         stop("Assumed values greater than total ")
       }
 
+      x_others = x_others[,c("LSOA21CD","Fuel","Keepership", "quarter","count")]
+
       return(x_others)
 
     } else {
       incomplete = TRUE
-
-      # # Overall Total Know but partial total missing
-      # x_totals_fuel = x_totals[x_totals$Fuel != "Total", ]
-      # x_totals_keep = x_totals[x_totals$Keepership != "Total", ]
-      #
-      # if(anyNA(x_totals_fuel$count2)){
-      #   x_totals_fuel$count2[is.na(x_totals_fuel$count2)] <- distribute(tt - sum(x_totals_fuel$count2, na.rm = TRUE),
-      #                                                                  sum(is.na(x_totals_fuel$count2)))
-      # }
-      # if(anyNA(x_totals_keep$count2)){
-      #   x_totals_keep$count2[is.na(x_totals_keep$count2)] <- distribute(tt - sum(x_totals_keep$count2, na.rm = TRUE),
-      #                                                                   sum(is.na(x_totals_keep$count2)))
-      # }
-      #
-      # x_totals = rbind(x_totals_fuel, x_totals_keep,
-      #                  x_totals[x_totals$Fuel == "Total" & x_totals$Keepership == "Total", ])
-      #
-      # check = FALSE # Disable the check on Furness balancing, as above guesses can be inconsitent
-      # # TODO: come up with a fix for this
-      # # Example
-      # #     ?   5          1   5
-      # # ?   0   ?      2   0   2
-      # # ?   ?   0  --> 2   2!  2
-      # # ?   0   ?      2   0   2
-     }
+    }
 
 
   }
@@ -288,17 +356,143 @@ fill_gaps_135 = function(x){
   # Fill Gaps
   # Make Matrix
   y = x_others[,c("Fuel","Keepership","count2")]
-  y$id = paste0(y$Fuel, y$Keepership)
-  fuels = unique(y$Fuel)
   keeperships = unique(y$Keepership)
-  y_missing = data.frame(Fuel = rep(fuels, length(keeperships)),
-                         Keepership = rep(keeperships, each = length(fuels)),
-                         count2 = 0
-  )
-  y_missing$id = paste0(y_missing$Fuel, y_missing$Keepership)
-  y_missing = y_missing[!y_missing$id %in% y$id,]
-  y = rbind(y, y_missing)
-  y$id <- NULL
+  # y$id = paste0(y$Fuel, y$Keepership)
+  # fuels = unique(y$Fuel)
+  # keeperships = unique(y$Keepership)
+  # y_missing = data.frame(Fuel = rep(fuels, length(keeperships)),
+  #                        Keepership = rep(keeperships, each = length(fuels)),
+  #                        count2 = 0
+  # )
+  # y_missing$id = paste0(y_missing$Fuel, y_missing$Keepership)
+  # y_missing = y_missing[!y_missing$id %in% y$id,]
+  # y = rbind(y, y_missing)
+  # y$id <- NULL
+  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+  rownames(y2_mat) = y2$Fuel
+  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+  # Use Furness balancing to fill gaps
+  if(incomplete){
+    #newmat = furness_incomplete(mat = y2_mat, rsum, csum, tt)
+    newmat = furness_partial_integer_total(mat = y2_mat, rsum, csum, tt)
+  } else {
+    newmat = furness_partial(mat = y2_mat, rsum, csum, check = TRUE)
+  }
+
+  newdf = as.data.frame(newmat)
+  newdf$Fuel <- rownames(newdf)
+  newdf = tidyr::pivot_longer(newdf, cols = dplyr::all_of(keeperships), names_to = "Keepership", values_to = "count")
+  newdf$LSOA21CD = x_others$LSOA21CD[1]
+  #newdf$LicenceStatus = x_others$LicenceStatus[1]
+  newdf$quarter = x_others$quarter[1]
+  newdf = newdf[,c("LSOA21CD","Fuel","Keepership", "quarter","count")]
+  return(newdf)
+
+
+
+
+}
+
+fill_gaps_145 = function(x){
+
+  incomplete = FALSE
+  suppressWarnings(x$count2 <- as.numeric(x$count))
+
+  # Sometimes data is missing
+  if(nrow(x) != 15){
+    x_missing = data.frame(LSOA21CD = x$LSOA21CD[1],
+                           Fuel = rep(c("BATTERY ELECTRIC","PLUG-IN HYBRID ELECTRIC (DIESEL)",
+                                        "PLUG-IN HYBRID ELECTRIC (PETROL)","RANGE EXTENDED ELECTRIC",
+                                        "Total" ), 3),
+                           Keepership = rep(c("COMPANY","PRIVATE","Total"), each = 5),
+                           quarter = x$quarter[1],
+                           count2 = 0
+    )
+    # Better to assume missing rows are 0???
+    x$id = paste0(x$Fuel,"-",x$Keepership)
+    x_missing$id = paste0(x_missing$Fuel,"-",x_missing$Keepership)
+    x_missing = x_missing[!x_missing$id %in% x$id,]
+    # Special case we only have totals e.g. E01000005 2019 Q1 there are [c] Private vehicles in total but no rows about them
+
+    if(any(c(x_missing$Fuel == "Total", x_missing$BodyType == "Total"))){
+      x_missing$count2 = NA
+    } else {
+      x_total_fuel = unique(x$Fuel[x$Keepership == "Total"])
+      x_total_Keepership = unique(x$Keepership[x$Fuel == "Total"])
+      x_total_fuel = x_total_fuel[x_total_fuel != "Total"]
+      x_total_Keepership = x_total_Keepership[x_total_Keepership != "Total"]
+      x_missing$count2 = ifelse(x_missing$Fuel %in% x_total_fuel & x_missing$Keepership %in% x_total_Keepership, NA, 0)
+    }
+
+    x = dplyr::bind_rows(x, x_missing)
+  }
+
+  if(all(is.na(x$count2))){
+    # No Data
+    return(NULL)
+  }
+
+  if(all(!is.na(x$count2))){
+    # All Data
+    x$count = x$count2
+    x$count2 = NULL
+    x$id = NULL
+    x = x[x$Keepership != "Total",]
+    x = x[x$Fuel != "Total",]
+    return(x)
+  }
+
+  #Missing Data
+  x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
+  x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
+
+  if(any(is.na(x_totals$count2))){
+    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+
+    if(is.na(tt)){
+      # Overall Total is between 1 and 4
+      # Missing Totals
+      if(sum(is.na(x_others$count2)) > 4){
+        # Too many options, pefer option where known [c] over generated option
+        x_others$count2[is.na(x_others$count)] = 0
+      }
+      if(sum(is.na(x_others$count2)) > 4){
+        # If there are still too many options, sick 1 in just the first 4 options
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+      } else {
+        x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
+      }
+
+      x_others$count = x_others$count2
+      #x_others$count2 = NULL
+
+      #check
+      if(sum(x_others$count) > 4){
+        print(x)
+        stop("Assumed values greater than total ")
+      }
+
+      x_others = x_others[,c("LSOA21CD","Fuel","Keepership", "quarter","count")]
+
+      return(x_others)
+
+    } else {
+      incomplete = TRUE
+    }
+
+
+  }
+
+  # Fill Gaps
+  # Make Matrix
+  y = x_others[,c("Fuel","Keepership","count2")]
+  keeperships = unique(y$Keepership)
   y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
   y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
   rownames(y2_mat) = y2$Fuel

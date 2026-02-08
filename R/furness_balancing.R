@@ -144,6 +144,7 @@ furness_incomplete <- function(mat, rsum, csum, tt){
 
   combinations_mat <- list()
   na_indices <- which(is.na(mat))
+  error_check <- list()
   for(i in seq(1, length(combinations))){
     mat_sub <- mat
     mat_sub[na_indices] <- combinations[[i]]
@@ -151,16 +152,18 @@ furness_incomplete <- function(mat, rsum, csum, tt){
     rsum_mat <- rowSums(mat_sub)
     csum_mat <- colSums(mat_sub)
 
-    if(!all(rsum_mat == rsum, na.rm = TRUE)){
-      mat_sub <- NULL
-    }
-    if(!all(csum_mat == csum, na.rm = TRUE)){
-      mat_sub <- NULL
-    }
+    rerror = sum(abs(rsum_mat - rsum), na.rm = TRUE)
+    cerror = sum(abs(csum_mat - csum), na.rm = TRUE)
+
+    error_check[[i]] <- sum(rerror, cerror)
     combinations_mat[[i]] <- mat_sub
   }
 
-  combinations_mat <- combinations_mat[lengths(combinations_mat) > 0]
+  error_check = unlist(error_check)
+  combinations_mat <- combinations_mat[error_check == min(error_check)]
+  if(min(error_check) != 0){
+    warning("Solution not found, getting best match")
+  }
   mat_fin <- combinations_mat[[sample(seq_along(combinations_mat), 1)]]
 
   return(mat_fin)
@@ -185,7 +188,24 @@ generate_combinations <- function(t, n, prefix = numeric()) {
   return(result)
 }
 
+compositions_fast <- function(t, n) {
+  # number of bars to place
+  k <- n - 1L
+  m <- t + n - 1L
 
+  # list of bar placements (in C, extremely fast)
+  bars <- utils::combn(m, k)
+
+  # convert bar positions -> composition via gap lengths
+  gaps <- rbind(
+    bars[1, ] - 1L,
+    apply(bars, 2, diff) - 1L,
+    m - bars[k, ]
+  )
+
+  # return as list of integer vectors
+  lapply(seq_len(ncol(gaps)), function(i) gaps[, i])
+}
 
 furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = FALSE, quiet = TRUE){
 
@@ -249,4 +269,104 @@ furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = F
   }
 
   return(mat)
+}
+
+
+# Integer fill for partial margins with a grand total
+# - Enforces provided rows/cols and the grand total exactly (integers)
+# - Keeps known cells fixed
+# - Optionally nudges toward a seed (e.g., IPF result)
+
+furness_partial_integer_total <- function(mat, rsum, csum, tt, seed = NULL) {
+  if (!requireNamespace("lpSolve", quietly = TRUE)) {
+    stop("Package 'lpSolve' is required. Install with install.packages('lpSolve').")
+  }
+  nr <- nrow(mat); nc <- ncol(mat)
+  free <- which(is.na(mat), arr.ind = TRUE)
+  k <- nrow(free)
+
+  K <- replace(mat, is.na(mat), 0)
+  sum_K <- sum(K)
+  T_res <- tt - sum_K
+  if (T_res < -1e-12) stop("Known cells exceed 'tt'.")
+
+  R <- rsum
+  C <- csum
+  R_res <- ifelse(!is.na(R), R - rowSums(K), NA_real_)
+  C_res <- ifelse(!is.na(C), C - colSums(K), NA_real_)
+  if (any(!is.na(R_res) & R_res < -1e-12)) stop("Known cells exceed provided row totals.")
+  if (any(!is.na(C_res) & C_res < -1e-12)) stop("Known cells exceed provided column totals.")
+
+  # Build constraints: provided rows, provided cols, and total
+  n_constr <- sum(!is.na(R_res)) + sum(!is.na(C_res)) + 1
+  A <- matrix(0, nrow = n_constr, ncol = max(k, 1))
+  rhs <- numeric(n_constr)
+  dir <- rep("=", n_constr)
+
+  rmap <- which(!is.na(R_res))
+  cmap <- which(!is.na(C_res))
+
+  ptr <- 0
+  # Rows
+  for (i in rmap) {
+    ptr <- ptr + 1
+    if (k > 0) {
+      idx <- which(free[,1] == i)
+      if (length(idx)) A[ptr, idx] <- 1
+    }
+    rhs[ptr] <- R_res[i]
+  }
+  # Columns
+  for (j in cmap) {
+    ptr <- ptr + 1
+    if (k > 0) {
+      idx <- which(free[,2] == j)
+      if (length(idx)) A[ptr, idx] <- 1
+    }
+    rhs[ptr] <- C_res[j]
+  }
+  # Total
+  ptr <- ptr + 1
+  if (k > 0) A[ptr, seq_len(k)] <- 1
+  rhs[ptr] <- T_res
+
+  if (k == 0) {
+    # Nothing to optimize: just check constraints
+    if (abs(sum_K - tt) > 1e-9) stop("No NA cells but sum(known) != tt.")
+    if (length(rmap)) {
+      if (max(abs(rowSums(K)[rmap] - rsum[rmap])) > 1e-9)
+        stop("Row totals not met by known cells.")
+    }
+    if (length(cmap)) {
+      if (max(abs(colSums(K)[cmap] - csum[cmap])) > 1e-9)
+        stop("Column totals not met by known cells.")
+    }
+    return(mat)
+  }
+
+  # Objective: tie-break using a seed if provided (encourage closeness)
+  if (is.null(seed)) {
+    obj <- rep(1, k)
+  } else {
+    if (!all(dim(seed) == dim(mat))) stop("'seed' must match 'mat' dimensions.")
+    s <- pmax(0, seed[is.na(mat)])
+    # Simple monotone weights toward the seed magnitudes (heuristic)
+    obj <- pmax(1, round(1000 / (1 + s)))
+  }
+
+  sol <- lpSolve::lp(
+    direction   = "min",
+    objective.in = obj,
+    const.mat    = A,
+    const.dir    = dir,
+    const.rhs    = round(rhs),   # integer RHS
+    all.int      = TRUE
+  )
+  if (sol$status != 0) {
+    stop("Integer model infeasible; check 'tt' and provided margins vs known cells.")
+  }
+
+  out <- mat
+  out[is.na(out)] <- pmax(0, round(sol$solution))
+  out
 }
