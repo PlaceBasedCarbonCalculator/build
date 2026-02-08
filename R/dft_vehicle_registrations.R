@@ -99,7 +99,7 @@ load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registratio
 }
 
 
-load_dft_ev_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
+load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
   d145 <- readr::read_csv(file.path(path,"df_VEH0145.csv"))
   d145 <- d145[d145$LSOA21CD != "Miscellaneous",]
@@ -284,7 +284,7 @@ fill_gaps_135 = function(x){
     x_missing = x_missing[!x_missing$id %in% x$id,]
     # Special case we only have totals e.g. E01000005 2019 Q1 there are [c] Private vehicles in total but no rows about them
 
-    if(any(c(x_missing$Fuel == "Total", x_missing$BodyType == "Total"))){
+    if(any(c(x_missing$Fuel == "Total", x_missing$Keepership == "Total"))){
       x_missing$count2 = NA
     } else {
       x_total_fuel = unique(x$Fuel[x$Keepership == "Total"])
@@ -316,8 +316,30 @@ fill_gaps_135 = function(x){
   x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
   x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
 
+  # Make Matrix
+  y = x_others[,c("Fuel","Keepership","count2")]
+  keeperships = unique(y$Keepership)
+
+  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+  rownames(y2_mat) = y2$Fuel
+
+  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+  tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+  tt_alt = min(sum(rsum, na.rm = TRUE), sum(csum, na.rm = TRUE), na.rm = TRUE)
+
+  # Option 1: tt is NA - We have very limited info
+  # Option 2: tt > tt_alt - We know there are missing variaibles
+  # Option 3: tt = tt_alt - We only have to fill in the matrix
+  # Option 4: tt_alt > tt - Something has gone wrong.
+
+  # Check for incomplete or partial totals
   if(any(is.na(x_totals$count2))){
-    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
 
     if(is.na(tt)){
       # Overall Total is between 1 and 4
@@ -353,29 +375,33 @@ fill_gaps_135 = function(x){
 
   }
 
-  # Fill Gaps
-  # Make Matrix
-  y = x_others[,c("Fuel","Keepership","count2")]
-  keeperships = unique(y$Keepership)
-  # y$id = paste0(y$Fuel, y$Keepership)
-  # fuels = unique(y$Fuel)
-  # keeperships = unique(y$Keepership)
-  # y_missing = data.frame(Fuel = rep(fuels, length(keeperships)),
-  #                        Keepership = rep(keeperships, each = length(fuels)),
-  #                        count2 = 0
-  # )
-  # y_missing$id = paste0(y_missing$Fuel, y_missing$Keepership)
-  # y_missing = y_missing[!y_missing$id %in% y$id,]
-  # y = rbind(y, y_missing)
-  # y$id <- NULL
-  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
-  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
-  rownames(y2_mat) = y2$Fuel
-  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
-  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+  if(tt > tt_alt) {
+    # Can't assume missing data is zero
+    x$count2 = ifelse(is.na(x$count),NA,x$count2)
 
-  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
-  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+    x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
+    x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
+
+    y = x_others[,c("Fuel","Keepership","count2")]
+    keeperships = unique(y$Keepership)
+
+    y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+    y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+    rownames(y2_mat) = y2$Fuel
+
+    rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+    rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+    csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+    csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+
+    incomplete = TRUE
+  }
+
+  # Fill Gaps
+
 
   # Use Furness balancing to fill gaps
   if(incomplete){
@@ -452,9 +478,30 @@ fill_gaps_145 = function(x){
   x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
   x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
 
-  if(any(is.na(x_totals$count2))){
-    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+  # Make Matrix
+  y = x_others[,c("Fuel","Keepership","count2")]
+  keeperships = unique(y$Keepership)
 
+  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+  rownames(y2_mat) = y2$Fuel
+
+  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+  tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+  tt_alt = min(sum(rsum, na.rm = TRUE), sum(csum, na.rm = TRUE), na.rm = TRUE)
+
+  # Option 1: tt is NA - We have very limited info
+  # Option 2: tt > tt_alt - We know there are missing variaibles
+  # Option 3: tt = tt_alt - We only have to fill in the matrix
+  # Option 4: tt_alt > tt - Something has gone wrong.
+
+  # Check for incomplete or partial totals
+  if(any(is.na(x_totals$count2))){
     if(is.na(tt)){
       # Overall Total is between 1 and 4
       # Missing Totals
@@ -485,26 +532,40 @@ fill_gaps_145 = function(x){
     } else {
       incomplete = TRUE
     }
+  }
 
+  if (tt > tt_alt) {
+    # Can't assume missing data is zero
+    x$count2 = ifelse(is.na(x$count),NA,x$count2)
 
+    x_totals = x[x$Keepership == "Total" | x$Fuel == "Total",]
+    x_others = x[!(x$Keepership == "Total" | x$Fuel == "Total"),]
+
+    y = x_others[,c("Fuel","Keepership","count2")]
+    keeperships = unique(y$Keepership)
+
+    y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
+    y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
+    rownames(y2_mat) = y2$Fuel
+
+    rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
+    rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
+
+    csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
+    csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
+
+    tt = x_totals$count2[x_totals$Fuel == "Total" & x_totals$Keepership == "Total"]
+
+    incomplete = TRUE
   }
 
   # Fill Gaps
-  # Make Matrix
-  y = x_others[,c("Fuel","Keepership","count2")]
-  keeperships = unique(y$Keepership)
-  y2 <- tidyr::pivot_wider(y, names_from = "Keepership", values_from = "count2")
-  y2_mat = as.matrix(y2[,seq(2, ncol(y2))])
-  rownames(y2_mat) = y2$Fuel
-  rsum = x_totals[x_totals$Keepership == "Total" & x_totals$Fuel != "Total",]
-  rsum = rsum$count2[match(rownames(y2_mat), rsum$Fuel)]
 
-  csum = x_totals[x_totals$Keepership != "Total" & x_totals$Fuel == "Total",]
-  csum = csum$count2[match(colnames(y2_mat), csum$Keepership)]
 
   # Use Furness balancing to fill gaps
   if(incomplete){
-    newmat = furness_incomplete(mat = y2_mat, rsum, csum, tt)
+    #newmat = furness_incomplete(mat = y2_mat, rsum, csum, tt)
+    newmat = furness_partial_integer_total(mat = y2_mat, rsum, csum, tt)
   } else {
     newmat = furness_partial(mat = y2_mat, rsum, csum, check = TRUE)
   }

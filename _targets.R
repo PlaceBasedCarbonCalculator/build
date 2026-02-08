@@ -503,6 +503,16 @@ tar_target(ulev_registrations,{
 tar_target(ev_registrations,{
   load_dft_ev_registrations(file.path(parameters$path_data,"vehicle_registrations"))
 }),
+
+tar_target(vehicle_summary,{
+  make_vehicle_summary(vehicle_registrations, ulev_registrations)
+}),
+
+tar_target(vehicle_summary_json,{
+  export_zone_json(vehicle_summary, idcol = "LSOA21CD", rounddp = 0,
+                   path = "outputdata/json/vehicle_summary", dataframe = "columns",
+                   reduce = FALSE, zip = FALSE)
+}),
 # tar_target(vehicle_registrations_21,{
 #   vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"vehicle_registrations")
 # }),
@@ -1133,7 +1143,7 @@ tar_target(build_postcode_jsons,{
                                               "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
                                               "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
                                               "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
-  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = FALSE,
+  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
                    path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
 }),
 

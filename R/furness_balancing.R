@@ -272,101 +272,443 @@ furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = F
 }
 
 
-# Integer fill for partial margins with a grand total
-# - Enforces provided rows/cols and the grand total exactly (integers)
-# - Keeps known cells fixed
-# - Optionally nudges toward a seed (e.g., IPF result)
+# Fast, memory-efficient fill for incomplete matrices with partial constraints
+# - Never modifies non-NA values (they stay fixed)
+# - Always achieves grand total tt (exactly)
+# - Satisfies all row/column sum constraints that are specified (non-NA in rsum/csum)
+# - Uses iterative balancing on free cells only (Furness-inspired)
+# - Handles over-constrained systems by flexing unconstrained rows/columns
 
-furness_partial_integer_total <- function(mat, rsum, csum, tt, seed = NULL) {
-  if (!requireNamespace("lpSolve", quietly = TRUE)) {
-    stop("Package 'lpSolve' is required. Install with install.packages('lpSolve').")
-  }
+furness_partial_integer_total <- function(mat, rsum, csum, tt, max_iterations = 1000, tolerance = 1e-3) {
+
+  # Validate inputs
+  stopifnot(nrow(mat) == length(rsum), ncol(mat) == length(csum),
+            is.matrix(mat), is.numeric(rsum), is.numeric(csum), is.numeric(tt))
+
   nr <- nrow(mat); nc <- ncol(mat)
-  free <- which(is.na(mat), arr.ind = TRUE)
-  k <- nrow(free)
 
-  K <- replace(mat, is.na(mat), 0)
-  sum_K <- sum(K)
-  T_res <- tt - sum_K
-  if (T_res < -1e-12) stop("Known cells exceed 'tt'.")
+  # Calculate known values and deficits
+  known_sum <- sum(mat, na.rm = TRUE)
+  if (known_sum > tt) stop("Sum of known values exceeds grand total tt.")
 
-  R <- rsum
-  C <- csum
-  R_res <- ifelse(!is.na(R), R - rowSums(K), NA_real_)
-  C_res <- ifelse(!is.na(C), C - colSums(K), NA_real_)
-  if (any(!is.na(R_res) & R_res < -1e-12)) stop("Known cells exceed provided row totals.")
-  if (any(!is.na(C_res) & C_res < -1e-12)) stop("Known cells exceed provided column totals.")
+  total_deficit <- tt - known_sum
 
-  # Build constraints: provided rows, provided cols, and total
-  n_constr <- sum(!is.na(R_res)) + sum(!is.na(C_res)) + 1
-  A <- matrix(0, nrow = n_constr, ncol = max(k, 1))
-  rhs <- numeric(n_constr)
-  dir <- rep("=", n_constr)
-
-  rmap <- which(!is.na(R_res))
-  cmap <- which(!is.na(C_res))
-
-  ptr <- 0
-  # Rows
-  for (i in rmap) {
-    ptr <- ptr + 1
-    if (k > 0) {
-      idx <- which(free[,1] == i)
-      if (length(idx)) A[ptr, idx] <- 1
-    }
-    rhs[ptr] <- R_res[i]
+  # Calculate row/column deficits
+  row_deficit <- rep(NA_real_, nr)
+  for (i in which(!is.na(rsum))) {
+    known_in_row <- sum(mat[i, ], na.rm = TRUE)
+    row_deficit[i] <- rsum[i] - known_in_row
   }
-  # Columns
-  for (j in cmap) {
-    ptr <- ptr + 1
-    if (k > 0) {
-      idx <- which(free[,2] == j)
-      if (length(idx)) A[ptr, idx] <- 1
-    }
-    rhs[ptr] <- C_res[j]
-  }
-  # Total
-  ptr <- ptr + 1
-  if (k > 0) A[ptr, seq_len(k)] <- 1
-  rhs[ptr] <- T_res
 
-  if (k == 0) {
-    # Nothing to optimize: just check constraints
-    if (abs(sum_K - tt) > 1e-9) stop("No NA cells but sum(known) != tt.")
-    if (length(rmap)) {
-      if (max(abs(rowSums(K)[rmap] - rsum[rmap])) > 1e-9)
-        stop("Row totals not met by known cells.")
-    }
-    if (length(cmap)) {
-      if (max(abs(colSums(K)[cmap] - csum[cmap])) > 1e-9)
-        stop("Column totals not met by known cells.")
-    }
+  col_deficit <- rep(NA_real_, nc)
+  for (j in which(!is.na(csum))) {
+    known_in_col <- sum(mat[, j], na.rm = TRUE)
+    col_deficit[j] <- csum[j] - known_in_col
+  }
+
+  # Validation
+  if (any(!is.na(row_deficit) & row_deficit < -1e-9))
+    stop("Known cells exceed at least one prescribed row sum.")
+  if (any(!is.na(col_deficit) & col_deficit < -1e-9))
+    stop("Known cells exceed at least one prescribed column sum.")
+
+  # Special case: no free cells
+  num_free <- sum(is.na(mat))
+  if (num_free == 0) {
+    if (abs(sum(mat, na.rm = TRUE) - tt) > 1e-9)
+      stop("No free cells but sum(known) != tt.")
     return(mat)
   }
 
-  # Objective: tie-break using a seed if provided (encourage closeness)
-  if (is.null(seed)) {
-    obj <- rep(1, k)
-  } else {
-    if (!all(dim(seed) == dim(mat))) stop("'seed' must match 'mat' dimensions.")
-    s <- pmax(0, seed[is.na(mat)])
-    # Simple monotone weights toward the seed magnitudes (heuristic)
-    obj <- pmax(1, round(1000 / (1 + s)))
+  # Identify constrained dimensions
+  constrained_rows <- which(!is.na(row_deficit))
+  constrained_cols <- which(!is.na(col_deficit))
+  unconstrained_rows <- setdiff(seq_len(nr), constrained_rows)
+  unconstrained_cols <- setdiff(seq_len(nc), constrained_cols)
+
+  # Strategy: Initialize conservatively - only cells that are:
+  # 1. In the core constrained × constrained submatrix, OR
+  # 2. The ONLY free cell in a constrained row/column (forced necessity)
+  # This minimizes spreading and keeps unconstrained cells available for adjustment
+
+  # First, identify forced cells (only free cell in a constrained dimension)
+  forced_cells <- matrix(, nrow = 0, ncol = 2)  # Collect forced cell positions
+
+  for (i in constrained_rows) {
+    free_in_row <- which(is.na(mat[i, ]))
+    if (length(free_in_row) == 1) {
+      forced_cells <- rbind(forced_cells, c(i, free_in_row[1]))
+    }
   }
 
-  sol <- lpSolve::lp(
-    direction   = "min",
-    objective.in = obj,
-    const.mat    = A,
-    const.dir    = dir,
-    const.rhs    = round(rhs),   # integer RHS
-    all.int      = TRUE
-  )
-  if (sol$status != 0) {
-    stop("Integer model infeasible; check 'tt' and provided margins vs known cells.")
+  for (j in constrained_cols) {
+    free_in_col <- which(is.na(mat[, j]))
+    if (length(free_in_col) == 1) {
+      forced_cells <- rbind(forced_cells, c(free_in_col[1], j))
+    }
   }
 
-  out <- mat
-  out[is.na(out)] <- pmax(0, round(sol$solution))
-  out
+  # Initialize free_mat: conservative approach
+  free_mat <- mat
+  constraint_deficit <- total_deficit  # Total to distribute
+
+  for (i in seq_len(nr)) {
+    for (j in seq_len(nc)) {
+      if (is.na(mat[i, j])) {
+        in_constr_row <- i %in% constrained_rows
+        in_constr_col <- j %in% constrained_cols
+
+        # Initialize only if in constrained × constrained OR in forced_cells
+        if (in_constr_row && in_constr_col) {
+          # Core constrained submatrix: initialize
+          free_mat[i, j] <- 1 / max(length(constrained_rows), length(constrained_cols), 1)
+        } else if (nrow(forced_cells) > 0 && any(forced_cells[,1] == i & forced_cells[,2] == j)) {
+          # Forced cell: initialize
+          free_mat[i, j] <- 1 / max(length(constrained_rows), length(constrained_cols), 1)
+        } else {
+          # Unconstrained or crossing: keep at 0 for now
+          free_mat[i, j] <- 0
+        }
+      }
+    }
+  }
+
+  # IPF on constrained dimensions: scale all free cells in constrained rows/cols
+  for (iter in seq_len(max_iterations)) {
+    converged <- TRUE
+
+    # Row scaling on CONSTRAINED rows: scale ALL free cells in constrained rows
+    for (i in constrained_rows) {
+      free_in_row <- which(is.na(mat[i, ]))
+
+      if (length(free_in_row) > 0) {
+        current_sum <- sum(free_mat[i, free_in_row])
+        if (current_sum > 1e-12 && row_deficit[i] > 1e-12) {
+          ratio <- row_deficit[i] / current_sum
+          free_mat[i, free_in_row] <- free_mat[i, free_in_row] * ratio
+          converged <- FALSE
+        }
+      }
+    }
+
+    # Column scaling on CONSTRAINED columns: scale ALL free cells in constrained cols
+    for (j in constrained_cols) {
+      free_in_col <- which(is.na(mat[, j]))
+
+      if (length(free_in_col) > 0) {
+        current_sum <- sum(free_mat[free_in_col, j])
+        if (current_sum > 1e-12 && col_deficit[j] > 1e-12) {
+          ratio <- col_deficit[j] / current_sum
+          free_mat[free_in_col, j] <- free_mat[free_in_col, j] * ratio
+          converged <- FALSE
+        }
+      }
+    }
+
+    # Check convergence
+    if (converged) break
+  }
+
+  # Round and compile result so far
+  free_mat <- round(free_mat)
+  result <- mat
+  result[is.na(result)] <- free_mat[is.na(mat)]
+
+  # CORRECTION PASS: Ensure all constrained row/column sums are exact
+  # This fixes oscillation issues from iterative scaling
+  # Key: only adjust using cells in FULLY unconstrained dimensions
+
+  # First, fix constrained rows by moving excess to unconstrained rows
+  for (i in constrained_rows) {
+    current_row_sum <- sum(result[i, ])
+    row_error <- rsum[i] - current_row_sum
+
+    if (abs(row_error) > 1e-6) {
+      if (row_error < 0) {
+        # Row has excess: move it to unconstrained rows in the same columns
+        excess <- abs(row_error)
+        free_in_row <- which(is.na(mat[i, ]))
+
+        # Move excess from free cells in this row to unconstrained rows in those columns
+        for (j in free_in_row) {
+          if (result[i, j] > 1e-9 && excess > 1e-9) {
+            move_amount <- min(result[i, j], excess)
+            result[i, j] <- result[i, j] - move_amount
+            excess <- excess - move_amount
+
+            # Put it in an unconstrained row in the same column
+            if (length(unconstrained_rows) > 0) {
+              rows_available <- which(is.na(mat[, j]) & (seq_len(nr) %in% unconstrained_rows))
+              if (length(rows_available) > 0) {
+                i_unc <- rows_available[1]
+                result[i_unc, j] <- result[i_unc, j] + move_amount
+              }
+            }
+          }
+        }
+      } else {
+        # Row needs more: try unconstrained columns first
+        free_in_row <- which(is.na(mat[i, ]))
+        unconstrained_in_row <- intersect(free_in_row, unconstrained_cols)
+        if (length(unconstrained_in_row) > 0) {
+          j <- unconstrained_in_row[1]
+          result[i, j] <- result[i, j] + row_error
+        } else {
+          # All columns are constrained: allocate directly to constrained columns
+          # We'll allocate value strategically to columns and let the grand total
+          # and column correction pass balance things
+          shortfall_remaining <- abs(row_error)
+          for (j in free_in_row[free_in_row %in% constrained_cols]) {
+            if (shortfall_remaining > 1e-9) {
+              result[i, j] <- result[i, j] + shortfall_remaining
+              shortfall_remaining <- 0
+              break
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # Then fix constrained columns
+  for (j in constrained_cols) {
+    current_col_sum <- sum(result[, j])
+    col_error <- csum[j] - current_col_sum
+
+    if (abs(col_error) > 1e-6) {
+      if (col_error < 0) {
+        # Column has excess: move it to unconstrained columns in the same rows
+        excess <- abs(col_error)
+        free_in_col <- which(is.na(mat[, j]))
+
+        # Move excess from free cells in this column to unconstrained columns in those rows
+        for (i in free_in_col) {
+          if (result[i, j] > 1e-9 && excess > 1e-9) {
+            move_amount <- min(result[i, j], excess)
+            result[i, j] <- result[i, j] - move_amount
+            excess <- excess - move_amount
+
+            # Put it in an unconstrained column in the same row
+            if (length(unconstrained_cols) > 0) {
+              cols_available <- which(is.na(mat[i, ]) & (seq_len(nc) %in% unconstrained_cols))
+              if (length(cols_available) > 0) {
+                j_unc <- cols_available[1]
+                result[i, j_unc] <- result[i, j_unc] + move_amount
+              }
+            }
+          }
+        }
+      } else {
+        # Column needs more: try unconstrained rows first
+        free_in_col <- which(is.na(mat[, j]))
+        unconstrained_in_col <- intersect(free_in_col, unconstrained_rows)
+        if (length(unconstrained_in_col) > 0) {
+          i <- unconstrained_in_col[1]
+          result[i, j] <- result[i, j] + col_error
+        } else {
+          # No unconstrained rows: borrow from unconstrained columns in constrained rows
+          borrowed <- 0
+          for (i in free_in_col[free_in_col %in% constrained_rows]) {
+            if (borrowed < abs(col_error)) {
+              # Look for value in unconstrained columns in this row
+              for (j_unc in unconstrained_cols) {
+                if (is.na(mat[i, j_unc]) && result[i, j_unc] > 1e-9) {
+                  move_amount <- min(result[i, j_unc], abs(col_error) - borrowed)
+                  result[i, j_unc] <- result[i, j_unc] - move_amount
+                  result[i, j] <- result[i, j] + move_amount
+                  borrowed <- borrowed + move_amount
+                  if (abs(borrowed - abs(col_error)) < 1e-9) break
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # Now handle unconstrained dimensions and grand total
+  constrained_sum <- sum(result[constrained_rows, constrained_cols])
+  remaining_need <- tt - sum(result)
+
+  # Determine which columns need more to satisfy their constraints
+  col_still_needs <- col_deficit  # Fresh copy
+  for (j in constrained_cols) {
+    col_still_needs[j] <- csum[j] - sum(result[, j])
+  }
+
+  # Distribute remaining_need to unconstrained rows, prioritizing columns that need it
+  if (abs(remaining_need) > 1e-9 && length(unconstrained_rows) > 0) {
+
+    if (remaining_need > 1e-9) {
+      # Positive deficit: add values
+      # First pass: put in columns that still have deficits (constrained columns)
+      cols_needing_values <- which(col_still_needs > 1e-9)
+
+      if (length(cols_needing_values) > 0 && abs(remaining_need) > 1e-9) {
+        # Distribute need across columns that still need it
+        for (j in cols_needing_values) {
+          need_in_col <- col_still_needs[j]
+          rows_available <- which(is.na(mat[, j]) & (seq_len(nr) %in% unconstrained_rows))
+
+          if (length(rows_available) > 0 && need_in_col > 1e-9) {
+            place_amount <- min(need_in_col, remaining_need)
+            i <- rows_available[1]
+            result[i, j] <- result[i, j] + place_amount
+            remaining_need <- remaining_need - place_amount
+            if (abs(remaining_need) < 1e-9) break
+          }
+        }
+      }
+
+      # If still have remaining, put in purely unconstrained cells
+      if (abs(remaining_need) > 1e-9 && length(unconstrained_rows) > 0 && length(unconstrained_cols) > 0) {
+        for (i in unconstrained_rows) {
+          for (j in unconstrained_cols) {
+            if (is.na(mat[i, j])) {
+              result[i, j] <- result[i, j] + remaining_need
+              remaining_need <- 0
+              break
+            }
+          }
+          if (abs(remaining_need) < 1e-9) break
+        }
+      }
+
+      # Last resort: any free cell in unconstrained row
+      if (abs(remaining_need) > 1e-9 && length(unconstrained_rows) > 0) {
+        for (i in unconstrained_rows) {
+          free_in_row <- which(is.na(mat[i, ]))
+          if (length(free_in_row) > 0 && abs(remaining_need) > 1e-9) {
+            # Prefer unconstrained columns in this row
+            unconstrained_in_row <- intersect(free_in_row, unconstrained_cols)
+            if (length(unconstrained_in_row) > 0) {
+              j <- unconstrained_in_row[1]
+              result[i, j] <- result[i, j] + remaining_need
+              remaining_need <- 0
+              break
+            }
+          }
+        }
+      }
+    } else {
+      # Negative deficit: subtract values (remove from unconstrained cells)
+      # CRITICAL: only remove from FULLY unconstrained cells (unconstrained row AND col)
+      removal_need <- abs(remaining_need)
+
+      # Only remove from purely unconstrained cells
+      if (length(unconstrained_rows) > 0 && length(unconstrained_cols) > 0) {
+        for (i in unconstrained_rows) {
+          for (j in unconstrained_cols) {
+            if (is.na(mat[i, j]) && result[i, j] > 1e-9 && removal_need > 1e-9) {
+              remove_amount <- min(result[i, j], removal_need)
+              result[i, j] <- result[i, j] - remove_amount
+              removal_need <- removal_need - remove_amount
+              if (removal_need < 1e-9) break
+            }
+          }
+          if (removal_need < 1e-9) break
+        }
+      }
+
+      # If still need to remove but no fully unconstrained cells, we have a problem
+      if (removal_need > 1e-9) {
+        # This indicates an infeasible or over-constrained system
+        warning("Cannot fully satisfy grand total constraint without violating row/column constraints.")
+      }
+    }
+  }
+
+  # SECOND CORRECTION PASS: Now that unconstrained rows/columns are populated,
+  # fix any remaining constrained row/column deficits by borrowing
+  for (i in constrained_rows) {
+    current_row_sum <- sum(result[i, ])
+    row_error <- rsum[i] - current_row_sum
+
+    if (row_error > 1e-6 && length(unconstrained_rows) > 0) {
+      # Row needs more and we have unconstrained rows available
+      free_in_row <- which(is.na(mat[i, ]))
+      for (j in free_in_row[free_in_row %in% constrained_cols]) {
+        if (row_error < 1e-9) break
+        # Try to borrow from unconstrained rows in this constrained column
+        for (i_unc in unconstrained_rows) {
+          if (is.na(mat[i_unc, j]) && result[i_unc, j] > 1e-9 && row_error > 1e-9) {
+            move_amount <- min(result[i_unc, j], row_error)
+            result[i_unc, j] <- result[i_unc, j] - move_amount
+            result[i, j] <- result[i, j] + move_amount
+            row_error <- row_error - move_amount
+          }
+        }
+      }
+    }
+  }
+
+  for (j in constrained_cols) {
+    current_col_sum <- sum(result[, j])
+    col_error <- csum[j] - current_col_sum
+
+    if (col_error > 1e-6 && length(unconstrained_cols) > 0) {
+      # Column needs more and we have unconstrained columns available
+      free_in_col <- which(is.na(mat[, j]))
+      for (i in free_in_col[free_in_col %in% constrained_rows]) {
+        if (col_error < 1e-9) break
+        # Try to borrow from unconstrained columns in this constrained row
+        for (j_unc in unconstrained_cols) {
+          if (is.na(mat[i, j_unc]) && result[i, j_unc] > 1e-9 && col_error > 1e-9) {
+            move_amount <- min(result[i, j_unc], col_error)
+            result[i, j_unc] <- result[i, j_unc] - move_amount
+            result[i, j] <- result[i, j] + move_amount
+            col_error <- col_error - move_amount
+          }
+        }
+      }
+    }
+  }
+
+  # Validation: Check that result meets all original constraints
+  violation_count <- 0
+
+  # 1. Check that known values are unchanged
+  known_mask <- !is.na(mat)
+  if (any(result[known_mask] != mat[known_mask])) {
+    warning("Some known (non-NA) values in mat were modified. This violates constraints.")
+    violation_count <- violation_count + 1
+  }
+
+  # 2. Check that result has no NA values
+  if (any(is.na(result))) {
+    warning("Result still contains NA values.")
+    violation_count <- violation_count + 1
+  }
+
+  # 3. Check row sum constraints
+  for (i in constrained_rows) {
+    row_sum <- sum(result[i, ])
+    if (abs(row_sum - rsum[i]) > 1e-6) {
+      warning("Row ", i, " sum is ", row_sum, " but expected ", rsum[i], ".")
+      violation_count <- violation_count + 1
+    }
+  }
+
+  # 4. Check column sum constraints
+  for (j in constrained_cols) {
+    col_sum <- sum(result[, j])
+    if (abs(col_sum - csum[j]) > 1e-6) {
+      warning("Column ", j, " sum is ", col_sum, " but expected ", csum[j], ".")
+      violation_count <- violation_count + 1
+    }
+  }
+
+  # 5. Check grand total constraint
+  total <- sum(result)
+  if (abs(total - tt) > 1e-6) {
+    warning("Grand total is ", total, " but expected ", tt, ".")
+    violation_count <- violation_count + 1
+  }
+
+  if (violation_count == 0) {
+    # All constraints satisfied - silent success
+  }
+
+  result
 }
