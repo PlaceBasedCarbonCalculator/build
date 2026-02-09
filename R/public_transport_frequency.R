@@ -152,10 +152,14 @@ load_pt_frequency = function(path = parameters$path_data){
 
 
 
-select_transport_vars = function(pt_frequency, vehicle_summary){
+select_transport_vars = function(pt_frequency, vehicle_summary, year = 2024, year_scot = 2022){
 
-  vehicle_summary = vehicle_summary[vehicle_summary$year == max(vehicle_summary$year),]
-  vehicle_summary = vehicle_summary[,c("LSOA21CD","pBEV_COMPANY","pBEV_PRIVATE","pULEV_COMPANY","pULEV_PRIVATE")]
+  vehicle_summary$country = substr(vehicle_summary$LSOA21CD,1,1)
+  vehicle_summary = vehicle_summary[(vehicle_summary$year == year & vehicle_summary$country != "S") |
+                                      (vehicle_summary$year == year_scot & vehicle_summary$country == "S")
+                                      ,]
+
+  vehicle_summary = vehicle_summary[,c("LSOA21CD","pBEV_COMPANY","pBEV_PRIVATE","pULEV_COMPANY","pULEV_PRIVATE","vehiclesPHousehold")]
 
   pt_frequency = pt_frequency[!is.na(pt_frequency$zone_id),]
 

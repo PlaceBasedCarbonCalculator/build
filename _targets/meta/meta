@@ -1,6 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
 .furness_partial_integer_total_fallback|function|7048f7cf8ae5e556|||||||||||||||
-.Random.seed|object|00ba69dfc9574814|||||||||||||||
+.Random.seed|object|42e4bdd6f9efd43e|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -410,7 +410,7 @@ make_pmtiles|function|0dc47744893b7675|||||||||||||||
 make_pmtiles_stack|function|9bae27f255a88ccc|||||||||||||||
 make_postcode_areas|function|a174f4acc1279a05|||||||||||||||
 make_similarity_table|function|0dbcc5062f4b469d|||||||||||||||
-make_vehicle_summary|function|20616a61628f3467|||||||||||||||
+make_vehicle_summary|function|99b179277e2d537c|||||||||||||||
 match_2011_classifications_2021|function|211d80dc8f2ac872|||||||||||||||
 match_hh_census|function|013abc3181ca7151|||||||||||||||
 match_hh_census2|function|96640892b23d3e21|||||||||||||||
@@ -624,7 +624,7 @@ select_map_outputs|function|6c14dd992370351e|||||||||||||||
 select_retofit_vars|function|daaf55e02cff7269|||||||||||||||
 select_synth_pop_year|function|22dc4dfa69b628b4|||||||||||||||
 select_synth_pop_year_scot|function|678d1682ca0540d4|||||||||||||||
-select_transport_vars|function|5b8e0e669f9986b3|||||||||||||||
+select_transport_vars|function|caebb0039fc1074d|||||||||||||||
 selected_lcfs|function|10aeefb457df9790|||||||||||||||
 simplify_AccType5|function|1706d0e01b92a2c0|||||||||||||||
 simplify_CarVan5|function|2ade239ee740a119|||||||||||||||
@@ -675,7 +675,7 @@ sythetic_census|function|b859933fa51149c4|||||||||||||||
 sythetic_census_scot|function|9597a51417d68cd4|||||||||||||||
 sythetic_census_scot_old|function|5759f68257288faa|||||||||||||||
 top_architypes|function|24ec6121dffb52da|||||||||||||||
-transport_lsoa_data|stem|4a3fa6d763b10f9b|6a78eaaee65e6911|68a0fdd887a57e6d|-1134730169||t20414.404927104s|b4396a6d5a4435f2|525188|rds|local|vector|||0.69||
+transport_lsoa_data|stem|cf50a1aa708373da|29ccb0810553d4d6|a5fc2d5c5c45448a|-1134730169||t20493.0164520768s|421250ec0fadf2a0|1036910|rds|local|vector|||0.47||
 travel2work|stem|cfc2781f6e5846fb|e5576a0f07ae9520|c0dfa5326169ab19|1855393739||t19826.3475780108s|69355519a838e5af|344568541|rds|local|vector|||360.67||
 try_inter|function|3d2e13f3d21cdcab|||||||||||||||
 ulev_registrations|stem|94e9a851b6455046|d50ceec85aa8bd69|779420dadb1dec04|1655025763||t20492.9242869442s|016fa7f20f549c3f|1399456|rds|local|vector|||710.24|Row 1 sum is 13 but expected 14.|
@@ -693,7 +693,7 @@ vehicle_cenus21|stem|39bfd5b27b7ab560|af39980e1a6ba3f7|753f20f24c02a849|-2353856
 vehicle_reg_to_21|function|13a1b713313d83d3|||||||||||||||
 vehicle_registrations|stem|fe172524b7cbfd4e|a3e297e05b81293e|d1fca843d9d9d42a|-1112227399||t20491.8311120434s|bc57f0035c360486|8228261|rds|local|vector|||1234.92||
 vehicle_registrations_21|stem|a49e6b4e4df806e1|ca2016ab9f0cf688|cd21f3a2aa5beac8|-234560125||t20482.5033211575s|4a58d0328106921d|9953966|rds|local|vector|||7.61||
-vehicle_summary|stem|dd07d75a69811707|2fa212329026ea2e|768b6f170bb5bf8f|334806005||t20492.9251308734s|bf92718cde744745|17854578|rds|local|vector|||66.41|Unknown or uninitialised column LSOA21CD.|
+vehicle_summary|stem|61955fd5215ebfcf|d76184b728319baa|dc21114bd6f759c4|334806005||t20493.0164337919s|703a3f2a771c13ca|31285749|rds|local|vector|||56||
 vehicle_summary_json|stem|d23c3cf2753c4507|2434f173d78eb817|b3a68651d40cdd0d|-1875494818||t20492.9380161635s|3e4acf685da8f273|84|rds|local|vector|||1040.33||
 voa_json_2010|stem|443f7614e95eba4e|186d2b2d7ab042bc|f815365207c4e3c0|-1161495879||t20491.9212829024s|37c5114db086cc97|136|rds|local|vector|||374.51||
 voa_json_2020|stem|f63a2399cffd9700|7004485eb8fcac67|6d4650a83fe69d08|-577594970||t20491.9253252458s|37c5114db086cc97|136|rds|local|vector|||345.73||
@@ -761,7 +761,7 @@ distribute_other_heating|function|adbfccb23788d41d
 split_for_arrays3|function|3015175cbf3af42d
 simplify_AccType5|function|1706d0e01b92a2c0
 simplify_household15|function|abd11747b16b75fd
-select_transport_vars|function|684f8404b8a9942a
+select_transport_vars|function|caebb0039fc1074d
 join_for_geojson|function|880eb9cae0248d75
 join_pmtiles|function|f715f67e020e79b6
 make_geojson|function|b345c3608ac5b125
@@ -834,7 +834,7 @@ read_householdComp4_Tenure3_scot|function|1e63b29783f416c2
 bulk_export_geojson_generic|function|8f60a227a4fd564e
 read_AccType_CarVan_scot|function|cf685bb5076b6a09
 summarise_oac|function|43c2bc16f582bf57
-.Random.seed|object|b5239b0c64da7023
+.Random.seed|object|1be3613cf50f20cb
 oa2021tolsoa2021|function|aa8108a72754f771
 read_AccType_Tenure_scot|function|b2efa1efd9eedd54
 load_area_classifications|function|bca57a8cb99e7081
@@ -944,7 +944,7 @@ load_LSOA_2011_2021_lookup|function|9db7e00257cf0dda
 build_lsoa_population_2022|function|4bba38ad09c4b8f9
 load_inspire|function|6b9cbff23c634f2b
 build_nts_zones|function|ddf367767ed820d8
-make_vehicle_summary|function|20616a61628f3467
+make_vehicle_summary|function|99b179277e2d537c
 load_dno_areas|function|c5638661df981461
 read_cents_scotland_oa11|function|9b3777f1bf021199
 zoomstack_sites|function|16138df4b4f55a1c
@@ -1104,4 +1104,3 @@ load_dft_vehicle_registrations|function|50b8a1e9a66767a7
 load_dft_ev_registrations|function|930abf0aa9794dd5
 load_dft_ulev_registrations|function|b772a310422e0c3f
 read_household_nssec_old|function|f15805f45fc22fb1
-transport_lsoa_data|stem|ec0893f12ef9e08e|29ccb0810553d4d6|31d358ab37fa96ee|-1134730169||t20492.9896621008s|1032e7da73ae4213|769202|rds|local|vector|||1.25||

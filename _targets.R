@@ -505,7 +505,7 @@ tar_target(ev_registrations,{
 }),
 
 tar_target(vehicle_summary,{
-  make_vehicle_summary(vehicle_registrations, ulev_registrations)
+  make_vehicle_summary(vehicle_registrations, ulev_registrations, population)
 }),
 
 tar_target(vehicle_summary_json,{

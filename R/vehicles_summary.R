@@ -1,11 +1,13 @@
-make_vehicle_summary = function(vehicle_registrations, ulev_registrations){
+make_vehicle_summary = function(vehicle_registrations, ulev_registrations, population){
 
-  vh_long = pivot_longer(vehicle_registrations,
+  population = population[,c("LSOA21CD","year","households_est","all_ages","adults")]
+
+  vh_long = tidyr::pivot_longer(vehicle_registrations,
                          cols = names(vehicle_registrations)[3:ncol(vehicle_registrations)],
                          names_sep = "_",
                          names_to = c("BodyType","Keepership","Licence"),
                          values_to = "vehicles")
-  ulev_long = pivot_longer(ulev_registrations,
+  ulev_long = tidyr::pivot_longer(ulev_registrations,
                            cols = names(ulev_registrations)[3:ncol(ulev_registrations)],
                            names_sep = "_",
                            names_to = c("Fuel","Keepership"),
@@ -44,17 +46,6 @@ make_vehicle_summary = function(vehicle_registrations, ulev_registrations){
     dplyr::group_by(LSOA21CD,year,Fuel,Keepership) |>
     dplyr::summarise(ulevs = sum(ulevs, na.rm = TRUE))
 
-
-  length(unique(vh_long$LSOA21CD)) #43064 - correct
-  length(unique(ulev_long$LSOA21CD)) #42120 - some missing!
-
-  lsoa_pop = unique(population$LSOA21CD)
-  lsoa_vh = unique(vh_long$LSOA21CD)
-  lsoa_ulev = unique(ulev_long$LSOA21CD)
-
-  head(lsoa_vh[!lsoa_vh %in% lsoa_pop])
-  head(lsoa_ulev[!lsoa_ulev %in% lsoa_pop])
-
   vh_summary = vh_long |>
     dplyr::group_by(LSOA21CD,year,Keepership) |>
     dplyr::summarise(vehicles = sum(vehicles, na.rm = TRUE))
@@ -64,7 +55,7 @@ make_vehicle_summary = function(vehicle_registrations, ulev_registrations){
 
   vh_summary2 = dplyr::left_join(vh_summary, vh_summary_alt, by = c("LSOA21CD","year","Keepership"))
 
-  ulev_summary = pivot_wider(ulev_long, names_from = "Fuel", values_from = "ulevs")
+  ulev_summary = tidyr::pivot_wider(ulev_long, names_from = "Fuel", values_from = "ulevs")
   ulev_summary$ULEVs = rowSums(ulev_summary[,c("BEV","PHEV","iceULEV","HEV","REEV","fuelcell")])
 
   all_summary = dplyr::left_join(vh_summary2, ulev_summary, by = c("LSOA21CD","year","Keepership"))
@@ -88,6 +79,20 @@ make_vehicle_summary = function(vehicle_registrations, ulev_registrations){
                                         id_cols = c("LSOA21CD","year"),
                                         names_from = "Keepership",
                                         values_from = names(all_summary)[4:ncol(all_summary)])
+
+  all_summary_wide = dplyr::left_join(all_summary_wide, population, by = c("LSOA21CD","year"))
+
+  all_summary_wide$vehiclesPPers = ifelse(all_summary_wide$all_ages > 0,all_summary_wide$vehicles_PRIVATE / all_summary_wide$all_ages, 0)
+  all_summary_wide$vehiclesPAdult = ifelse(all_summary_wide$adults > 0,all_summary_wide$vehicles_PRIVATE / all_summary_wide$adults, 0)
+  all_summary_wide$vehiclesPHousehold = ifelse(all_summary_wide$households_est > 0,all_summary_wide$vehicles_PRIVATE / all_summary_wide$households_est, 0)
+
+  all_summary_wide$vehiclesPPers[is.na(all_summary_wide$vehiclesPPers)] = 0
+  all_summary_wide$vehiclesPAdult[is.na(all_summary_wide$vehiclesPAdult)] = 0
+  all_summary_wide$vehiclesPHousehold[is.na(all_summary_wide$vehiclesPHousehold)] = 0
+
+  all_summary_wide$all_ages = NULL
+  all_summary_wide$adults = NULL
+  all_summary_wide$households_est = NULL
 
   all_summary_wide
 }
