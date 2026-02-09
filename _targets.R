@@ -509,7 +509,7 @@ tar_target(vehicle_summary,{
 }),
 
 tar_target(vehicle_summary_json,{
-  export_zone_json(vehicle_summary, idcol = "LSOA21CD", rounddp = 0,
+  export_zone_json(vehicle_summary, idcol = "LSOA21CD", rounddp = 2,
                    path = "outputdata/json/vehicle_summary", dataframe = "columns",
                    reduce = FALSE, zip = FALSE)
 }),

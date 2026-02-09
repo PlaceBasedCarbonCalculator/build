@@ -134,11 +134,26 @@ make_pmtiles_stack = function(lsoa_data,
                               bounds_lsoa_GB_super_generalised,
                               zoomstack_buildings_lst_4326 = NULL,
                               name = "",
-                              output_path = "outputdata/retofit"){
+                              output_path = "outputdata/retofit",
+                              rounddp = 3
+                              ){
 
   if(!dir.exists(output_path)){
     stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
   }
+
+  # Round to 3DP
+  for(i in seq_len(ncol(lsoa_data))){
+    if(inherits(lsoa_data[[i]],"numeric")){
+      if(rounddp == 0){
+        lsoa_data[[i]] = as.integer(lsoa_data[[i]])
+      } else {
+        lsoa_data[[i]] = round(lsoa_data[[i]], rounddp)
+      }
+
+    }
+  }
+
 
   # Make GeoJSON
   zones_high =  join_for_geojson(lsoa_data, bounds_lsoa_GB_full)
