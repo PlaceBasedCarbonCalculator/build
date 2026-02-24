@@ -1,6 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
 .furness_partial_integer_total_fallback|function|7048f7cf8ae5e556|||||||||||||||
-.Random.seed|object|848e76c8f26d835f|||||||||||||||
+.Random.seed|object|1afd964334db5800|||||||||||||||
 access_counts|function|9c1f1558ce226d44|||||||||||||||
 access_poi_circle|stem|7426ed7156c4c51d|7c5850f48abcd664|da54f6dee4afd16d|1042736904||t19755.975088427s|6c491d1972868635|468492059|rds|local|vector|||1410.047||
 access_poi_circle_15min|stem|1e2f9309327e3e4e|8c3138b6071facfc|42edcf6b6a5f9ff3|-1168344665||t19934.4341661797s|303621df6bb048b8|238414896|rds|local|vector|||195.66||
@@ -299,8 +299,8 @@ la_emissions_all|stem|5c2b39c8fc1c267f|642c6801b4ae98bf|5128be052ab95a0c|-150360
 la_emissions_summary_json|stem|a650c22a6ba82dae|7bbc64a77c79d79f|09fe45b9f5470412|-545267571||t20486.9552437334s|e655bbbdcbba1d63|81|rds|local|vector|||172.84||
 land_registry_add_uprn|function|6489e3e9ae116856|||||||||||||||
 landcover|stem|923fe6f770326951|d6b101d06d29a5cb|853a1f4270ce3980|-1687245806||t19858.8716744441s|cc3974d52f0c210a|400709753|rds|local|vector|||5272.96|repeating attributes for all subgeometries for which they may not be constant. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to b|
-lcfs|stem|fcf7a6c9fd125923|0b5654f1441a2281|0804c1445d60f1ff|1276346926||t20508.8297239136s|ceb384e8ed71358a|36307051|rds|local|vector|||211.94|Undeclared levels 33, 62, 66, 70, 74, 79, 92, 95, 96, 102, 110, 111, 118, 140, 160, 171, 174, 188, 196, 199, 227, 230, 261, 279, 291, 300, 319, 354, 361, 362, 373, 374, 393, 394, 398, 421, 425, 472, 473, 483, 511, 514, 545, 556, 628, 663, 671, 677, 686, 697, 702, 709, 736, 745, 758, 761, 768, 778, 783, 792, 813, 814, 845, 870, 871, 877, 885, 896, 905, 911, 918, 928, 930, 960, 975, 1009, 1011, 1034, 1059, 1078, 1087, 1099, 1115, 1123, 1171, 1173, 1198, 1205, 1243, 1257, 1264, 1294, 1305, 1345, 1377, 1378, 1385, 1395, 1401, 1429, 1455, 1464, 1468, 1475, 1493, 1503, 1516, 1520, 1527, 1539, 1542, 1544, 1547, 1563, 1577, 1605, 1624, 1635, 1641, 1659, 1670, 1673, 1677, 1678, 1689, 1694, 1712, 1719, 1720, 1751, 1766, 1800, 1802, 1807, 1809, 1812, 1813, 1838, 1843, 1845, 1846, 1892, 1901, 1905, 1972, 1983, 1994, 2041, 2046, 2051, 2053, 2059, 2069, 2086, 2111, 2117, 2128, 2150, 2153, 2157, 2158, 2159, 2179, 2189, 2207, 2217, 2240, 2255, 2269, 2281, 2305, 2313, 2319, 2337, 2358, 2362, 2376, 2383, 2392, 2393, 2405, 2430, 2453, 2461, 2472, 2478, 2479, 2480, 2507, 2536, 2554, 2592, 2600, 2613, 2660, 2665, 2673, 2676, 2702, 2717, 2724, 2733, 2737, 2744, 2766, 2789, 2792, 2793, 2819, 2826, 2827, 2839, 2847, 2945, 2970, 2984, 2986, 2989, 3004, 3019, 3026, 3032, 3038, 3041, 3074, 3089, 3096, 3101, 3104, 3113, 3118, 3124, 3127, 3135, 3139, 3143, 3145, 3152, 3153, 3195, 3235, 3251, 3282, 3285, 3300, 3304, 3313, 3337, 3341, 3342, 3348, 3364, 3367, 3369, 3372, 3379, 3391, 3421, 3489, 3492, 3530, 3537, 3562, 3565, 3584, 3585, 3603, 3606, 3615, 3629, 3630, 3634, 3653, 3663, 3675, 3678, 3680, 3693, 3699, 3707, 3711, 3728, 3751, 3799, 3806, 3815, 3857, 3875, 3892, 3896, 3913, 3920, 3923, 3924, 3936, 3938, 3944, 3950, 3956, 3962, 3967, 3968, 3971, 3974, 3982, 4001, 4009, 4020, 4022, 4024, 4039, 4050, 4070, 4086, 4090, 4097, 4113, 4115, 4129, 4143, 4172, 4184, 4185, 4197, 4212, 4230, 4247, 4279, 4291, 4330, 4345, 4359, 4377, 4382, 4446, 4453, 4459, 4466, 4534, 4548, 4549, 4561, 4582, 4601, 4610, 4612, 4630, 4633, 4662, 4680, 4690, 4705,|
-lcfs_clean|stem|f2ce140a271deacb|9acd08919892c40f|089c4b97143cd839|-2061081377||t20376.5175544067s||5512283|rds|local|vector|||1.27||replacement has 0 rows, data has 8662
+lcfs|stem|e038c88f59af3934|0b5654f1441a2281|94e5609fda682cbe|1276346926||t20508.8752849174s|b08c7f7f08efb71e|36331031|rds|local|vector|||312.83|Undeclared levels 33, 62, 66, 70, 74, 79, 92, 95, 96, 102, 110, 111, 118, 140, 160, 171, 174, 188, 196, 199, 227, 230, 261, 279, 291, 300, 319, 354, 361, 362, 373, 374, 393, 394, 398, 421, 425, 472, 473, 483, 511, 514, 545, 556, 628, 663, 671, 677, 686, 697, 702, 709, 736, 745, 758, 761, 768, 778, 783, 792, 813, 814, 845, 870, 871, 877, 885, 896, 905, 911, 918, 928, 930, 960, 975, 1009, 1011, 1034, 1059, 1078, 1087, 1099, 1115, 1123, 1171, 1173, 1198, 1205, 1243, 1257, 1264, 1294, 1305, 1345, 1377, 1378, 1385, 1395, 1401, 1429, 1455, 1464, 1468, 1475, 1493, 1503, 1516, 1520, 1527, 1539, 1542, 1544, 1547, 1563, 1577, 1605, 1624, 1635, 1641, 1659, 1670, 1673, 1677, 1678, 1689, 1694, 1712, 1719, 1720, 1751, 1766, 1800, 1802, 1807, 1809, 1812, 1813, 1838, 1843, 1845, 1846, 1892, 1901, 1905, 1972, 1983, 1994, 2041, 2046, 2051, 2053, 2059, 2069, 2086, 2111, 2117, 2128, 2150, 2153, 2157, 2158, 2159, 2179, 2189, 2207, 2217, 2240, 2255, 2269, 2281, 2305, 2313, 2319, 2337, 2358, 2362, 2376, 2383, 2392, 2393, 2405, 2430, 2453, 2461, 2472, 2478, 2479, 2480, 2507, 2536, 2554, 2592, 2600, 2613, 2660, 2665, 2673, 2676, 2702, 2717, 2724, 2733, 2737, 2744, 2766, 2789, 2792, 2793, 2819, 2826, 2827, 2839, 2847, 2945, 2970, 2984, 2986, 2989, 3004, 3019, 3026, 3032, 3038, 3041, 3074, 3089, 3096, 3101, 3104, 3113, 3118, 3124, 3127, 3135, 3139, 3143, 3145, 3152, 3153, 3195, 3235, 3251, 3282, 3285, 3300, 3304, 3313, 3337, 3341, 3342, 3348, 3364, 3367, 3369, 3372, 3379, 3391, 3421, 3489, 3492, 3530, 3537, 3562, 3565, 3584, 3585, 3603, 3606, 3615, 3629, 3630, 3634, 3653, 3663, 3675, 3678, 3680, 3693, 3699, 3707, 3711, 3728, 3751, 3799, 3806, 3815, 3857, 3875, 3892, 3896, 3913, 3920, 3923, 3924, 3936, 3938, 3944, 3950, 3956, 3962, 3967, 3968, 3971, 3974, 3982, 4001, 4009, 4020, 4022, 4024, 4039, 4050, 4070, 4086, 4090, 4097, 4113, 4115, 4129, 4143, 4172, 4184, 4185, 4197, 4212, 4230, 4247, 4279, 4291, 4330, 4345, 4359, 4377, 4382, 4446, 4453, 4459, 4466, 4534, 4548, 4549, 4561, 4582, 4601, 4610, 4612, 4630, 4633, 4662, 4680, 4690, 4705,|
+lcfs_clean|stem|6c632d8c6c364259|9acd08919892c40f|ff6aea1535d27260|-2061081377||t20508.8445958864s|89be40e4b67513e0|6303100|rds|local|vector|||1.78||
 load_area_classifications|function|bca57a8cb99e7081|||||||||||||||
 load_building_age_2011|function|d517be5ed7a7787e|||||||||||||||
 load_car_emissions|function|3ee450f00ada0a41|||||||||||||||
@@ -333,8 +333,8 @@ load_inspire|function|6b9cbff23c634f2b|||||||||||||||
 load_inspire_scot|function|1e8c9e6c81c5850f|||||||||||||||
 load_inspire_scotland|function|92cd49bdeddd6948|||||||||||||||
 load_la_consumption_accounts|function|6e7c7c068bd4d2c4|||||||||||||||
-load_LCFS|function|45a7e734d3b13bb9|||||||||||||||
-load_LCFS_single|function|d7f49d7f08bb39c9|||||||||||||||
+load_LCFS|function|7560ea5075acb04b|||||||||||||||
+load_LCFS_single|function|0ecc338b469db0a1|||||||||||||||
 load_lr_price_paid|function|048d800420da639e|||||||||||||||
 load_LSOA_2001_2011_lookup|function|339e62d02f7d8bd0|||||||||||||||
 load_LSOA_2011_2021_lookup|function|9db7e00257cf0dda|||||||||||||||
@@ -417,8 +417,8 @@ match_hh_census|function|013abc3181ca7151|||||||||||||||
 match_hh_census2|function|96640892b23d3e21|||||||||||||||
 match_hh_census3|function|68d9454a4b7477ad|||||||||||||||
 match_income_lsoa_msoa|function|e1b033060fc1b616|||||||||||||||
-match_LCFS_synth_pop|function|b45df58ce39f46f3|||||||||||||||
-match_LCFS_synth_pop_scotland|function|552c9ee48ed59c9c|||||||||||||||
+match_LCFS_synth_pop|function|89663325c4bc19c5|||||||||||||||
+match_LCFS_synth_pop_scotland|function|8bf86fafe9ee30b9|||||||||||||||
 match_matrix_csums|function|0cbf9af72a01b1e3|||||||||||||||
 match_matrix_rsums|function|9ef50828098d91fd|||||||||||||||
 match_matrix_rsums_csums|function|87aea58ab10a59b9|||||||||||||||
@@ -626,7 +626,7 @@ select_retofit_vars|function|daaf55e02cff7269|||||||||||||||
 select_synth_pop_year|function|22dc4dfa69b628b4|||||||||||||||
 select_synth_pop_year_scot|function|678d1682ca0540d4|||||||||||||||
 select_transport_vars|function|caebb0039fc1074d|||||||||||||||
-selected_lcfs|function|0eb68d61e880f3c1|||||||||||||||
+selected_lcfs|function|a7c6c520f898e11b|||||||||||||||
 simplify_AccType5|function|1706d0e01b92a2c0|||||||||||||||
 simplify_CarVan5|function|2ade239ee740a119|||||||||||||||
 simplify_ethnic6|function|73e78913ba551ba8|||||||||||||||
@@ -645,7 +645,7 @@ split_for_arrays2|function|1695f2a77110a39f|||||||||||||||
 split_for_arrays3|function|3015175cbf3af42d|||||||||||||||
 split_lsoa_landuse|function|1c3deb4e8894a5ac|||||||||||||||
 split_merge|function|cffcc48ffc772922|||||||||||||||
-subset_lcfs|function|fddda4b2e74fd6c7|||||||||||||||
+subset_lcfs|function|615874e5418056e0|||||||||||||||
 summarise_access_proximity|function|941de24ef762effa|||||||||||||||
 summarise_household_composition|function|1355c157838b9f59|||||||||||||||
 summarise_oac|function|43c2bc16f582bf57|||||||||||||||
@@ -667,6 +667,8 @@ synth_households_lcfs_2018|stem|a38e8e7eff16efeb|4909e1b404e1166c|2bc21833cf46a8
 synth_households_lcfs_2018_scotland|stem|8905a80d506ea6d3|b41a20a6e1d6eb0e|40ca2151abca20e3|-698012212||t20482.4693249372s|bd86c25e5e6f8874|171877143|rds|local|vector|||748.89||
 synth_households_lcfs_2020|stem|94bbbdc5b41ef239|1e32fb66bc68db12|2bc21833cf46a836|-391173513||t20482.4943761321s|09e8741456cfc64f|1255025354|rds|local|vector|||1899.95||
 synth_households_lcfs_2020_scotland|stem|9de42ed5ebe6ff3c|6e66fcb7643f18a0|40ca2151abca20e3|-1282725462||t20482.5031919178s|647293a779afa00e|165383152|rds|local|vector|||726.75||
+synth_households_lcfs_2022|stem||8f4b70cfaf277195|a3c3a01dbe0d2afd|-13484761||t20508.8485091308s||0|rds|local|vector|||457.22||replacement has 0 rows, data has 8637
+synth_households_lcfs_2022_scotland|stem|c34b9c625d68fece|6e66fcb7643f18a0|b73fcd28bd5a2339|-1519089483||t20508.8857659018s|5bca8446807aaa9a|165886592|rds|local|vector|||866.74||
 synth_pop_seed|stem|21ab0c9bf270f739|6e11a767909df2ac|d1742a3907e0718c|1537537442||t20291.7663811375s|8e968300a28065b7|12229|rds|local|vector|||2.78|Target not consistents  shifting to probabilities                  Check input data|
 synth_pop_seed_scotland|stem|80a87d7408363fa4|3e02ae24cfa23f7f|e16696874f7873dc|203855004||t20273.4660544647s|28ecb313c457fa4b|145267|rds|local|vector|||40.5|One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. One or more parsing issues, call problems on your data frame for details,e.g.  dat  vroom...  problemsdat. Target not consistents  shifting to probabilities                  Check input data|
 syth_communit_photo_dz_scot|function|f6bb7975d62a63b9|||||||||||||||
@@ -835,7 +837,7 @@ read_householdComp4_Tenure3_scot|function|1e63b29783f416c2
 bulk_export_geojson_generic|function|8f60a227a4fd564e
 read_AccType_CarVan_scot|function|cf685bb5076b6a09
 summarise_oac|function|43c2bc16f582bf57
-.Random.seed|object|061503bcab6397e0
+.Random.seed|object|605d8aaa2cc2a443
 oa2021tolsoa2021|function|aa8108a72754f771
 read_AccType_Tenure_scot|function|b2efa1efd9eedd54
 load_area_classifications|function|bca57a8cb99e7081
@@ -998,7 +1000,7 @@ read_bounds|function|c98e479b00946565
 build_lsoa_population|function|16788b7cff0945bf
 download_boundaries|function|1fa7e8b8fbb505d6
 download_dft_vehicle_registrations|function|4abd1dbd8aaa2b3d
-match_LCFS_synth_pop_scotland|function|552c9ee48ed59c9c
+match_LCFS_synth_pop_scotland|function|8bf86fafe9ee30b9
 read_postcodes|function|161ea70c12eca290
 load_ons_isochrones|function|f0f1a776e69ee05a
 read_hhSize_hhComp|function|4c9e375d8ba2de75
@@ -1032,7 +1034,7 @@ gtfs_stop_frequency|function|c3d1ff0baab81604
 gtfs_trips_per_zone|function|a650516e2a50fe6d
 calculate_consumption_lsoa|function|88cc4a1a62d4eac6
 get_flights_lsoa_emissions|function|5c5b1ef1bcc91350
-consumption_footprint_syth_pop|function|db19ccdb97dfc868
+consumption_footprint_syth_pop|function|dc8b70ad7e2c54d1
 add_building_heights|function|b89db7e6422a5627
 make_income_bands_lsoa|function|bc47ebe1ddb159ee
 bulk_export_pbcc|function|f9773e86e0222ef4
@@ -1057,7 +1059,7 @@ subset_lcfs|function|615874e5418056e0
 make_dz_11_22_lookup|function|ad5245ee09d664c8
 wiggle_points|function|1e1322f299018099
 bal_func|function|3d84c2b06b3a8ace
-match_LCFS_synth_pop|function|b45df58ce39f46f3
+match_LCFS_synth_pop|function|89663325c4bc19c5
 extrapolate_population_households|function|a9b1c8725af46739
 value2grade|function|89690dc11411bfa0
 split_merge|function|cffcc48ffc772922
@@ -1090,7 +1092,7 @@ select_map_outputs|function|6c14dd992370351e
 prep_postcode_gas_electic|function|0eb64f52e5f5c3e2
 combine_lsoa_emissions|function|38155d2bb2679ec3
 zoomstack_buildings_lsoa|function|293cad9262b9e8c6
-load_LCFS_single|function|6d04ff53b4f99f1a
+load_LCFS_single|function|0ecc338b469db0a1
 split_lsoa_landuse|function|1c3deb4e8894a5ac
 balance_nssec2|function|9b19e94c84f6f2c6
 combine_nssec_enthinic|function|a5e88a8e14ea38bf
@@ -1099,7 +1101,7 @@ fill_gaps|function|da60933d58114c3d
 fill_gaps_145|function|d75eafc11dc6fe99
 fill_gaps_135|function|02b9da213c5f6e4a
 balance_nssec|function|9663990c20e9b3fc
-load_LCFS|function|7af4fbe19b32206f
+load_LCFS|function|7560ea5075acb04b
 read_household_nssec|function|728ffc2d92af98ca
 build_household_types|function|b3c432e74bc2bbd3
 load_dft_vehicle_registrations|function|50b8a1e9a66767a7

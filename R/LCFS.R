@@ -387,6 +387,10 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
     household_char$OAC = household_char$OAC3D
   }
 
+  #Fix Income
+  if(is.null(household_char$incanon)){
+    household_char$incanon = household_char$anon_income
+  }
 
   #Fix Upper Case
   cols = names(household_char)[grepl("^[cpba]",names(household_char))]

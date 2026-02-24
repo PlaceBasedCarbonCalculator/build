@@ -69,7 +69,7 @@ match_LCFS_synth_pop = function(census21_synth_households,
   }
   if(inc_year == 2012){
     oac_year = 2001
-  } else if(inc_year >= 2022) {
+  } else if(inc_year >= 2024) {
     oac_year = 2021
   } else {
     oac_year = 2011
@@ -228,7 +228,7 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
 
   if(inc_year <= 2012){
     oac_year = 2001
-  } else if(inc_year >= 2022) {
+  } else if(inc_year >= 2024) {
     oac_year = 2021
   } else {
     oac_year = 2011

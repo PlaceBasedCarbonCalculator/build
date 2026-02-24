@@ -754,7 +754,7 @@ tar_target(consumption_la,{
 }),
 
 tar_target(consumption_multipliers_uk,{
-  load_consumption_multipliers(dl_consumption)
+  load_consumption_multipliers(path = file.path(parameters$path_data,"consumption/Defra22_results_UK.ods"))
 }),
 
 tar_target(consumption_nations,{
@@ -766,9 +766,11 @@ tar_target(consumption_income,{
 }),
 
 tar_target(consumption_syth_pop,{
-  consumption_footprint_syth_pop(synth_households_lcfs_2020,synth_households_lcfs_2018,
+  consumption_footprint_syth_pop(synth_households_lcfs_2022,
+                                 synth_households_lcfs_2020,synth_households_lcfs_2018,
                                  synth_households_lcfs_2016,synth_households_lcfs_2014,
                                  synth_households_lcfs_2012,synth_households_lcfs_2010,
+                                 synth_households_lcfs_2022_scotland,
                                  synth_households_lcfs_2020_scotland,synth_households_lcfs_2018_scotland,
                                  synth_households_lcfs_2016_scotland,synth_households_lcfs_2014_scotland,
                                  synth_households_lcfs_2012_scotland,synth_households_lcfs_2010_scotland
@@ -995,6 +997,11 @@ tar_target(lcfs,{
 
 tar_target(lcfs_clean,{
   selected_lcfs(lcfs)
+}),
+
+tar_target(synth_households_lcfs_2022_scotland,{
+  match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
+                                population, base_year = "2020/21")
 }),
 
 tar_target(synth_households_lcfs_2020_scotland,{

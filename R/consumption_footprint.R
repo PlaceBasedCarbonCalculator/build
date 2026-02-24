@@ -348,7 +348,7 @@ income_bands <- function(dat){
 
 
 
-load_consumption_multipliers = function(path = "../inputdata/consumption/UK_full_dataset_1990_to_2021__including_conversion_factors_by_SIC_code.ods"){
+load_consumption_multipliers = function(path = "../inputdata/consumption/Defra22_results_UK.ods"){
     cons = readODS::read_ods(path, sheet = "ghg_coicop_mult")
     names(cons)[1] = "product"
 
