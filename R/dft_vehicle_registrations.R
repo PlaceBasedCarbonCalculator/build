@@ -103,6 +103,7 @@ load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations
 
   d145 <- readr::read_csv(file.path(path,"df_VEH0145.csv"))
   d145 <- d145[d145$LSOA21CD != "Miscellaneous",]
+  d145 <- d145[substr(d145$LSOA21CD,1,1) %in% c("E","S","W"),]
 
   d145_long <- tidyr::pivot_longer(d145,
                                    cols = names(d145)[5:ncol(d145)],

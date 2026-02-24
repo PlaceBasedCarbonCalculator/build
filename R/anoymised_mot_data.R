@@ -98,6 +98,8 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
                                      centroids_dz22,
                                     vehicle_registrations_21, lookup_lsoa_2011_21, lookup_dz_2011_22, years = 2010:2023){
 
+  vehicle_registrations_21$year = as.integer(gsub(" Q1","",vehicle_registrations_21$quarter))
+
   vehicle_registrations_21 = vehicle_registrations_21[vehicle_registrations_21$year %in% years,]
 
 
@@ -150,15 +152,15 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
 
   # Number of each vehicle type, renamed
   names(vehicle_registrations_21)  = gsub("_Licensed","",names(vehicle_registrations_21))
-  vehicle_registrations_21$company_bike = rowSums(vehicle_registrations_21[,c("Cars_Company","Other body types_Company",
-                                                                              "Motorcycles_Company","Motorcycles_Private")],
+  vehicle_registrations_21$company_bike = rowSums(vehicle_registrations_21[,c("Cars_COMPANY","Other vehicles_COMPANY",
+                                                                              "Motorcycles_COMPANY","Motorcycles_PRIVATE")],
                                                   na.rm = TRUE)
-  vehicle_registrations_21$all_vehicles = rowSums(vehicle_registrations_21[,c("Cars_Private","Other body types_Private","company_bike")],
+  vehicle_registrations_21$all_vehicles = rowSums(vehicle_registrations_21[,c("Cars_PRIVATE","Other vehicles_PRIVATE","company_bike")],
                                                   na.rm = TRUE)
-  vehicle_registrations_21 = vehicle_registrations_21[,c("LSOA21CD","year","Cars_Private",
-                                                         "Other body types_Private","company_bike",
+  vehicle_registrations_21 = vehicle_registrations_21[,c("LSOA21CD","year","Cars_PRIVATE",
+                                                         "Other vehicles_PRIVATE","company_bike",
                                                          "all_vehicles")]
-  names(vehicle_registrations_21) = gsub("Other body types","vans",names(vehicle_registrations_21))
+  names(vehicle_registrations_21) = gsub("Other vehicles","vans",names(vehicle_registrations_21))
 
   # Add on PC
 
@@ -167,8 +169,8 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
 
   vr_pc_summary = dplyr::group_by(vehicle_registrations_21, PC_AREA, year)
   vr_pc_summary = dplyr::summarise(vr_pc_summary,
-                                   Cars_Private = sum(Cars_Private),
-                                   vans_Private = sum(vans_Private),
+                                   Cars_Private = sum(Cars_PRIVATE),
+                                   vans_Private = sum(vans_PRIVATE),
                                    company_bike = sum(company_bike),
                                    all_vehicles = sum(all_vehicles))
 
@@ -179,7 +181,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
 
   names(car_km_pc) = gsub("^20","total_20",names(car_km_pc))
   car_km_pc_long = tidyr::pivot_longer(car_km_pc,
-                                       cols = paste0("total_",2010:2023),
+                                       cols = paste0("total_",years),
                                        names_sep = "_",
                                        names_to = c(".value","year"))
   car_km_pc_long$year = as.numeric(car_km_pc_long$year)
@@ -199,8 +201,8 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
                          by = "LSOA21CD")
   vehicle_registrations_21 = dplyr::group_by(vehicle_registrations_21, PC_AREA, year)
   vehicle_registrations_21 = dplyr::mutate(vehicle_registrations_21,
-                      car_share = Cars_Private * car_vkmyear_11 / sum(Cars_Private * car_vkmyear_11, na.rm = TRUE),
-                      van_share = vans_Private  * van_vkmyear_11 / sum(vans_Private * van_vkmyear_11, na.rm = TRUE),
+                      car_share = Cars_PRIVATE * car_vkmyear_11 / sum(Cars_PRIVATE * car_vkmyear_11, na.rm = TRUE),
+                      van_share = vans_PRIVATE  * van_vkmyear_11 / sum(vans_PRIVATE * van_vkmyear_11, na.rm = TRUE),
                       company_share = company_bike / sum(company_bike, na.rm = TRUE)
                       )
   vehicle_registrations_21 = dplyr::ungroup(vehicle_registrations_21)
@@ -215,7 +217,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   vehicle_registrations_21$van_km = vehicle_registrations_21$van_share * vehicle_registrations_21$pc_van_km
   vehicle_registrations_21$company_km = vehicle_registrations_21$company_share * vehicle_registrations_21$pc_company_km
 
-  vehicle_registrations_21 = vehicle_registrations_21[,c("LSOA21CD","year","Cars_Private","vans_Private","company_bike",
+  vehicle_registrations_21 = vehicle_registrations_21[,c("LSOA21CD","year","Cars_PRIVATE","vans_PRIVATE","company_bike",
                                                          "all_vehicles","PC_AREA","car_km","van_km","company_km")]
 
   return(vehicle_registrations_21)
@@ -299,7 +301,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   # car_km_2009_2011$car_van_km_ratio_11[is.nan(car_km_2009_2011$car_van_km_ratio_11)] = 0 # 0 / 0 error for new LSOAs
   #
   # # MOTORing along cars count most closely matches "Cars_Private_Licensed"
-  # # vans most closely matches Other body types_Private_Licensed
+  # # vans most closely matches Other vehicles_Private_Licensed
   #
   #
   #
@@ -307,9 +309,9 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   # national_private_company = dplyr::group_by(vehicle_registrations_21, year)
   # national_private_company = dplyr::summarise(national_private_company,
   #                                            private_cars = sum(Cars_Private_Licensed, na.rm = TRUE),
-  #                                            private_vans = sum(`Other body types_Private_Licensed`, na.rm = TRUE),
+  #                                            private_vans = sum(`Other vehicles_Private_Licensed`, na.rm = TRUE),
   #                                            company_or_bike = sum(Cars_Company_Licensed,
-  #                                                                  `Other body types_Company_Licensed`,
+  #                                                                  `Other vehicles_Company_Licensed`,
   #                                                                  Motorcycles_Company_Licensed,
   #                                                                  Motorcycles_Private_Licensed,
   #                                                                  na.rm = TRUE
@@ -349,7 +351,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   # vehicle_registrations_21 = dplyr::group_by(vehicle_registrations_21, LSOA21CD)
   # vehicle_registrations_21 = dplyr::mutate(vehicle_registrations_21,
   #                     car_trend = Cars_Private_Licensed / Cars_Private_Licensed[year == 2011],
-  #                     van_trend = `Other body types_Private_Licensed` / `Other body types_Private_Licensed`[year == 2011])
+  #                     van_trend = `Other vehicles_Private_Licensed` / `Other vehicles_Private_Licensed`[year == 2011])
   # vehicle_registrations_21 = dplyr::ungroup(vehicle_registrations_21)
   #
   # vehicle_registrations_21$car_trend[is.na(vehicle_registrations_21$car_trend)] = 0
@@ -357,14 +359,14 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   #
   # vehicle_registrations_21$company_or_bike_total = rowSums(vehicle_registrations_21[,
   #   c("Motorcycles_Company_Licensed","Motorcycles_Private_Licensed",
-  #     "Cars_Company_Licensed","Other body types_Company_Licensed")],
+  #     "Cars_Company_Licensed","Other vehicles_Company_Licensed")],
   #   na.rm = TRUE)
   #
   # vehicle_registrations_21$company_or_bike_share = vehicle_registrations_21$company_or_bike_total /
   #   rowSums(vehicle_registrations_21[,
-  #                                    c("Cars_Private_Licensed","Other body types_Private_Licensed",
+  #                                    c("Cars_Private_Licensed","Other vehicles_Private_Licensed",
   #                                      "Motorcycles_Company_Licensed","Motorcycles_Private_Licensed",
-  #                                      "Cars_Company_Licensed","Other body types_Company_Licensed")],
+  #                                      "Cars_Company_Licensed","Other vehicles_Company_Licensed")],
   #           na.rm = TRUE)
   # vehicle_registrations_21$company_or_bike_share[is.na(vehicle_registrations_21$company_or_bike_share)] = 0
   #
@@ -378,13 +380,13 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   # foo = dplyr::group_by(foo, PC_AREA, year)
   # foo = dplyr::mutate(foo,
   #                    car_share = Cars_Private_Licensed / sum(Cars_Private_Licensed, na.rm = TRUE ),
-  #                    van_share = `Other body types_Private_Licensed` / sum(`Other body types_Private_Licensed`, na.rm = TRUE ),
+  #                    van_share = `Other vehicles_Private_Licensed` / sum(`Other vehicles_Private_Licensed`, na.rm = TRUE ),
   #                    company_or_bike_share = (Cars_Company_Licensed +
-  #                                 `Other body types_Company_Licensed` +
+  #                                 `Other vehicles_Company_Licensed` +
   #                                 `Motorcycles_Company_Licensed` +
   #                                 `Motorcycles_Private_Licensed`) /
   #                      sum(Cars_Company_Licensed,
-  #                            `Other body types_Company_Licensed`,
+  #                            `Other vehicles_Company_Licensed`,
   #                            `Motorcycles_Company_Licensed`,
   #                            `Motorcycles_Private_Licensed`, na.rm = TRUE ),
   #                    )
@@ -471,7 +473,7 @@ extraplote_car_km_trends2 = function(car_km_pc, car_km_2009_2011, centroids_lsoa
   # pc_vr = dplyr::group_by(vehicle_registrations_21, PC_AREA, year)
   # pc_vr = dplyr::summarise(pc_vr,
   #                          private_cars = sum(Cars_Private_Licensed, na.rm = TRUE),
-  #                          private_vans = sum(`Other body types_Private_Licensed`, na.rm = TRUE),
+  #                          private_vans = sum(`Other vehicles_Private_Licensed`, na.rm = TRUE),
   #                          company_or_bike_total = sum(company_or_bike_total, na.rm = TRUE))
   # pc_vr = dplyr::ungroup(pc_vr)
   # pc_vr = dplyr::group_by(pc_vr, PC_AREA)

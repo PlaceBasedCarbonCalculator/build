@@ -64,6 +64,8 @@ match_LCFS_synth_pop = function(census21_synth_households,
   inc_year = as.numeric(substr(base_year,1,4))
   if(inc_year < 2012){
     inc_year = 2012
+  } else if(inc_year == 2022){
+    inc_year = 2023 # Skipped a year from 2020 to 2023
   }
   if(inc_year == 2012){
     oac_year = 2001

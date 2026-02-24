@@ -862,11 +862,11 @@ tar_target(ons_isochrones,{
 # Flights
 #TODO: Switch to permanent paths
 tar_target(flights_od,{
-  load_flights_od()
+  load_flights_od(file.path(parameters$path_data,"flights/od_emissions_2024.gpkg"))
 }),
 
 tar_target(flights_airports,{
-  load_flights_airports(bounds_la = bounds_la)
+  load_flights_airports(file.path(parameters$path_data,"flights/airports_clean_first_pass_2024.gpkg"), bounds_la = bounds_la)
 }),
 
 tar_target(flights_total_emissions,{
@@ -1026,6 +1026,11 @@ tar_target(synth_households_lcfs_2012_scotland,{
 tar_target(synth_households_lcfs_2010_scotland,{
   match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac01dz22,income_scot_dz22,
                                 population, base_year = "2010/11")
+}),
+
+tar_target(synth_households_lcfs_2022,{
+  match_LCFS_synth_pop(census21_synth_households,lcfs_clean,oac11lsoa21,income_lsoa_msoa,
+                       population, dwellings_type_backcast, base_year = "2022/23")
 }),
 
 tar_target(synth_households_lcfs_2020,{

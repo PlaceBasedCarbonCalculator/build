@@ -74,88 +74,92 @@ car_emissions_to_21 = function(car_emissions_11, lsoa_11_21_tools) {
 }
 
 car_emissions_post2018 = function(car_emissions_11,
-                                  vehicle_registrations_21,
-                                  ulev_registrations_21) {
+                                  vehicle_registrations,
+                                  ulev_registrations) {
 
-  ulev_registrations_21 = ulev_registrations_21[,!grepl("Disposal",names(ulev_registrations_21))]
+  ulev_registrations = ulev_registrations[,!grepl("DISPOSAL",names(ulev_registrations))]
 
-  vehicle_registrations_21 = vehicle_registrations_21[,!grepl("Disposal",names(vehicle_registrations_21))]
-  vehicle_registrations_21 = vehicle_registrations_21[,!grepl("SORN",names(vehicle_registrations_21))]
+  vehicle_registrations = vehicle_registrations[,!grepl("DISPOSAL",names(vehicle_registrations))]
+  vehicle_registrations = vehicle_registrations[,!grepl("SORN",names(vehicle_registrations))]
 
-  vehicle_registrations_21$all_vehicles = rowSums(vehicle_registrations_21[,
-    c("Cars_Company_Licensed","Cars_Private_Licensed",
-      "Other body types_Company_Licensed","Other body types_Private_Licensed",
-      "Motorcycles_Company_Licensed","Motorcycles_Private_Licensed")])
+  vehicle_registrations$year = as.integer(gsub(" Q1","",vehicle_registrations$quarter))
+  ulev_registrations$year = as.integer(gsub(" Q1","",ulev_registrations$quarter))
 
 
-  ulev_registrations_21$PHEV = rowSums(ulev_registrations_21[,
-              c("Plug-in hybrid electric (petrol)_Company",
-                "Plug-in hybrid electric (petrol)_Private",
-                "Plug-in hybrid electric (diesel)_Company",
-                "Plug-in hybrid electric (diesel)_Private")],
+  vehicle_registrations$all_vehicles = rowSums(vehicle_registrations[,
+    c("Cars_COMPANY_Licensed","Cars_PRIVATE_Licensed",
+      "Other vehicles_COMPANY_Licensed","Other vehicles_PRIVATE_Licensed",
+      "Motorcycles_COMPANY_Licensed","Motorcycles_PRIVATE_Licensed")])
+
+
+  ulev_registrations$PHEV = rowSums(ulev_registrations[,
+              c("PLUG-IN HYBRID ELECTRIC (PETROL)_COMPANY",
+                "PLUG-IN HYBRID ELECTRIC (PETROL)_PRIVATE",
+                "PLUG-IN HYBRID ELECTRIC (DIESEL)_COMPANY",
+                "PLUG-IN HYBRID ELECTRIC (DIESEL)_PRIVATE")],
                                      na.rm = TRUE)
-  ulev_registrations_21$BEV = rowSums(ulev_registrations_21[,
-                c("Battery electric_Company","Battery electric_Private")],
+  ulev_registrations$BEV = rowSums(ulev_registrations[,
+                c("BATTERY ELECTRIC_COMPANY","BATTERY ELECTRIC_PRIVATE")],
                                     na.rm = TRUE)
-  ulev_registrations_21$REEV = rowSums(ulev_registrations_21[,
-                c("Range extended electric_Private","Range extended electric_Company")],
+  ulev_registrations$REEV = rowSums(ulev_registrations[,
+                c("RANGE EXTENDED ELECTRIC_PRIVATE","RANGE EXTENDED ELECTRIC_COMPANY")],
                                      na.rm = TRUE)
-  ulev_registrations_21$HEV = rowSums(ulev_registrations_21[,
-                c("Hybrid electric (diesel)_Company",
-                  "Hybrid electric (diesel)_Private",
-                  "Hybrid electric (petrol)_Private",
-                  "Hybrid electric (petrol)_Company")],
+  ulev_registrations$HEV = rowSums(ulev_registrations[,
+                c("HYBRID ELECTRIC (DIESEL)_COMPANY",
+                  "HYBRID ELECTRIC (DIESEL)_PRIVATE",
+                  "HYBRID ELECTRIC (PETROL)_PRIVATE",
+                  "HYBRID ELECTRIC (PETROL)_COMPANY")],
                                        na.rm = TRUE)
-  ulev_registrations_21$ULEV_ICE = rowSums(ulev_registrations_21[,
-                c("Diesel_Private","Diesel_Company","Petrol_Company",
-                  "Petrol_Private")],na.rm = TRUE)
-  ulev_registrations_21$fuelcell = rowSums(ulev_registrations_21[,
-                c("Fuel cell electric_Company","Fuel cell electric_Private")],
+  ulev_registrations$ULEV_ICE = rowSums(ulev_registrations[,
+                c("DIESEL_PRIVATE","DIESEL_COMPANY","PETROL_COMPANY",
+                  "PETROL_PRIVATE")],na.rm = TRUE)
+  ulev_registrations$fuelcell = rowSums(ulev_registrations[,
+                c("FUEL CELLS_COMPANY","FUEL CELLS_PRIVATE")],
                                            na.rm = TRUE)
 
 
-  vehicle_registrations_21 = vehicle_registrations_21[,c("LSOA21CD","year","all_vehicles")]
-  ulev_registrations_21 = ulev_registrations_21[,c("LSOA21CD","year","PHEV","BEV","REEV","HEV","ULEV_ICE","fuelcell" )]
+  vehicle_registrations = vehicle_registrations[,c("LSOA21CD","year","all_vehicles")]
+  ulev_registrations = ulev_registrations[,c("LSOA21CD","year","PHEV","BEV","REEV","HEV","ULEV_ICE","fuelcell" )]
 
 
-  vehicle_registrations_21 = dplyr::left_join(vehicle_registrations_21,ulev_registrations_21, by = c("LSOA21CD","year"))
+  vehicle_registrations = dplyr::left_join(vehicle_registrations,ulev_registrations, by = c("LSOA21CD","year"))
 
 
-  for(i in 1:ncol(vehicle_registrations_21)){
-    x = vehicle_registrations_21[,i]
+  for(i in 1:ncol(vehicle_registrations)){
+    x = vehicle_registrations[,i]
     if(is.numeric(x)){
       x[is.na(x)] = 0
-      vehicle_registrations_21[,i] = x
+      vehicle_registrations[,i] = x
     }
   }
 
   # BEVs Fuel Cell are 0 tailpipe, other ULEV < 75g CO2 per km
   emiss_2018 = car_emissions_11[car_emissions_11$year == 2018,]
 
-  #vehicle_registrations_21 = vehicle_registrations_21[vehicle_registrations_21$year > 2017,]
+  #vehicle_registrations = vehicle_registrations[vehicle_registrations$year > 2017,]
   # Do for all years as missing Scotland data
-  vehicle_registrations_21$share_0g = (vehicle_registrations_21$BEV + vehicle_registrations_21$fuelcell) / vehicle_registrations_21$all_vehicles
-  vehicle_registrations_21$share_75g = (vehicle_registrations_21$PHEV +
-                                          vehicle_registrations_21$REEV +
-                                          vehicle_registrations_21$HEV +
-                                          vehicle_registrations_21$ULEV_ICE) / vehicle_registrations_21$all_vehicles
+  vehicle_registrations$share_0g = (vehicle_registrations$BEV + vehicle_registrations$fuelcell) / vehicle_registrations$all_vehicles
+  vehicle_registrations$share_75g = (vehicle_registrations$PHEV +
+                                          vehicle_registrations$REEV +
+                                          vehicle_registrations$HEV +
+                                          vehicle_registrations$ULEV_ICE) / vehicle_registrations$all_vehicles
 
-  vehicle_registrations_21$share_0g[is.infinite(vehicle_registrations_21$share_0g)] = 0
-  vehicle_registrations_21$share_75g[is.infinite(vehicle_registrations_21$share_75g)] = 0
+  vehicle_registrations$share_0g[is.infinite(vehicle_registrations$share_0g)] = 0
+  vehicle_registrations$share_75g[is.infinite(vehicle_registrations$share_75g)] = 0
 
-  vehicle_registrations_21$share_0g[is.nan(vehicle_registrations_21$share_0g)] = 0
-  vehicle_registrations_21$share_75g[is.nan(vehicle_registrations_21$share_75g)] = 0
+  vehicle_registrations$share_0g[is.nan(vehicle_registrations$share_0g)] = 0
+  vehicle_registrations$share_75g[is.nan(vehicle_registrations$share_75g)] = 0
 
-  vehicle_registrations_21$share_full = 1 - vehicle_registrations_21$share_0g - vehicle_registrations_21$share_75g
+  vehicle_registrations$share_full = 1 - vehicle_registrations$share_0g - vehicle_registrations$share_75g
 
   # Work out 2018 share excluding ULEV
   emiss_2018 = dplyr::left_join(emiss_2018,
-                         vehicle_registrations_21[vehicle_registrations_21$year == 2018,],
+                         vehicle_registrations[vehicle_registrations$year == 2018,],
                          by = c("LSOA21CD","year"))
   emiss_2018$AvgCO2_cars_nonULEV = (emiss_2018$AvgCO2_cars - (75 * emiss_2018$share_75g)) / emiss_2018$share_full
   emiss_2018 = emiss_2018[,c("LSOA21CD","AvgCO2_cars_nonULEV")]
 
-  foo = dplyr::left_join(vehicle_registrations_21, emiss_2018, by = "LSOA21CD")
+  foo = dplyr::left_join(vehicle_registrations, emiss_2018, by = "LSOA21CD")
 
   #Fill in missing data for scotland with averages
   annualemissis = car_emissions_11 |>

@@ -21,7 +21,7 @@ load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_cl
 
 # Get annual emissions for each to the home nations
 # Note some flight emissions are allocated outside the UK
-get_flights_total_emissions = function(flights_od, flights_airports) {
+get_flights_total_emissions = function(flights_od, flights_airports, max_year = 2024) {
 
   flights_airports = sf::st_drop_geometry(flights_airports)
   flights_airports = flights_airports[!duplicated(flights_airports),]
@@ -36,8 +36,8 @@ get_flights_total_emissions = function(flights_od, flights_airports) {
                                 by = c("airport2" = "airport",
                                        "airport2_country" = "country"))
 
-  #TODO: Update to 2023
-  flights_summary = flights_od[,c("fromclass","toclass",paste0("emissions_",2010:2021))]
+
+  flights_summary = flights_od[,c("fromclass","toclass",paste0("emissions_",2010:max_year))]
   flights_summary = dplyr::group_by(flights_summary, fromclass, toclass)
   flights_summary = dplyr::summarise_all(flights_summary, sum, na.rm = TRUE)
   flights_summary = dplyr::ungroup(flights_summary)
@@ -169,8 +169,8 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
   emissions_summary$emissions_domestic = emissions_summary$domestic * emissions_summary$weight_domestic
 
   # Check
-  if(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2019],
-           emissions_summary$emissions_domestic[emissions_summary$year == 2019])) != chk_total){
+  if(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2024],
+           emissions_summary$emissions_domestic[emissions_summary$year == 2024])) != chk_total){
     stop("Flight emissission check failed")
   }
 

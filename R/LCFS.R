@@ -8,6 +8,7 @@ load_LCFS = function(path = file.path(parameters$path_secure_data,"Living Costs 
   lcfs_all = list()
 
   for(i in 1:length(zips)){
+    message(zips[i])
     lcfs_all[[i]] = load_LCFS_single(path = file.path(path, zips[i]))
   }
 
@@ -32,7 +33,11 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   fls2 = list.files(fls, full.names = FALSE, pattern = ".sav")
   nms = gsub("%20","_",fls2)
   nms = gsub("_ukanon[0-9]*\\.sav","",nms)
+  nms = gsub("_ukanon_[0-9]*\\.sav","",nms)
+  nms = gsub("_ukanon_v[0-9]*\\_[0-9]*\\.sav","",nms)
+  nms = gsub("_ukanon_[0-9]*\\_[0-9]*\\.sav","",nms)
   nms = gsub("_ukanon_final.sav","",nms)
+  nms = gsub("_ukanon_final_[0-9]*\\.sav","",nms)
   nms = gsub("^[0-9]*[-|_][0-9]*_","",nms)
   nms = gsub("^[0-9]*\\_","",nms)
   nms = gsub("^lcfs_[0-9]*_","",nms)
@@ -125,6 +130,26 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
   names(flights)[names(flights) == "flyadult"] = "flyadult1"
   names(flights)[names(flights) == "flychild"] = "flychild1"
 
+  #2023-24 number not names
+  if(inherits(flights$flydest1,"numeric")){
+    FlyLookup = data.frame(id = 1:4,
+                           names = c("Domestic UK one way","Domestic UK return",
+                                     "Single return from UK to outside UK","Other flight"))
+    flights$flydest1 = factor(FlyLookup$names[match(flights$flydest1,FlyLookup$id)], levels = FlyLookup$names)
+  }
+
+  # Sometimes levles missing
+  if(inherits(flights$flydest1,"factor")){
+    cols = grep("^flydest", names(flights))
+    cols = cols[2:length(cols)]
+    for(j in cols){
+      if(inherits(flights[[j]],"numeric")){
+        flights[[j]] = levels(flights$flydest1)[match(flights[[j]],seq(1, length(levels(flights$flydest1))))]
+      }
+    }
+  }
+  # Convert to character
+  flights[grep("^flydest", names(flights))] <- lapply(flights[grep("^flydest", names(flights))], as.character)
 
   flights = tidyr::pivot_longer(flights,
       cols = tidyr::starts_with("flydest") | tidyr::starts_with("flyadult") | tidyr::starts_with("flychild"),
@@ -195,7 +220,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                                                         "DVrmsp",
                                                         "DVbedp",
                                                         "DVsharep",
-                                                        "OAC"
+                                                        "OAC",
+                                                        "OAC3D"
                                                          )))
 
 
@@ -210,6 +236,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "Gorx", # Government Office Region modified
                          "URGridEWp", # Rural Urban England
                          "URGridSCp", # Rural Scotland England
+                         "oac3d", # OAC3D in 2022 version
                          "OAC3D", # Output Area Classification -3D
                          "incanon", # Anonymised household income and allowances
                          "p344p", # Gross normal weekly household income - top-coded
@@ -217,7 +244,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "P352p", # Gross current income of household - top-coded
                          "A122", # Tenure
                          "A124", # Cars and Vans
-                         "a124p", # Cars and Vans top coded
+                         "A124p", # Cars and Vans top coded
                          "A094", # NS-SEC 12 Class of HRP,
                          "A091", # Socio-economic group HRP,
                          "A116", # Building Type - Removed in 2020
@@ -330,24 +357,47 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 
 
                          # Other Vars
-                         "p493p",
-                         "p492p",
+                         "P493p",
+                         "P492p",
                          "P431p",
-                         "p431", # Main source of income
-                         "a117p",
-                         "a118p",
-                         "a143p",
-                         "a162p",
-                         "p200p",
-                         "a111p",
-                         "a114p")
+                         "P431", # Main source of income
+                         "A117p",
+                         "A118p",
+                         "A143p",
+                         "A162p",
+                         "P200p",
+                         "A111p",
+                         "A114p")
 
 
-  household_char = dplyr::select(households, dplyr::any_of(columns_to_select))
+  columns_to_select2 = lowercase_CP(columns_to_select)
+
+  household_char = dplyr::select(households, dplyr::any_of(columns_to_select2))
 
   missing_cols = columns_to_select[!columns_to_select %in% names(household_char)]
   if(length(missing_cols) > 0){
     warning("Ths columns are missing: ", paste(missing_cols, collapse = ", "))
+  }
+
+  #Fix OAC3D
+  if(is.null(household_char$OAC3D)){
+    household_char$OAC3D = household_char$oac3d
+  }
+  if(is.null(household_char$OAC)){
+    household_char$OAC = household_char$OAC3D
+  }
+
+
+  #Fix Upper Case
+  cols = names(household_char)[grepl("^[cpba]",names(household_char))]
+  cols = cols[cols != "case"]
+
+  for(j in 1:ncol(household_char)){
+    nm = names(household_char)[j]
+    if(nm %in% cols){
+      names(household_char)[j] = paste0(toupper(substr(nm,1,1)),substr(nm,2,nchar(nm)))
+      message(nm," renamed to ",names(household_char)[j])
+    }
   }
 
   #Values that have to de deducted as rebates
@@ -367,56 +417,77 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
     household_char$P250t = - household_char$P250t
   }
 
+  # Fix Housing Type
+  household_char$A116 = as.character(household_char$A116)
+  if(any(as.character(0:6) %in% household_char$A116)){
+    housing_types <- data.frame(
+      id = 0:6,
+      names = c(
+        "Not Recorded",
+        "Whole house,bungalow-detached",
+        "Whole house,bungalow-semi-detached",
+        "Whole house,bungalow-terraced",
+        "Purpose-built flat maisonette",
+        "Part of house converted flat",
+        "Others"
+      ),
+      stringsAsFactors = FALSE
+    )
+    hh_match = housing_types$names[match(household_char$A116,housing_types$id)]
+    household_char$A116 = ifelse(is.na(hh_match),household_char$A116,household_char$A116)
+  }
 
-  # atttribs = attributes(households)
-  # vars = data.frame(nms = names(atttribs$variable.labels), vals = unname(atttribs$variable.labels))
-  # write.csv(vars, file.path(path,"hosuehold_variaibles.csv"), row.names = FALSE)
+  # Fix Tenures
+  household_char$A122 = as.character(household_char$A122)
+  if(any(as.character(0:8) %in% household_char$A122)){
+    housing_types <- data.frame(
+      id = 0:8,
+      names = c(
+        "Not Recorded",
+        "LA (furnished unfurnished)",
+        "Housing Assn (furnished unfurnished)",
+        "Priv. rented (unfurnished)",
+        "Priv. rented (furnished)",
+        "Owned with mortgage",
+        "Owned by rental purchase",
+        "Owned outright",
+        "Rent free"
+      ),
+      stringsAsFactors = FALSE
+    )
+    hh_match = housing_types$names[match(household_char$A122,housing_types$id)]
+    household_char$A122 = ifelse(is.na(hh_match),household_char$A122,household_char$A122)
+  }
 
-  # Check consistences
-
-  # purchases_summary = dplyr::group_by(purchases, case, `DivisionalDescription`)
-  # purchases_summary = dplyr::summarise(purchases_summary, pdamount = sum(pdamount, na.rm = TRUE))
-  # purchases_summary = tidyr::pivot_wider(purchases_summary,
-  #                                        values_from = "pdamount",
-  #                                        names_from = "DivisionalDescription",
-  #                                        values_fill = 0)
-  #
-  # purchases_summary = dplyr::left_join(purchases_summary, household_char, by = "case")
-  #
-  # purchases_summary = purchases_summary[,c("case","Clothing and footwear",
-  #                                          "Food and non-alcoholic beverages",
-  #                                          "Furnishings, household equipment and routine maintenance of house",
-  #                                          "Health","Miscellaneous goods and services",
-  #                                          "Non-consumption expenditure","Recreation and culture",
-  #                                          "Transport","Alcoholic beverages, tobacco and narcotics",
-  #                                          "Housing, water, electricity, gas and other fuels",
-  #                                          "Communication","Education","Restaurants and hotels",
-  #                                          "P600t","P601t","P602t","P603t",
-  #                                          "P604t","P605t","P606t","P607t",
-  #                                          "P608t","P609t","P610t","P611t",
-  #                                          "P612t","P620tp","P630tp")]
-  #
-  # purchases_summary$d_food = round(abs(purchases_summary$`Food and non-alcoholic beverages` - purchases_summary$P601t))
-  # purchases_summary$d_alc = round(abs(purchases_summary$`Alcoholic beverages, tobacco and narcotics` - purchases_summary$P602t))
-  # purchases_summary$d_cloth = round(abs(purchases_summary$`Clothing and footwear` - purchases_summary$P603t))
-  # purchases_summary$d_house = round(abs(purchases_summary$`Housing, water, electricity, gas and other fuels` - purchases_summary$P604t))
-  # purchases_summary$d_furn = round(abs(purchases_summary$`Furnishings, household equipment and routine maintenance of house` - purchases_summary$P605t))
-  # purchases_summary$d_health = round(abs(purchases_summary$`Health` - purchases_summary$P606t))
-  # purchases_summary$d_trans = round(abs(purchases_summary$`Transport` - purchases_summary$P607t))
-  # purchases_summary$d_comm = round(abs(purchases_summary$`Communication` - purchases_summary$P608t))
-  # purchases_summary$d_rec = round(abs(purchases_summary$`Recreation and culture` - purchases_summary$P609t))
-  # purchases_summary$d_edu = round(abs(purchases_summary$`Education` - purchases_summary$P610t))
-  # purchases_summary$d_rest = round(abs(purchases_summary$`Restaurants and hotels` - purchases_summary$P611t))
-  # purchases_summary$d_misc = round(abs(purchases_summary$`Miscellaneous goods and services` - purchases_summary$P612t))
-  #
-  # summary((round(purchases_summary$`Clothing and footwear`,2) - round(purchases_summary$P603t,2)))
-  # summary((round(,2) - round(,2)))
-  # summary((round(purchases_summary$`Health`,2) - round(purchases_summary$P606t,2)))
-  # summary((round(purchases_summary$`Furnishings, household equipment and routine maintenance of house`,2) - round(purchases_summary$P605t,2)))
-  # summary((round(purchases_summary$`Miscellaneous goods and services`,2) - round(purchases_summary$P612t,2)))
-  # summary((round(purchases_summary$`Non-consumption expenditure`,2) - round(purchases_summary$P620tp,2)))
 
   people = lcfs$dvper
+
+  #Fix Upper Case
+  cols = names(people)[grepl("^[cpba]",names(people))]
+  cols = cols[cols != "case"]
+
+  for(j in 1:ncol(people)){
+    nm = names(people)[j]
+    if(nm %in% cols){
+      names(people)[j] = paste0(toupper(substr(nm,1,1)),substr(nm,2,nchar(nm)))
+      message(nm," renamed to ",names(people)[j])
+    }
+  }
+
+
+
+  # Still Null in 2022-23 data
+  if(is.null(people$A012p)){
+    people$A012p = NA
+  }
+
+  if(inherits(people$A003,"numeric")){
+    PeopleLookup = data.frame(id = 1:2,
+                           names = c("HRP",
+                                     "Not HRP"))
+    people$A003 = factor(PeopleLookup$names[match(people$A003,PeopleLookup$id)], levels = PeopleLookup$names)
+  }
+
   people_summary = summarise_household_composition(people)
 
   # Check for extreme consumption
@@ -436,8 +507,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 
   household_char$P620tp = remove_extreme_consumption(household_char$P620tp, "Non-Consumption")
   household_char$P630tp = remove_extreme_consumption(household_char$P630tp, "Total Anoymised")
-  household_char$a117p = remove_extreme_consumption(household_char$a117p, "new cars")
-  household_char$a118p = remove_extreme_consumption(household_char$a118p, "second hand cars")
+  household_char$A117p = remove_extreme_consumption(household_char$A117p, "new cars")
+  household_char$A118p = remove_extreme_consumption(household_char$A118p, "second hand cars")
 
 
   lcfs_final = list(household = household_char,
@@ -450,6 +521,17 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 
 
 }
+
+
+lowercase_CP <- function(x) {
+  x_orig = x
+  is_cp <- grepl("^[CPBA]", x)
+  # Only modify elements that start with C or P
+  substr(x[is_cp], 1, 1) <- tolower(substr(x[is_cp], 1, 1))
+  unique(c(x,x_orig))
+}
+
+
 
 remove_extreme_consumption = function(x, type = ""){
   #hist(x, seq(min(x)-10, max(x)+10, 10))
@@ -469,17 +551,12 @@ remove_extreme_consumption = function(x, type = ""){
 
 summarise_household_composition = function(people){
 
-  if(inherits(people$a005p, "factor")){
-    people$a005p = as.character(people$a005p)
-    people$a005p = ifelse(people$a005p %in% c("80 or older","80 and older"),
-                          "81",people$a005p)
-    people$a005p = as.integer(people$a005p)
+  if(inherits(people$A005p, "factor")){
+    people$A005p = as.character(people$A005p)
+    people$A005p = ifelse(people$A005p %in% c("80 or older","80 and older"),
+                          "81",people$A005p)
+    people$A005p = as.integer(people$A005p)
   }
-
-  if(is.null(people$a012p)){
-    people$a012p = people$A012p
-  }
-
 
   ppl_list = dplyr::group_split(people, case)
 
@@ -494,12 +571,12 @@ hh_comp = function(x){
   #TODO: Check that string are the same across years, which some are not
   if(nrow(x) == 1){
     # Single Person
-    if(x$a005p > 65){
+    if(x$A005p > 65){
       return(data.frame(case = x$case, hhsize = nrow(x), hhcomp = "OnePersonOver66",
-                        hhcomp5 = "Oneperson", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                        hhcomp5 = "Oneperson", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
     } else {
       return(data.frame(case = x$case, hhsize = nrow(x), hhcomp = "OnePersonOther",
-                        hhcomp5 = "Oneperson", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                        hhcomp5 = "Oneperson", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
     }
   } else {
     # Check for Children
@@ -508,7 +585,7 @@ hh_comp = function(x){
       x$dependancy = ifelse(x$A007 %in% c("Not recorded","University/polytechnic, any other higher education college"),
                             "non-dependant","dependant")
       x$dependancy = ifelse(x$A003 == "HRP", "non-dependant", x$dependancy) #HRP can't be dependant e.g. student parent
-      x$dependancy = ifelse(x$a005p >= 18, "non-dependant", x$dependancy) #Adults can't be dependant
+      x$dependancy = ifelse(x$A005p >= 18, "non-dependant", x$dependancy) #Adults can't be dependant
       x$child = ifelse(x$A002 %in% c("Son or daughter","Grandson grndaughter"),
                        "child", "adult")
 
@@ -526,26 +603,26 @@ hh_comp = function(x){
 
 
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "LoneParent",
-                            hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleChildren",
-                            hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         } else {
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherChildren",
-                            hhcomp5 = "Other", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Other", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         }
 
       } else {
         # All non-dependant children
         if(n_adutls == 1){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "LoneParentNonDepChildren",
-                            hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Loneparent", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         } else if (n_adutls == 2 & all(x$A002[x$child_dep == "adult"] %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleNonDepChildren",
-                            hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Couple", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         } else {
           return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherNoChildren - nondepchild",
-                            hhcomp5 = "Other", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+                            hhcomp5 = "Other", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         }
       }
 
@@ -553,16 +630,16 @@ hh_comp = function(x){
       # No Children
       if(all(x$A206 == "Retired/unoccupied and of minimum NI Pension age")){
         if(all(x$A002 != "Non-relative")){
-          return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "FamilyOver66", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+          return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "FamilyOver66", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         } else {
-          return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - retired", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+          return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - retired", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
         }
       } else if (nrow(x) == 2 & all(x$A002 %in% c("Person 1","Spouse cohabitee civil partner","Spouse/Cohabitee/Civil Partner"))){
-        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleNoChildren", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "CoupleNoChildren", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
       } else if (all(x$A007 == "University/polytechnic, any other higher education college")){
-        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - students", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherIncStudentOrOver66 - students", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
       } else {
-        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherNoChildren", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$a012p[x$A003 == "HRP"]))
+        return(data.frame(case = x$case[1], hhsize = nrow(x), hhcomp = "OtherNoChildren", HRPemploy = x$A200[x$A003 == "HRP"], HRPethnic = x$A012p[x$A003 == "HRP"]))
       }
 
     }
@@ -632,6 +709,9 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
   #   hh_22$C73311t = hh_22$B487
   # }
 
+  fly_21$case = as.character(fly_21$case)
+  fly_22$case = as.character(fly_22$case)
+
   hh_21 = add_component_costs(hh_21, yrs[1])
   hh_22 = add_component_costs(hh_22, yrs[2])
 
@@ -641,7 +721,7 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
 
   hh$Tenure5 = convert_housing_tenure(hh$A122)
   if(is.null(hh$A124)){
-    hh$CarVan5 = convert_car_ownership(hh$a124p)
+    hh$CarVan5 = convert_car_ownership(hh$A124p)
   } else {
     hh$CarVan5 = convert_car_ownership(hh$A124)
   }
@@ -679,16 +759,16 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                          "hhSize5",
                          "hhComp15",
                          "OAC",
+                         "OAC3D",
                          "Gorx",
                          "URGridEWp",
                          "URGridSCp",
-                         "OAC3D",
                          "incanon",
                          "A122", # Tenure
                          "A094",
                          "A091",
                          "A116", # Dwelling Category
-                         "p200p", # Number of rooms
+                         "P200p", # Number of rooms
                          "P600t", # Consumption Categories
                          "P601t",
                          "P602t",
@@ -715,9 +795,9 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                          "spend_transport_optranequip_other",
                          "spend_transport_services_pt",
                          "spend_transport_services_air",
-                        "a117p", # New Cars
-                        "a118p", # Second Hand Cars
-                        "a162p", # Motor Cycles
+                        "A117p", # New Cars
+                        "A118p", # Second Hand Cars
+                        "A162p", # Motor Cycles
                         "HRPemploy",
                         "HRPethnic",
                         "flight_international_return",
@@ -733,7 +813,7 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                      NSSEC8_HRP = A094,
                      SEC_HRP = A091,
                      dwelling_type = A116,
-                     rooms = p200p,
+                     rooms = P200p,
                      spend_totalconsump = P600t,
                      spend_food = P601t,
                      spend_alcohol = P602t,
@@ -749,9 +829,9 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
                      spend_misc = P612t,
                      spend_nonconsump = P620tp,
                      spend_total = P630tp,
-                     cars_new = a117p,
-                     cars_secondhand = a118p,
-                     motorcycles = a162p
+                     cars_new = A117p,
+                     cars_secondhand = A118p,
+                     motorcycles = A162p
                      )
 
 
@@ -766,7 +846,8 @@ selected_lcfs = function(lcfs){
              "2014/15" = subset_lcfs(lcfs, yrs = c("2014","20152016")),
              "2016/17" = subset_lcfs(lcfs, yrs = c("20162017","20172018")),
              "2018/19" = subset_lcfs(lcfs, yrs = c("20182019","20192020")),
-             "2020/21" = subset_lcfs(lcfs, yrs = c("20202021","20212022"))
+             "2020/21" = subset_lcfs(lcfs, yrs = c("20202021","20212022")),
+             "2022/23" = subset_lcfs(lcfs, yrs = c("20222023","20232024"))
   )
 
   res
@@ -881,7 +962,7 @@ add_component_costs = function(hh, yr = "2010"){
 "C73611t"#	Delivery charges and other transport services
   ))), na.rm = TRUE)
 
-
+  #TODO: Documentation seems to be wrong for post 2022 as C73311t C73312t is specified but B487 B488 is in the data and makes the total numbers add up
   if(yr %in% c("2010","2011","2012")){
     hh$spend_transport_services_air = rowSums(dplyr::select(hh, dplyr::any_of(c(
 "C73311t",#	Air fares(within UK)
@@ -904,6 +985,7 @@ add_component_costs = function(hh, yr = "2010"){
 
   if(sum(hh$diff != 0) > 1){ # Allow one error for subpression of excessive consumption
     stop("Transport spending components don't add up in ",yr," ",sum(hh$diff == 0)," cases")
+    foo = hh[,c("case","P607t","spend_transport_vehiclepurchase","spend_transport_optranequip_fuel","spend_transport_optranequip_other","spend_transport_services_air","spend_transport_services_pt","diff")]
   } else {
     hh$diff = NULL
   }
