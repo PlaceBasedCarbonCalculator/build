@@ -532,7 +532,7 @@ tar_target(car_emissions_perkm,{
   car_emissions_post2018(car_emissions_11,vehicle_registrations,ulev_registrations)
 }),
 tar_target(car_emissions,{
-  calculate_car_emissions(car_km_lsoa_21, car_emissions_perkm, population)
+  calculate_car_emissions(car_km_lsoa_21, car_emissions_perkm, population, years = 2010:2023)
 }),
 
 #Car &  Van km (2009-2011 LSOA)
@@ -890,7 +890,7 @@ tar_target(lsoa_emissions_all,{
   combine_lsoa_emissions(flights_lsoa_emissions,consumption_emissions,
                          car_emissions,domestic_electricity_emissions,
                          domestic_gas_emissions,other_heating_emissions,
-                         max_year = 2020)
+                         max_year = 2022)
 }),
 
 tar_target(la_emissions_all,{
@@ -1001,7 +1001,7 @@ tar_target(lcfs_clean,{
 
 tar_target(synth_households_lcfs_2022_scotland,{
   match_LCFS_synth_pop_scotland(scot_synth_households,lcfs_clean,oac11dz22,income_scot_dz22,
-                                population, base_year = "2020/21")
+                                population, base_year = "2022/23")
 }),
 
 tar_target(synth_households_lcfs_2020_scotland,{

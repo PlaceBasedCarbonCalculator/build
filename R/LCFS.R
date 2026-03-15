@@ -239,6 +239,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
                          "oac3d", # OAC3D in 2022 version
                          "OAC3D", # Output Area Classification -3D
                          "incanon", # Anonymised household income and allowances
+                         "anon_income", # Alterative name for incanon
                          "p344p", # Gross normal weekly household income - top-coded
                          "P389p", # Normal weekly disposable income
                          "P352p", # Gross current income of household - top-coded
@@ -374,10 +375,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 
   household_char = dplyr::select(households, dplyr::any_of(columns_to_select2))
 
-  missing_cols = columns_to_select[!columns_to_select %in% names(household_char)]
-  if(length(missing_cols) > 0){
-    warning("Ths columns are missing: ", paste(missing_cols, collapse = ", "))
-  }
+
 
   #Fix OAC3D
   if(is.null(household_char$OAC3D)){
@@ -441,7 +439,7 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
     household_char$A116 = ifelse(is.na(hh_match),household_char$A116,household_char$A116)
   }
 
-  # Fix Tenures
+  # Fix Tenures newer data has missing lables
   household_char$A122 = as.character(household_char$A122)
   if(any(as.character(0:8) %in% household_char$A122)){
     housing_types <- data.frame(
@@ -449,8 +447,8 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
       names = c(
         "Not Recorded",
         "LA (furnished unfurnished)",
-        "Housing Assn (furnished unfurnished)",
-        "Priv. rented (unfurnished)",
+        "Hsng Assn (furnished unfrnish)",
+        "Priv. rented (unfurn)",
         "Priv. rented (furnished)",
         "Owned with mortgage",
         "Owned by rental purchase",
@@ -460,7 +458,13 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
       stringsAsFactors = FALSE
     )
     hh_match = housing_types$names[match(household_char$A122,housing_types$id)]
-    household_char$A122 = ifelse(is.na(hh_match),household_char$A122,household_char$A122)
+    household_char$A122 = ifelse(is.na(hh_match),household_char$A122,hh_match)
+    household_char$A122 = ifelse(household_char$A122 == "Local Authority","LA (furnished unfurnished)",household_char$A122) #2022-23 error
+  }
+
+  missing_cols = columns_to_select[!columns_to_select %in% names(household_char)]
+  if(length(missing_cols) > 0){
+    warning("Ths columns are missing: ", paste(missing_cols, collapse = ", "))
   }
 
 

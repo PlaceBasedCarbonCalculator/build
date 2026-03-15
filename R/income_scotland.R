@@ -145,12 +145,18 @@ income_limit_estimator = function(u50, u100, u150, u200, u250, u300, u350, u400,
 }
 
 
-esimate_income_scotland_dz22 = function(income_scot_dz11, lookup_dz_2011_22_pre){
+esimate_income_scotland_dz22 = function(income_scot_dz11, lookup_dz_2011_22_pre, path = "../inputdata/income/scotland/Scotland Income Trends.xlsx"){
 
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
   lookup_dz_2011_22_pre = lookup_dz_2011_22_pre[,c("DataZone","DataZone22","count")]
 
   lookup_dz_2011_22_pre = dplyr::group_split(lookup_dz_2011_22_pre, DataZone22)
+
+  trend = readxl::read_excel(path,"Combined")
+  trend = trend[,c("year","historic")]
+  trend$year1 = as.integer(substr(trend$year,1,4))
+  trend = trend[trend$year >= 2018,]
+  trend$weight = trend$historic / trend$historic[trend$year1 == 2018]
 
   res = list()
   for(i in seq_along(lookup_dz_2011_22_pre)){
@@ -170,5 +176,24 @@ esimate_income_scotland_dz22 = function(income_scot_dz11, lookup_dz_2011_22_pre)
   }
 
   res = dplyr::bind_rows(res)
+
+  # Add on Extra Years
+  res_2018 = res[res$year == 2018,]
+
+  res_extra = list()
+  for(i in 2019:2020){
+    sub = res_2018
+    sub$year = i
+    weight = trend$weight[trend$year1 == i]
+    sub$lower_limit = sub$lower_limit * weight
+    sub$upper_limit = sub$upper_limit * weight
+    sub$total_annual_income = sub$total_annual_income * weight
+    res_extra[[i]] = sub
+  }
+
+  res_extra = dplyr::bind_rows(res_extra)
+
+  res = rbind(res, res_extra)
+
   res
 }

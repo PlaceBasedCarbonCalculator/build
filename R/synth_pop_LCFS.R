@@ -238,8 +238,8 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
   if(inc_year < 2014){
     inc_year = 2014
   }
-  if(inc_year > 2018){
-    inc_year = 2018
+  if(inc_year > 2020){
+    inc_year = 2020
   }
   if(inc_year == 2016){ # No 2016 data so use 2017
     inc_year = 2017

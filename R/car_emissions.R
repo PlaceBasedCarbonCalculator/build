@@ -85,6 +85,8 @@ car_emissions_post2018 = function(car_emissions_11,
   vehicle_registrations$year = as.integer(gsub(" Q1","",vehicle_registrations$quarter))
   ulev_registrations$year = as.integer(gsub(" Q1","",ulev_registrations$quarter))
 
+  vehicle_registrations = vehicle_registrations[substr(vehicle_registrations$LSOA21CD,1,1) %in% c("E","W","S"),]
+  ulev_registrations = ulev_registrations[substr(ulev_registrations$LSOA21CD,1,1) %in% c("E","W","S"),]
 
   vehicle_registrations$all_vehicles = rowSums(vehicle_registrations[,
     c("Cars_COMPANY_Licensed","Cars_PRIVATE_Licensed",
@@ -123,13 +125,13 @@ car_emissions_post2018 = function(car_emissions_11,
 
 
   vehicle_registrations = dplyr::left_join(vehicle_registrations,ulev_registrations, by = c("LSOA21CD","year"))
-
+  vehicle_registrations = as.data.frame(vehicle_registrations)
 
   for(i in 1:ncol(vehicle_registrations)){
-    x = vehicle_registrations[,i]
+    x = vehicle_registrations[[i]]
     if(is.numeric(x)){
       x[is.na(x)] = 0
-      vehicle_registrations[,i] = x
+      vehicle_registrations[[i]] = x
     }
   }
 
@@ -159,33 +161,33 @@ car_emissions_post2018 = function(car_emissions_11,
   emiss_2018$AvgCO2_cars_nonULEV = (emiss_2018$AvgCO2_cars - (75 * emiss_2018$share_75g)) / emiss_2018$share_full
   emiss_2018 = emiss_2018[,c("LSOA21CD","AvgCO2_cars_nonULEV")]
 
-  foo = dplyr::left_join(vehicle_registrations, emiss_2018, by = "LSOA21CD")
+  res = dplyr::left_join(vehicle_registrations, emiss_2018, by = "LSOA21CD")
 
   #Fill in missing data for scotland with averages
   annualemissis = car_emissions_11 |>
     dplyr::group_by(year) |>
     dplyr::summarise(natAvgCO2_cars_nonULEV = median(AvgCO2_cars, na.rm = TRUE))
 
-  foo = dplyr::left_join(foo, annualemissis, by = "year")
-  foo$AvgCO2_cars_nonULEV = ifelse(is.na(foo$AvgCO2_cars_nonULEV),foo$natAvgCO2_cars_nonULEV,foo$AvgCO2_cars_nonULEV)
+  res = dplyr::left_join(res, annualemissis, by = "year")
+  res$AvgCO2_cars_nonULEV = ifelse(is.na(res$AvgCO2_cars_nonULEV),res$natAvgCO2_cars_nonULEV,res$AvgCO2_cars_nonULEV)
 
   # Calculate Average COs
-  foo$AvgCO2 = (foo$AvgCO2_cars_nonULEV * foo$share_full) +
-    (75 * foo$share_75g)
+  res$AvgCO2 = (res$AvgCO2_cars_nonULEV * res$share_full) +
+    (75 * res$share_75g)
 
   # No (old) data for Scotland, so extrapolate forward
-  foo$AvgCO2 = ifelse(is.na(foo$AvgCO2), (median(foo$AvgCO2_cars_nonULEV[foo$year == 2018], na.rm = TRUE) * foo$share_full) +
-    (75 * foo$share_75g), foo$AvgCO2)
+  res$AvgCO2 = ifelse(is.na(res$AvgCO2), (median(res$AvgCO2_cars_nonULEV[res$year == 2018], na.rm = TRUE) * res$share_full) +
+    (75 * res$share_75g), res$AvgCO2)
 
-  foo = foo[,c("LSOA21CD","year","all_vehicles","AvgCO2")]
-  foo$AvgAge = NA
+  res = res[,c("LSOA21CD","year","all_vehicles","AvgCO2")]
+  res$AvgAge = NA
 
   names(car_emissions_11) = c("LSOA21CD","year","all_vehicles","AvgCO2","AvgAge")
 
   # Bind Real Data EW 2002-2018, estimated ESW 2019-2024, estimated Scotland 2010-2018
 
 
-  final = rbind(car_emissions_11, foo[foo$year >= 2019,], foo[foo$year <= 2018 & substr(foo$LSOA21CD,1,1) == "S",])
+  final = rbind(car_emissions_11, res[res$year >= 2019,], res[res$year <= 2018 & substr(res$LSOA21CD,1,1) == "S",])
   final = final[order(final$LSOA21CD, final$year),]
   final
 

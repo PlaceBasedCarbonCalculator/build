@@ -132,6 +132,14 @@ make_similarity_table = function(hh, oac_year = 2011){
     }
   }
 
+  # Check for NAs
+
+  naCheck = unlist(sapply(similarity_table, function(x){sapply(x, anyNA)}))
+  if(any(naCheck)){
+    naCheck = naCheck[naCheck]
+    stop("NAs in similarity_table ", paste(names(naCheck),collapse = ", "))
+  }
+
   similarity_table
 }
 

@@ -113,7 +113,7 @@ get_flights_total_emissions = function(flights_od, flights_airports, max_year = 
 get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
 
   # Consistency Checks
-  chk_total = sum(flights_total_emissions$emissions_2019[flights_total_emissions$country_uk != "N"])
+  chk_total = sum(flights_total_emissions$emissions_2022[flights_total_emissions$country_uk != "N"])
 
 
   consumption_emissions = consumption_emissions[,c("LSOA21CD","year","all_ages",
@@ -169,9 +169,10 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
   emissions_summary$emissions_domestic = emissions_summary$domestic * emissions_summary$weight_domestic
 
   # Check
-  if(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2024],
-           emissions_summary$emissions_domestic[emissions_summary$year == 2024])) != chk_total){
-    stop("Flight emissission check failed")
+  if(abs(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2022],
+           emissions_summary$emissions_domestic[emissions_summary$year == 2022])) - chk_total) > 1){
+    stop("Flight emissission check failed: Total ",round(sum(c(emissions_summary$emissions_international[emissions_summary$year == 2022],
+                                                         emissions_summary$emissions_domestic[emissions_summary$year == 2022])))," not equalt to ",round(chk_total))
   }
 
 
