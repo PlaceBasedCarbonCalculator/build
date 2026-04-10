@@ -1,3 +1,10 @@
+#' Read Bounds
+#'
+#' @description Read bounds from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds <- function(path = file.path(data_path(),"boundaries/Local_Authority_Districts_May_2023_UK_BFC_V2_179125415192200502.gpkg")){
   bounds <- sf::read_sf(path)
   bounds$geometry <- sf::st_geometry(bounds)
@@ -6,6 +13,13 @@ read_bounds <- function(path = file.path(data_path(),"boundaries/Local_Authority
   bounds
 }
 
+#' Read Bounds Shp
+#'
+#' @description Read bounds shp from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_shp <- function(path = file.path("../inputdata/","boundaries/LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")){
   dir.create(file.path(tempdir(),"bounds"))
   unzip(path, exdir = file.path(tempdir(),"bounds"))
@@ -20,6 +34,13 @@ read_bounds_shp <- function(path = file.path("../inputdata/","boundaries/LAD_MAY
 }
 
 
+#' Download Boundaries
+#'
+#' @description Download the boundaries resource and return the local file path.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return The local path or file name of the downloaded resource.
+#' @keywords internal
 download_boundaries <- function(path = file.path(data_path(),"boundaries")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -35,6 +56,13 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
   path
 }
 
+#' Read Bounds La
+#'
+#' @description Read bounds la from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_la <- function(path){
   file_path = file.path(path, "LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")
   bounds <- read_bounds_shp(file_path)
@@ -43,6 +71,13 @@ read_bounds_la <- function(path){
 }
 
 
+#' Read Bounds Wards
+#'
+#' @description Read bounds wards from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_wards <- function(path){
   file_path = file.path(path, "Wards_(May_2025)_Boundaries_UK_BFC_(V2).zip")
   bounds <- read_bounds_shp(file_path)
@@ -50,6 +85,13 @@ read_bounds_wards <- function(path){
   bounds
 }
 
+#' Read Bounds Parish
+#'
+#' @description Read bounds parish from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_parish <- function(path){
   file_path = file.path(path, "Parishes_May_2023_Boundaries_EW_BFC_5274983877488017783.gpkg")
   bounds <- read_bounds(file_path)
@@ -57,6 +99,13 @@ read_bounds_parish <- function(path){
   bounds
 }
 
+#' Read Bounds Westminster
+#'
+#' @description Read bounds westminster from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_westminster <- function(path){
   file_path = file.path(path, "Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BFC_-6236279356162627018.gpkg")
   bounds <- read_bounds(file_path)
@@ -64,6 +113,13 @@ read_bounds_westminster <- function(path){
   bounds
 }
 
+#' Read Bounds Lsoa Full
+#'
+#' @description Read bounds lsoa full from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_lsoa_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_4078143405809415814.gpkg")
   bounds <- read_bounds(file_path)
@@ -72,6 +128,13 @@ read_bounds_lsoa_full <- function(path){
   bounds
 }
 
+#' Read Bounds Lsoa Generalised
+#'
+#' @description Read bounds lsoa generalised from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_lsoa_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BGC_V3_2542665517405622314.gpkg")
   bounds <- read_bounds(file_path)
@@ -80,6 +143,13 @@ read_bounds_lsoa_generalised <- function(path){
   bounds
 }
 
+#' Read Bounds Lsoa Super Generalised
+#'
+#' @description Read bounds lsoa super generalised from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_bounds_lsoa_super_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BSC_v2_8443070537763669663.gpkg")
   bounds <- read_bounds(file_path)
@@ -88,6 +158,13 @@ read_bounds_lsoa_super_generalised <- function(path){
   bounds
 }
 
+#' Read Centroids
+#'
+#' @description Read centroids from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids <- function(path){
   file_path = file.path(path, "LSOA_Dec_2011_PWC_in_England_and_Wales_2022_4940074699479565285.gpkg")
   bounds <- read_bounds(file_path)
@@ -96,6 +173,13 @@ read_centroids <- function(path){
   bounds
 }
 
+#' Read Centroids Dz11
+#'
+#' @description Read centroids dz11 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_dz11 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
   unzip(file.path(path,"SG_DataZoneCent_2011.zip"), exdir = file.path(tempdir(),"dz"))
@@ -107,6 +191,13 @@ read_centroids_dz11 <- function(path){
   cents
 }
 
+#' Read Centroids Dz22
+#'
+#' @description Read centroids dz22 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_dz22 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
   unzip(file.path(path,"SG_DataZoneCent_2022.zip"), exdir = file.path(tempdir(),"dz"))
@@ -118,6 +209,13 @@ read_centroids_dz22 <- function(path){
   cents
 }
 
+#' Read Centroids Oa21
+#'
+#' @description Read centroids oa21 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_oa21 <- function(path){
   file_path = file.path(path, "Output_Areas_2021_PWC_V3_-4067204786746319875.gpkg")
   bounds <- read_bounds(file_path)
@@ -125,6 +223,13 @@ read_centroids_oa21 <- function(path){
   bounds
 }
 
+#' Read Centroids Lsoa21
+#'
+#' @description Read centroids lsoa21 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_lsoa21 <- function(path){
   file_path = file.path(path, "LSOA_Dec_2021_PWC_for_England_and_Wales_2022_-7410472461544737417.gpkg")
   bounds <- read_bounds(file_path)
@@ -132,6 +237,13 @@ read_centroids_lsoa21 <- function(path){
   bounds
 }
 
+#' Read Postcodes
+#'
+#' @description Read postcodes from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_postcodes <- function(path){
   dir.create(file.path(tempdir(),"postcodes"))
   unzip(path, exdir = file.path(tempdir(),"postcodes"))
@@ -158,12 +270,25 @@ read_postcodes <- function(path){
   postcodes
 }
 
+#' Make Postcode Areas
+#'
+#' @description Build postcode areas and return the generated output.
+#' @param postcodes){ Input object or parameter named `postcodes){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_postcode_areas <- function(postcodes){
   postcodes <- dplyr::group_by(postcodes, PC_AREA)
   postcodes <- dplyr::summarise(postcodes)
   postcodes
 }
 
+#' Read Postcode Points
+#'
+#' @description Read postcode points from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_postcode_points = function(path = "D:/OneDrive - University of Leeds/Data/Postcodes/codepo_20251101/codepo_gpkg_gb.zip"){
   dir.create(file.path(tempdir(),"postcodes"))
   unzip(path, exdir = file.path(tempdir(),"postcodes"))
@@ -173,6 +298,13 @@ read_postcode_points = function(path = "D:/OneDrive - University of Leeds/Data/P
   points
 }
 
+#' Load Lsoa 2011 2021 Lookup
+#'
+#' @description Load LSOA 2011 2021 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_LSOA_2011_2021_lookup <- function(path){
   file_path = file.path(path, "LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Lookup_for_England_and_Wales_(Version_2).csv")
   lookup = readr::read_csv(file_path)
@@ -180,6 +312,13 @@ load_LSOA_2011_2021_lookup <- function(path){
   lookup
 }
 
+#' Load Lsoa 2001 2011 Lookup
+#'
+#' @description Load LSOA 2001 2011 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_LSOA_2001_2011_lookup <- function(path){
   file_path = file.path(path, "Lower_Layer_Super_Output_Area_(2001)_to_Lower_Layer_Super_Output_Area_(2011)_to_Local_Authority_District_(2011)_Lookup_in_England_and_Wales.csv")
   lookup = readr::read_csv(file_path)
@@ -187,6 +326,13 @@ load_LSOA_2001_2011_lookup <- function(path){
   lookup
 }
 
+#' Load Oa Lsoa Msoa Class 2011 Lookup
+#'
+#' @description Load OA LSOA MSOA class 2011 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   file_path = file.path(path, "GB_OA_LSOA_MSOA_LAD_Classifications_2017.csv")
   lookup = readr::read_csv(file_path)
@@ -194,6 +340,13 @@ load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   lookup
 }
 
+#' Load Oa Lsoa Msoa 2021 Lookup
+#'
+#' @description Load OA LSOA MSOA 2021 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_OA_LSOA_MSOA_2021_lookup <- function(path){
   file_path = file.path(path, "OA_LSOA_MSOA_LAD_2021_Lookup_EW_v3.csv")
   lookup = readr::read_csv(file_path)
@@ -201,6 +354,13 @@ load_OA_LSOA_MSOA_2021_lookup <- function(path){
   lookup
 }
 
+#' Load Postcode Oa Lsoa Msoa Class 2021 Lookup
+#'
+#' @description Load postcode OA LSOA MSOA class 2021 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   dir.create(file.path(tempdir(),"lookup"))
   unzip(file.path(path,"PCD_OA21_LSOA21_MSOA21_LAD_FEB24_UK_LU.zip"), exdir = file.path(tempdir(),"lookup"))
@@ -209,6 +369,13 @@ load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   lookup
 }
 
+#' Load Msoa 2011 2021 Lookup
+#'
+#' @description Load MSOA 2011 2021 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_MSOA_2011_2021_lookup <- function(path){
   file_path = file.path(path, "MSOA_(2011)_to_MSOA_(2021)_to_Local_Authority_District_(2022)_Best_Fit_Lookup_for_EW_(V2).csv")
   lookup = readr::read_csv(file_path)
@@ -216,6 +383,13 @@ load_MSOA_2011_2021_lookup <- function(path){
 }
 
 
+#' Load Oa Dz Iz 2022 Lookup
+#'
+#' @description Load OA DZ IZ 2022 lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_OA_DZ_IZ_2022_lookup <- function(path = "../inputdata/boundaries/"){
   dir.create(file.path(tempdir(),"lookup"))
   unzip(file.path(path,"oa22_dz22_iz22.zip"), exdir = file.path(tempdir(),"lookup"))
@@ -224,6 +398,13 @@ load_OA_DZ_IZ_2022_lookup <- function(path = "../inputdata/boundaries/"){
 }
 
 # Bind list of SF data frames together using faster data.table::rbindlist
+#' Bind Sf
+#'
+#' @description Perform processing for bind sf.
+#' @param x Input data object.
+#' @param idcol Input object or parameter named `idcol`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bind_sf = function(x, idcol = NULL) {
   if (length(x) == 0) stop("Empty list")
   geom_name = attr(x[[1]], "sf_column")
@@ -233,6 +414,13 @@ bind_sf = function(x, idcol = NULL) {
   x
 }
 
+#' Read Bounds Lsoa11 Full
+#'
+#' @description Read bounds lsoa11 full from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_bounds_lsoa11_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_Dec_2011_Boundaries_Full_Clipped_BFC_EW_V3_2022_3969098746815328641.gpkg")
   bounds <- read_bounds(file_path)
@@ -241,6 +429,13 @@ read_bounds_lsoa11_full <- function(path){
 }
 
 
+#' Read Bounds Dz11
+#'
+#' @description Read bounds dz11 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_bounds_dz11 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
   unzip(file.path(path, "SG_DataZoneBdry_2011.zip"), exdir = file.path(tempdir(),"dz"))
@@ -252,6 +447,16 @@ read_bounds_dz11 <- function(path){
 }
 
 
+#' Lsoa Admin Summary
+#'
+#' @description Perform processing for lsoa admin summary.
+#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
+#' @param bounds_wards Input object or parameter named `bounds_wards`.
+#' @param bounds_parish Input object or parameter named `bounds_parish`.
+#' @param bounds_westminster Input object or parameter named `bounds_westminster`.
+#' @param bounds_la){ Input object or parameter named `bounds_la){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la){
 
   cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
@@ -269,6 +474,13 @@ lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, 
 }
 
 
+#' Read Cents Scotland Oa11
+#'
+#' @description Read cents scotland oa11 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_cents_scotland_oa11 = function(path = "../inputdata/boundaries/"){
   dir.create(file.path(tempdir(),"dz"))
   unzip(file.path(path, "Scotland-output-area-2011-pwc.zip"), exdir = file.path(tempdir(),"dz"))
@@ -280,6 +492,13 @@ read_cents_scotland_oa11 = function(path = "../inputdata/boundaries/"){
 
 }
 
+#' Read Cents Scotland Oa01
+#'
+#' @description Read cents scotland oa01 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_cents_scotland_oa01 = function(path = "../inputdata/boundaries/"){
   dir.create(file.path(tempdir(),"dz"))
   unzip(file.path(path, "Scotland-OutputArea2001_HWC.zip"), exdir = file.path(tempdir(),"dz"))

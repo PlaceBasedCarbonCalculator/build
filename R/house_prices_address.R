@@ -1,6 +1,18 @@
 # Match Up Land Registry Data with UPRN when Possible
 # Or Postcode Centroid when not
 
+#' Land Registry Add UPRN
+#'
+#' @description Perform processing for land registry add uprn.
+#' @param house_price_lr Input object or parameter named `house_price_lr`.
+#' @param house_prices_ubdc Input object or parameter named `house_prices_ubdc`.
+#' @param uprn_historical Input object or parameter named `uprn_historical`.
+#' @param lookup_postcode_OA_LSOA_MSOA_2021 Lookup table used to map area codes or classifications.
+#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
+#' @param path_epc Input object or parameter named `path_epc`.
+#' @param path_epc_nondom Input object or parameter named `path_epc_nondom`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 land_registry_add_uprn = function(house_price_lr,
                                   house_prices_ubdc,
                                   uprn_historical,
@@ -188,8 +200,12 @@ land_registry_add_uprn = function(house_price_lr,
 
 }
 
-
-
+#' House Price LSOA Summary
+#'
+#' @description Perform processing for house price LSOA summary.
+#' @param house_price_lr_uprn Input object or parameter named `house_price_lr_uprn`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 house_price_lsoa_summary = function(house_price_lr_uprn){
 
   house_price_lr_uprn$year = lubridate::year(house_price_lr_uprn$date)
@@ -210,6 +226,13 @@ house_price_lsoa_summary = function(house_price_lr_uprn){
 }
 
 # Extrapolate todays price from hisotrical price
+#' House Price Extrapolate
+#'
+#' @description Perform processing for house price extrapolate.
+#' @param house_price_lr_uprn Input object or parameter named `house_price_lr_uprn`.
+#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 house_price_extrapolate = function(house_price_lr_uprn, lsoa_admin){
 
   lsoa_admin = lsoa_admin[,c("LSOA21CD","LAD25CD")]

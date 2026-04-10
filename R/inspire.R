@@ -1,3 +1,10 @@
+#' Load Inspire Scotland
+#'
+#' @description Load inspire scotland data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_inspire_scotland = function(path = file.path(parameters$path_data,"INSPIRE_scotland")) {
   zips = list.files(path, pattern = ".zip", full.names = TRUE)
   polys <- list()
@@ -20,6 +27,13 @@ load_inspire_scotland = function(path = file.path(parameters$path_data,"INSPIRE_
 }
 
 
+#' Load Inspire
+#'
+#' @description Load inspire data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_inspire = function(path = file.path(parameters$path_data,"INSPIRE")){
 
   zips = list.files(path, pattern = ".zip", full.names = TRUE)

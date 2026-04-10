@@ -1,3 +1,10 @@
+#' Dowload Nomis
+#'
+#' @description Perform processing for dowload nomis.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 dowload_nomis = function(path = file.path(parameters$path_data,"nomis")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -45,6 +52,13 @@ dowload_nomis = function(path = file.path(parameters$path_data,"nomis")){
 
 }
 
+#' Load Population 2021
+#'
+#' @description Load population 2021 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_population_2021 = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts007a.zip"))
   names(dat) = c("year","LSOA21NM","LSOA21","all_ages","0-4","5-9","10-14","15-19","20-24",
@@ -55,6 +69,12 @@ load_population_2021 = function(path = file.path(parameters$path_data,"nomis")){
 }
 
 # Helper function to unzip to temp dir and read in LSOA table
+#' Unzip Nomis
+#'
+#' @description Perform processing for unzip nomis.
+#' @param file Input object or parameter named `file`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
 
   dir.create(file.path(tempdir(),"nomis"))
@@ -65,6 +85,13 @@ unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
   fl
 }
 
+#' Load Census 2021 Vehicles
+#'
+#' @description Load census 2021 vehicles data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts045.zip"))
   names(dat) = c("year","LSOA21NM","LSOA21","households_total","households_noCarVan","households_1CarVan","households_2CarVan","households_3plusCarVan")
@@ -73,6 +100,13 @@ load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomi
   dat
 }
 
+#' Load Census 2021 Households
+#'
+#' @description Load census 2021 households data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_census_2021_households = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts041.zip"))
   names(dat) = c("year","LSOA21NM","LSOA21","households_total")

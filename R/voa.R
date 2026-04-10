@@ -2,6 +2,13 @@
 #reported as ‘0’ and counts fewer than five reported as negligible and denoted
 #by ‘-’.
 
+#' Load Voa Ctsop1
+#'
+#' @description Load voa CTSOP1 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
   tmp_dir = file.path(tempdir(),"voa")
@@ -42,6 +49,13 @@ load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
 }
 
+#' Load Voa Ctsop3
+#'
+#' @description Load voa CTSOP3 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
   tmp_dir = file.path(tempdir(),"voa")
@@ -120,6 +134,13 @@ load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
 }
 
+#' Load Voa Ctsop4
+#'
+#' @description Load voa CTSOP4 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
   tmp_dir = file.path(tempdir(),"voa")
@@ -181,6 +202,13 @@ load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
 }
 
+#' Summarise Voa Post2010
+#'
+#' @description Summarise voa post2010 into a compact table suitable for analysis.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param dwellings_tax_band) Input object or parameter named `dwellings_tax_band)`.
+#' @return A summary data frame with aggregated metrics.
+#' @keywords internal
 summarise_voa_post2010 = function(dwellings_tax_band) {
   dwellings_tax_band = dwellings_tax_band[dwellings_tax_band$year >= 2010,]
   names(dwellings_tax_band) = gsub("_","",names(dwellings_tax_band))
@@ -191,6 +219,14 @@ summarise_voa_post2010 = function(dwellings_tax_band) {
 
 }
 
+#' Summarise Voa Post2020
+#'
+#' @description Summarise voa post2020 into a compact table suitable for analysis.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param dwellings_type Input object or parameter named `dwellings_type`.
+#' @param dwellings_age) Input object or parameter named `dwellings_age)`.
+#' @return A summary data frame with aggregated metrics.
+#' @keywords internal
 summarise_voa_post2020 = function(dwellings_type, dwellings_age) {
   dwellings_type = dwellings_type[dwellings_type$band == "All",]
   dwellings_age = dwellings_age[dwellings_age$band == "All",]

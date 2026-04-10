@@ -3,6 +3,13 @@
 #' @param path folder to save results
 #' @example
 
+#' Make Geojson
+#'
+#' @description Build geojson and return the generated output.
+#' @param z Input object or parameter named `z`.
+#' @param path File or directory path.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_geojson <- function(z, path = "outputs/zones.geojson"){
 
   if(ncol(z) > 15){

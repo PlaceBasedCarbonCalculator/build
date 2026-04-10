@@ -1,5 +1,12 @@
 # https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/population-estimates/small-area-population-estimates-2011-data-zone-based/time-series
 # Population in 2011 DataZones
+#' Download Scotland Population
+#'
+#' @description Download the scotland population resource and return the local file path.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return The local path or file name of the downloaded resource.
+#' @keywords internal
 download_scotland_population = function(path = file.path(parameters$path_data,"population_scotland")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -21,6 +28,13 @@ download_scotland_population = function(path = file.path(parameters$path_data,"p
 }
 
 
+#' Load Scotland Population
+#'
+#' @description Load scotland population data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_scotland_population = function(path = file.path(parameters$path_data,"population_scotland")){
 
   pops = list()
@@ -53,6 +67,17 @@ load_scotland_population = function(path = file.path(parameters$path_data,"popul
 
 # Make single population dataset for E,S,W from 2002 to 2021 + E&W 2022
 # Note this uses 2011 DataZones but 2021 LSOAs
+#' Combine Populations
+#'
+#' @description Combine populations inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param population_2002_2020 Input object or parameter named `population_2002_2020`.
+#' @param population_2021 Input object or parameter named `population_2021`.
+#' @param population_2022 Input object or parameter named `population_2022`.
+#' @param population_scot Input object or parameter named `population_scot`.
+#' @param lookup_lsoa_2011_21) Lookup table used to map area codes or classifications.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_populations = function(population_2002_2020, population_2021, population_2022, population_scot, lookup_lsoa_2011_21) {
 
   #TODO: Get Scotland 2022 population
@@ -175,6 +200,14 @@ combine_populations = function(population_2002_2020, population_2021, population
 }
 
 # New version that uses the VOA/Council Tax data
+#' Combine Populations2
+#'
+#' @description Combine populations2 inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param population_households_historical Input object or parameter named `population_households_historical`.
+#' @param population_scot_dz22) Input object or parameter named `population_scot_dz22)`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_populations2 = function(population_households_historical, population_scot_dz22) {
 
 

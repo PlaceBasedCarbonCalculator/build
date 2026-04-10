@@ -1,9 +1,26 @@
+#' Load Consumption Lookup
+#'
+#' @description Load consumption lookup data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_consumption_lookup = function(path = "../inputdata/consumption/PBCC_lookup.xlsx"){
   lookup = readxl::read_xlsx(path)
   lookup
 }
 
 
+#' Calculate Consumption Lsoa
+#'
+#' @description Calculate consumption lsoa and return the computed result.
+#' @param consumption_syth_pop Input object or parameter named `consumption_syth_pop`.
+#' @param population Population dataset.
+#' @param consumption_nations Input object or parameter named `consumption_nations`.
+#' @param consumption_lookup Input object or parameter named `consumption_lookup`.
+#' @param consumption_multipliers_uk) Input object or parameter named `consumption_multipliers_uk)`.
+#' @return A data frame or numeric summary containing the computed results.
+#' @keywords internal
 calculate_consumption_lsoa = function(consumption_syth_pop, population, consumption_nations, consumption_lookup, consumption_multipliers_uk) {
 
   population = population[,c("LSOA21CD","year","all_ages")]
@@ -183,6 +200,12 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
 }
 
 
+#' Remove Inf
+#'
+#' @description Perform processing for remove inf.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 remove_inf = function(x){
   x[is.infinite(x)] = 0
   x[is.nan(x)] = 0

@@ -1,5 +1,12 @@
 # Living Costs and Food Survey
 
+#' Load Lcfs
+#'
+#' @description Load LCFS data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_LCFS = function(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded")) {
 
   zips = list.files(path, pattern = ".zip")
@@ -20,6 +27,13 @@ load_LCFS = function(path = file.path(parameters$path_secure_data,"Living Costs 
 }
 
 
+#' Load Lcfs Single
+#'
+#' @description Load LCFS single data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded","LCFS_20202021_V1.zip")){
 
   dir = file.path(tempdir(),"lcfs")
@@ -531,6 +545,12 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 }
 
 
+#' Lowercase Cp
+#'
+#' @description Perform processing for lowercase CP.
+#' @param x) Input object or parameter named `x)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 lowercase_CP <- function(x) {
   x_orig = x
   is_cp <- grepl("^[CPBA]", x)
@@ -541,6 +561,13 @@ lowercase_CP <- function(x) {
 
 
 
+#' Remove Extreme Consumption
+#'
+#' @description Perform processing for remove extreme consumption.
+#' @param x Input data object.
+#' @param type Input object or parameter named `type`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 remove_extreme_consumption = function(x, type = ""){
   #hist(x, seq(min(x)-10, max(x)+10, 10))
 
@@ -557,6 +584,13 @@ remove_extreme_consumption = function(x, type = ""){
 
 
 
+#' Summarise Household Composition
+#'
+#' @description Summarise household composition into a compact table suitable for analysis.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param people){ Input object or parameter named `people){`.
+#' @return A summary data frame with aggregated metrics.
+#' @keywords internal
 summarise_household_composition = function(people){
 
   if(inherits(people$A005p, "factor")){
@@ -574,6 +608,12 @@ summarise_household_composition = function(people){
   ppl_summary
 }
 
+#' Hh Comp
+#'
+#' @description Perform processing for hh comp.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 hh_comp = function(x){
 
   #TODO: Check that string are the same across years, which some are not
@@ -656,6 +696,13 @@ hh_comp = function(x){
   stop("Unknown example", x$case[1])
 }
 
+#' Subset Lcfs
+#'
+#' @description Perform processing for subset lcfs.
+#' @param lcfs Input object or parameter named `lcfs`.
+#' @param yrs Input object or parameter named `yrs`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
 
   if(length(yrs) != 2){
@@ -708,14 +755,6 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
   hh_21 = dplyr::left_join(hh_21, fly_21, by = "case")
   hh_22 = dplyr::left_join(hh_22, fly_22, by = "case")
 
-  # Fix for changeeing source of flight emissions
-  # if("B487" %in% names(hh_21)){ #& !"C73311t" %in% names(hh_21)){
-  #   hh_21$C73311t = hh_21$B487
-  # }
-  #
-  # if("B487" %in% names(hh_22)){ # & !"C73311t" %in% names(hh_22)){
-  #   hh_22$C73311t = hh_22$B487
-  # }
 
   fly_21$case = as.character(fly_21$case)
   fly_22$case = as.character(fly_22$case)
@@ -847,6 +886,12 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
 }
 
 
+#' Selected Lcfs
+#'
+#' @description Perform processing for selected lcfs.
+#' @param lcfs){ Input object or parameter named `lcfs){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 selected_lcfs = function(lcfs){
 
   res = list("2010/11" = subset_lcfs(lcfs, yrs = c("2010","2011")),
@@ -862,6 +907,13 @@ selected_lcfs = function(lcfs){
 
 }
 
+#' Add Component Costs
+#'
+#' @description Add component costs to an existing dataset.
+#' @param hh Input object or parameter named `hh`.
+#' @param yr Input object or parameter named `yr`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 add_component_costs = function(hh, yr = "2010"){
 
   hh$spend_housing_gaselec = rowSums(dplyr::select(hh, dplyr::any_of(c(
@@ -1005,6 +1057,12 @@ add_component_costs = function(hh, yr = "2010"){
 
 
 
+#' Clean Oac Codes
+#'
+#' @description Perform processing for clean OAC codes.
+#' @param values) Input object or parameter named `values)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 clean_OAC_codes <- function(values) {
   # Create a mapping of descriptions to ONS codes
   mapping <- c(

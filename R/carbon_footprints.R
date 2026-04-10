@@ -1,3 +1,0 @@
-housing_footprint = function(){
-
-}

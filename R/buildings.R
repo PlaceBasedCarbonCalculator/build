@@ -1,9 +1,23 @@
+#' Load Building Age 2011
+#'
+#' @description Load building age 2011 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_building_age_2011 = function(path = file.path(parameters$path_secure_data,"CDRC/building age price")) {
   age = read.csv(file.path(path,"voapropertyage.csv"))
   names(age)[1] = "LSAO11CD"
   age
 }
 
+#' Load Housing Type 2021
+#'
+#' @description Load housing type 2021 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_housing_type_2021 = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts044.zip"))
   names(dat) = c("year","LSOA21NM","LSOA21CD","all_households",
@@ -15,6 +29,13 @@ load_housing_type_2021 = function(path = file.path(parameters$path_data,"nomis")
 }
 
 
+#' Load Central Heating 2021
+#'
+#' @description Load central heating 2021 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_central_heating_2021 = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts046.zip"))
   names(dat) = c("year","LSOA21NM","LSOA21CD",

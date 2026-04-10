@@ -1,3 +1,10 @@
+#' Read Osm Pbf Landuse
+#'
+#' @description Read osm pbf landuse from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
 
   poly = osmextract::oe_read(file.path(path,"united-kingdom-latest.osm.pbf"),
@@ -44,6 +51,13 @@ read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
 }
 
 
+#' Read Osm Pbf Buildings
+#'
+#' @description Read osm pbf buildings from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_osm_pbf_buildings = function(path = file.path(parameters$path_data,"osm")){
 
   poly = osmextract::oe_read(file.path(path,"united-kingdom-latest.osm.pbf"),

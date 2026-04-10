@@ -1,3 +1,10 @@
+#' Read Motoring Along
+#'
+#' @description Read motoring along from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_motoring_along = function(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3")){
 
   mot11 <- read.csv(file.path(path, "MOT Data RACv9.3 LSOAoutputs_2011.csv"))

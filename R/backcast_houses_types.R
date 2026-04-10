@@ -2,6 +2,13 @@
 # tar_load(dwellings_type)
 
 
+#' Backcast Dwelling Types
+#'
+#' @description Perform processing for backcast dwelling types.
+#' @param dwellings_tax_band Input object or parameter named `dwellings_tax_band`.
+#' @param dwellings_type){ Input object or parameter named `dwellings_type){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 backcast_dwelling_types = function(dwellings_tax_band, dwellings_type){
 
   dwellings_tax_band = dwellings_tax_band[dwellings_tax_band$year > 2009 &
@@ -42,6 +49,13 @@ backcast_dwelling_types = function(dwellings_tax_band, dwellings_type){
 }
 
 
+#' Build Backcasts Dwellings
+#'
+#' @description Build backcasts dwellings and return the generated output.
+#' @param sub Subset object used within the function.
+#' @param sub_tax){ Input object or parameter named `sub_tax){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_backcasts_dwellings = function(sub, sub_tax){
 
   if(!all(unique(sub$ecode) %in% unique(sub_tax$ecode))){
@@ -85,49 +99,3 @@ build_backcasts_dwellings = function(sub, sub_tax){
 }
 
 
-# lsoa = "E01034220"
-#
-#
-# sub_tax = dwellings_tax_band[dwellings_tax_band$ecode == lsoa,]
-# sub_tax$all_properties = NULL
-#
-# sub = dwellings_type[dwellings_type$ecode == lsoa,]
-#
-#
-# sub_tax_2020 = sub_tax[sub_tax$year == 2020,]
-# sub = sub[sub$year == 2020,]
-# sub = sub[,c("ecode","band","bungalow_total","flat_mais_total","house_terraced_total",
-#              "house_semi_total","house_detached_total","annexe","caravan_houseboat_mobilehome", "unknown")]
-# sub = sub[sub$band != "All",]
-# sub_I = sub[1,]
-# sub_I$band = "I"
-# sub_I[3:ncol(sub_I)] = lapply(sub_I[3:ncol(sub_I)],function(x){0})
-# sub = rbind(sub, sub_I)
-#
-#
-# # > head(sub)
-# # # A tibble: 6 × 10
-# # ecode     band  bungalow_total flat_mais_total house_terraced_total house_semi_total house_detached_total annexe caravan_houseboat_mobilehome unknown
-# # <chr>     <chr>          <int>           <int>                <int>            <int>                <int>  <int>                        <int>   <int>
-# #   1 E01034220 A                  0              90                    0                0                    0      0                            0       0
-# # 2 E01034220 B                  0              10                    0                0                    0      0                            0       0
-# # 3 E01034220 C                  0             290                    0                0                    0      0                            0       0
-# # 4 E01034220 D                  0             330                    0                0                    0      0                            0      10
-# # 5 E01034220 E                  0             140                    0                0                    0      0                            0       0
-# # 6 E01034220 F                  0             100                    0                0                    0      0                            0       0
-#
-# # head(sub_tax)
-# # A tibble: 6 × 12
-# # ecode      year band_a band_b band_c band_d band_e band_f band_g band_h band_i
-# # <chr>     <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>  <int>
-# # 1 E01034220  1993      0      0      0      0      0      0      0      0     NA
-# # 2 E01034220  1994      0      0      0      0      0      0      0      0     NA
-# # 3 E01034220  1995      0      0      0      0      0      0      0      0     NA
-# # 4 E01034220  1996      0      0      0      0      0      0      0      0     NA
-# # 5 E01034220  1997      0      0      0      0      0      0      0      0     NA
-# # 6 E01034220  1998      0      0      0      0      0      0      0      0     NA
-#
-# # Make a function that works out the number of each typ of house in sub exists in each year of sub_tax
-#
-#
-#

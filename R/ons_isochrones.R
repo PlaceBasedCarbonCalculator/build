@@ -1,3 +1,10 @@
+#' Load Ons Isochrones
+#'
+#' @description Load ons isochrones data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_ons_isochrones = function(path){
   fls = list.files(path, full.names = TRUE, pattern = "zip")
   isos = list()

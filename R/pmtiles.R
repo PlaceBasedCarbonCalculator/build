@@ -1,3 +1,27 @@
+#' Make Pmtiles
+#'
+#' @description Build pmtiles and return the generated output.
+#' @param input Input object or parameter named `input`.
+#' @param geojson Input object or parameter named `geojson`.
+#' @param pmtiles Input object or parameter named `pmtiles`.
+#' @param name Name or label used to identify output content.
+#' @param layer Input object or parameter named `layer`.
+#' @param output_path A file or directory path used by the function.
+#' @param attribution Input object or parameter named `attribution`.
+#' @param min_zoom Input object or parameter named `min_zoom`.
+#' @param max_zoom Input object or parameter named `max_zoom`.
+#' @param extend_zoom Input object or parameter named `extend_zoom`.
+#' @param coalesce Input object or parameter named `coalesce`.
+#' @param drop Input object or parameter named `drop`.
+#' @param shared_borders Input object or parameter named `shared_borders`.
+#' @param max_tile_bytes Input object or parameter named `max_tile_bytes`.
+#' @param simplification Input object or parameter named `simplification`.
+#' @param buffer Input object or parameter named `buffer`.
+#' @param drop_rate Input object or parameter named `drop_rate`.
+#' @param force Input object or parameter named `force`.
+#' @param new_line_delim Input object or parameter named `new_line_delim`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_pmtiles = function(input = NULL,
                         geojson = "school_locations.geojson",
                         pmtiles = "schools.pmtiles",
@@ -77,6 +101,14 @@ make_pmtiles = function(input = NULL,
 }
 
 
+#' Join Pmtiles
+#'
+#' @description Combine pmtiles inputs into a single consolidated result.
+#' @param output Input object or parameter named `output`.
+#' @param inputs Input object or parameter named `inputs`.
+#' @param output_path A file or directory path used by the function.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 join_pmtiles = function(output = 'dasymetric.pmtiles',
                         inputs = c('dasymetric_verylow.pmtiles',
                                    'dasymetric_low.pmtiles',
@@ -128,6 +160,19 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
 
 
 # Common need is to low/med/high zooms
+#' Make Pmtiles Stack
+#'
+#' @description Build pmtiles stack and return the generated output.
+#' @param lsoa_data Input object or parameter named `lsoa_data`.
+#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
+#' @param bounds_lsoa_GB_generalised Input object or parameter named `bounds_lsoa_GB_generalised`.
+#' @param bounds_lsoa_GB_super_generalised Input object or parameter named `bounds_lsoa_GB_super_generalised`.
+#' @param zoomstack_buildings_lst_4326 Input object or parameter named `zoomstack_buildings_lst_4326`.
+#' @param name Name or label used to identify output content.
+#' @param output_path A file or directory path used by the function.
+#' @param rounddp Input object or parameter named `rounddp`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_pmtiles_stack = function(lsoa_data,
                               bounds_lsoa_GB_full,
                               bounds_lsoa_GB_generalised,

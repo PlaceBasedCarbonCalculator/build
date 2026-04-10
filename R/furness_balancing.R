@@ -1,3 +1,12 @@
+#' Bal Func
+#'
+#' @description Perform processing for bal func.
+#' @param mat2 Input object or parameter named `mat2`.
+#' @param rsum2 Input object or parameter named `rsum2`.
+#' @param csum2 Input object or parameter named `csum2`.
+#' @param int_only Input object or parameter named `int_only`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   # Find ratio of rows
   mat_rsum <- rowSums(mat2, na.rm = TRUE)
@@ -31,6 +40,12 @@ bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   return(mat2)
 }
 
+#' Round Half Random
+#'
+#' @description Perform processing for round half random.
+#' @param x) Input object or parameter named `x)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 round_half_random <- function(x) {
   tweaks <- runif(length(x), min = -0.5, max = 0.5)
   tweaks[x < 1] <- 0 # Never round to 0
@@ -39,6 +54,17 @@ round_half_random <- function(x) {
 
 
 # Furness method balancing
+#' Furness Partial
+#'
+#' @description Perform processing for furness partial.
+#' @param mat Input object or parameter named `mat`.
+#' @param rsum Input object or parameter named `rsum`.
+#' @param csum Input object or parameter named `csum`.
+#' @param n Input object or parameter named `n`.
+#' @param check Input object or parameter named `check`.
+#' @param int_only Input object or parameter named `int_only`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = TRUE){
 
   # Check rsum = csum
@@ -113,6 +139,13 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = T
   return(mat_fin)
 }
 
+#' Distribute
+#'
+#' @description Perform processing for distribute.
+#' @param total Input object or parameter named `total`.
+#' @param bins) Input object or parameter named `bins)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 distribute <- function(total, bins) {
   # Calculate the base value for each bin
   base_value <- total %/% bins
@@ -133,6 +166,15 @@ distribute <- function(total, bins) {
 
 
 # Furness method balancing
+#' Furness Incomplete
+#'
+#' @description Perform processing for furness incomplete.
+#' @param mat Input object or parameter named `mat`.
+#' @param rsum Input object or parameter named `rsum`.
+#' @param csum Input object or parameter named `csum`.
+#' @param tt){ Input object or parameter named `tt){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 furness_incomplete <- function(mat, rsum, csum, tt){
 
   rname <- rownames(mat)
@@ -170,6 +212,14 @@ furness_incomplete <- function(mat, rsum, csum, tt){
 }
 
 
+#' Generate Combinations
+#'
+#' @description Perform processing for generate combinations.
+#' @param t Input object or parameter named `t`.
+#' @param n Input object or parameter named `n`.
+#' @param prefix Input object or parameter named `prefix`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 generate_combinations <- function(t, n, prefix = numeric()) {
   # Generate all length-n vectors of non-negative integers that sum to t.
   # Returns a list of numeric vectors. Order matters (compositions).
@@ -188,6 +238,13 @@ generate_combinations <- function(t, n, prefix = numeric()) {
   return(result)
 }
 
+#' Compositions Fast
+#'
+#' @description Perform processing for compositions fast.
+#' @param t Input object or parameter named `t`.
+#' @param n) Input object or parameter named `n)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 compositions_fast <- function(t, n) {
   # number of bars to place
   k <- n - 1L
@@ -207,6 +264,18 @@ compositions_fast <- function(t, n) {
   lapply(seq_len(ncol(gaps)), function(i) gaps[, i])
 }
 
+#' Furness Balance
+#'
+#' @description Perform processing for furness balance.
+#' @param mat Input object or parameter named `mat`.
+#' @param rsum Input object or parameter named `rsum`.
+#' @param csum Input object or parameter named `csum`.
+#' @param n Input object or parameter named `n`.
+#' @param check Input object or parameter named `check`.
+#' @param int_only Input object or parameter named `int_only`.
+#' @param quiet Input object or parameter named `quiet`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = FALSE, quiet = TRUE){
 
   rname <- rownames(mat)
@@ -279,6 +348,17 @@ furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = F
 # - Uses iterative balancing on free cells only (Furness-inspired)
 # - Handles over-constrained systems by flexing unconstrained rows/columns
 
+#' Furness Partial Integer Total
+#'
+#' @description Perform processing for furness partial integer total.
+#' @param mat Input object or parameter named `mat`.
+#' @param rsum Input object or parameter named `rsum`.
+#' @param csum Input object or parameter named `csum`.
+#' @param tt Input object or parameter named `tt`.
+#' @param max_iterations Input object or parameter named `max_iterations`.
+#' @param tolerance Input object or parameter named `tolerance`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 furness_partial_integer_total <- function(mat, rsum, csum, tt, max_iterations = 1000, tolerance = 1e-3) {
 
   # Validate inputs

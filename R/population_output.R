@@ -1,3 +1,10 @@
+#' Summarise Population
+#'
+#' @description Summarise population into a compact table suitable for analysis.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A summary data frame with aggregated metrics.
+#' @keywords internal
 summarise_population = function(population){
 
   population = population[population$year > 2009,]

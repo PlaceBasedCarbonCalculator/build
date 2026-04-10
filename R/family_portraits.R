@@ -7,6 +7,13 @@
 # residents_ethnic = read_NSSEC_ethinic()
 
 
+#' Build Household Types
+#'
+#' @description Build household types and return the generated output.
+#' @param households_nssec Input object or parameter named `households_nssec`.
+#' @param residents_ethnic){ Input object or parameter named `residents_ethnic){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_household_types = function(households_nssec, residents_ethnic){
   # Simplify Ethnicity to White, Black, Other
   residents_ethnic$ethnic6[residents_ethnic$ethnic6 %in% c("Asian","Mixed","Other")] = "Other"
@@ -47,24 +54,6 @@ build_household_types = function(households_nssec, residents_ethnic){
   # 14 - Long Term Unemployed
   # 15 - Students
 
-  # households_nssec$NSSEC5 = "DNA"
-  # households_nssec$NSSEC5[households_nssec$NSSEC10 == "L14"] = "unemployed"
-  # households_nssec$NSSEC5[households_nssec$NSSEC10 == "L15"] = "students"
-  # households_nssec$NSSEC5[households_nssec$NSSEC10 %in% c("L1L2L3","L4L5L6")] = "higher"
-  # households_nssec$NSSEC5[households_nssec$NSSEC10 %in% c("L7","L8L9")] = "intermediate"
-  # households_nssec$NSSEC5[households_nssec$NSSEC10 %in% c("L10L11","L12","L13")] = "routine"
-  #
-  #
-  # households_nssec =  dplyr::group_by(households_nssec, LSOA21CD, NSSEC5)
-  # households_nssec = dplyr::summarise(households_nssec,
-  #                                     LoneParent = sum(LoneParent),
-  #                                     DNA = sum(DNA),
-  #                                     OnePersonOver66 = sum(OnePersonOver66),
-  #                                     OnePersonOther = sum(OnePersonOther),
-  #                                     CoupleNoChildren = sum(CoupleNoChildren),
-  #                                     CoupleChildren = sum(CoupleChildren),
-  #                                     CoupleNoDepChild = sum(CoupleNoDepChild),
-  #                                     Other8 = sum(Other8))
 
   #TODO: earlier we pivot wide only to pivot back, that wastes about and hour!
   households_nssec = tidyr::pivot_longer(households_nssec, cols = names(households_nssec)[2:ncol(households_nssec)],
@@ -108,48 +97,35 @@ build_household_types = function(households_nssec, residents_ethnic){
 }
 
 
+#' Select Household Pics
+#'
+#' @description Perform processing for select household pics.
+#' @param combined_long){ Input object or parameter named `combined_long){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 select_household_pics = function(combined_long){
-
-
 
   long_lst = dplyr::group_split(combined_long, combined_long$LSOA21CD, .keep = FALSE)
   cats = purrr::map(long_lst, top_architypes, n = 48, .progress = TRUE)
   cats = dplyr::bind_rows(cats)
 
-  # #Check 20 is enough no close
-  #
-  #
-  # chk = cats[cats$cumpic >= 48,]
-  # chk = dplyr::group_split(chk, chk$LSOA21CD, .keep = FALSE)
-  # chk = purrr::map(chk, function(x){x[1,]}, .progress = TRUE)
-  # chk = dplyr::bind_rows(chk)
-  # summary(chk$cum)
-  # summary(duplicated(chk$LSOA21CD))
-  # quantile(chk$cum, seq(0,1,0.05))
-  # # Need between 14 and 50 types to cover 80% of the populations, mean of 22
-  # x = cats[cats$LSOA21CD == "E01000501",]
-  #
-  # # Look for unusual categorie to merge
-  #
-  # cat_sum = cats %>%
-  #   group_by(NSSEC10,  NSSEC,ethnic) %>%
-  #   summarise(households = sum(households, na.rm = T))
-
-  # Doing 48 images per LSOA for 90% of hosuheols in 90% of LSOAs
-
+  # Doing 48 images per LSOA for 90% of housholds in 90% of LSOAs
   cats_top = cats[cats$cumpic <= 48,]
-  #cats_top = cats_top[,c("LSOA21CD","NSSEC5","householdComposition","ethnic","pic")]
   cats_top$id = paste0(cats_top$NSSEC5,"_",cats_top$householdComposition,"_",cats_top$ethnic)
   cats_top = cats_top[,c("LSOA21CD","id","pic")]
-  # cats_summary = cats_top %>%
-  #   group_by(NSSEC5, householdComposition, ethnic) %>%
-  #   summarise(households = sum(households),
-  #             pic = sum(pic))
   cats_top
 
 }
 
 
+#' Combine NS-SEC Ethnic
+#'
+#' @description Combine NS-SEC Ethnic inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param hh Input object or parameter named `hh`.
+#' @param eth){ Input object or parameter named `eth){`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_nssec_enthinic = function(hh, eth){
   if(hh$LSOA21CD[1] != eth$LSOA21CD[1]){
     stop("LSOAs don't match")

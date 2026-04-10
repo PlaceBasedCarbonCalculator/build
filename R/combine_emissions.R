@@ -1,3 +1,16 @@
+#' Combine Lsoa Emissions
+#'
+#' @description Combine lsoa emissions inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param flights_lsoa_emissions Input object or parameter named `flights_lsoa_emissions`.
+#' @param consumption_emissions Input object or parameter named `consumption_emissions`.
+#' @param car_emissions Input object or parameter named `car_emissions`.
+#' @param domestic_electricity_emissions Input object or parameter named `domestic_electricity_emissions`.
+#' @param domestic_gas_emissions Input object or parameter named `domestic_gas_emissions`.
+#' @param other_heating_emissions Input object or parameter named `other_heating_emissions`.
+#' @param max_year Input object or parameter named `max_year`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_lsoa_emissions = function(flights_lsoa_emissions,
                                   consumption_emissions,
                                   car_emissions,

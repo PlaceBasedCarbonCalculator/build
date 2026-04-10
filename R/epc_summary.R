@@ -1,4 +1,23 @@
+#' True or NA
+#'
+#' @description Replace NA values with FALSE
+#' @param x Logical vector
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
+trueNA = function(x){
+  x[is.na(x)] = FALSE
+  x
+}
 
+
+#' Epc Summarise Domestic
+#'
+#' @description Perform processing for epc summarise domestic.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param path File or directory path.
+#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
                                   bounds_lsoa_GB_full
                                   ){
@@ -46,10 +65,6 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
                                    "(same premises above)",
                                    "(another premises above)" )] = "(another dwelling above)"
 
-  trueNA = function(x){
-    x[is.na(x)] = FALSE
-    x
-  }
 
   # Flag Roofs and Floors
   certs$floor_ee <- as.character(certs$floor_ee)

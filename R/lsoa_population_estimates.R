@@ -1,6 +1,13 @@
 # Build LSOA Population for ONS Data
 # https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates
 
+#' Dowload Lsoa Population
+#'
+#' @description Process population data and return a summary table.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame produced by the function.
+#' @keywords internal
 dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -44,6 +51,12 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
 
 
 
+#' Build Lsoa Population
+#'
+#' @description Build lsoa population and return the generated output.
+#' @param path File or directory path.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_lsoa_population <- function(path = file.path(data_path(),"population")){
 
   # 2020
@@ -257,6 +270,12 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
 }
 
 
+#' Build Lsoa Population 2022
+#'
+#' @description Build lsoa population 2022 and return the generated output.
+#' @param path) Input object or parameter named `path)`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_lsoa_population_2022 = function(path) {
   #2022
   pop22 <- readxl::read_excel(file.path(path,"pop2022.xlsx"),
@@ -294,6 +313,12 @@ build_lsoa_population_2022 = function(path) {
 }
 
 
+#' Build Lsoa Population 2022 24
+#'
+#' @description Build lsoa population 2022 24 and return the generated output.
+#' @param path File or directory path.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_lsoa_population_2022_24 = function(path = "../inputdata/population/") {
   #2022
   pop22 <- readxl::read_excel(file.path(path,"pop2022-2024.xlsx"),

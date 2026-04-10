@@ -1,3 +1,10 @@
+#' Download Pct
+#'
+#' @description Download the pct resource and return the local file path.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return The local path or file name of the downloaded resource.
+#' @keywords internal
 download_pct <- function(path){
   if(!dir.exists(path)){
     dir.create(path)

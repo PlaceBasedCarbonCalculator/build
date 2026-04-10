@@ -1,3 +1,11 @@
+#' Make Dz 11 22 Lookup
+#'
+#' @description Build dz 11 22 lookup and return the generated output.
+#' @param bounds_dz11 Input object or parameter named `bounds_dz11`.
+#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
+#' @param uprn_bng){ Input object or parameter named `uprn_bng){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
   over = sf::st_intersects(bounds_dz22, bounds_dz11)
@@ -40,13 +48,6 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
       # Also look for 2011 area larger than 2021
 
-      # sub_difference = sf::st_difference(bounds_dz11[over[[i]],],bounds_dz22[i,])
-      # sub_difference = slither_detection(sub_difference) # Remove Slithers
-      # sub_difference$area_diff = as.numeric(sf::st_area(sub_difference))
-      # sub_difference$area_change = round(sub_difference$area11 - sub_difference$area_diff)
-      # sub_difference$p_change = sub_difference$area_change / sub_difference$area11
-      # # Remove small areas, less than 1% of the 2011 area
-      # sub_difference = sub_difference[sub_difference$p_change > 0.01,]
 
       # Summarise what makes up the area of the 2022 zone
       #sel_11 = bounds_dz11[bounds_dz11$DataZone %in% unique(c(sub_intersection$DataZone, sub_difference$DataZone)),]
@@ -101,26 +102,14 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 # library(tmap)
 # tmap_mode("view")
 
-# qtm(bounds_dz22[i,], lines.col = "red", fill = NULL) +
-#   qtm(bounds_dz11[over[[i]],], lines.col = "blue", fill = NULL)
-#
-#
-# qtm(bounds_dz11[over[[i]],], lines.col = "blue", fill = NULL) +
-#   qtm(inter2, lines.col = "green", fill = NULL) +
-#   qtm(bounds_dz22[i,], lines.col = "red", fill = NULL)
-#
-#   # qtm(sub_intersection, lines.col = "black", fill = NULL) +
-#   # qtm(sub_difference, lines.col = "green", fill = NULL)
-#
-# qtm(bounds_dz11[over[[i]],], lines.col = "blue", fill = NULL) +
-#   qtm(sub_intersection, lines.col = "green", fill = NULL) +
-#   qtm(bounds_dz22[i,], lines.col = "red", fill = NULL)
-#
-#
-# qtm(bounds_dz22[i,], lines.col = "red", fill = NULL) +
-#   qtm(sel_11, lines.col = "blue", fill = NULL)
 
 
+#' Make Dz 11 22 Lookup Simple
+#'
+#' @description Build dz 11 22 lookup simple and return the generated output.
+#' @param lookup_dz_2011_22_pre){ Lookup table used to map area codes or classifications.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_dz_11_22_lookup_simple = function(lookup_dz_2011_22_pre){
   # Scotland
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)
@@ -135,6 +124,14 @@ make_dz_11_22_lookup_simple = function(lookup_dz_2011_22_pre){
   lookup_dz_2011_22_pre
 }
 
+#' Slither Detection
+#'
+#' @description Perform processing for slither detection.
+#' @param x Input data object.
+#' @param apratio Input object or parameter named `apratio`.
+#' @param min_area Input object or parameter named `min_area`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 slither_detection = function(x, apratio = 0.5, min_area = 100){
   x = sf::st_collection_extract(x, "POLYGON")
   x = sf::st_cast(x, "POLYGON")
@@ -149,6 +146,15 @@ slither_detection = function(x, apratio = 0.5, min_area = 100){
 
 # Convert Population 2011 to Population 22
 
+#' Interpolate Population Dz11 Dz22
+#'
+#' @description Process population data and return a summary table.
+#' @param lookup_dz_2011_22_pre Lookup table used to map area codes or classifications.
+#' @param households_scotland Input object or parameter named `households_scotland`.
+#' @param population_scot Input object or parameter named `population_scot`.
+#' @param dwellings_tax_band_scotland){ Input object or parameter named `dwellings_tax_band_scotland){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 interpolate_population_dz11_dz22 = function(lookup_dz_2011_22_pre, households_scotland, population_scot, dwellings_tax_band_scotland){
 
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)

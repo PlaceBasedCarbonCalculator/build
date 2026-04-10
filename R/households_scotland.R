@@ -1,3 +1,10 @@
+#' Read Scotland Households
+#'
+#' @description Read scotland households from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_scotland_households = function(path = "../inputdata/population_scotland/household-estimates.xlsx"){
   hh = list()
   for(i in 2014:2023){

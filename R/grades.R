@@ -1,3 +1,11 @@
+#' Value Grade
+#'
+#' @description Perform processing for value2grade.
+#' @param x Input data object.
+#' @param high_good Input object or parameter named `high_good`.
+#' @param zeroNA Input object or parameter named `zeroNA`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 value2grade <- function(x, high_good = FALSE, zeroNA = TRUE){
 
   x_cent <- percentile(x, zeroNA = zeroNA) # In flights.R

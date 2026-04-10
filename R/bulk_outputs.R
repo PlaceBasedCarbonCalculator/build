@@ -22,6 +22,16 @@
 #' @param path output directory
 #' @param rounddp numeric, how many decimpla places to round to
 
+#' Bulk Export Csv Generic
+#'
+#' @description Perform processing for bulk export csv generic.
+#' @param x Input data object.
+#' @param name Name or label used to identify output content.
+#' @param date Date or timestamp information.
+#' @param path File or directory path.
+#' @param rounddp Input object or parameter named `rounddp`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 bulk_export_csv_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
   if(!dir.exists(path)){
@@ -79,6 +89,16 @@ bulk_export_csv_generic = function(x, name = NULL, date = Sys.Date(), path = "ou
 }
 
 
+#' Bulk Export Geojson Generic
+#'
+#' @description Generic fucntion to export geojson files
+#' @param x Input data object.
+#' @param name Name or label used to identify output content.
+#' @param date Date or timestamp information.
+#' @param path File or directory path.
+#' @param rounddp Input object or parameter named `rounddp`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
   if(!dir.exists(path)){
@@ -132,12 +152,20 @@ bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path =
 
   unlink(file.path(tempdir(),"bulkexport"), recursive = TRUE)
 
-
   return(path_final_out)
 
 }
 
-
+#' Bulk Export Sf Generic
+#'
+#' @description Gneric Export fucntion for SF data frames
+#' @param x Input data object.
+#' @param name Name or label used to identify output content.
+#' @param date Date or timestamp information.
+#' @param path File or directory path.
+#' @param rounddp Input object or parameter named `rounddp`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_sf_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
   if(!dir.exists(path)){
@@ -184,41 +212,92 @@ bulk_export_sf_generic = function(x, name = NULL, date = Sys.Date(), path = "out
 
 }
 
-
-
+#' Bulk Export Pbcc
+#'
+#' @description Perform processing for bulk export pbcc.
+#' @param x Input data object.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_pbcc = function(x = lsoa_emissions_all_forcasts){
   bulk_export_csv_generic(x, "pbcc_lsoa")
 }
 
+#' Bulk Export Household Clusters
+#'
+#' @description Perform processing for bulk export household clusters.
+#' @param x Input data object.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_household_clusters = function(x = household_clusters){
   bulk_export_csv_generic(x, "household_clusters")
 }
 
+#' Bulk Export Pt Frequency
+#'
+#' @description Perform processing for bulk export pt frequency.
+#' @param x Input data object.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_pt_frequency = function(x = pt_frequency){
   bulk_export_csv_generic(x, "pt_frequency")
 }
 
+#' Bulk Export Access Proximity
+#'
+#' @description Compute accessibility or proximity metrics for zones and POIs.
+#' @param x Input data object.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_access_proximity = function(x = access_proximity){
   bulk_export_csv_generic(x, "access_proximity")
 }
 
+#' Bulk Export Inspire
+#'
+#' @description Perform processing for bulk export inspire.
+#' @param ){ Input object or parameter named `){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_inspire = function(){
 
 }
-
+#' Bulk Export Epc Dom Summary
+#'
+#' @description Perform processing for bulk export epc dom summary.
+#' @param x Input data object.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_epc_dom_summary = function(x = epc_dom_summary){
   bulk_export_csv_generic(x, "epc_dom_summary")
 }
 
 
+#' Bulk Export Epc Dom
+#'
+#' @description Perform processing for bulk export epc dom.
+#' @param geojson_epc_dom){ Input object or parameter named `geojson_epc_dom){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_epc_dom = function(geojson_epc_dom){
   bulk_export_geojson_generic(geojson_epc_dom, "epc_domestic")
 }
 
+#' Bulk Export Epc Nondom
+#'
+#' @description Perform processing for bulk export epc nondom.
+#' @param geojson_epc_nondom){ Input object or parameter named `geojson_epc_nondom){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_epc_nondom = function(geojson_epc_nondom){
   bulk_export_geojson_generic(geojson_epc_nondom, "epc_nondomestic")
 }
 
+#' Bulk Export Buildings
+#'
+#' @description Perform processing for bulk export buildings.
+#' @param buildings_heights){ Input object or parameter named `buildings_heights){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 bulk_export_buildings = function(buildings_heights){
   bulk_export_sf_generic(buildings_heights, "buildings_heights")
 }

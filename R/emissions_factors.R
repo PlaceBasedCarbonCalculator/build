@@ -1,3 +1,9 @@
+#' Load Emissions Factors
+#'
+#' @description Make emissions factors data from DEFRA
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_emissions_factors = function(){
 
   # Defra Emissions Factors

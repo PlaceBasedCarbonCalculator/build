@@ -1,3 +1,11 @@
+#' Make Lsoa Warnings
+#'
+#' @description Build lsoa warnings and return the generated output.
+#' @param lookup_lsoa_2011_21 LSOA lookup table spanning 2011 and 2021 boundaries.
+#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_lsoa_warnings = function(lookup_lsoa_2011_21,lookup_dz_2011_22, population){
 
   lookup_dz_2011_22 = lookup_dz_2011_22[,"LSOA21CD"]

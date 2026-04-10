@@ -1,3 +1,10 @@
+#' Load Income Scotland
+#'
+#' @description Load income scotland data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_income_scotland = function(path = "../inputdata/income/scotland/"){
 
   income_2018 = readxl::read_xlsx(file.path(path,"CHMA+-+2018+-+Publication+-+LLHIE+Estimates+Data+Summary+-+2018+-+Minor+Revsions+-+24+May+2019.xlsx"),
@@ -124,6 +131,28 @@ load_income_scotland = function(path = "../inputdata/income/scotland/"){
 
 }
 
+#' Income Limit Estimator
+#'
+#' @description Use income band data to estimate upper and lower income
+#'   confidence limits
+#' @param u50 Input object or parameter named `u50`.
+#' @param u100 Input object or parameter named `u100`.
+#' @param u150 Input object or parameter named `u150`.
+#' @param u200 Input object or parameter named `u200`.
+#' @param u250 Input object or parameter named `u250`.
+#' @param u300 Input object or parameter named `u300`.
+#' @param u350 Input object or parameter named `u350`.
+#' @param u400 Input object or parameter named `u400`.
+#' @param u500 Input object or parameter named `u500`.
+#' @param u600 Input object or parameter named `u600`.
+#' @param u700 Input object or parameter named `u700`.
+#' @param u800 Input object or parameter named `u800`.
+#' @param u900 Input object or parameter named `u900`.
+#' @param u1000 Input object or parameter named `u1000`.
+#' @param u1200 Input object or parameter named `u1200`.
+#' @param u2000 Input object or parameter named `u2000`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 income_limit_estimator = function(u50, u100, u150, u200, u250, u300, u350, u400, u500, u600, u700, u800, u900, u1000, u1200, u2000){
 
   comb = c(u50, u100, u150, u200, u250, u300, u350, u400, u500, u600, u700, u800, u900, u1000, u1200, u2000)
@@ -145,6 +174,14 @@ income_limit_estimator = function(u50, u100, u150, u200, u250, u300, u350, u400,
 }
 
 
+#' Esimate Income Scotland Dz22
+#'
+#' @description Perform processing for esimate income scotland dz22.
+#' @param income_scot_dz11 Input object or parameter named `income_scot_dz11`.
+#' @param lookup_dz_2011_22_pre Lookup table used to map area codes or classifications.
+#' @param path File or directory path.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 esimate_income_scotland_dz22 = function(income_scot_dz11, lookup_dz_2011_22_pre, path = "../inputdata/income/scotland/Scotland Income Trends.xlsx"){
 
   lookup_dz_2011_22_pre = sf::st_drop_geometry(lookup_dz_2011_22_pre)

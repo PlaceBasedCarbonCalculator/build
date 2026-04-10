@@ -1,7 +1,27 @@
-select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast,
-                               income_lsoa_msoa, income_scot_dz22,
-                               domestic_electricity, domestic_gas,
-                               bills_gas_electric, bills_other_heating) {
+#' Select Retofit Vars
+#'
+#' @description Perform processing for select retofit vars.
+#' @param epc_dom_summary Input object or parameter named `epc_dom_summary`.
+#' @param population Population dataset.
+#' @param house_prices_nowcast Input object or parameter named `house_prices_nowcast`.
+#' @param income_lsoa_msoa Input object or parameter named `income_lsoa_msoa`.
+#' @param income_scot_dz22 Input object or parameter named `income_scot_dz22`.
+#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
+#' @param domestic_gas Input object or parameter named `domestic_gas`.
+#' @param bills_gas_electric Input object or parameter named `bills_gas_electric`.
+#' @param bills_other_heating) Input object or parameter named `bills_other_heating)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
+select_retofit_vars = function(epc_dom_summary,
+                               population,
+                               house_prices_nowcast,
+                               income_lsoa_msoa,
+                               income_scot_dz22,
+                               domestic_electricity,
+                               domestic_gas,
+                               bills_gas_electric,
+                               bills_other_heating
+                               ) {
 
   bills_gas_electric = bills_gas_electric[,c("LSOA21CD","year","energy_average_bill")]
   bills_gas_electric = bills_gas_electric[bills_gas_electric$year == max(bills_gas_electric$year),]
@@ -86,17 +106,6 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
   # House Prices
   # Not all areas have a transaction in 2024, so take most recent year
 
-  # house_prices_lsoa = house_prices_lsoa[,c("LSOA21CD","year","transactions","price_median")]
-  # house_prices_lsoa = house_prices_lsoa |>
-  #   dplyr::group_by(LSOA21CD) |>
-  #   dplyr::summarise(max_year = max(year),
-  #     price_median = price_median[year == max_year],
-  #     transactions = transactions[year == max_year]
-  #     )
-  # house_prices_lsoa = house_prices_lsoa[substr(house_prices_lsoa$LSOA21CD,1,1) != "S",] #Attribution error
-  # house_prices_lsoa$price_median[house_prices_lsoa$transactions < 3] = NA
-  # TODO: 373 LSOAs have less than 5 transactions per year
-  # sub = dplyr::left_join(sub, house_prices_lsoa[,c("LSOA21CD","price_median")], by = "LSOA21CD")
 
   house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2024")]
   house_prices_nowcast = house_prices_nowcast |>
@@ -145,10 +154,15 @@ select_retofit_vars = function(epc_dom_summary, population, house_prices_nowcast
                "house_income_ratio","median_gas_kwh","median_elec_kwh","fuelcost_bivaraite" )]
 
   sub
-
-
 }
 
+#' Modal
+#'
+#' @description Perform processing for modal.
+#' @param df Input object or parameter named `df`.
+#' @param drop Input object or parameter named `drop`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 modal = function(df, drop = TRUE){
   x = apply(df, 1, function(x) names(df)[x == max(x)][1])
   if(drop){

@@ -1,3 +1,11 @@
+#' Make La Summary
+#'
+#' @description Build la summary and return the generated output.
+#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
+#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_la_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
   lsoa_admin = lsoa_admin[,c("LSOA21CD","LAD25CD")]
@@ -76,6 +84,14 @@ make_la_summary = function(lsoa_emissions_all, lsoa_admin, population){
 }
 
 
+#' Make Oac Summary
+#'
+#' @description Build oac summary and return the generated output.
+#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
+#' @param area_classifications_11_21 Input object or parameter named `area_classifications_11_21`.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_oac_summary = function(lsoa_emissions_all, area_classifications_11_21, population){
 
   area_classifications_11_21 = area_classifications_11_21[,c("LSOA21CD","lsoa_class_code")]

@@ -1,3 +1,10 @@
+#' Make Similarity Table
+#'
+#' @description Build similarity table and return the generated output.
+#' @param hh Input object or parameter named `hh`.
+#' @param oac_year Input object or parameter named `oac_year`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_similarity_table = function(hh, oac_year = 2011){
   nms_Tenure <- c("outright", "mortgage", "socialrented", "privaterented")
   nms_hhComp <- c("OnePersonOther", "OnePersonOver66", "CoupleNoChildren", "CoupleChildren",
@@ -147,6 +154,18 @@ make_similarity_table = function(hh, oac_year = 2011){
 
 
 
+#' Match Hh Census3
+#'
+#' @description Match hh census3 values between datasets.
+#' @param Tenure5 Input object or parameter named `Tenure5`.
+#' @param hhComp15 Input object or parameter named `hhComp15`.
+#' @param hhSize5 Input object or parameter named `hhSize5`.
+#' @param CarVan5 Input object or parameter named `CarVan5`.
+#' @param OACs Input object or parameter named `OACs`.
+#' @param hh Input object or parameter named `hh`.
+#' @param similarity_table) Input object or parameter named `similarity_table)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_hh_census3 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similarity_table) {
 
   OAC = unlist(strsplit(OACs," "))

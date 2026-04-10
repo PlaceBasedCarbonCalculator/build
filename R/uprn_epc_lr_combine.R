@@ -1,3 +1,13 @@
+#' Combine Uprn Epc Lr
+#'
+#' @description Combine uprn epc lr inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param uprn_historical Input object or parameter named `uprn_historical`.
+#' @param house_prices_nowcast Input object or parameter named `house_prices_nowcast`.
+#' @param path_epc_dom Input object or parameter named `path_epc_dom`.
+#' @param path_epc_nondom Input object or parameter named `path_epc_nondom`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_uprn_epc_lr = function(uprn_historical,
                                house_prices_nowcast,
                                path_epc_dom = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),

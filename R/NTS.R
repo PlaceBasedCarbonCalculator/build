@@ -1,3 +1,10 @@
+#' Load Nts
+#'
+#' @description Load NTS data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_NTS = function(path = file.path(parameters$path_secure_data,"National Travel Survey/Safeguarded/")){
 
   dir = file.path(tempdir(),"NTS")
@@ -79,25 +86,6 @@ load_NTS = function(path = file.path(parameters$path_secure_data,"National Trave
 
 
 
-  # lookup_cols = readxl::read_excel(file.path(dir,"UKDA-5340-spss","mrdoc","excel","5340_nts_lookup_table_eul_2002_to_2023.xlsx"),
-  #                                    sheet = "Main Table Variables")
-  # lookup_cols = lookup_cols[,c("Variable","Description")]
-  #
-  # lookup_cols$clean = gsub(" - Created in SQL","",lookup_cols$Description)
-  # lookup_cols$clean = gsub(" - created in SQL","",lookup_cols$clean)
-  # lookup_cols$clean = gsub(",|\\(|\\)|<|=|>|?","",lookup_cols$clean)
-  # lookup_cols$clean = gsub("  regional / Metropolitan area breakdown","",lookup_cols$clean)
-  # lookup_cols$clean = gsub("/","",lookup_cols$clean)
-  # lookup_cols$clean = gsub("-","",lookup_cols$clean)
-  # lookup_cols$clean = gsub(" ","",lookup_cols$clean)
-  #
-  # for(i in 1:length(nts)){
-  #   tab_nms = names(nts[[i]])
-  #   tab_match = lookup_cols$clean[match(tab_nms, lookup_cols$Variable)]
-  #   tab_match = ifelse(is.na(tab_match),tab_nms, tab_match)
-  #
-  #   names(nts[[i]]) = tab_match
-  # }
 
   unlink(dir, recursive = TRUE)
 
@@ -106,6 +94,12 @@ load_NTS = function(path = file.path(parameters$path_secure_data,"National Trave
 
 
 
+#' Build Nts Zones
+#'
+#' @description Build nts zones and return the generated output.
+#' @param nts){ Input object or parameter named `nts){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_nts_zones = function(nts){
   nts_household = nts$household
   #nts_ldj = nts$ldj

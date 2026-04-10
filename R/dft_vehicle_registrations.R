@@ -1,3 +1,10 @@
+#' Download Dft Vehicle Registrations
+#'
+#' @description Download the dft vehicle registrations resource and return the local file path.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return The local path or file name of the downloaded resource.
+#' @keywords internal
 download_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
   if(!dir.exists(path)){
     dir.create(path)
@@ -21,6 +28,13 @@ download_dft_vehicle_registrations <- function(path = file.path(data_path(),"veh
 }
 
 
+#' Load Dft Vehicle Registrations
+#'
+#' @description Load dft vehicle registrations data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
 
   d125 <- readr::read_csv(file.path(path,"df_VEH0125.csv"))
@@ -58,6 +72,13 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
 }
 
 
+#' Load Dft Ulev Registrations
+#'
+#' @description Load dft ulev registrations data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
   d135 <- readr::read_csv(file.path(path,"df_VEH0135.csv"))
@@ -99,6 +120,13 @@ load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registratio
 }
 
 
+#' Load Dft Ev Registrations
+#'
+#' @description Load dft ev registrations data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
   d145 <- readr::read_csv(file.path(path,"df_VEH0145.csv"))
@@ -135,6 +163,12 @@ load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations
 }
 
 
+#' Fill Gaps
+#'
+#' @description Perform processing for fill gaps.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 fill_gaps = function(x){
   incomplete = FALSE
   suppressWarnings(x$count2 <- as.numeric(x$count))
@@ -263,6 +297,12 @@ fill_gaps = function(x){
 }
 
 
+#' Fill Gaps 135
+#'
+#' @description Perform processing for fill gaps 135.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 fill_gaps_135 = function(x){
 
   incomplete = FALSE
@@ -426,6 +466,12 @@ fill_gaps_135 = function(x){
 
 }
 
+#' Fill Gaps 145
+#'
+#' @description Perform processing for fill gaps 145.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 fill_gaps_145 = function(x){
 
   incomplete = FALSE

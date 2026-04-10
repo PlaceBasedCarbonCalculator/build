@@ -1,3 +1,10 @@
+#' Download Area Classifications
+#'
+#' @description Download the area classifications resource and return the local file path.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return The local path or file name of the downloaded resource.
+#' @keywords internal
 download_area_classifications = function(path){
   if(!dir.exists(path)){
     dir.create(path)
@@ -14,6 +21,13 @@ download_area_classifications = function(path){
 }
 
 
+#' Load Area Classifications
+#'
+#' @description Load area classifications data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_area_classifications = function(path){
 
   dir.create(file.path(tempdir(),"area_classifications"))
@@ -30,6 +44,14 @@ load_area_classifications = function(path){
   classif
 }
 
+#' Match 2011 Classifications 2021
+#'
+#' @description Match 2011 classifications 2021 values between datasets.
+#' @param area_classifications Area classification lookup table.
+#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
+#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 match_2011_classifications_2021 = function(area_classifications, lookup_dz_2011_22, lsoa_11_21_tools){
 
   lookup_dz_2011_22 = lookup_dz_2011_22[order(lookup_dz_2011_22$splitshare, decreasing = TRUE),]

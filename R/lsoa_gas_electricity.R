@@ -1,31 +1,15 @@
-# dowload_gas_electric <- function(path = file.path(data_path(),"gas_electric")){
-#   if(!dir.exists(path)){
-#     dir.create(path)
-#   } else {
-#     fls = list.files(path, pattern = "xlsx")
-#     if(length(fls) > 3){
-#       return(path)
-#     }
-#   }
-#
-#   url_elec = "https://assets.publishing.service.gov.uk/media/63a2ea3fd3bf7f375b61c12d/LSOA_domestic_elec_2010-21.xlsx"
-#   download.file(url_elec, file.path(path,"lsoa_elec_dom.xlsx"), mode = "wb")
-#
-#   url_elec = "https://assets.publishing.service.gov.uk/media/63a2e9e58fa8f5390dfdf56b/MSOA_non-domestic_elec_2010-21.xlsx"
-#   download.file(url_elec, file.path(path,"msoa_elec_nondom.xlsx"), mode = "wb")
-#
-#   url_gas = "https://assets.publishing.service.gov.uk/media/63a2ef098fa8f53913e8071b/LSOA_domestic_gas_2010-21.xlsx"
-#   download.file(url_gas, file.path(path,"lsoa_gas_dom.xlsx"), mode = "wb")
-#
-#   url_gas = "https://assets.publishing.service.gov.uk/media/63a31f44e90e075870e2cf0f/MSOA_non-domestic_gas_2010-21.xlsx"
-#   download.file(url_gas, file.path(path,"msoa_gas_nondom.xlsx"), mode = "wb")
-#
-#   return(path)
-#
-# }
+#' Utility functions for gas and electricity input data.
+#'
+#' These helpers load and convert gas and electricity datasets for LSOA/MSOA
+#' level analysis.
+#'
+#' @keywords internal
 
-
-
+#' Load LSOA domestic electricity data.
+#'
+#' @param path Directory containing `LSOA_domestic_elec_2010-2024.xlsx`.
+#' @return A data frame of domestic electricity statistics by LSOA and year.
+#' @keywords internal
 load_lsoa_electric <- function(path){
 
   elec = list()
@@ -62,6 +46,11 @@ load_lsoa_electric <- function(path){
 
 
 
+#' Load MSOA non-domestic electricity data.
+#'
+#' @param path Directory containing `MSOA_non-domestic_elec_2010-2024.xlsx`.
+#' @return A data frame of non-domestic electricity statistics by MSOA and year.
+#' @keywords internal
 load_msoa_electric_nondom <- function(path){
 
 
@@ -101,6 +90,11 @@ load_msoa_electric_nondom <- function(path){
 
 
 
+#' Load LSOA domestic gas data.
+#'
+#' @param path Directory containing `LSOA_domestic_gas_2010-2024.xlsx`.
+#' @return A data frame of domestic gas statistics by LSOA and year.
+#' @keywords internal
 load_lsoa_gas <- function(path){
 
 
@@ -152,6 +146,13 @@ load_lsoa_gas <- function(path){
 
 
 
+#' Load MSOA non-domestic gas data from a spreadsheet folder.
+#'
+#' Reads MSOA non-domestic gas sheets for the years 2010 through 2021 from an Excel
+#' workbook located in `path` and returns a cleaned data frame.
+#'
+#' @param path Directory containing `MSOA_non_domestic_gas_2010-2024.xlsx`.
+#' @return A data frame with MSOA non-domestic gas values for each year.
 load_msoa_gas_nondom <- function(path){
 
   gas = list()
@@ -180,6 +181,13 @@ load_msoa_gas_nondom <- function(path){
 
 }
 
+#' Convert 2011 gas data to 2021 LSOA boundaries.
+#'
+#' @param domestic_gas_11 Domestic gas data by 2011 LSOA boundaries.
+#' @param lsoa_11_21_tools Lookup tables and split/merge logic for 2011→2021 conversion.
+#' @param lookup_dz_2011_22_pre Scotland DataZone lookup for 2011→2021 conversion.
+#' @return A data frame with gas data aligned to 2021 LSOA boundaries.
+#' @keywords internal
 lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
   #Update new data uses 2021/22 boundaries from 2015 onwards!
@@ -271,6 +279,13 @@ lsoa_gas_to_2021 <- function(domestic_gas_11, lsoa_11_21_tools, lookup_dz_2011_2
 
 }
 
+#' Convert 2011 electricity data to 2021 LSOA boundaries.
+#'
+#' @param domestic_electricity_11 Electricity data using 2011 LSOA boundaries.
+#' @param lsoa_11_21_tools Lookup tables and split/merge logic for 2011→2021 conversion.
+#' @param lookup_dz_2011_22_pre Scotland DataZone lookup for 2011→2021 conversion.
+#' @return A data frame with electricity data aligned to 2021 LSOA boundaries.
+#' @keywords internal
 lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, lookup_dz_2011_22_pre){
 
   domestic_electricity_11 = domestic_electricity_11[,c("LSOA","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")]
@@ -343,13 +358,7 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
   #TODO: How do you get the median of a subgroup? For now assuming unchanged
 
 
-  #Split
-  # domestic_electricity_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, domestic_electricity_S,
-  #                                           by = "LSOA11CD", relationship = "many-to-many")
-  # domestic_electricity_S = as.data.frame(domestic_electricity_S)
-  # for(i in 5:6){
-  #   domestic_electricity_S[i] = domestic_electricity_S[,i ,drop = TRUE] * domestic_electricity_S$pop_ratio
-  # }
+  # Split ratio operations are handled in the current `domestic_electricity_S` path.
 
   nms = c("LSOA21CD","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")
 
@@ -365,6 +374,12 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
 
 
 
+#' Build lookup tables for 2011 to 2021 LSOA conversions.
+#'
+#' @param lookup_lsoa_2011_21 Lookup table mapping 2011 to 2021 LSOA boundaries.
+#' @param population Population estimates used to split or merge LSOA counts.
+#' @return A list with `lookup_unchanged`, `lookup_split`, and `lookup_merge` tibble outputs.
+#' @keywords internal
 lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population) {
 
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA11CD","LSOA21CD","CHGIND")]
@@ -400,13 +415,6 @@ lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population) {
   lookup_lsoa_2011_21_M$CHGIND = NULL
   lookup_lsoa_2011_21_S$CHGIND = NULL
 
-  # population_2021 = dplyr::left_join(lookup_lsoa_2011_21_S, population_2021, by = c("LSOA21CD" = "LSOA21"))
-  # population_2021 = dplyr::group_by(population_2021, LSOA11CD)
-  # population_2021 = dplyr::mutate(population_2021, pop_ratio = pop2021 / sum(pop2021))
-  # population_2021 = dplyr::ungroup(population_2021, LSOA21CD)
-  #
-  # lookup_lsoa_2011_21_S = population_2021[,c("LSOA11CD","LSOA21CD","pop_ratio")]
-
   #Split ratio over time
   population = population[population$LSOA21CD %in% lookup_lsoa_2011_21_S$LSOA21CD,]
   population = population[,c("LSOA21CD","year","all_ages","adults","households_est")]
@@ -431,6 +439,13 @@ lsoa_convert_2011_2021_pre_data = function(lookup_lsoa_2011_21, population) {
 
 
 
+#' Calculate gas emissions per LSOA using population and emissions factors.
+#'
+#' @param domestic_gas Domestic gas usage data frame with `LSOA21CD`, `year`, and `total_gas_kwh`.
+#' @param emissions_factors Emissions factors data frame with `year` and `gas_kgco2e`.
+#' @param population Population data frame with `LSOA21CD`, `year`, and `all_ages`.
+#' @return A data frame with total and per-capita gas emissions by LSOA and year.
+#' @keywords internal
 calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
 
   domestic_gas = domestic_gas[,c("LSOA21CD","year","total_gas_kwh")]
@@ -453,6 +468,13 @@ calculate_gas_emissions = function(domestic_gas, emissions_factors, population){
 
 }
 
+#' Calculate electricity emissions per LSOA using population and emissions factors.
+#'
+#' @param domestic_electricity Electricity usage data frame with `LSOA21CD`, `year`, and `total_elec_kwh`.
+#' @param emissions_factors Emissions factors data frame with `year` and `electricity_kgco2e`.
+#' @param population Population data frame with `LSOA21CD`, `year`, and `all_ages`.
+#' @return A data frame with total and per-capita electricity emissions by LSOA and year.
+#' @keywords internal
 calculate_electricity_emissions = function(domestic_electricity, emissions_factors, population){
 
   domestic_electricity = domestic_electricity[,c("LSOA21CD","year","total_elec_kwh")]
@@ -475,6 +497,11 @@ calculate_electricity_emissions = function(domestic_electricity, emissions_facto
 
 }
 
+#' Load postcode-level gas and electricity data.
+#'
+#' @param path Directory containing postcode-level gas and electricity CSV files.
+#' @return A list of data frames containing gas and electricity data by postcode year.
+#' @keywords internal
 load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"gas_electric/postcode")){
 
   # Gas
@@ -637,6 +664,14 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   geall
 }
 
+#' Clean Postcode Elec
+#'
+#' @description Load or manipulate geographic boundary or point datasets.
+#' @param sub Subset object used within the function.
+#' @param year Year value used for filtering or loading.
+#' @param type){ Input object or parameter named `type){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 clean_postcode_elec = function(sub, year, type){
   sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
   names(sub) = c("postcode",paste0("elec_meters_",type,"_",year),paste0("elec_totalkwh_",type,"_",year),
@@ -645,6 +680,13 @@ clean_postcode_elec = function(sub, year, type){
   sub
 }
 
+#' Clean Postcode Gas
+#'
+#' @description Load or manipulate geographic boundary or point datasets.
+#' @param sub Subset object used within the function.
+#' @param year){ Input object or parameter named `year){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 clean_postcode_gas = function(sub, year){
   sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
   names(sub) = c("postcode",paste0("gas_meters_",year),paste0("gas_totalkwh_",year),
@@ -654,6 +696,13 @@ clean_postcode_gas = function(sub, year){
 }
 
 
+#' Calculate Postcode Gas Electric Emissions
+#'
+#' @description Calculate postcode gas electric emissions and return the computed result.
+#' @param postcode_gas_electricity Input object or parameter named `postcode_gas_electricity`.
+#' @param emissions_factors){ Input object or parameter named `emissions_factors){`.
+#' @return A data frame or numeric summary containing the computed results.
+#' @keywords internal
 calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, emissions_factors){
 
   names(postcode_gas_electricity) = gsub("_20", "X20", names(postcode_gas_electricity) )
@@ -707,6 +756,13 @@ calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, e
 
 }
 
+#' Sum Na
+#'
+#' @description Perform processing for sumNA.
+#' @param x Input data object.
+#' @param y){ Input object or parameter named `y){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 sumNA = function(x, y){
   x[is.na(x)] = 0
   y[is.na(y)] = 0
@@ -714,6 +770,13 @@ sumNA = function(x, y){
 }
 
 
+#' Prep Postcode Gas Electic
+#'
+#' @description Load or manipulate geographic boundary or point datasets.
+#' @param postcode_gas_electricity_emissions Input object or parameter named `postcode_gas_electricity_emissions`.
+#' @param bounds_postcodes_2024){ Input object or parameter named `bounds_postcodes_2024){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_postcodes_2024){
   sub = postcode_gas_electricity_emissions[postcode_gas_electricity_emissions$year == max(postcode_gas_electricity_emissions$year, na.rm = TRUE), ]
   sub = sub[sub$postcode %in% bounds_postcodes_2024$POSTCODE,]
@@ -730,8 +793,18 @@ prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_
 }
 
 
+#' Calculate Lsoa Gas Electric Emissions
+#'
+#' @description Calculate lsoa gas electric emissions and return the computed result.
+#' @param domestic_gas Input object or parameter named `domestic_gas`.
+#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
+#' @param emissions_factors Input object or parameter named `emissions_factors`.
+#' @param bills_gas_electric Input object or parameter named `bills_gas_electric`.
+#' @param bills_other_heating Input object or parameter named `bills_other_heating`.
+#' @param other_heating_emissions){ Input object or parameter named `other_heating_emissions){`.
+#' @return A data frame or numeric summary containing the computed results.
+#' @keywords internal
 calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electricity, emissions_factors,
-                                                 bills_gas_electric, bills_other_heating, other_heating_emissions){
   sub = dplyr::full_join(domestic_gas, domestic_electricity, by = c("LSOA21CD","year"))
   names(sub)[names(sub) == "meters.x"] = "meters_gas"
   names(sub)[names(sub) == "meters.y"] = "meters_elec"

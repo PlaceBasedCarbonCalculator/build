@@ -1,3 +1,10 @@
+#' Load Car Emissions
+#'
+#' @description Load car emissions data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path){ Input object or parameter named `path){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_car_emissions <- function(path){
   dir.create(file.path(tempdir(),"car_emissions"))
   unzip(path, exdir = file.path(tempdir(),"car_emissions"))
@@ -22,6 +29,13 @@ load_car_emissions <- function(path){
   emissions_gp
 }
 
+#' Car Emissions To 21
+#'
+#' @description Compute a carbon emission or footprint summary.
+#' @param car_emissions_11 Input object or parameter named `car_emissions_11`.
+#' @param lsoa_11_21_tools) Input object or parameter named `lsoa_11_21_tools)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 car_emissions_to_21 = function(car_emissions_11, lsoa_11_21_tools) {
 
 
@@ -73,6 +87,14 @@ car_emissions_to_21 = function(car_emissions_11, lsoa_11_21_tools) {
 
 }
 
+#' Car Emissions Post2018
+#'
+#' @description Compute a carbon emission or footprint summary.
+#' @param car_emissions_11 Input object or parameter named `car_emissions_11`.
+#' @param vehicle_registrations Input object or parameter named `vehicle_registrations`.
+#' @param ulev_registrations) Input object or parameter named `ulev_registrations)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 car_emissions_post2018 = function(car_emissions_11,
                                   vehicle_registrations,
                                   ulev_registrations) {
@@ -190,19 +212,17 @@ car_emissions_post2018 = function(car_emissions_11,
   final = rbind(car_emissions_11, res[res$year >= 2019,], res[res$year <= 2018 & substr(res$LSOA21CD,1,1) == "S",])
   final = final[order(final$LSOA21CD, final$year),]
   final
-
-  # Checks
-  # library(ggplot2)
-  # chk = final[final$LSOA21CD == "E01032669",]
-  # ggplot(chk, aes(x = year, y = AvgCO2)) +
-  #   geom_line() +
-  #   ylim(0,NA)
-
-
 }
 
-
-
+#' Calculate Car Emissions
+#'
+#' @description Calculate car emissions and return the computed result.
+#' @param car_km_lsoa_21 Input object or parameter named `car_km_lsoa_21`.
+#' @param car_emissions_perkm Input object or parameter named `car_emissions_perkm`.
+#' @param population Population dataset.
+#' @param years Year values used for filtering or loading.
+#' @return A data frame or numeric summary containing the computed results.
+#' @keywords internal
 calculate_car_emissions = function(car_km_lsoa_21, car_emissions_perkm, population, years = 2010:2021){
 
   population = population[population$year %in% years,]

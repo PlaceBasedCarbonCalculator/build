@@ -1,3 +1,8 @@
+#' Download the OS Open Zoomstack archive.
+#'
+#' @param path Directory to save the OS Zoomstack download.
+#' @return The full path to the downloaded Open Zoomstack ZIP file.
+#' @keywords internal
 download_os_zoomstack = function(path = file.path(parameters$path_data,"os_zoomstack")) {
   url = "https://api.os.uk/downloads/v1/products/OpenZoomstack/downloads?area=GB&format=GeoPackage&redirect"
 
@@ -15,6 +20,11 @@ download_os_zoomstack = function(path = file.path(parameters$path_data,"os_zooms
 
 }
 
+#' Read Open Zoomstack building geometries for high-detail building tiles.
+#'
+#' @param dl_os_zoomstack Path to the downloaded OS Zoomstack zip archive.
+#' @return An `sf` object containing high-detail building geometries.
+#' @keywords internal
 zoomstack_buildings_high = function(dl_os_zoomstack) {
   # TODO: Finish this function
 
@@ -37,6 +47,15 @@ zoomstack_buildings_high = function(dl_os_zoomstack) {
 
 
 
+#' Build LSOA-level zoomstack building tile layers.
+#'
+#' @param buildings_heights An `sf` object with building heights and geometry.
+#' @param dl_os_zoomstack Path to the downloaded OS Zoomstack zip archive.
+#' @param bounds_lsoa_GB_full Full-resolution LSOA boundaries.
+#' @param bounds_lsoa_GB_generalised Generalised LSOA boundaries.
+#' @param bounds_lsoa_GB_super_generalised Super-generalised LSOA boundaries.
+#' @return A named list of `sf` objects for high, medium, low, and verylow zoomstack layers.
+#' @keywords internal
 zoomstack_buildings_lsoa = function(buildings_heights, dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised) {
   # TODO: Finish this function
 
@@ -110,6 +129,12 @@ zoomstack_buildings_lsoa = function(buildings_heights, dl_os_zoomstack, bounds_l
 }
 
 
+#' Split buildings by overlapping zone geometries.
+#'
+#' @param b An `sf` object representing building geometries.
+#' @param z An `sf` object representing zone geometries.
+#' @return A combined `sf` object containing split building geometries aligned to zones.
+#' @keywords internal
 split_buildings = function(b,z){
   if(nrow(z) > 2){
     suppressWarnings(suppressMessages(wth <- sf::st_within(z, b[1,])))
@@ -137,6 +162,12 @@ split_buildings = function(b,z){
 }
 
 
+#' Merge duplicate building features after zone splitting.
+#'
+#' @param build An `sf` object containing building geometries with duplicate ids.
+#' @param bounds Zone boundaries used to guide the merge operation.
+#' @return An `sf` object with duplicate buildings merged.
+#' @keywords internal
 split_merge = function(build, bounds) {
 
   dups <- unique(build$id[duplicated(build$id)])
@@ -156,6 +187,11 @@ split_merge = function(build, bounds) {
 }
 
 
+#' Rename `geom` column to `geometry` in an sf object.
+#'
+#' @param build An `sf` object with a `geom` geometry column.
+#' @return The same `sf` object with a standardized geometry column name.
+#' @keywords internal
 change_geom_name = function(build){
   names(build)[names(build) == "geom"] = "geometry"
   sf::st_geometry(build) = "geometry"
@@ -163,6 +199,11 @@ change_geom_name = function(build){
 }
 
 
+#' Read Open Zoomstack feature layers for sites, water, woodland, and greenspace.
+#'
+#' @param dl_os_zoomstack Path to the downloaded OS Zoomstack zip archive.
+#' @return An `sf` object containing a combined set of spatial feature geometries.
+#' @keywords internal
 zoomstack_sites = function(dl_os_zoomstack) {
   # TODO: Finish this function
 
@@ -240,28 +281,12 @@ zoomstack_sites = function(dl_os_zoomstack) {
   sites = dplyr::bind_rows(sites_union)
 
   # Local Woodland includes small cluster of trees
-  # Regional national are over simplified
-  #wood_nat = woods[woods$type == "National",]
-  #wood_reg = woods[woods$type == "Regional",]
+  # Regional and national woodland polygons are over-simplified for this output.
   wood_local = woods[woods$type == "Local",]
   wood_local$type = "woodland"
   wood_local = wood_local[,c("type","geom")]
   names(wood_local) = c("type","geometry")
   sf::st_geometry(wood_local) = "geometry"
-
-  #
-  #
-  # wlri = sf::st_intersects(wood_local, wood_reg)
-  # wood_local_reg = wood_local[lengths(wlri) > 0,]
-  # wood_local = wood_local[lengths(wlri) == 0,]
-  # wood_local$area = as.numeric(sf::st_area(wood_local))
-  # wood_local = wood_local[wood_local$area > 100000, ] # Only keep the large isolated woods
-
-  # wood_local_reg are parts of woodland clusters (often split by small paths)
-
-  #foo = wood_local_reg[wood_reg[4,],] # 3 fails
-  #bar = merge_woods(foo)
-  #qtm(bar, fill= "red") + qtm(foo)
 
   res = rbind(sites, water_local, greenspace, wood_local)
 
@@ -270,6 +295,11 @@ zoomstack_sites = function(dl_os_zoomstack) {
 }
 
 
+#' Load OS greenspace data from an Open Greenspace archive.
+#'
+#' @param path Directory containing `opgrsp_gpkg_gb.zip`.
+#' @return An `sf` object containing greenspace polygons.
+#' @keywords internal
 load_os_greenspace = function(path = file.path(parameters$path_data,"os_greenspace")) {
   # TODO: Finish this function
 
@@ -311,190 +341,14 @@ load_os_greenspace = function(path = file.path(parameters$path_data,"os_greenspa
 
 
 
-# # Merge small clusters of polygons while maintaing outer boundary
-# # Very concave areas may be infilled
-# merge_woods = function(poly){
-#
-#   # Buffer out and then in
-#   bout = sf::st_union(sf::st_buffer(poly, 10))
-#   bin = sf::st_buffer(bout, -30)
-#
-#   poly$id = seq(1, nrow(poly))
-#
-#   # Make points
-#   pts = suppressWarnings(sf::st_segmentize(sf::st_cast(poly, "LINESTRING"), dfMaxLength = 10))
-#   pts = suppressWarnings(sf::st_cast(pts, "POINT"))
-#   pts$pid = 1:nrow(pts)
-#
-#   # Points on the edge
-#   pids = pts[bin, ]
-#   pts = pts[!pts$pid %in% pids$pid,]
-#
-#   #qtm(poly, fill = "green") + qtm(pts)
-#
-#   pts = dplyr::group_split(pts, id)
-#   pts = lapply(pts, function(x){
-#     x = sf::st_coordinates(x)[,1:2]
-#     x = sf::st_as_sf(sf::st_sfc(sf::st_linestring(x), crs = 27700))
-#     x
-#   })
-#   pts = dplyr::bind_rows(pts)
-#   pts = sf::st_difference(pts, bin)
-#
-#   #Clip off the start and end of each line
-#   pts = sf::st_collection_extract(pts, "LINESTRING")
-#   pts = sf::st_cast(pts, "LINESTRING")
-#   pts = lapply(pts$x, function(x){
-#     x = sf::st_coordinates(x)[,1:2]
-#     if(nrow(x) < 4){
-#       return(NULL)
-#     }
-#     x = x[seq(2,nrow(x) - 1),]
-#     x = sf::st_as_sf(sf::st_sfc(sf::st_linestring(x), crs = 27700))
-#     x
-#   })
-#   pts = dplyr::bind_rows(pts)
-#   pts$id = seq(1,nrow(pts))
-#
-#   pts_start = sf::st_as_sf(lwgeom::st_startpoint(pts))
-#   pts_end = sf::st_as_sf(lwgeom::st_endpoint(pts))
-#   pts_start$id = pts$id
-#   pts_end$id = pts$id
-#
-#   qtm(pts[98,], lines.lwd = 2, lines.col = "red") + qtm(pts) + qtm(pts_start, dots.col = "red") + qtm(pts_end, dots.col = "blue")
-#
-#   pts_all = rbind(pts_end, pts_start)
-#
-#   # Pair up start and end
-#   nn = suppressMessages(nngeo::st_nn(pts_all, pts_all, k = 2, maxdist = 100, progress = FALSE))
-#   nn = lapply(nn, function(x){
-#     if(length(x) < 2){
-#       return(NA)
-#     } else {
-#       x[2]
-#     }
-#   })
-#   nn = unlist(nn)
-#   nnn = seq_along(nn)
-#
-#   # Graph analysis identifies closed loops when multiple areas
-#   edges <- c(rbind(nnn, nn))
-#   edges_int <-
-#   g = igraph::make_graph(edges = edges, n = length(nn), directed = FALSE)
-#   #g = igraph::simplify(g)
-#   comps <- igraph::components(g)
-#   pts_all$membership = comps$membership
-#
-#   lookup = sf::st_drop_geometry(pts_all)
-#
-#
-#   igraph::V(g)$subgraph_id <- comps$membership
-#
-#   # for(j in unique(comps$membership)){
-#   #   subgraph <- igraph::induced_subgraph(g, which(comps$membership == j))
-#   #   subgraph <- igraph::as_data_frame(subgraph)
-#   #   subgraph <-
-#   #
-#   # }
-#
-#   #pts = pts[order(pts$membership),]
-#   pts_list = dplyr::group_split(pts, membership, .keep = TRUE)
-#
-#   for(j in seq(1, length(pts_list))){
-#     sub = pts_list[[j]]
-#     nn_sub = nn[comps$membership == j]
-#     nnn_sub = nnn[comps$membership == j]
-#     qtm(pts[nnn_sub,])
-#
-#     ordering = list()
-#     ordering[[1]] = nnn_sub[1]
-#     for(i in seq(2,length(nnn_sub))){
-#       ordering[[i]] = nn_sub[nnn_sub == ordering[[i-1]]]
-#     }
-#     ordering = unlist(ordering)
-#     summary(nnn %in% ordering)
-#
-#
-#   }
-#
-#
-#    # some lines lost
-#
-#
-#
-#   pts$order = seq_along(ordering)[match(pts$id, ordering)]
-#
-#   pts_na = pts[is.na(pts$order),]
-#   pts = pts[!is.na(pts$order),]
-#   pts = pts[order(pts$order),]
-#
-#   pts = suppressWarnings(sf::st_cast(pts, "POINT"))
-#   pts = sf::st_coordinates(pts[,1:2])
-#   pts = rbind(pts, pts[1,])
-#   pts = sf::st_polygon(list(pts))
-#   pts = sf::st_sfc(pts, crs = 27700)
-#
-#   pts
-#
-# }
-#
-#
-# # foo = wood_local_reg[wood_reg[1,],]
-# # foob = sf::st_union(sf::st_buffer(foo, 5))
-# # foou = sf::st_union(foo)
-# # foo$id = 1:nrow(foo)
-# #
-# # foop = sf::st_cast(foo, "POINT")
-# #
-# # id = 400
-# # x = nn[[id]]
-# # qtm(foop) + qtm(foop[x,], dots.col = "red") + qtm(foop[id,], dots.col = "blue")
-# # near_not_smame(x, id)
-# #
-# # near_not_smame = function(x, id, zids = foop$id){
-# #   zid = zids[id]
-# #   if(length(x) == 1){
-# #     return(zid)
-# #   }
-# #   zids_near = zids[x]
-# #   x = x[zids_near != zid]
-# #   if(length(x) == 0){
-# #     return(zid)
-# #   }
-# #   return(zids[x[1]])
-# # }
-# #
-# # nn = nngeo::st_nn(foop, foop, k = 5, maxdist = 50)
-# # nn2 = purrr::map2(nn, seq_along(nn), near_not_smame, zids = foop$id)
-# # nn2 = unlist(nn2)
-# #
-# # foop$nn_id = nn2
-# # foop$diff = ifelse(foop$id != foop$nn_id,"y","n")
-# # foop$pid = 1:nrow(foop)
-# # qtm(foo) + qtm(foop, dots.col = "diff")
-# #
-# # bar = foop[foop$diff == "n",]
-# #
-# # convex = sf::st_convex_hull(sf::st_union(bar))
-# # convave = sf::st_concave_hull(sf::st_union(bar), 0, allow_holes = FALSE)
-# # convave2 = sf::st_concave_hull(sf::st_union(bar[sample(1:nrow(bar), size = nrow(bar)),]), 0, allow_holes = FALSE)
-# #
-# # qtm(foo) + qtm(convex, fill = NULL, borders = "red") + qtm(convave, fill = NULL, borders = "blue") + qtm(bar, dots.col = "green")
-# #
-# # qtm(convave, fill = NULL, borders = "blue") + qtm(convave2, fill = NULL, borders = "red")
-# #
-# #
-# #
-# #
-# #
-# # qtm(fizz5, fill = "blue") + qtm(foo)
-# #
-# #
-# # qtm(foo) + qtm(foobout, fill = NULL, borders = "red") + qtm(foobin, fill = NULL, borders = "blue") + qtm(fizz)
-# #
-# # qtm(foobin, fill = "blue") + qtm(foobin2, fill = "red") +qtm(foo) + qtm(fizz2)
 
 
+#' Merge Woods
+#'
+#' @description Combine woods inputs into a single consolidated result.
+#' @param poly){ Input object or parameter named `poly){`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 merge_woods = function(poly){
 
   # Buffer out and then in

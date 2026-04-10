@@ -1,3 +1,11 @@
+#' House Price Add Uprn
+#'
+#' @description Perform processing for house price add uprn.
+#' @param house_price_lr Input object or parameter named `house_price_lr`.
+#' @param house_prices_ubdc Input object or parameter named `house_prices_ubdc`.
+#' @param uprn){ Input object or parameter named `uprn){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 house_price_add_uprn = function(house_price_lr, house_prices_ubdc, uprn){
 
   house_price_lr = dplyr::left_join(house_price_lr, house_prices_ubdc, by = "transactionid")

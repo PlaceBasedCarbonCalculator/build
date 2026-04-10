@@ -1,3 +1,11 @@
+#' Make Vehicle Summary
+#'
+#' @description Build vehicle summary and return the generated output.
+#' @param vehicle_registrations Input object or parameter named `vehicle_registrations`.
+#' @param ulev_registrations Input object or parameter named `ulev_registrations`.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_vehicle_summary = function(vehicle_registrations, ulev_registrations, population){
 
   population = population[,c("LSOA21CD","year","households_est","all_ages","adults")]

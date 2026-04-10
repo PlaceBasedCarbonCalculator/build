@@ -1,3 +1,10 @@
+#' Oac To 2021
+#'
+#' @description Perform processing for OAC to 2021.
+#' @param lookup_OA_LSOA_MSOA_classifications Lookup table used to map area codes or classifications.
+#' @param lookup_lsoa_2011_21){ Lookup table used to map area codes or classifications.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC_to_2021 = function(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21){
 
   lookup_lsoa_2011_21 = lookup_lsoa_2011_21[,c("LSOA11CD","LSOA21CD")]
@@ -17,11 +24,25 @@ OAC_to_2021 = function(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
 }
 
 
+#' Load Oac21
+#'
+#' @description Load OAC21 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_OAC21 = function(path = file.path(parameters$path_data,"area_classifications/oac21ew.csv")){
   oac21 = readr::read_csv(path)
   oac21
 }
 
+#' Oac21 Lsoa21
+#'
+#' @description Perform processing for OAC21 lsoa21.
+#' @param oac21 Input object or parameter named `oac21`.
+#' @param lookup_postcode_OA_LSOA_MSOA_2021){ Lookup table used to map area codes or classifications.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC21_lsoa21 = function(oac21, lookup_postcode_OA_LSOA_MSOA_2021){
 
   lookup_postcode_OA_LSOA_MSOA_2021 = lookup_postcode_OA_LSOA_MSOA_2021[,c("oa21cd","lsoa21cd")]
@@ -40,6 +61,14 @@ OAC21_lsoa21 = function(oac21, lookup_postcode_OA_LSOA_MSOA_2021){
 
 }
 
+#' Oac11 Dz22
+#'
+#' @description Perform processing for OAC11 dz22.
+#' @param centroids_oa11_scotland Centroid geometries used for area matching.
+#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
+#' @param lookup_OA_LSOA_MSOA_classifications){ Lookup table used to map area codes or classifications.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC11_dz22 = function(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_classifications){
 
   lookup_OA_LSOA_MSOA_classifications = lookup_OA_LSOA_MSOA_classifications[,c("OA11CD","OAC11CD")]
@@ -89,6 +118,14 @@ OAC11_dz22 = function(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_
 
 }
 
+#' Oac11 Lsoa21
+#'
+#' @description Perform processing for OAC11 lsoa21.
+#' @param centroids_oa11 Centroid geometries used for area matching.
+#' @param bounds_lsoa21_full Input object or parameter named `bounds_lsoa21_full`.
+#' @param lookup_OA_LSOA_MSOA_classifications){ Lookup table used to map area codes or classifications.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications){
 
   bounds_lsoa21_full$LSOA21NM = NULL
@@ -140,6 +177,14 @@ OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_
 
 }
 
+#' Oac01 Lsoa21
+#'
+#' @description Perform processing for OAC01 lsoa21.
+#' @param centroids_oa01 Centroid geometries used for area matching.
+#' @param bounds_lsoa21_full Input object or parameter named `bounds_lsoa21_full`.
+#' @param oac01){ Input object or parameter named `oac01){`.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
 
   bounds_lsoa21_full$LSOA21NM = NULL
@@ -193,6 +238,14 @@ OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
 }
 
 
+#' Oac01 Dz22
+#'
+#' @description Perform processing for OAC01 dz22.
+#' @param centroids_oa01_scotland Centroid geometries used for area matching.
+#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
+#' @param oac01){ Input object or parameter named `oac01){`.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 OAC01_dz22 = function(centroids_oa01_scotland, bounds_dz22, oac01){
 
   oac01 = oac01[,c("OA_CODE","Subgroup Code")]
@@ -244,12 +297,26 @@ OAC01_dz22 = function(centroids_oa01_scotland, bounds_dz22, oac01){
 }
 
 
+#' Read Centroids Oa11
+#'
+#' @description Read centroids oa11 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_oa11 = function(path = "../inputdata/boundaries/"){
   oa = sf::st_read(file.path(path,"Output_Areas_Dec_2011_PWC_2022_2937497644548359762.gpkg"))
   oa$GlobalID = NULL
   oa
 }
 
+#' Read Centroids Oa01
+#'
+#' @description Read centroids oa01 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 read_centroids_oa01 = function(path = "../inputdata/boundaries/"){
   oa = sf::st_read(file.path(path,"Output_Areas_2001_EW_PWC_6679101571236103446.gpkg"))
   oa$GlobalID = NULL
@@ -257,6 +324,13 @@ read_centroids_oa01 = function(path = "../inputdata/boundaries/"){
 }
 
 
+#' Read Oac01
+#'
+#' @description Read OAC01 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_OAC01 = function(path = "../inputdata/area_classifications/2001/OAC_2001.Rds"){
   oac = readRDS(path)
   oac

@@ -1,3 +1,10 @@
+#' Load Cenus11 Households
+#'
+#' @description Load cenus11 households data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS402UK_LSOA_Households_AcommodationType.csv"){
   cenus11 = read.csv(path, skip = 7)
   cenus11 = cenus11[,2:3]
@@ -11,8 +18,20 @@ load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS4
 # Estimate the population and number of households for Census 2021 boundaries even when there have been changes.
 # Number of households are a function of adults (20+) / dwelling and number of dwellings
 
-#TODO: Check odd LSOA resutls E01033274 E01024150 E01024301 E01016129 E01024504 W01001971
+#TODO: Check odd LSOA results E01033274 E01024150 E01024301 E01016129 E01024504 W01001971
 
+#' Extrapolate Population Households
+#'
+#' @description Process population data and return a summary table.
+#' @param households_cenus11 Input object or parameter named `households_cenus11`.
+#' @param households_cenus21 Input object or parameter named `households_cenus21`.
+#' @param lookup_lsoa_2011_21 LSOA lookup table spanning 2011 and 2021 boundaries.
+#' @param dwellings_tax_band Input object or parameter named `dwellings_tax_band`.
+#' @param population_2002_2020 Input object or parameter named `population_2002_2020`.
+#' @param population_2021 Input object or parameter named `population_2021`.
+#' @param population_2022_24 Input object or parameter named `population_2022_24`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 extrapolate_population_households = function(households_cenus11,
                                              households_cenus21,
                                              lookup_lsoa_2011_21,
@@ -200,23 +219,17 @@ extrapolate_population_households = function(households_cenus11,
 
 }
 
-# p = pop_U[pop_U$LSOA21CD == "E01000001",]
-# d = dwellings_tax_band[dwellings_tax_band$LSOA21CD == "E01000001",]
-# hh21 = households_cenus21[households_cenus21$LSOA == "E01000001",]
-# hh11 = households_cenus11[households_cenus11$LSOA == "E01000001",]
-# list(p = pop_U, d = d_U, hh21 = hh21_U, hh11 = hh11_U)
-# foo = sapply(pop_U, function(x){x$LSOA21CD[1]})
-# p = pop_U[foo == "W01001971"][[1]]
-# #pn = pop_S_new[[1]]
-# d = d_U[foo == "W01001971"][[1]]
-# hh21 = hh21_U[foo == "W01001971"][[1]]
-# hh11 = hh11_U[foo == "W01001971"][[1]]
 
-# p = pop_M[[1]]
-# d = d_M[[1]]
-# hh21 = hh21_M[[1]]
-# hh11 = hh11_M[[1]]
-
+#' Extrapolate Households
+#'
+#' @description Perform processing for extrapolate households.
+#' @param p Input object or parameter named `p`.
+#' @param d Input object or parameter named `d`.
+#' @param hh21 Input object or parameter named `hh21`.
+#' @param hh11 Input object or parameter named `hh11`.
+#' @param pn Input object or parameter named `pn`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
   # Initial check
   if(is.null(pn)){

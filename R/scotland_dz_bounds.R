@@ -1,3 +1,10 @@
+#' Read Dz2022 Bounds
+#'
+#' @description Read dz2022 bounds from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_dz2022_bounds = function(path = "../inputdata/boundaries/SG_DataZoneBdry_2022.zip"){
   path = file.path(path, "SG_DataZoneBdry_2022.zip")
 

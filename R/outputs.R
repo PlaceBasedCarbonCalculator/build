@@ -1,3 +1,11 @@
+#' Select Map Outputs
+#'
+#' @description Perform processing for select map outputs.
+#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
+#' @param area_classifications_11_21 Input object or parameter named `area_classifications_11_21`.
+#' @param year Year value used for filtering or loading.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 select_map_outputs = function(lsoa_emissions_all, area_classifications_11_21, year = 2020) {
   lsoa_savings = lsoa_emissions_all[lsoa_emissions_all$year %in% c(2010,year),]
   lsoa_savings = lsoa_savings[,c("LSOA21CD","total_kgco2e_percap","year")]
@@ -19,6 +27,13 @@ select_map_outputs = function(lsoa_emissions_all, area_classifications_11_21, ye
 }
 
 
+#' Join For Geojson
+#'
+#' @description Combine for geojson inputs into a single consolidated result.
+#' @param lsoa_map_data Input object or parameter named `lsoa_map_data`.
+#' @param bounds) Input object or parameter named `bounds)`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 join_for_geojson = function(lsoa_map_data, bounds) {
   bounds = dplyr::left_join(bounds, lsoa_map_data, by = "LSOA21CD")
   bounds

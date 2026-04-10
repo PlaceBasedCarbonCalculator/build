@@ -3,6 +3,12 @@
 # multivariate without being disclosive. Nationally representative seed is then
 # used as input to local synthetic populations which discourages the generation of
 # usual household combinations
+#' Build Synth Pop Seed Scotland
+#'
+#' @description Build synth pop seed scotland and return the generated output.
+#' @param path_data Input object or parameter named `path_data`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_data,"population_scotland")){
 
   # Read In Data
@@ -122,6 +128,13 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
 
 }
 
+#' Read Hhsize5 Acctype7 Householdcomp10 Tenure5 Scot
+#'
+#' @description Read hhSize5 AccType7 householdComp10 Tenure5 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_AccType7_householdComp10_Tenure5_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType7_householdComp10_Tenure5_Scotland.csv"){
 
   raw_data <- readr::read_csv(path , skip = 10, col_names = FALSE, show_col_types = FALSE)
@@ -173,6 +186,12 @@ read_hhSize5_AccType7_householdComp10_Tenure5_scot = function(path = "../inputda
 
 
 
+#' Rep Lables
+#'
+#' @description Perform processing for rep lables.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 rep_lables = function(x){
   for(i in seq_len(length(x))){
     if(is.na(x[i])){
@@ -183,6 +202,13 @@ rep_lables = function(x){
 }
 
 
+#' Read Hhsize5 Acctype7 Householdcomp10 Carvan3 Scot
+#'
+#' @description Read hhSize5 AccType7 householdComp10 CarVan3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_AccType7_householdComp10_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType7_householdComp10_CarVan3_Scotland.csv"){
 
   raw_data <- readr::read_csv(path , skip = 11, col_names = FALSE, show_col_types = FALSE)
@@ -231,6 +257,13 @@ read_hhSize5_AccType7_householdComp10_CarVan3_scot = function(path = "../inputda
 
 
 
+#' Read Householdcomp10 Householdcomp4 Acctype7 Acctype3 Scot
+#'
+#' @description Read householdComp10 householdComp4 AccType7 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp10_householdComp4_AccType7_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_householdComp4_AccType7_AccType3_Scotland.csv"){
 
   raw_data <- readr::read_csv(path , skip = 10, col_names = FALSE, show_col_types = FALSE)
@@ -277,6 +310,13 @@ read_householdComp10_householdComp4_AccType7_AccType3_scot = function(path = "..
 
 
 
+#' Read Householdcomp10 Carvan5 Tenure5 Hhsize5 Scot
+#'
+#' @description Read householdComp10 CarVan5 Tenure5 hhSize5 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp10_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_CarVan5_Tenure5_hhSize5_Scotland.xlsx") {
 
   p1 = readxl::read_xlsx(path, sheet = "0. One person", skip = 13, col_names = FALSE)
@@ -332,6 +372,13 @@ read_householdComp10_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputda
 
 
 
+#' Read Acctyp7 Carvan5 Tenure5 Hhsize5 Scot
+#'
+#' @description Read AccTyp7 CarVan5 Tenure5 hhSize5 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccTyp7_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_CarVan5_Tenure5_hhSize5_Scotland.xlsx") {
 
   p1 = readxl::read_xlsx(path, sheet = "0. One person", skip = 13, col_names = FALSE)
@@ -392,6 +439,13 @@ read_AccTyp7_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputdata/popul
 }
 
 
+#' Read Householdcomp10 Hhsize5 Carvan3 Tenure3 Acctype3 Scot
+#'
+#' @description Read householdComp10 hhSize5 CarVan3 Tenure3 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_hhSize5_CarVan3_Tenure3_AccType3.Scotland.xlsx") {
 
   p1 = readxl::read_xlsx(path, sheet = "0. One person household Aged 66", skip = 14, col_names = FALSE)
@@ -477,6 +531,13 @@ read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot <- function(path = ".
 
 }
 
+#' Read Acctype7 Carvan5 Carvan3 Tenure5 Tenure3 Scot
+#'
+#' @description Read AccType7 CarVan5 CarVan3 Tenure5 Tenure3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_Scotland.xlsx") {
 
   p1 = readxl::read_xlsx(path, sheet = "0. Whole house or bungalow Deta", skip = 13, col_names = FALSE)
@@ -558,6 +619,13 @@ read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot <- function(path = "../inputd
 
 
 
+#' Read Acctype7 Acctyp3 Scot
+#'
+#' @description Read AccType7 AccTyp3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccType7_AccTyp3_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_AccType3_Scotland.csv") {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)

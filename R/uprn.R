@@ -1,3 +1,10 @@
+#' Load Uprn
+#'
+#' @description Load uprn data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_uprn = function(path = file.path(parameters$path_data,"os_uprn")) {
 
   dir.create(file.path(tempdir(),"uprn"))
@@ -10,6 +17,13 @@ load_uprn = function(path = file.path(parameters$path_data,"os_uprn")) {
 }
 
 
+#' Load Uprn 27700
+#'
+#' @description Load uprn 27700 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_uprn_27700 = function(path = file.path(parameters$path_data,"os_uprn")) {
 
   dir.create(file.path(tempdir(),"uprn"))
@@ -22,6 +36,13 @@ load_uprn_27700 = function(path = file.path(parameters$path_data,"os_uprn")) {
 }
 
 
+#' Load Uprn Historical
+#'
+#' @description Load uprn historical data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_uprn_historical = function(path = "../inputdata/os_uprn/osopenuprn_2020_2025_all.zip"){
   dir.create(file.path(tempdir(),"uprn"))
   unzip(path, exdir = file.path(tempdir(),"uprn"))

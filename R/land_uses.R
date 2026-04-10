@@ -1,3 +1,12 @@
+#' Combine Land Use
+#'
+#' @description Combine land use inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param os_land Input object or parameter named `os_land`.
+#' @param os_greenspace Input object or parameter named `os_greenspace`.
+#' @param osm_land){ Input object or parameter named `osm_land){`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_land_use = function(os_land, os_greenspace, osm_land){
 
   #TODO: landuse:farmyard is a residential land use that can overlap with non-residential
@@ -101,6 +110,13 @@ combine_land_use = function(os_land, os_greenspace, osm_land){
   landcover
 }
 
+#' Split Lsoa Landuse
+#'
+#' @description Perform processing for split lsoa landuse.
+#' @param landcover Input object or parameter named `landcover`.
+#' @param bounds_lsoa_GB_full){ Input object or parameter named `bounds_lsoa_GB_full){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   if( FALSE){
@@ -183,12 +199,6 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
   rm(landcover_noover, landcover_over)
 
-  # landcover_over_single = landcover_over[landcover_over$n.overlaps == 1,]
-  # landcover_over_multi = landcover_over[landcover_over$n.overlaps > 1,]
-  #
-  # landcover_over_multi = sf::st_transform(landcover_over_multi, 4326)
-  # landcover_over_multi = landcover_over_multi[sf::st_is_valid(landcover_over_multi),]
-  # qtm(landcover_over) + qtm(landcover_over, fill = "red")
 
   # Remove Slivers
   landcover$area = as.numeric(sf::st_area(landcover))
@@ -281,16 +291,17 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
   res
 
 
-  # qtm(lsoa_res, fill = "red") + qtm(lsoa_nonres, fill = "blue")
-  # resbuff = st_buffer(res,0)
-  # ovr = st_overlaps(resbuff)
-  # ovrlst = as.list(ovr)
-  # qtm(res[2,], fill = "red") + qtm(res[18,], fill = "blue")
-  # qtm(resbuff[2,], fill = "red") + qtm(resbuff[18,], fill = "blue")
 
 }
 
 
+#' Fast St Difference
+#'
+#' @description Perform processing for fast st difference.
+#' @param x Input data object.
+#' @param y){ Input object or parameter named `y){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 fast_st_difference = function(x, y){
   inter = lengths(sf::st_intersects(y))
   y_inter = sf::st_union(y[inter > 1,])
@@ -301,6 +312,14 @@ fast_st_difference = function(x, y){
 
 
 
+#' Remove Small Holes
+#'
+#' @description Perform processing for remove small holes.
+#' @param df Input object or parameter named `df`.
+#' @param min_size Input object or parameter named `min_size`.
+#' @param max_ap_ratio Input object or parameter named `max_ap_ratio`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
   geom = purrr::map(sf::st_geometry(df), remove_small_holes_single,
                     min_size = min_size,
@@ -314,6 +333,14 @@ remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
 
 
 
+#' Remove Small Holes Single
+#'
+#' @description Perform processing for remove small holes single.
+#' @param x Input data object.
+#' @param min_size Input object or parameter named `min_size`.
+#' @param max_ap_ratio Input object or parameter named `max_ap_ratio`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 remove_small_holes_single = function(x, min_size = 5, max_ap_ratio = 1){
   if(length(x) > 1){
     vals = purrr::map(x[seq(2, length(x))], hole_area)
@@ -327,11 +354,23 @@ remove_small_holes_single = function(x, min_size = 5, max_ap_ratio = 1){
   x
 }
 
+#' Hole Area
+#'
+#' @description Perform processing for hole area.
+#' @param y){ Input object or parameter named `y){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 hole_area = function(y){
   y = sf::st_sfc(sf::st_polygon(list(y)), crs = 27700)
   c(as.numeric(sf::st_area(y)), as.numeric(sf::st_perimeter(y)))
 }
 
+#' Try Inter
+#'
+#' @description Perform processing for try inter.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 try_inter = function(x){
   res = suppressMessages(suppressWarnings(try(sf::st_intersection(x), silent = TRUE)))
   if(inherits(res, "try-error")){
@@ -340,59 +379,5 @@ try_inter = function(x){
   res
 }
 
-# split_holes = function(y){
-#   sf::st_sfc(sf::st_polygon(list(y)), crs = 27700)
-# }
 
 
-# fast_st_intersects = function(x, y){
-#   intersections <- sf::st_intersects(x, y)
-#   res <- purrr::map(1:dim(x)[1], function(ix){
-#     suppressWarnings(sf::st_intersection(x = x[ix,], y = y[intersections[[ix]],]))
-#   })
-#   dplyr::bind_rows(res)
-# }
-#
-# bind_sf = function(x) {
-#   if (length(x) == 0) stop("Empty list")
-#   geom_name = attr(x[[1]], "sf_column")
-#   geom_types = purrr::map_chr(x, function(x){class(x[[attributes(x)$sf_column]])[1]})
-#   if(length(unique(geom_types)) != 1){
-#     # Change to sfc_GEOMETRY
-#     x = purrr::map(x, sf::st_cast)
-#   }
-#   x = data.table::rbindlist(x, use.names = FALSE)
-#   x[[geom_name]] = sf::st_sfc(x[[geom_name]], recompute_bbox = TRUE)
-#   x = sf::st_as_sf(x)
-#   x
-# }
-#
-# bench::mark(r1 = fast_st_intersects(x,y),
-#             r2 = sf::st_intersection(x, y), check = FALSE
-#             )
-#
-# r1 = fast_st_intersects(x1,y)
-# r2 = sf::st_intersection(x1, y)
-# summary(sf::st_is_empty(r1))
-# r1$geometry[[384]]
-#
-# r1b = sf::st_collection_extract(r1)
-# r2b = sf::st_collection_extract(r2)
-#
-# tmap_options(check.and.fix = TRUE)
-# qtm(r1b, fill = "red") + qtm(r2b, fill = "blue")
-#
-#
-# library(sf)
-# library(dplyr)
-# library(purrr)
-# library(progress)
-#
-# intersections <- st_intersects(x = xFeatures, y = yFeatures)
-#
-# pb <- progress_bar$new(format = "[:bar] :current/:total (:percent)", total = dim(xFeatures)[1])
-#
-# intersectFeatures <- map_dfr(1:dim(xFeatures)[1], function(ix){
-#   pb$tick()
-#   st_intersection(x = xFeatures[ix,], y = yFeatures[intersections[[ix]],])
-# })

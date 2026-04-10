@@ -1,3 +1,19 @@
+#' Summarise Access Proximity
+#'
+#' @description Summarise access proximity into a compact table suitable for analysis.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param access_poi_circle_15min Input object or parameter named `access_poi_circle_15min`.
+#' @param access_poi_iso_15min Input object or parameter named `access_poi_iso_15min`.
+#' @param access_poi_circle_30min Input object or parameter named `access_poi_circle_30min`.
+#' @param access_poi_iso_30min Input object or parameter named `access_poi_iso_30min`.
+#' @param access_poi_circle_45min Input object or parameter named `access_poi_circle_45min`.
+#' @param access_poi_iso_45min Input object or parameter named `access_poi_iso_45min`.
+#' @param access_poi_circle_60min Input object or parameter named `access_poi_circle_60min`.
+#' @param access_poi_iso_60min Input object or parameter named `access_poi_iso_60min`.
+#' @param lookup_oa2021_lsoa2021 OA-to-LSOA lookup table.
+#' @param area_classifications Area classification lookup table.
+#' @return A summary data frame with aggregated metrics.
+#' @keywords internal
 summarise_access_proximity = function(access_poi_circle_15min,
                                       access_poi_iso_15min,
                                       access_poi_circle_30min,
@@ -61,9 +77,6 @@ summarise_access_proximity = function(access_poi_circle_15min,
   names(access_poi_iso_60min)[5:6] = c("pop_access_60","access_60")
   names(access_poi_circle_60min)[5:6] = c("pop_proximity_60","proximity_60")
 
-
-  #foo = access_poi_iso_15min[access_poi_iso_15min$LSOA21CD == "E01019468",]
-
   corenms = c("LSOA21CD","groupname","categoryname","classname")
 
   ap = dplyr::full_join(access_poi_iso_15min, access_poi_circle_15min, by = corenms)
@@ -76,15 +89,6 @@ summarise_access_proximity = function(access_poi_circle_15min,
 
 
   # Add Missing combinations
-  #miss = access_poi_iso_60min[!duplicated(access_poi_iso_60min$classname),]
-  #miss = miss[,c("groupname","categoryname","classname","nat_pps")]
-  #miss = miss[rep(1:nrow(miss), length(unique(access_poi_circle_60min$LSOA21CD))),] # 35672 LSOA in England and Wales
-  #miss$LSOA21CD = rep(unique(lookup_oa2021_lsoa2021$LSOA21CD), each = 385) # 385 number of location types
-
-  #ap = dplyr::full_join(ap, miss, by = c("LSOA21CD","groupname","categoryname","classname"))
-  #ap$nat_pps = dplyr::if_else(!is.na(ap$nat_pps.x), ap$nat_pps.x, ap$nat_pps.y)
-  #ap$nat_pps.x = NULL
-  #ap$nat_pps.y = NULL
   ap = as.data.frame(ap)
 
   #Crop to +/- lim
@@ -100,23 +104,7 @@ summarise_access_proximity = function(access_poi_circle_15min,
     ap[,i] = dplyr::if_else(ap[,i] > lim_pos ,lim_pos,ap[,i])
   }
 
-  # Fill in missing populations
-  # ap = dplyr::group_by(ap, LSOA21CD)
-  # ap = dplyr::mutate(ap, pop_access_15 = dplyr::if_else(is.na(pop_access_15),max(pop_access_15, na.rm = TRUE),pop_access_15))
-  # ap = dplyr::mutate(ap, pop_access_30 = dplyr::if_else(is.na(pop_access_30),max(pop_access_30, na.rm = TRUE),pop_access_30))
-  # ap = dplyr::mutate(ap, pop_access_45 = dplyr::if_else(is.na(pop_access_45),max(pop_access_45, na.rm = TRUE),pop_access_45))
-  # ap = dplyr::mutate(ap, pop_access_60 = dplyr::if_else(is.na(pop_access_60),max(pop_access_60, na.rm = TRUE),pop_access_60))
-  # ap = dplyr::mutate(ap, pop_proximity_15 = dplyr::if_else(is.na(pop_proximity_15),max(pop_proximity_15, na.rm = TRUE),pop_proximity_15))
-  # ap = dplyr::mutate(ap, pop_proximity_30 = dplyr::if_else(is.na(pop_proximity_30),max(pop_proximity_30, na.rm = TRUE),pop_proximity_30))
-  # ap = dplyr::mutate(ap, pop_proximity_45 = dplyr::if_else(is.na(pop_proximity_45),max(pop_proximity_45, na.rm = TRUE),pop_proximity_45))
-  # ap = dplyr::mutate(ap, pop_proximity_60 = dplyr::if_else(is.na(pop_proximity_60),max(pop_proximity_60, na.rm = TRUE),pop_proximity_60))
-  # ap = dplyr::ungroup(ap)
 
-  # nms = names(ap)
-  # nms = nms[grepl("pop_",nms)]
-  # for(i in nms){
-  #   ap[,i] = dplyr::if_else(is.na(ap[,i]),max(ap[,i], na.rm = TRUE),ap[,i])
-  # }
 
 
   ap_orig = ap
@@ -136,36 +124,6 @@ summarise_access_proximity = function(access_poi_circle_15min,
   ap
 }
 
-# foo = ap[ap$LSOA21CD == "E01012992",]
-# qtm(zones[zones$OA21CD == "E00065509",])
-# #
-# tar_load(access_poi_circle_15min)
-# tar_load(access_poi_circle_30min)
-# tar_load(access_poi_circle_45min)
-# tar_load(access_poi_circle_60min)
-# tar_load(access_poi_iso_15min)
-# tar_load(access_poi_iso_30min)
-# tar_load(access_poi_iso_45min)
-# tar_load(access_poi_iso_60min)
-# tar_load(lookup_oa2021_lsoa2021)
-# tar_load(area_classifications)
-# # #  E01012992
-#
-# tar_load(ons_isochrones)
-#
-# zones = ons_isochrones[ons_isochrones$iso_cutoff == 900,] # 15 min
-# zones = zones[zones$OA21CD %in% lookup_oa2021_lsoa2021$nearest_OA2021,]
-# #
-# lookup_oa2021_lsoa2021[lookup_oa2021_lsoa2021$LSOA21CD == "E01012992",]
-# #
-# # zones = zones[zones$OA21CD == "E00065509",]
-# #
-#  tar_load(poi)
-#  tar_load(centroids_oa21)
-#  tar_load(population_oa21)
-#  pop = population_oa21
-#  gb_pop = 67.33e6
-#  oa = centroids_oa21
 
 #
 # x = c(-10,-3,-2,1,3,10,NA)

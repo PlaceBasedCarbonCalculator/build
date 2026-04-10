@@ -1,4 +1,11 @@
 
+#' Load Msoa Income
+#'
+#' @description Load msoa income data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   #TODO: Total Weakly Income or Net weekly Income / Equivalised  / Before / After Housing Costs
 

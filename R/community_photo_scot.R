@@ -1,3 +1,11 @@
+#' Make Community Photo Scotland
+#'
+#' @description Build community photo scotland and return the generated output.
+#' @param path File or directory path.
+#' @param bounds_iz22 Input object or parameter named `bounds_iz22`.
+#' @param lookup_DataZone_2022){ Lookup table used to map area codes or classifications.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_community_photo_scotland = function(path = "../inputdata/population_scotland/", bounds_iz22, lookup_DataZone_2022){
 
   bounds_iz22 = sf::st_drop_geometry(bounds_iz22)
@@ -137,6 +145,15 @@ make_community_photo_scotland = function(path = "../inputdata/population_scotlan
 # eth = dz_ethnic2[[645]]
 
 
+#' Syth Communit Photo Dz Scot
+#'
+#' @description Perform processing for syth communit photo dz scot.
+#' @param ra Input object or parameter named `ra`.
+#' @param nssec Input object or parameter named `nssec`.
+#' @param comp Input object or parameter named `comp`.
+#' @param eth){ Input object or parameter named `eth){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 syth_communit_photo_dz_scot = function(ra, nssec, comp, eth){
 
   if(length(unique(c(ra$IZCode,
@@ -300,6 +317,14 @@ syth_communit_photo_dz_scot = function(ra, nssec, comp, eth){
 }
 
 
+#' Syth Communit Photo Scot
+#'
+#' @description Perform processing for syth communit photo scot.
+#' @param hhns Input object or parameter named `hhns`.
+#' @param eth Input object or parameter named `eth`.
+#' @param seed){ Input object or parameter named `seed){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 syth_communit_photo_scot = function(hhns, eth, seed){
 
   if(length(unique(c(hhns$IZCode,
@@ -372,6 +397,14 @@ syth_communit_photo_scot = function(hhns, eth, seed){
 
 
 
+#' Read Hhcomp Nssec Iz Scot
+#'
+#' @description Read hhComp nssec iz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp_nssec_iz_scot = function(path = "../inputdata/population_scotland/scotlandcensus2022_NSSEC10_householdComp10_IntermiedateZone_wide2.csv", bounds_iz22){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -408,6 +441,13 @@ read_hhComp_nssec_iz_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
+#' Read Hhcomp Nssec Ethnic Scot
+#'
+#' @description Read hhComp nssec ethnic scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp_nssec_ethnic_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_nssec10_ethnic8_Scotland.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -440,6 +480,14 @@ read_hhComp_nssec_ethnic_scot = function(path = "../inputdata/population_scotlan
 
 }
 
+#' Read Ethnic8 Iz Scot
+#'
+#' @description Read ethnic8 iz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_ethnic8_iz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_ethnic8_IntermiedateZone.csv", bounds_iz22){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
@@ -463,6 +511,13 @@ read_ethnic8_iz_scot = function(path = "../inputdata/population_scotland/scotlan
 
 }
 
+#' Read Nssec10 Dz Scot
+#'
+#' @description Read nssec10 dz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_nssec10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_nssec10_DataZone.csv"){
 
   # Read the CSV (skip the metadata rows)
@@ -487,6 +542,13 @@ read_nssec10_dz_scot = function(path = "../inputdata/population_scotland/scotlan
 
 }
 
+#' Read Hhcomp10 Dz Scot
+#'
+#' @description Read hhcomp10 dz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
 
   # Read the CSV (skip the metadata rows)
@@ -510,6 +572,13 @@ read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotla
 }
 
 
+#' Read Hhcomp10 Dz Scot
+#'
+#' @description Read hhcomp10 dz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
 
   # Read the CSV (skip the metadata rows)
@@ -533,6 +602,13 @@ read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotla
 }
 
 # Note Population Not Households
+#' Read Ethnic2 Dz Scot
+#'
+#' @description Read ethnic2 dz scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_ethnic2_dz_scot = function(path = "../inputdata/population_scotland/scotlandcensus2022_Ethnic2_People_DataZone.csv"){
 
   # Read the CSV (skip the metadata rows)

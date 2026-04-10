@@ -1,3 +1,10 @@
+#' Read Hhcomp15 Tenure5 Size5 Carvan5 Ew
+#'
+#' @description Read hhComp15 Tenure5 Size5 CarVan5 EW from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp15_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"census2021EW_Households_HouseholdComposition15_Tenure5_Size5_CarVar_5_EW.csv")){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -31,6 +38,13 @@ read_hhComp15_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"ce
 
 }
 
+#' Read Hhcomp15 Tenure5 Size5 Acc5 Ew
+#'
+#' @description Read hhComp15 Tenure5 Size5 Acc5 EW from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp15_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census2021EW_Households_HouseholdComposition15_Tenure5_Size5_Acc5_EW.csv")){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -63,6 +77,13 @@ read_hhComp15_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"censu
 
 }
 
+#' Read Hhcomp6 Tenure5 Size5 Acc5 Ew
+#'
+#' @description Read hhComp6 Tenure5 Size5 Acc5 EW from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp6_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census2021EW_Households_HouseholdComposition6_Tenure5_Size5_Acc5_EW.csv")){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -89,6 +110,13 @@ read_hhComp6_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census
 
 }
 
+#' Read Hhcomp6 Tenure5 Size5 Carvan5 Ew
+#'
+#' @description Read hhComp6 Tenure5 Size5 CarVan5 EW from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp6_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"census2021EW_Households_HouseholdComposition6_Tenure5_Size5_CarVan5_EW.csv")){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -115,6 +143,13 @@ read_hhComp6_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"cen
 
 }
 
+#' Read Carvan5 Tenure5 Size5 Acc5 Ew
+#'
+#' @description Read CarVan5 Tenure5 Size5 Acc5 EW from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan5_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census2021EW_Households_CarVan5_Tenure5_Size5_Acc5_EW.csv")){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -141,6 +176,12 @@ read_CarVan5_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census
 
 }
 
+#' Build Synth Pop Seed
+#'
+#' @description Build synth pop seed and return the generated output.
+#' @param path_data Input object or parameter named `path_data`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_synth_pop_seed = function(path_data = file.path(parameters$path_data,"population")){
 
   sizeCarTenureComp15 = read_hhComp15_Tenure5_Size5_CarVan5_EW(file.path(path_data,"census2021EW_Households_HouseholdComposition15_Tenure5_Size5_CarVar_5_EW.csv"))

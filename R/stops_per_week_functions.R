@@ -1,3 +1,11 @@
+#' Build Pt Analysis
+#'
+#' @description Build pt analysis and return the generated output.
+#' @param zone Input object or parameter named `zone`.
+#' @param i Input object or parameter named `i`.
+#' @param path File or directory path.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 build_pt_analysis <- function(zone, i = 2023, path = "D:/OneDrive - University of Leeds/Data/UK2GTFS/"){
 
   if(i < 2012){
@@ -229,16 +237,20 @@ count_weekday_runs <- function(cal){
 
 
 
-#' Count the number of trips spotting at each stop between two dates#'
+#' Gtfs Stop Frequency
 #'
+#' @description Perform processing for gtfs stop frequency.
 #' @param gtfs GTFS object from gtfs_read()
 #' @param startdate Start date
 #' @param enddate End date
-#'
-#' @export
+#' @param gtfs Input object or parameter named `gtfs`.
+#' @param startdate Input object or parameter named `startdate`.
+#' @param enddate Input object or parameter named `enddate`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 gtfs_stop_frequency <- function(gtfs,
-                        startdate = lubridate::ymd("2020-03-01"),
-                        enddate = lubridate::ymd("2020-04-30")){
+                                startdate = lubridate::ymd("2020-03-01"),
+                                enddate = lubridate::ymd("2020-04-30")){
   message("Only using stops between ",startdate," and ",enddate)
   stop_times <- gtfs$stop_times
   trips <- gtfs$trips
@@ -311,13 +323,17 @@ gtfs_stop_frequency <- function(gtfs,
 }
 
 
-#' Trim a GTFS file between two dates'
+#' Gtfs Trim Dates
 #'
+#' @description Perform processing for gtfs trim dates.
 #' @param gtfs GTFS object from gtfs_read()
 #' @param startdate Start date
 #' @param enddate End date
-#'
-#' @export
+#' @param gtfs Input object or parameter named `gtfs`.
+#' @param startdate Input object or parameter named `startdate`.
+#' @param enddate Input object or parameter named `enddate`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 gtfs_trim_dates <- function(gtfs,
                             startdate = lubridate::ymd("2020-03-01"),
                             enddate = lubridate::ymd("2020-04-30")) {
@@ -365,6 +381,17 @@ gtfs_trim_dates <- function(gtfs,
 
 
 
+#' Gtfs Trips Per Zone
+#'
+#' @description Prepare or summarise zone-based accessibility results.
+#' @param gtfs Input object or parameter named `gtfs`.
+#' @param zone Input object or parameter named `zone`.
+#' @param startdate Input object or parameter named `startdate`.
+#' @param enddate Input object or parameter named `enddate`.
+#' @param zone_id Identifier values used for joining or grouping.
+#' @param by_mode Input object or parameter named `by_mode`.
+#' @return An sf object containing spatial data.
+#' @keywords internal
 gtfs_trips_per_zone <- function(gtfs,
                                 zone,
                                 startdate = min(gtfs$calendar$start_date),
@@ -518,6 +545,14 @@ gtfs_trips_per_zone <- function(gtfs,
 }
 
 
+#' Internal Trips Per Zone
+#'
+#' @description Prepare or summarise zone-based accessibility results.
+#' @param x Input data object.
+#' @param by_mode Input object or parameter named `by_mode`.
+#' @param days_tot){ Input object or parameter named `days_tot){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 internal_trips_per_zone <- function(x, by_mode = TRUE, days_tot){
   x <- x[!duplicated(x$trip_id),]
   #zone_id = x$zone_id[1]

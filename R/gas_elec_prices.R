@@ -1,3 +1,10 @@
+#' Load Gas Elec Prices
+#'
+#' @description Load gas elec prices data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_gas_elec_prices = function(path = "../inputdata/gas_electric/prices"){
 
   gas = readxl::read_excel(file.path(path,"table_234.xlsx"), sheet = "2.3.4")
@@ -35,6 +42,13 @@ load_gas_elec_prices = function(path = "../inputdata/gas_electric/prices"){
 #DNO or PES Areas
 #https://www.neso.energy/data-portal/gis-boundaries-gb-dno-license-areas
 
+#' Load Dno Areas
+#'
+#' @description Load dno areas data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_dno_areas = function(path = "../inputdata/gas_electric/"){
   dir.create(file.path(tempdir(),"dno"))
   unzip(file.path(path,"gb-dno-license-areas-20240503-as-esri-shape-file.zip"), exdir = file.path(tempdir(),"dno"))
@@ -54,6 +68,14 @@ load_dno_areas = function(path = "../inputdata/gas_electric/"){
 
 }
 
+#' Make Lsoa To Dno Lookup
+#'
+#' @description Build lsoa to dno lookup and return the generated output.
+#' @param dno Input object or parameter named `dno`.
+#' @param centroids_lsoa21 LSOA 2021 centroid geometries.
+#' @param centroids_dz22){ Centroid geometries used for area matching.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 make_lsoa_to_dno_lookup = function(dno, centroids_lsoa21, centroids_dz22){
   dno = dno[,c("region")]
 
@@ -74,6 +96,15 @@ make_lsoa_to_dno_lookup = function(dno, centroids_lsoa21, centroids_dz22){
 }
 
 
+#' Estimate Gas Electric Bills
+#'
+#' @description Perform processing for estimate gas electric bills.
+#' @param domestic_gas Input object or parameter named `domestic_gas`.
+#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
+#' @param prices_gas_electric Input object or parameter named `prices_gas_electric`.
+#' @param lsoa_dno_lookup_GB){ Input object or parameter named `lsoa_dno_lookup_GB){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 estimate_gas_electric_bills = function(domestic_gas, domestic_electricity, prices_gas_electric, lsoa_dno_lookup_GB){
 
   names(domestic_gas)[names(domestic_gas) == "meters"] = "gas_meters"

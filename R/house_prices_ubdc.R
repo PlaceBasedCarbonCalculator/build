@@ -1,3 +1,10 @@
+#' Load Ubdc House Prices
+#'
+#' @description Load ubdc house prices data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_ubdc_house_prices = function(path = "../inputdata/house prices/ppdid_uprn_usrn.zip"){
   dir.create(file.path(tempdir(),"ubdc"))
   unzip(path, exdir = file.path(tempdir(),"ubdc"))
@@ -8,6 +15,13 @@ load_ubdc_house_prices = function(path = "../inputdata/house prices/ppdid_uprn_u
 }
 
 
+#' Load Lr Price Paid
+#'
+#' @description Load lr price paid data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_lr_price_paid = function(path = "../inputdata/house prices/land registry/"){
   fls = list.files(path)
 

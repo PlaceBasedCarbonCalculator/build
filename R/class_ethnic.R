@@ -1,3 +1,10 @@
+#' Read Class Ethinic
+#'
+#' @description Read class ethinic from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_class_ethinic = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
 
   dir = file.path(tempdir(),"class_ethnic")
@@ -31,6 +38,13 @@ read_class_ethinic = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Nssec Ethinic
+#'
+#' @description Read NSSEC ethinic from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdidents_NSSEC10_Ethnicity_LSOA_partial.csv"
                               #,path2 = "../inputdata/population/census2021EW_Residents_Ethnicity_LSOA.csv"
                               ){
@@ -45,27 +59,14 @@ read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdi
   raw$ethnic6 = simplify_ethnic6(raw$ethnic6)
   raw = raw[raw$ethnic6 != "DNA",] # 0 For all rows so remove
 
-  # ethonly = read.csv(path2)
-  # names(ethonly) = c("LSOA21CD","LSOA21NM","ethnic6CD","ethnic6","residents")
-  # ethonly = ethonly[,c("LSOA21CD","ethnic6","residents")]
-  # ethonly = ethonly[!ethonly$LSOA21CD %in% unique(raw$LSOA21CD),]
-  # ethonly$ethnic6 = simplify_ethnic6(ethonly$ethnic6)
 
-  # Check ethonly distributions
-  # LSOAs with suppresed breakdown are all more the 97% white
-  # chk = purrr::map(dplyr::group_split(ethonly, LSOA21CD), function(x){
-  #   x = x[order(x$residents,decreasing = TRUE),]
-  #   x$percent = round(x$residents / sum(x$residents) * 100,1)
-  #   x = x[1,]
-  #   x
-  # }, .progress = T)
-  # chk = dplyr::bind_rows(chk)
-
-  raw
-
-}
-
-
+#' Read Household Nssec Old
+#'
+#' @description Read household nssec old from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_household_nssec_old = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
 
   dir = file.path(tempdir(),"class_ethnic")
@@ -120,27 +121,24 @@ read_household_nssec_old = function(path = "../inputdata/population/census2021EW
 
   wide = dplyr::left_join(wide6[,c("LSOA21CD", "NSSEC10","LoneParent","DNA")],
                           wide8, by = c("LSOA21CD", "NSSEC10"))
-  # long = tidyr::pivot_longer(wide,
-  #                            cols = c("LoneParent","DNA","OnePersonOver66",
-  #                            "OnePersonOther","CoupleNoChildren","CoupleChildren",
-  #                            "CoupleNoDepChild","Other8"))
-  # long_lst = dplyr::group_split(long, long$LSOA21CD, .keep = FALSE)
-  #x = long_lst[[1]]
 
-  # cats = purrr::map(long_lst, top_architypes)
-  # cats = dplyr::bind_rows(cats)
-  # cats$cat_name = paste0(cats$NSSEC10,"-",cats$name)
-  #
-  # foo = as.data.frame(table(cats$cat_name))
-  #
-  # wide_miss = wide[is.na(wide$Other8),]
-  # foo = wide_miss[wide_miss$LSOA21CD == "E01000117",]
 
   wide
 
 }
 
 
+#' Read Household Nssec
+#'
+#' @description Read household nssec from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path1 Input object or parameter named `path1`.
+#' @param path2 Input object or parameter named `path2`.
+#' @param path File or directory path.
+#' @param path_msoa Input object or parameter named `path_msoa`.
+#' @param lookup_postcode_OA_LSOA_MSOA_2021 Lookup table used to map area codes or classifications.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_household_nssec = function(path1 = "../inputdata/population/census2021EW_Households_HouseholdComposition15_LSOA.csv",
                                 path2 = "../inputdata/population/census2021EW_RefPerson_NSSEC10_Houshold15_LSOA_partial.csv",
                                 path = "../inputdata/population/census2021EW_HouseholdComposition.zip",
@@ -280,11 +278,14 @@ read_household_nssec = function(path1 = "../inputdata/population/census2021EW_Ho
 
   res = dplyr::bind_rows(list(raw_nssec_hc_part, lst_bal))
   res
-
 }
 
-
-
+#' Simplify Nssec
+#'
+#' @description Perform processing for simplify nssec.
+#' @param nsec){ Input object or parameter named `nsec){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 simplify_nssec = function(nsec){
   nsec = strsplit(nsec,":")
   nsec = sapply(nsec, `[[`, 1)
@@ -296,6 +297,12 @@ simplify_nssec = function(nsec){
 }
 
 
+#' Nssec10 To Nssec5
+#'
+#' @description Convert nssec10 to nssec5.
+#' @param nsec){ Input object or parameter named `nsec){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 nssec10_to_nssec5 = function(nsec){
 
   nsec[nsec == "L14"] = "unemployed"
@@ -306,6 +313,12 @@ nssec10_to_nssec5 = function(nsec){
   nsec
 }
 
+#' Simplify Household6
+#'
+#' @description Perform processing for simplify household6.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 simplify_household6 = function(x){
   x[x=="Does not apply"] = "DNA"
   x[x=="One-person household"] = "OnePerson"
@@ -317,6 +330,12 @@ simplify_household6 = function(x){
 
 }
 
+#' Simplify Household8
+#'
+#' @description Perform processing for simplify household8.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 simplify_household8 = function(x){
   x[x=="Does not apply"] = "DNA"
   x[x=="One-person household: Aged 66 years and over"] = "OnePersonOver66"
@@ -330,6 +349,12 @@ simplify_household8 = function(x){
 
 }
 
+#' Simplify Household15
+#'
+#' @description Perform processing for simplify household15.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 simplify_household15 = function(x){
   x[x=="Does not apply"] = "DNA"
   x[x=="One-person household: Aged 66 years and over"] = "OnePersonOver66"
@@ -351,6 +376,12 @@ simplify_household15 = function(x){
 
 
 
+#' Simplify Ethnic6
+#'
+#' @description Perform processing for simplify ethnic6.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 simplify_ethnic6 = function(x){
   x[x=="Does not apply"] = "DNA"
   x[x=="Asian, Asian British or Asian Welsh"] = "Asian"
@@ -364,6 +395,13 @@ simplify_ethnic6 = function(x){
 
 
 
+#' Balance Nssec
+#'
+#' @description Perform processing for balance nssec.
+#' @param x Input data object.
+#' @param y){ Input object or parameter named `y){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 balance_nssec = function(x, y){
   # Check
   if(x$LSOA21CD[1] != y$LSOA21CD[1]){
@@ -386,6 +424,15 @@ balance_nssec = function(x, y){
 
 
 
+#' Balance Nssec2
+#'
+#' @description Perform processing for balance nssec2.
+#' @param hc Input object or parameter named `hc`.
+#' @param nssec Input object or parameter named `nssec`.
+#' @param both Input object or parameter named `both`.
+#' @param msoa){ Input object or parameter named `msoa){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 balance_nssec2 = function(hc, nssec, both, msoa){
   # Check
   if(hc$LSOA21CD[1] != nssec$LSOA21CD[1]){
@@ -405,6 +452,15 @@ balance_nssec2 = function(hc, nssec, both, msoa){
 
   # Make Muliple Matrixes for One person, Coupel, Lone Parent, Other
 
+#' Make Mat
+#'
+#' @description Build mat and return the generated output.
+#' @param both Input object or parameter named `both`.
+#' @param hc Input object or parameter named `hc`.
+#' @param msoa Input object or parameter named `msoa`.
+#' @param type Input object or parameter named `type`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
   make_mat = function(both, hc, msoa, type = "OnePerson"){
     rsum_one = both[both$household6 == type,]
     csum_one = hc[hc$household6 == type,]
@@ -456,6 +512,13 @@ balance_nssec2 = function(hc, nssec, both, msoa){
 
 
 
+#' Top Architypes
+#'
+#' @description Perform processing for top architypes.
+#' @param x Input data object.
+#' @param n Input object or parameter named `n`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 top_architypes = function(x, n = 48){
   x = x[order(x$households, decreasing = TRUE),]
   x$per = x$households / sum(x$households) * 100

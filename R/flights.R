@@ -1,8 +1,23 @@
+#' Load Flights Od
+#'
+#' @description Load flights od data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_flights_od = function(path = "../../creds2/LDT/data/clean/od_emissions_2021.gpkg") {
   pass_od <- sf::read_sf(path)
   pass_od
 }
 
+#' Load Flights Airports
+#'
+#' @description Load flights airports data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_la) Input object or parameter named `bounds_la)`.
+#' @return An sf object containing the loaded spatial data.
+#' @keywords internal
 load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_clean_second_pass_2021.gpkg", bounds_la) {
   airports <- sf::read_sf(path)
 
@@ -21,6 +36,14 @@ load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_cl
 
 # Get annual emissions for each to the home nations
 # Note some flight emissions are allocated outside the UK
+#' Get Flights Total Emissions
+#'
+#' @description Compute a carbon emission or footprint summary.
+#' @param flights_od Input object or parameter named `flights_od`.
+#' @param flights_airports Input object or parameter named `flights_airports`.
+#' @param max_year Input object or parameter named `max_year`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 get_flights_total_emissions = function(flights_od, flights_airports, max_year = 2024) {
 
   flights_airports = sf::st_drop_geometry(flights_airports)
@@ -52,6 +75,13 @@ get_flights_total_emissions = function(flights_od, flights_airports, max_year = 
                                     flights_summary$toclass == "Other Country"), ]
 
   # Split Domestic emissions 50:50 between nations
+#' Part Sum
+#'
+#' @description Perform processing for part sum.
+#' @param x Input data object.
+#' @param frac Input object or parameter named `frac`.
+#' @return A data frame produced by the function.
+#' @keywords internal
   part_sum = function(x, frac = 0.5){
     sum(x, na.rm = TRUE) * frac
   }
@@ -110,6 +140,13 @@ get_flights_total_emissions = function(flights_od, flights_airports, max_year = 
 
 }
 
+#' Get Flights Lsoa Emissions
+#'
+#' @description Compute a carbon emission or footprint summary.
+#' @param flights_total_emissions Input object or parameter named `flights_total_emissions`.
+#' @param consumption_emissions){ Input object or parameter named `consumption_emissions){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
 
   # Consistency Checks
@@ -187,86 +224,16 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
 }
 
 
-# Old Method
-# get_flights_lsoa_emissions = function(flights_total_emissions, income_lsoa, population){
-#
-#   #TODO: Get Scotland Income
-#   #TODO: Change income shares over time
-#
-#   # Define Curve
-#   x = seq(0,1,0.01)
-#   y = 1.02 * x **2 - 0.02 *x
-#   y[y<0] <- 0
-#   z = c(y[1],diff(y))
-#
-#   # Split by country
-#   income_lsoa$county = substr(income_lsoa$LSOA21CD,1,1)
-#
-#   income_lsoa_EW = income_lsoa[income_lsoa$county %in% c("E","W"), ]
-#   income_lsoa_S = population[,c("year","LSOA21CD")]
-#   income_lsoa_S = income_lsoa_S[income_lsoa_S$year == 2021,]
-#   income_lsoa_S$county = substr(income_lsoa_S$LSOA21CD,1,1)
-#   income_lsoa_S = income_lsoa_S[income_lsoa_S$county == "S", ]
-#   income_lsoa_S$year = NULL
-#
-#   income_lsoa_EW$centile <- percentile(income_lsoa_EW$income_lsoa) / 100
-#   #income_lsoa_S$centile <- percentile(income_lsoa_S$income_lsoa) / 100
-#
-#   match_table <- data.frame(x, y, z)
-#   match_table$x <- round(match_table$x, 2)
-#
-#   income_lsoa_EW$emissions_share <- match_table$z[match(income_lsoa_EW$centile, match_table$x)]
-#   income_lsoa_EW$emissions_share <- income_lsoa_EW$emissions_share / sum(income_lsoa_EW$emissions_share, na.rm = TRUE)
-#
-#   flights_total_emissions = as.data.frame(flights_total_emissions)
-#
-#   for(i in 2002:2021){
-#     income_lsoa_EW[paste0("emissions_flights_",i)] <- income_lsoa_EW$emissions_share *
-#       sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",i)], na.rm = TRUE)
-#   }
-#
-#   # sum(income_lsoa_EW$emissions_flights_2021) /
-#   # sum(flights_total_emissions[flights_total_emissions$country_uk %in% c("E","W"),paste0("emissions_",2021)], na.rm = TRUE)
-#
-#   for(i in 2002:2021){
-#     income_lsoa_S[paste0("emissions_flights_",i)] <- flights_total_emissions[flights_total_emissions$country_uk == "S",paste0("emissions_",i)] / nrow(income_lsoa_S)
-#   }
-#
-#   income_lsoa_EW$centile = NULL
-#   income_lsoa_EW$emissions_share = NULL
-#
-#   income_lsoa_EW$income_lsoa = NULL
-#
-#
-#
-#   population = population[,c("year","LSOA21CD","all_ages")]
-#   population = tidyr::pivot_wider(population, names_from = "year",
-#                                   values_from = "all_ages", id_cols = "LSOA21CD")
-#
-#   emissions_lsoa = rbind(income_lsoa_EW, income_lsoa_S)
-#
-#   population = population[order(population$LSOA21CD),]
-#   emissions_lsoa = emissions_lsoa[order(emissions_lsoa$LSOA21CD),]
-#
-#   if(!all(population$LSOA21CD == emissions_lsoa$LSOA21CD)){
-#     stop("LSOA21CD don't match")
-#   }
-#
-#   for(i in 2002:2021){
-#     emissions_lsoa[paste0("emissions_flights_percap_",i)] <- emissions_lsoa[paste0("emissions_flights_",i)] / population[as.character(i)]
-#   }
-#
-#   # Few DataZones with 0 population in 2021
-#   emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)] = lapply(emissions_lsoa[,paste0("emissions_flights_percap_",2002:2021)],
-#                                                                           function(x){
-#                                                                             x[is.infinite(x)] = 0
-#                                                                             x
-#                                                                           })
-#   emissions_lsoa
-# }
 
 
 
+#' Percentile
+#'
+#' @description Perform processing for percentile.
+#' @param dat Input object or parameter named `dat`.
+#' @param zeroNA Input object or parameter named `zeroNA`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 percentile <- function(dat, zeroNA = FALSE){
   if(zeroNA){
     dat[dat == 0] = NA

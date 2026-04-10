@@ -1,3 +1,10 @@
+#' Read Acc Hhcomp
+#'
+#' @description Read Acc hhComp from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_hhComp = function(path = "../inputdata/population/census2021EW_Households_HouseholdComposition15_AccomodationType5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -19,6 +26,13 @@ read_Acc_hhComp = function(path = "../inputdata/population/census2021EW_Househol
 
 }
 
+#' Read Acc Hhcomp6
+#'
+#' @description Read Acc hhComp6 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_hhComp6 = function(path = "../inputdata/population/census2021EW_Households_AccomodationType5_HouseholdComposition6_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -34,6 +48,13 @@ read_Acc_hhComp6 = function(path = "../inputdata/population/census2021EW_Househo
 }
 
 
+#' Read Acc Tenure
+#'
+#' @description Read Acc tenure from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_tenure = function(path = "../inputdata/population/census2021EW_Households_AccomodationType5_Tenure5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -50,6 +71,13 @@ read_Acc_tenure = function(path = "../inputdata/population/census2021EW_Househol
 
 }
 
+#' Read Acc Carvan
+#'
+#' @description Read Acc CarVan from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_CarVan = function(path = "../inputdata/population/census2021EW_Households_AccomodationType5_CarVan5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -65,6 +93,13 @@ read_Acc_CarVan = function(path = "../inputdata/population/census2021EW_Househol
 
 }
 
+#' Read Hhsize Hhcomp
+#'
+#' @description Read hhSize hhComp from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_hhComp = function(path = "../inputdata/population/census2021EW_Households_HouseholdComposition6_HouseholdSize5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -79,6 +114,13 @@ read_hhSize_hhComp = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Acc Hhsize
+#'
+#' @description Read Acc hhSize from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_hhSize = function(path = "../inputdata/population/census2021EW_Households_AccomodationType5_HousehholdSize5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -94,6 +136,13 @@ read_Acc_hhSize = function(path = "../inputdata/population/census2021EW_Househol
 
 }
 
+#' Read Carvan Hhcomp
+#'
+#' @description Read CarVan hhComp from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan_hhComp = function(path = "../inputdata/population/census2021EW_Households_HouseholdComposition6_CarVan5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -110,6 +159,13 @@ read_CarVan_hhComp = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Tenure Hhsize
+#'
+#' @description Read Tenure hhSize from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_hhSize = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdSize5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -127,6 +183,13 @@ read_Tenure_hhSize = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Tenure Carvan
+#'
+#' @description Read Tenure CarVan from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_CarVan = function(path = "../inputdata/population/census2021EW_Households_Tenure5_CarVan5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -143,6 +206,13 @@ read_Tenure_CarVan = function(path = "../inputdata/population/census2021EW_House
 }
 
 
+#' Read Tenure Carvan Hhcomp6
+#'
+#' @description Read Tenure CarVan hhComp6 from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_CarVan_hhComp6 = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdComposition6_CarVan5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -160,6 +230,13 @@ read_Tenure_CarVan_hhComp6 = function(path = "../inputdata/population/census2021
 
 }
 
+#' Read Tenure Hhsize Carvan
+#'
+#' @description Read Tenure hhSize CarVan from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_hhSize_CarVan = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdSize5_CarVan5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -178,6 +255,13 @@ read_Tenure_hhSize_CarVan = function(path = "../inputdata/population/census2021E
 
 }
 
+#' Read Hhsize Carvan
+#'
+#' @description Read hhSize CarVan from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_CarVan = function(path = "../inputdata/population/census2021EW_Households_hhSize5_CarVan5_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -194,6 +278,13 @@ read_hhSize_CarVan = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Tenure Nssec
+#'
+#' @description Read Tenure NSSEC from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_NSSEC = function(path = "../inputdata/population/census2021EW_RefPerson_NSSEC10_Tenure5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -207,6 +298,13 @@ read_Tenure_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
 
 }
 
+#' Read Hhcomp Nssec
+#'
+#' @description Read hhComp NSSEC from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp_NSSEC = function(path = "../inputdata/population/census2021EW_RefPerson_NSSEC10_Houshold15_LSOA_partial.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -221,6 +319,13 @@ read_hhComp_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
 }
 
 
+#' Read Hhcomp Tenure
+#'
+#' @description Read hhComp Tenure from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp_Tenure = function(path = "../inputdata/population/census2021EW_Households_HouseholdComposition15_Tenure5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -246,6 +351,13 @@ read_hhComp_Tenure = function(path = "../inputdata/population/census2021EW_House
 
 }
 
+#' Read Hhcomp6 Tenure
+#'
+#' @description Read hhComp6 Tenure from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdComposition6_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -263,6 +375,13 @@ read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Hous
 
 }
 
+#' Read Hhcomp6 Tenure
+#'
+#' @description Read hhComp6 Tenure from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Households_HouseholdComposition6_Tenure5_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -279,6 +398,13 @@ read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Hous
 
 }
 
+#' Read Hhsize
+#'
+#' @description Read hhSize from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize = function(path = "../inputdata/population/census2021EW_Households_HouseholdSize7_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -290,6 +416,13 @@ read_hhSize = function(path = "../inputdata/population/census2021EW_Households_H
 
 }
 
+#' Read Carvan
+#'
+#' @description Read CarVan from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan = function(path = "../inputdata/population/census2021EW_Households_CarsVans6_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -301,6 +434,13 @@ read_CarVan = function(path = "../inputdata/population/census2021EW_Households_C
 
 }
 
+#' Read Tenure
+#'
+#' @description Read tenure from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_tenure = function(path = "../inputdata/population/census2021EW_Households_Tenure9_LSOA.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE)
@@ -312,6 +452,13 @@ read_tenure = function(path = "../inputdata/population/census2021EW_Households_T
 
 }
 
+#' Split For Arrays
+#'
+#' @description Perform processing for split for arrays.
+#' @param x Input data object.
+#' @param lsoa_common){ Input object or parameter named `lsoa_common){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 split_for_arrays = function(x, lsoa_common){
   x = x[x$LSOA21CD %in% lsoa_common,]
   x = x[order(x$LSOA21CD),]
@@ -319,6 +466,13 @@ split_for_arrays = function(x, lsoa_common){
   x
 }
 
+#' Split For Arrays2
+#'
+#' @description Perform processing for split for arrays2.
+#' @param x Input data object.
+#' @param lsoa_all){ Input object or parameter named `lsoa_all){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 split_for_arrays2 = function(x, lsoa_all){
   y = lapply(lsoa_all, function(lsoa){
     sub = x[x$LSOA21CD == lsoa,]
@@ -330,6 +484,13 @@ split_for_arrays2 = function(x, lsoa_all){
   y
 }
 
+#' Split For Arrays3
+#'
+#' @description Perform processing for split for arrays3.
+#' @param x Input data object.
+#' @param lsoa_all){ Input object or parameter named `lsoa_all){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 split_for_arrays3 = function(x, lsoa_all){
   x = x[order(x$LSOA21CD),]
   groups = dplyr::group_split(x, x$LSOA21CD)
@@ -340,6 +501,13 @@ split_for_arrays3 = function(x, lsoa_all){
 }
 
 
+#' Sythetic Census
+#'
+#' @description Perform processing for sythetic census.
+#' @param path_data Input object or parameter named `path_data`.
+#' @param synth_pop_seed){ Input object or parameter named `synth_pop_seed){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 sythetic_census = function(path_data = file.path(parameters$path_data,"population"), synth_pop_seed){
 
   Acc_hhComp = read_Acc_hhComp(file.path(path_data,"census2021EW_Households_HouseholdComposition15_AccomodationType5_LSOA_partial.csv"))  # Partial
@@ -423,6 +591,28 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
 
 
 
+#' Census Syth Combine V4
+#'
+#' @description Perform processing for census syth combine v4.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param Acc_tenure_sub Input object or parameter named `Acc_tenure_sub`.
+#' @param hhComp_Tenure_sub Input object or parameter named `hhComp_Tenure_sub`.
+#' @param Tenure_hhSize_CarVan_sub Input object or parameter named `Tenure_hhSize_CarVan_sub`.
+#' @param Acc_hhComp_sub Input object or parameter named `Acc_hhComp_sub`.
+#' @param Acc_hhComp6_sub Input object or parameter named `Acc_hhComp6_sub`.
+#' @param Acc_CarVan_sub Input object or parameter named `Acc_CarVan_sub`.
+#' @param hhSize_hhComp_sub Input object or parameter named `hhSize_hhComp_sub`.
+#' @param Acc_hhSize_sub Input object or parameter named `Acc_hhSize_sub`.
+#' @param hhComp6_Tenure_sub Input object or parameter named `hhComp6_Tenure_sub`.
+#' @param CarVan_hhComp_sub Input object or parameter named `CarVan_hhComp_sub`.
+#' @param Tenure_CarVan_hhComp6_sub Input object or parameter named `Tenure_CarVan_hhComp6_sub`.
+#' @param Tenure_hhSize_sub Input object or parameter named `Tenure_hhSize_sub`.
+#' @param Tenure_CarVan_sub Input object or parameter named `Tenure_CarVan_sub`.
+#' @param hhSize_CarVan_sub Input object or parameter named `hhSize_CarVan_sub`.
+#' @param seed Input object or parameter named `seed`.
+#' @param iter Input object or parameter named `iter`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 census_syth_combine_v4 = function(Acc_tenure_sub,
                                   hhComp_Tenure_sub,
                                   Tenure_hhSize_CarVan_sub,
@@ -690,10 +880,15 @@ census_syth_combine_v4 = function(Acc_tenure_sub,
 
 }
 
-
-# Adjust mat2 so that it has the same rowsums as mat1
-# humnaleauge requires input matrixes to have the same total sums
-# but in many cases the rows for two matrix refer to the same variaible so should match
+#' Match Matrix Rsums
+#'
+#' @description Adjust mat2 so that it has the same rowsums as mat1
+#'     humnaleauge requires input matrixes to have the same total sums
+#'     but in many cases the rows for two matrix refer to the same variaible so should match
+#' @param mat1 Input object or parameter named `mat1`.
+#' @param mat2) Input object or parameter named `mat2)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 match_matrix_rsums <- function(mat1, mat2) {
   # Calculate the row sums of both matrices
   row_sums1 <- rowSums(mat1)
@@ -726,6 +921,13 @@ match_matrix_rsums <- function(mat1, mat2) {
   return(mat2)
 }
 
+#' Match Matrix Csums
+#'
+#' @description Match matrix csums values between datasets.
+#' @param mat1 Input object or parameter named `mat1`.
+#' @param mat2) Input object or parameter named `mat2)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 match_matrix_csums <- function(mat1, mat2) {
   # Calculate the col sums of both matrices
   col_sums1 <- colSums(mat1)
@@ -760,6 +962,12 @@ match_matrix_csums <- function(mat1, mat2) {
 }
 
 
+#' Simplify Tenure5
+#'
+#' @description Perform processing for simplify Tenure5.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 simplify_Tenure5 = function(x){
   x[x=="Owned: Owns outright"] = "outright"
   x[x=="Owned: Owns with a mortgage or loan or shared ownership"] = "mortgage"
@@ -768,6 +976,12 @@ simplify_Tenure5 = function(x){
   x
 }
 
+#' Simplify Hhsize5
+#'
+#' @description Perform processing for simplify hhSize5.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 simplify_hhSize5 = function(x){
   x[x=="1 person in household"] = "p1"
   x[x=="2 people in household"] = "p2"
@@ -776,6 +990,12 @@ simplify_hhSize5 = function(x){
   x
 }
 
+#' Simplify Carvan5
+#'
+#' @description Perform processing for simplify CarVan5.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 simplify_CarVan5 = function(x){
   x[x=="No cars or vans in household"] = "car0"
   x[x=="1 car or van in household"] = "car1"
@@ -784,6 +1004,12 @@ simplify_CarVan5 = function(x){
   x
 }
 
+#' Simplify Acctype5
+#'
+#' @description Perform processing for simplify AccType5.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 simplify_AccType5= function(x){
   x[x=="Whole house or bungalow: Detached"] = "detached"
   x[x=="Whole house or bungalow: Semi-detached"] = "semidetached"

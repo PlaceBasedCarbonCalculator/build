@@ -1,3 +1,13 @@
+#' Bivariate Categories
+#'
+#' @description Convert two select of numeric data into quantiles and then
+#'   categorise on a 5x5 matrix.
+#' @param x First numeric input
+#' @param y Second numeric input
+#' @param zeroNA logical, if TRUE zero values are replaced with NA for the
+#'   purpose of calculating quantile bands, useful if 0 means ignore or no data.
+#' @return A vector of two digit numbers from 11 to 55.
+#' @keywords internal
 bivariate_categories = function(x,y, zeroNA = FALSE){
 
   if(zeroNA){

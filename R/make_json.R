@@ -1,3 +1,53 @@
+#' Write One
+#'
+#' @description Export one to disk or a specified output location.
+#' @param sub Subset object used within the function.
+#' @param idcol Input object or parameter named `idcol`.
+#' @param path File or directory path.
+#' @param dataframe Input object or parameter named `dataframe`.
+#' @param na){ Input object or parameter named `na){`.
+#' @return Usually returns the input invisibly after saving output to disk.
+#' @keywords internal
+write_one <- function(sub, idcol, path = "", dataframe, na){
+  #sub <- x[x[[idcol]] == idv, , drop = FALSE]
+  # ensure a data.frame (avoid tibble overhead)
+  sub <- as.data.frame(sub)
+  nmsub <- sub[[idcol]][1]
+  sub[[idcol]] <- NULL
+  outfile <- file.path(path, paste0(nmsub, ".json"))
+  yyjsonr::write_json_file(sub, outfile, dataframe = dataframe)
+  outfile
+}
+
+#' Convert Json
+#'
+#' @description Perform processing for convert2json.
+#' @param sub Subset object used within the function.
+#' @param idcol Input object or parameter named `idcol`.
+#' @param dataframe){ Input object or parameter named `dataframe){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
+convert2json <- function(sub, idcol, dataframe){
+  sub <- as.data.frame(sub)
+  nmsub <- sub[[idcol]][1]
+  sub[[idcol]] <- NULL
+  json = yyjsonr::write_json_str(sub, dataframe = dataframe)
+  names(json) = nmsub
+  json
+}
+
+#' Write File
+#'
+#' @description Perform processing for write2file.
+#' @param content Input object or parameter named `content`.
+#' @param filename) Input object or parameter named `filename)`.
+#' @return Usually returns the input invisibly after saving output to disk.
+#' @keywords internal
+write2file <- function(content, filename) {
+  writeLines(content, filename)
+}
+
+
 #' Function to convert a data.frame into a folder of JSON files
 #' @param x data frame with column called geo_code
 #' @param idcol name of column with unique id
@@ -9,9 +59,31 @@
 #'
 #' Will drop any sf geometry and name files based on geo_code
 
-export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
-                             zip = TRUE, rounddp = 2, dataframe = "rows", reduce = FALSE, na = "null",
-                             parallel = TRUE, workers = NULL){
+#' Export Zone Json
+#'
+#' @description Export zone json to disk or a specified output location.
+#' @param x Input data object.
+#' @param idcol Input object or parameter named `idcol`.
+#' @param path File or directory path.
+#' @param zip Logical zip ouputs
+#' @param rounddp Number of decimal points to round data to
+#' @param dataframe Input object or parameter named `dataframe`.
+#' @param reduce Reduce column names length
+#' @param na What should NAs be in JSON
+#' @param parallel Input object or parameter named `parallel`.
+#' @param workers Number of workers to use if `parallel` is TRUE
+#' @return Usually returns the input invisibly after saving output to disk.
+#' @keywords internal
+export_zone_json <- function(x,
+                             idcol = "LSOA21CD",
+                             path = "outputdata/json",
+                             zip = TRUE,
+                             rounddp = 2,
+                             dataframe = "rows",
+                             reduce = FALSE,
+                             na = "null",
+                             parallel = TRUE,
+                             workers = NULL){
 
   if(!dir.exists(path)){
     if(dir.exists("outputdata")) {
@@ -58,10 +130,7 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
 
   x <- dplyr::group_split(x, .data[[idcol]], .keep = TRUE)
 
-
   # Avoid building a large list in memory; iterate unique ids and write files per id.
-  #ids <- unique(x[[idcol]])
-
   # Prepare output directory (for zip we write to a temp dir first)
   if(zip){
     temp_json_dir <- file.path(tempdir(), paste0("jsonzip", idcol))
@@ -69,31 +138,6 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
   } else {
     if(!dir.exists(path)) dir.create(path, recursive = TRUE)
     temp_json_dir <- path
-  }
-
-  # writer for a single id
-  write_one <- function(sub, idcol, path = "", dataframe, na){
-    #sub <- x[x[[idcol]] == idv, , drop = FALSE]
-    # ensure a data.frame (avoid tibble overhead)
-    sub <- as.data.frame(sub)
-    nmsub <- sub[[idcol]][1]
-    sub[[idcol]] <- NULL
-    outfile <- file.path(path, paste0(nmsub, ".json"))
-    yyjsonr::write_json_file(sub, outfile, dataframe = dataframe)
-    outfile
-  }
-
-  convert2json <- function(sub, idcol, dataframe){
-    sub <- as.data.frame(sub)
-    nmsub <- sub[[idcol]][1]
-    sub[[idcol]] <- NULL
-    json = yyjsonr::write_json_str(sub, dataframe = dataframe)
-    names(json) = nmsub
-    json
-  }
-
-  write2file <- function(content, filename) {
-    writeLines(content, filename)
   }
 
   message("Converting JSON ",Sys.time())
@@ -148,6 +192,12 @@ export_zone_json <- function(x,  idcol = "LSOA21CD", path = "outputdata/json",
 
 # Long names make the JSON files larger so reduce names and save a lookup
 
+#' Reduce Name Length
+#'
+#' @description Perform processing for reduce name length.
+#' @param x){ Input object or parameter named `x){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 reduce_name_length = function(x){
 
   # Round1: split at _ and take first letter, or numbers

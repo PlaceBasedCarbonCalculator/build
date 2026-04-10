@@ -1,9 +1,19 @@
+#' Load House Prices
+#'
+#' @description Load house prices data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param "house_price_age" Input object or parameter named `"house_price_age"`.
+#' @param path File or directory path.
+#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_house_prices = function(path = file.path(parameters$path_data,"house_price_age"),
                              lsoa_11_21_tools){
   hp1 = read.csv(file.path(path,"Median_Prices_Quarterly.csv"))
   hp2 = read.csv(file.path(path,"hpssa202103.csv"))
 
-  #Standerdies to Q1 as 2020/2021 data is for March
+  #Standardised to Q1 as 2020/2021 data is for March
 
   hp1 = hp1[,c("lsoa_cd",names(hp1)[grepl("Q1",names(hp1))])]
   names(hp1) = c("LSOA11CD",paste0("houseprice_",1995:2018))
@@ -82,8 +92,18 @@ load_house_prices = function(path = file.path(parameters$path_data,"house_price_
 }
 
 
+#' Load House Transactions
+#'
+#' @description Load house transactions data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param "house_price_age" Input object or parameter named `"house_price_age"`.
+#' @param path File or directory path.
+#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_house_transactions = function(path = file.path(parameters$path_data,"house_price_age"),
-                             lsoa_11_21_tools){
+                                   lsoa_11_21_tools){
   hp1 = read.csv(file.path(path,"Transaction_Count_Quarterly.csv"))
 
 

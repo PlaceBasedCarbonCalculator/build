@@ -1,3 +1,11 @@
+#' Load Travel2work
+#'
+#' @description Load travel2work data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param cents){ Input object or parameter named `cents){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_travel2work = function(path, cents){
   dir.create(file.path(tempdir(),"t2w"))
   unzip(path,

@@ -1,3 +1,10 @@
+#' Read Hhcomp Scot
+#'
+#' @description Read hhComp scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhComp_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_householdComp4_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 10, col_names = FALSE)
@@ -29,6 +36,14 @@ read_hhComp_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 }
 
+#' Read Hhsize Householdcomp Scot
+#'
+#' @description Read hhSize HouseholdComp scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_HouseholdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_hhSize5_IntermediateZone.csv", bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -80,6 +95,14 @@ read_hhSize_HouseholdComp_scot <- function(path = "../inputdata/population_scotl
   return(raw_data)
 }
 
+#' Read Hhsize Tenure Scot
+#'
+#' @description Read hhSize Tenure scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_Tenure_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_hhSize5_IntermediateZone.csv",bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -120,6 +143,14 @@ read_hhSize_Tenure_scot <- function(path = "../inputdata/population_scotland/sco
   return(raw_data)
 }
 
+#' Read Hhsize Acctype Scot
+#'
+#' @description Read hhSize AccType scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_AccType_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_hhSize5_IntermediateZone.csv",bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -167,6 +198,14 @@ read_hhSize_AccType_scot <- function(path = "../inputdata/population_scotland/sc
   return(raw_data)
 }
 
+#' Read Tenure Householdcomp Scot
+#'
+#' @description Read Tenure HouseholdComp scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_HouseholdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_householdComp10_IntermediateZone.csv",bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -229,6 +268,13 @@ read_Tenure_HouseholdComp_scot <- function(path = "../inputdata/population_scotl
   return(raw_data)
 }
 
+#' Read Acc Scot
+#'
+#' @description Read Acc scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_AccType3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -256,6 +302,13 @@ read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2
 
 }
 
+#' Read Carvan Scot
+#'
+#' @description Read CarVan scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan5_CarVan3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -283,6 +336,13 @@ read_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 }
 
+#' Read Hhsize Scot
+#'
+#' @description Read hhSize scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
@@ -296,6 +356,13 @@ read_hhSize_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 }
 
+#' Read Tenure Scot
+#'
+#' @description Read Tenure scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_Tenure3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -323,6 +390,14 @@ read_Tenure_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 }
 
+#' Read Acctype Carvan Scot
+#'
+#' @description Read AccType CarVan scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccType_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_CarVan3_IntermediateZone.csv", bounds_iz22){
 
   raw_data = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -374,6 +449,14 @@ read_AccType_CarVan_scot = function(path = "../inputdata/population_scotland/sco
 
 }
 
+#' Read Acctype Householdcomp Scot
+#'
+#' @description Read AccType householdComp scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccType_householdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_householdComp4_IntermediateZone.csv",bounds_iz22) {
   # Read the CSV file, skipping the first few lines to remove headers
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -426,6 +509,14 @@ read_AccType_householdComp_scot <- function(path = "../inputdata/population_scot
   return(raw_data)
 }
 
+#' Read Acctype Tenure Scot
+#'
+#' @description Read AccType Tenure scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_AccType_Tenure_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_Tenure3_IntermediateZone.csv",bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -468,6 +559,14 @@ read_AccType_Tenure_scot <- function(path = "../inputdata/population_scotland/sc
   return(raw_data)
 }
 
+#' Read Hhsize Carvan Scot
+#'
+#' @description Read hhSize CarVan scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize_CarVan_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_CarVan5_IntermediateZone.csv",bounds_iz22) {
 
   raw_data <- readr::read_csv(path , skip = 12, col_names = FALSE, show_col_types = FALSE)
@@ -508,6 +607,13 @@ read_hhSize_CarVan_scot <- function(path = "../inputdata/population_scotland/sco
   return(raw_data)
 }
 
+#' Read Hhsize5 Tenure3 Scot
+#'
+#' @description Read hhSize5 Tenure3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_Tenure3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -534,6 +640,13 @@ read_hhSize5_Tenure3_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
+#' Read Hhsize5 Householdcomp4 Scot
+#'
+#' @description Read hhSize5 householdComp4 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_householdComp4_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_householdComp4_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -561,6 +674,13 @@ read_hhSize5_householdComp4_scot = function(path = "../inputdata/population_scot
 
 }
 
+#' Read Hhsize5 Acctype3 Scot
+#'
+#' @description Read hhSize5 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_AccType3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -587,6 +707,13 @@ read_hhSize5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 }
 
+#' Read Carvan5 Acctype3 Scot
+#'
+#' @description Read CarVan5 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan5_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan5_AccType3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -613,6 +740,13 @@ read_CarVan5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 }
 
+#' Read Carvan5 Tenure3 Scot
+#'
+#' @description Read CarVan5 Tenure3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_CarVan5_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_CarVan5_Tenure3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -641,6 +775,13 @@ read_CarVan5_Tenure3_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
+#' Read Householdcomp4 Carvan3 Scot
+#'
+#' @description Read householdComp4 CarVan3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp4_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_CarVan3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -669,6 +810,13 @@ read_householdComp4_CarVan3_scot = function(path = "../inputdata/population_scot
 
 }
 
+#' Read Householdcomp4 Acctype3 Scot
+#'
+#' @description Read householdComp4 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp4_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_AccType3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -697,6 +845,13 @@ read_householdComp4_AccType3_scot = function(path = "../inputdata/population_sco
 
 }
 
+#' Read Householdcomp4 Tenure3 Scot
+#'
+#' @description Read householdComp4 Tenure3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_householdComp4_Tenure3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp4_Tenure3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -725,6 +880,13 @@ read_householdComp4_Tenure3_scot = function(path = "../inputdata/population_scot
 
 }
 
+#' Read Hhsize5 Carvan3 Scot
+#'
+#' @description Read hhSize5 CarVan3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_hhSize5_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_CarVan3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -752,6 +914,13 @@ read_hhSize5_CarVan3_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
+#' Read Tenure5 Acctype3 Scot
+#'
+#' @description Read Tenure5 AccType3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure5_AccType3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_AccType3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 10, col_names = FALSE)
@@ -776,6 +945,13 @@ read_Tenure5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 }
 
+#' Read Tenure5 Carvan3 Scot
+#'
+#' @description Read Tenure5 CarVan3 scot from disk into an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 read_Tenure5_CarVan3_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_CarVan3_DataZone.csv"){
 
   raw = readr::read_csv(path, show_col_types = FALSE, skip = 12, col_names = FALSE)
@@ -803,6 +979,13 @@ read_Tenure5_CarVan3_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
+#' Sythetic Census Scot
+#'
+#' @description Perform processing for sythetic census scot.
+#' @param path_data Input object or parameter named `path_data`.
+#' @param synth_pop_seed_scotland){ Input object or parameter named `synth_pop_seed_scotland){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 sythetic_census_scot = function(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland){
 
   # Load Data
@@ -900,6 +1083,13 @@ sythetic_census_scot = function(path_data = file.path(parameters$path_data,"popu
 
 }
 
+#' Array Maker
+#'
+#' @description Perform processing for array maker.
+#' @param x Input data object.
+#' @param ...){ Input object or parameter named `...){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 array_maker = function(x, ...){
   args <- substitute(list(...))[-1]  # Capture the unevaluated arguments
   arg_names <- sapply(args, function(x) deparse(x))
@@ -914,6 +1104,28 @@ array_maker = function(x, ...){
   mat1
 }
 
+#' Scot Syth Combine
+#'
+#' @description Perform processing for scot syth combine.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param dz_CarVan_sub Input object or parameter named `dz_CarVan_sub`.
+#' @param dz_HouseholdComp_sub Input object or parameter named `dz_HouseholdComp_sub`.
+#' @param dz_Tenure_sub Input object or parameter named `dz_Tenure_sub`.
+#' @param dz_AccType_sub Input object or parameter named `dz_AccType_sub`.
+#' @param dz_hhSize5_Tenure3_sub Input object or parameter named `dz_hhSize5_Tenure3_sub`.
+#' @param dz_hhSize5_householdComp4_sub Input object or parameter named `dz_hhSize5_householdComp4_sub`.
+#' @param dz_hhSize5_AccType3_sub Input object or parameter named `dz_hhSize5_AccType3_sub`.
+#' @param dz_CarVan5_AccType3_sub Input object or parameter named `dz_CarVan5_AccType3_sub`.
+#' @param dz_CarVan5_Tenure3_sub Input object or parameter named `dz_CarVan5_Tenure3_sub`.
+#' @param dz_householdComp4_CarVan3_sub Input object or parameter named `dz_householdComp4_CarVan3_sub`.
+#' @param dz_householdComp4_AccType3_sub Input object or parameter named `dz_householdComp4_AccType3_sub`.
+#' @param dz_householdComp4_Tenure3_sub Input object or parameter named `dz_householdComp4_Tenure3_sub`.
+#' @param dz_hhSize5_CarVan3_sub Input object or parameter named `dz_hhSize5_CarVan3_sub`.
+#' @param dz_Tenure5_AccType3_sub Input object or parameter named `dz_Tenure5_AccType3_sub`.
+#' @param dz_Tenure5_CarVan3_sub Input object or parameter named `dz_Tenure5_CarVan3_sub`.
+#' @param seed Input object or parameter named `seed`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 scot_syth_combine = function(dz_CarVan_sub,
                              dz_HouseholdComp_sub,
                              dz_Tenure_sub,
@@ -929,7 +1141,7 @@ scot_syth_combine = function(dz_CarVan_sub,
                              dz_hhSize5_CarVan3_sub,
                              dz_Tenure5_AccType3_sub,
                              dz_Tenure5_CarVan3_sub,
-                                 seed) {
+                             seed) {
 
   # Check Zone match
   if(length(unique(c(dz_CarVan_sub$LSOA21CD,
@@ -1074,6 +1286,15 @@ scot_syth_combine = function(dz_CarVan_sub,
 
 }
 
+#' Vaidate Syth Pop
+#'
+#' @description Perform processing for vaidate syth pop.
+#' @param x Input data object.
+#' @param y Second input data object.
+#' @param var1 Input object or parameter named `var1`.
+#' @param var2 Input object or parameter named `var2`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
   x = x[,c(var1,var2,"households")]
   x2 = dplyr::group_by_at(x, dplyr::all_of(c(var1,var2))) |>
@@ -1087,6 +1308,15 @@ vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "C
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
+#' Vaidate Syth Pop2
+#'
+#' @description Perform processing for vaidate syth pop2.
+#' @param x Input data object.
+#' @param y Second input data object.
+#' @param var1 Input object or parameter named `var1`.
+#' @param var2 Input object or parameter named `var2`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 vaidate_syth_pop2 = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
   x = x[,c(var1,var2,"households")]
 
@@ -1148,6 +1378,15 @@ vaidate_syth_pop2 = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
+#' Sythetic Census Scot Old
+#'
+#' @description Perform processing for sythetic census scot old.
+#' @param path_data Input object or parameter named `path_data`.
+#' @param bounds_iz22 Input object or parameter named `bounds_iz22`.
+#' @param synth_pop_seed_scotland Input object or parameter named `synth_pop_seed_scotland`.
+#' @param lookup_DataZone_2022){ Lookup table used to map area codes or classifications.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"population_scotland"), bounds_iz22, synth_pop_seed_scotland, lookup_DataZone_2022){
 
   # Intermediate Zone Data
@@ -1277,6 +1516,17 @@ sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"
   res_com_sub = res_com[[1]]
 }
 
+#' Downscale To Datazone
+#'
+#' @description Prepare or summarise zone-based accessibility results.
+#' @param dz_CarVan_sub Input object or parameter named `dz_CarVan_sub`.
+#' @param dz_HouseholdComp_sub Input object or parameter named `dz_HouseholdComp_sub`.
+#' @param dz_Tenure_sub Input object or parameter named `dz_Tenure_sub`.
+#' @param dz_AccType_sub Input object or parameter named `dz_AccType_sub`.
+#' @param dz_hhsize_sub Input object or parameter named `dz_hhsize_sub`.
+#' @param res_com_sub){ Input object or parameter named `res_com_sub){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 downscale_to_datazone = function(dz_CarVan_sub,
                                  dz_HouseholdComp_sub,
                                  dz_Tenure_sub,
@@ -1284,7 +1534,7 @@ downscale_to_datazone = function(dz_CarVan_sub,
                                  dz_hhsize_sub ,
                                  res_com_sub){
 
-  # Check ZOne match
+  # Check Zone match
   if(length(unique(c(dz_CarVan_sub$IZCode,
                      dz_HouseholdComp_sub$IZCode,
                      dz_Tenure_sub$IZCode,
@@ -1338,15 +1588,6 @@ downscale_to_datazone = function(dz_CarVan_sub,
   t_Tenure5 = array_df |> dplyr::group_by(Tenure5) |> dplyr::summarise(households = sum(households))
   t_AccType7 = array_df |> dplyr::group_by(AccType7) |> dplyr::summarise(households = sum(households))
 
-
-  prep_for_cleaning = function(t_hhComp10,dzbyhhcomp ){
-    t_hhComp10_m = as.matrix(t_hhComp10[,2])
-    rownames(t_hhComp10_m) = t_hhComp10[[1]]
-    t_hhComp10_m = t_hhComp10_m[match(colnames(dzbyhhcomp), rownames(t_hhComp10_m)),,drop = FALSE]
-    t_hhComp10_m = t(t_hhComp10_m)
-    t_hhComp10_m
-  }
-
   t_hhComp10 = prep_for_cleaning(t_hhComp10,dzbyhhcomp)
   t_hhSize = prep_for_cleaning(t_hhSize,dzbyhhsize)
   t_CarVan5 = prep_for_cleaning(t_CarVan5,dzbycar)
@@ -1383,9 +1624,40 @@ downscale_to_datazone = function(dz_CarVan_sub,
 
 }
 
+#' Prep For Cleaning
+#'
+#' @description Perform processing for prep for cleaning.
+#' @param t_hhComp10 Input object or parameter named `t_hhComp10`.
+#' @param dzbyhhcomp Input object or parameter named `dzbyhhcomp`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
+prep_for_cleaning = function(t_hhComp10,dzbyhhcomp ){
+  t_hhComp10_m = as.matrix(t_hhComp10[,2])
+  rownames(t_hhComp10_m) = t_hhComp10[[1]]
+  t_hhComp10_m = t_hhComp10_m[match(colnames(dzbyhhcomp), rownames(t_hhComp10_m)),,drop = FALSE]
+  t_hhComp10_m = t(t_hhComp10_m)
+  t_hhComp10_m
+}
+
+
+#' Scot Syth Combine Old
+#'
+#' @description Perform processing for scot syth combine old.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param int_hhSize_CarVan_sub Input object or parameter named `int_hhSize_CarVan_sub`.
+#' @param int_hhSize_HouseholdComp_sub Input object or parameter named `int_hhSize_HouseholdComp_sub`.
+#' @param int_hhSize_Tenure_sub Input object or parameter named `int_hhSize_Tenure_sub`.
+#' @param int_hhSize_AccType_sub Input object or parameter named `int_hhSize_AccType_sub`.
+#' @param int_Tenure_HouseholdComp_sub Input object or parameter named `int_Tenure_HouseholdComp_sub`.
+#' @param seed) Input object or parameter named `seed)`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 scot_syth_combine_old = function(int_hhSize_CarVan_sub,
-                             int_hhSize_HouseholdComp_sub, int_hhSize_Tenure_sub, int_hhSize_AccType_sub, int_Tenure_HouseholdComp_sub,
-                                 seed) {
+                                 int_hhSize_HouseholdComp_sub,
+                                 int_hhSize_Tenure_sub,
+                                 int_hhSize_AccType_sub,
+                                 int_Tenure_HouseholdComp_sub,
+                                 seed){
 
   # Check Zone match
   if(length(unique(c(int_hhSize_CarVan_sub$IZCode,
@@ -1526,12 +1798,19 @@ scot_syth_combine_old = function(int_hhSize_CarVan_sub,
     round(abs(chkmat - HouseholdCompByTenure) / HouseholdCompByTenure * 100) # % error
   }
 
-
-
   result_df
 
 }
 
+
+#' Match Matrix Rsums Csums
+#'
+#' @description Match matrix rsums csums values between datasets.
+#' @param rsum2 Input object or parameter named `rsum2`.
+#' @param csum2 Input object or parameter named `csum2`.
+#' @param matO){ Input object or parameter named `matO){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 match_matrix_rsums_csums = function(rsum2, csum2, matO){
 
   mat_rsum = rowSums(matO)
@@ -1561,6 +1840,12 @@ match_matrix_rsums_csums = function(rsum2, csum2, matO){
 
 # Intergerisation method
 # From https://spatial-microsim-book.robinlovelace.net/smsimr#sintegerisation
+#' Int Trs
+#'
+#' @description Perform processing for int trs.
+#' @param x){ Input object or parameter named `x){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 int_trs <- function(x){
   # For generalisation purpose, x becomes a vector
   xv <- as.vector(x) # allows trs to work on matrices

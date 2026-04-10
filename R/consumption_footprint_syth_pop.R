@@ -1,3 +1,22 @@
+#' Consumption Footprint Syth Pop
+#'
+#' @description Compute a carbon emission or footprint summary.
+#' @param synth_households_lcfs_2022 Input object or parameter named `synth_households_lcfs_2022`.
+#' @param synth_households_lcfs_2020 Input object or parameter named `synth_households_lcfs_2020`.
+#' @param synth_households_lcfs_2018 Input object or parameter named `synth_households_lcfs_2018`.
+#' @param synth_households_lcfs_2016 Input object or parameter named `synth_households_lcfs_2016`.
+#' @param synth_households_lcfs_2014 Input object or parameter named `synth_households_lcfs_2014`.
+#' @param synth_households_lcfs_2012 Input object or parameter named `synth_households_lcfs_2012`.
+#' @param synth_households_lcfs_2010 Input object or parameter named `synth_households_lcfs_2010`.
+#' @param synth_households_lcfs_2022_scotland Input object or parameter named `synth_households_lcfs_2022_scotland`.
+#' @param synth_households_lcfs_2020_scotland Input object or parameter named `synth_households_lcfs_2020_scotland`.
+#' @param synth_households_lcfs_2018_scotland Input object or parameter named `synth_households_lcfs_2018_scotland`.
+#' @param synth_households_lcfs_2016_scotland Input object or parameter named `synth_households_lcfs_2016_scotland`.
+#' @param synth_households_lcfs_2014_scotland Input object or parameter named `synth_households_lcfs_2014_scotland`.
+#' @param synth_households_lcfs_2012_scotland Input object or parameter named `synth_households_lcfs_2012_scotland`.
+#' @param synth_households_lcfs_2010_scotland Input object or parameter named `synth_households_lcfs_2010_scotland`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 consumption_footprint_syth_pop = function(synth_households_lcfs_2022,
                                           synth_households_lcfs_2020,
                                           synth_households_lcfs_2018,
@@ -60,10 +79,14 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2022,
                               synth_households_lcfs_2010, synth_households_lcfs_2010_scotland))
 
   res
-
-
 }
 
+#' Consumption Lsoa Summary
+#'
+#' @description Perform processing for consumption lsoa summary.
+#' @param synth_households_lcfs_2020){ Input object or parameter named `synth_households_lcfs_2020){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 consumption_lsoa_summary = function(synth_households_lcfs_2020){
 
   sub = dplyr::group_by(synth_households_lcfs_2020, by = LSOA21CD) |>

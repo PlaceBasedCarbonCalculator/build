@@ -1,5 +1,14 @@
 
 # Convert vehicle registration to single dataset with 2021 boundaries
+#' Vehicle Reg To 21
+#'
+#' @description Perform processing for vehicle reg to 21.
+#' @param vehicle_registrations Input object or parameter named `vehicle_registrations`.
+#' @param lsoa_11_21_tools Input object or parameter named `lsoa_11_21_tools`.
+#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
+#' @param mode Input object or parameter named `mode`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2011_22, mode = "vehicle_registrations"){
 
   if(mode == "vehicle_registrations"){
@@ -117,6 +126,13 @@ vehicle_reg_to_21 = function(vehicle_registrations,lsoa_11_21_tools, lookup_dz_2
 }
 
 
+#' Car Km 2009 2011 To 2021
+#'
+#' @description Perform processing for car km 2009 2011 to 2021.
+#' @param car_km_2009_2011 Input object or parameter named `car_km_2009_2011`.
+#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 car_km_2009_2011_to_2021 = function(car_km_2009_2011, lsoa_11_21_tools){
 
   ckm_S = car_km_2009_2011[car_km_2009_2011$LSOA11 %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]

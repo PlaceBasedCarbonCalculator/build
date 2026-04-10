@@ -1,6 +1,14 @@
 #TODO; This is a very rough estimate of energy spending on fuels other than
 #gas/electric it assumes that heat demand is the UK average and that people by
 #oil or smokeless solid fuel.
+#' Estimate Other Heating Bills
+#'
+#' @description Perform processing for estimate other heating bills.
+#' @param ch_all Input object or parameter named `ch_all`.
+#' @param prices_other_heating Input object or parameter named `prices_other_heating`.
+#' @param population){ Input object or parameter named `population){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 estimate_other_heating_bills = function(ch_all, prices_other_heating, population){
 
   population = population[,c("LSOA21CD","year","households_est")]

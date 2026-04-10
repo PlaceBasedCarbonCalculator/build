@@ -1,3 +1,14 @@
+#' Calculate Other Heating
+#'
+#' @description Calculate other heating and return the computed result.
+#' @param central_heating_2021 Input object or parameter named `central_heating_2021`.
+#' @param central_heating_2011 Input object or parameter named `central_heating_2011`.
+#' @param central_heating_2011_scotland Input object or parameter named `central_heating_2011_scotland`.
+#' @param central_heating_2022_scotland Input object or parameter named `central_heating_2022_scotland`.
+#' @param domestic_gas Input object or parameter named `domestic_gas`.
+#' @param population){ Input object or parameter named `population){`.
+#' @return A data frame or numeric summary containing the computed results.
+#' @keywords internal
 calculate_other_heating = function(central_heating_2021,
                                    central_heating_2011,
                                    central_heating_2011_scotland,
@@ -55,70 +66,6 @@ calculate_other_heating = function(central_heating_2021,
                     .f = distribute_other_heating,
                     .progress = TRUE)
 
-  # # Use 2011 for 2010 - 2015, then 2021
-  #
-  # ch_2011 = list()
-  # for(i in 2010:2015){
-  #   sub = central_heating_2011
-  #   sub$year = i
-  #   pop_sub = population[population$year == i,]
-  #   sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
-  #   sub$splitratio = ifelse(sub$all_households != 0,
-  #                           sub$all_properties / sub$all_households,
-  #                           0)
-  #
-  #   sub$oil = sub$oil * sub$splitratio
-  #   sub$solid_fuel = sub$solid_fuel * sub$splitratio
-  #   sub$other = sub$other * sub$splitratio
-  #   sub$two_or_more = sub$two_or_more * sub$splitratio
-  #
-  #   sub = sub[,c("LSOA21CD","year","oil","solid_fuel","other","two_or_more")]
-  #
-  #   ch_2011[[i - 2009]] = sub
-  # }
-  # ch_2011 = dplyr::bind_rows(ch_2011)
-  #
-  # ch_2021 = list()
-  # for(i in 2016:2021){
-  #   sub = central_heating_2021
-  #   sub$year = i
-  #
-  #   pop_sub = population[population$year == i,]
-  #   sub = dplyr::left_join(sub, pop_sub, by = c("LSOA21CD","year"))
-  #   sub$splitratio = ifelse(sub$all_households != 0,
-  #                           sub$all_properties / sub$all_households,
-  #                           0)
-  #
-  #   sub$bottled_gas = sub$bottled_gas * sub$splitratio
-  #   sub$oil = sub$oil * sub$splitratio
-  #   sub$wood = sub$wood * sub$splitratio
-  #   sub$solid_fuel = sub$solid_fuel * sub$splitratio
-  #   sub$heat_network = sub$heat_network * sub$splitratio
-  #   sub$other_central_heating = sub$other_central_heating * sub$splitratio
-  #   sub$two_types_no_renewable_energy = sub$two_types_no_renewable_energy * sub$splitratio
-  #   sub$two_types_inc_renewable_energy = sub$two_types_inc_renewable_energy * sub$splitratio
-  #
-  #   sub = sub[,c("LSOA21CD","year","bottled_gas",
-  #               "oil","wood","solid_fuel",
-  #               "heat_network","other_central_heating",
-  #               "two_types_no_renewable_energy",
-  #                "two_types_inc_renewable_energy")]
-  #
-  #   ch_2021[[i - 2015]] = sub
-  # }
-  # ch_2021 = dplyr::bind_rows(ch_2021)
-  #
-  # ch_2011$bottled_gas = 0
-  # ch_2011$wood = 0
-  # ch_2011$heat_network = 0
-  # ch_2011$two_types_no_renewable_energy = 0
-  # ch_2011$two_types_inc_renewable_energy = 0
-  #
-  # ch_2021$other = ch_2021$other_central_heating
-  # ch_2021$other_central_heating = NULL
-  # ch_2021$two_or_more = 0
-  #
-  # ch_all = rbind(ch_2011, ch_2021)
 
   ch_all = dplyr::bind_rows(res)
   ch_all = dplyr::left_join(ch_all, gas_average, by = "year")
@@ -150,6 +97,14 @@ calculate_other_heating = function(central_heating_2021,
   ch_all
 }
 
+
+#' Load Central Heating 2011
+#'
+#' @description Load central heating 2011 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_central_heating_2011 = function(path = file.path(parameters$path_data,"nomis","2011")){
   dat = read.csv(file.path(path,"QS415UK - central heating.csv"), skip = 7)
   names(dat) = c("Area","LSOA11CD",
@@ -162,6 +117,13 @@ load_central_heating_2011 = function(path = file.path(parameters$path_data,"nomi
 }
 
 
+#' Distribute Other Heating
+#'
+#' @description Perform processing for distribute other heating.
+#' @param ch21 Input object or parameter named `ch21`.
+#' @param ch11){ Input object or parameter named `ch11){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 distribute_other_heating = function(ch21, ch11){
 
   if(length(unique(c(ch21$LSOA21CD,ch11$LSOA21CD))) != 1){
@@ -202,6 +164,13 @@ distribute_other_heating = function(ch21, ch11){
 
 }
 
+#' Central Heating 2011 To 2021
+#'
+#' @description Perform processing for central heating 2011 to 2021.
+#' @param central_heating_2011 Input object or parameter named `central_heating_2011`.
+#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
 
   dat_S = central_heating_2011[central_heating_2011$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
@@ -242,6 +211,13 @@ central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
 
 }
 
+#' Load Cental Heating Scotland 2011
+#'
+#' @description Load cental heating scotland 2011 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_cental_heating_scotland_2011 = function(path = "../inputdata/gas_electric/scotland_2011_centralheating.csv"){
 
   ch = readr::read_csv(path)
@@ -255,6 +231,13 @@ load_cental_heating_scotland_2011 = function(path = "../inputdata/gas_electric/s
   ch
 }
 
+#' Load Cental Heating Scotland 2022
+#'
+#' @description Load cental heating scotland 2022 data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_cental_heating_scotland_2022 = function(path = "../inputdata/gas_electric/scotland_2022_centralheating.csv"){
 
   ch = readr::read_csv(path, skip = 9)
@@ -270,6 +253,13 @@ load_cental_heating_scotland_2022 = function(path = "../inputdata/gas_electric/s
   ch
 }
 
+#' Central Heating 2011 To 2022 Scotland
+#'
+#' @description Perform processing for central heating 2011 to 2022 scotland.
+#' @param sub Subset object used within the function.
+#' @param lookup_dz_2011_22_pre){ Lookup table used to map area codes or classifications.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 central_heating_2011_to_2022_scotland = function(sub, lookup_dz_2011_22_pre){
 
   # Scotland
@@ -301,6 +291,13 @@ central_heating_2011_to_2022_scotland = function(sub, lookup_dz_2011_22_pre){
 
 }
 
+#' Load Other Heating Prices
+#'
+#' @description Load other heating prices data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File or directory path.
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_other_heating_prices = function(path = "../inputdata/gas_electric/prices"){
 
   prices = readxl::read_excel(file.path(path,"table_211_213.xlsx"), sheet = "2.1.3a")

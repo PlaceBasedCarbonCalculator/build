@@ -1,3 +1,11 @@
+#' Match Income Lsoa Msoa
+#'
+#' @description Match income lsoa msoa values between datasets.
+#' @param income_msoa Input object or parameter named `income_msoa`.
+#' @param lookup_MSOA_2011_21 Lookup table used to map area codes or classifications.
+#' @param lookup_OA_LSOA_MSOA_2021) Lookup table used to map area codes or classifications.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_income_lsoa_msoa = function(income_msoa,
                                   lookup_MSOA_2011_21,
                                   lookup_OA_LSOA_MSOA_2021) {
@@ -30,7 +38,16 @@ match_income_lsoa_msoa = function(income_msoa,
   income_lsoa
 }
 
-# Select a random id form the list of matches, give more weight those close to average income.
+
+#'  Select a random id form the list of matches, give more weight those close to average income.
+#'
+#' @description Perform processing for select id income.
+#' @param lst Input object or parameter named `lst`.
+#' @param mean_income Input object or parameter named `mean_income`.
+#' @param sd_income Input object or parameter named `sd_income`.
+#' @param hh){ Input object or parameter named `hh){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 select_id_income = function(lst, mean_income, sd_income, hh){
   lst = unlist(lst)
   if(length(lst) == 1){
@@ -52,6 +69,18 @@ select_id_income = function(lst, mean_income, sd_income, hh){
 
 }
 
+#' Match Lcfs Synth Pop
+#'
+#' @description Match LCFS synth pop values between datasets.
+#' @param census21_synth_households Input object or parameter named `census21_synth_households`.
+#' @param lcfs_clean Input object or parameter named `lcfs_clean`.
+#' @param oac11lsoa21 Input object or parameter named `oac11lsoa21`.
+#' @param income_lsoa_msoa Input object or parameter named `income_lsoa_msoa`.
+#' @param population Population dataset.
+#' @param dwellings_type_backcast Input object or parameter named `dwellings_type_backcast`.
+#' @param base_year Input object or parameter named `base_year`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_LCFS_synth_pop = function(census21_synth_households,
                                 lcfs_clean,
                                 oac11lsoa21,
@@ -216,6 +245,17 @@ match_LCFS_synth_pop = function(census21_synth_households,
 
 }
 
+#' Match Lcfs Synth Pop Scotland
+#'
+#' @description Match LCFS synth pop scotland values between datasets.
+#' @param scot_synth_households Input object or parameter named `scot_synth_households`.
+#' @param lcfs_clean Input object or parameter named `lcfs_clean`.
+#' @param oac11dz22 Input object or parameter named `oac11dz22`.
+#' @param income_scot_dz22 Input object or parameter named `income_scot_dz22`.
+#' @param population Population dataset.
+#' @param base_year Input object or parameter named `base_year`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_LCFS_synth_pop_scotland = function(scot_synth_households,
                                          lcfs_clean,
                                          oac11dz22,
@@ -359,15 +399,17 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
   future::plan("sequential")
 
   hh = hh[,!names(hh) %in% c("Tenure5","CarVan5","hhSize5","hhComp15")]
-
   cenus_long2 = dplyr::left_join(cenus_long2, hh, by = c("household_id_single" = "household_id"))
-
   cenus_long2
 
 }
 
-
-
+#' Convert Housing Tenure
+#'
+#' @description Perform processing for convert housing tenure.
+#' @param housing_tenure) Input object or parameter named `housing_tenure)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 convert_housing_tenure <- function(housing_tenure) {
   # Define a named vector for mapping
   mapping <- c(
@@ -389,6 +431,12 @@ convert_housing_tenure <- function(housing_tenure) {
   return(converted_tenure)
 }
 
+#' Convert Nssec
+#'
+#' @description Perform processing for convert NSSEC.
+#' @param ns_sec) Input object or parameter named `ns_sec)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 convert_NSSEC <- function(ns_sec) {
   # Create a named vector for mapping
   mapping <- c(
@@ -414,8 +462,20 @@ convert_NSSEC <- function(ns_sec) {
   return(new_classification)
 }
 
+#' Convert Household Size
+#'
+#' @description Perform processing for convert household size.
+#' @param hhsize) Input object or parameter named `hhsize)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 convert_household_size <- function(hhsize) {
   # Define a function to classify the number of cars
+#' Classify Hh
+#'
+#' @description Perform processing for classify hh.
+#' @param n) Input object or parameter named `n)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
   classify_hh <- function(n) {
     if (is.na(n)) {
       return(NA)
@@ -439,8 +499,20 @@ convert_household_size <- function(hhsize) {
   return(classified_hh)
 }
 
+#' Convert Car Ownership
+#'
+#' @description Perform processing for convert car ownership.
+#' @param num_cars) Input object or parameter named `num_cars)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 convert_car_ownership <- function(num_cars) {
   # Define a function to classify the number of cars
+#' Classify Cars
+#'
+#' @description Perform processing for classify cars.
+#' @param n) Input object or parameter named `n)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
   classify_cars <- function(n) {
     if (is.na(n)) {
       return(NA)
@@ -486,6 +558,20 @@ convert_car_ownership <- function(num_cars) {
 # }
 
 
+#' Match Hh Census
+#'
+#' @description Match hh census values between datasets.
+#' @param Tenure5 Input object or parameter named `Tenure5`.
+#' @param hhComp15 Input object or parameter named `hhComp15`.
+#' @param hhSize5 Input object or parameter named `hhSize5`.
+#' @param CarVan5 Input object or parameter named `CarVan5`.
+#' @param OACs Input object or parameter named `OACs`.
+#' @param upper_limit Input object or parameter named `upper_limit`.
+#' @param lower_limit Input object or parameter named `lower_limit`.
+#' @param hh Input object or parameter named `hh`.
+#' @param similarity_matrices) Input object or parameter named `similarity_matrices)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_hh_census <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, upper_limit, lower_limit, hh, similarity_matrices) {
 
 
@@ -583,6 +669,18 @@ match_hh_census <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, upper_limit, 
 
 
 
+#' Match Hh Census2
+#'
+#' @description Match hh census2 values between datasets.
+#' @param Tenure5 Input object or parameter named `Tenure5`.
+#' @param hhComp15 Input object or parameter named `hhComp15`.
+#' @param hhSize5 Input object or parameter named `hhSize5`.
+#' @param CarVan5 Input object or parameter named `CarVan5`.
+#' @param OACs Input object or parameter named `OACs`.
+#' @param hh Input object or parameter named `hh`.
+#' @param similarity_matrices) Input object or parameter named `similarity_matrices)`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 match_hh_census2 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similarity_matrices) {
 
 
@@ -661,6 +759,14 @@ match_hh_census2 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similari
 
 
 # For each LSOA select the number of households require for each year
+#' Select Synth Pop Year
+#'
+#' @description Perform processing for select synth pop year.
+#' @param cen Input object or parameter named `cen`.
+#' @param pop Population lookup table.
+#' @param bk){ Input object or parameter named `bk){`.
+#' @return A data frame produced by the function.
+#' @keywords internal
 select_synth_pop_year = function(cen, pop, bk){
   if(!all(unique(c(cen$LSOA21CD,pop$LSOA21CD)) %in% unique(bk$lsoa21cd))){
     stop("LSOA don't match")
@@ -709,6 +815,13 @@ select_synth_pop_year = function(cen, pop, bk){
 }
 
 
+#' Select Synth Pop Year Scot
+#'
+#' @description Perform processing for select synth pop year scot.
+#' @param cen Input object or parameter named `cen`.
+#' @param pop){ Input object or parameter named `pop){`.
+#' @return The function result, typically a data frame or list used in the pipeline.
+#' @keywords internal
 select_synth_pop_year_scot = function(cen, pop){
   if(length(unique(c(cen$LSOA21CD,pop$LSOA21CD))) != 1){
     stop("LSOA don't match")

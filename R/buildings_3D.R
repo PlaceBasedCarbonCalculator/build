@@ -1,4 +1,14 @@
 
+#' Combine OS and OSM Buildings
+#'
+#' @description Combine OS and OSM buildings inputs into a single consolidated result.
+#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
+#' @param osm_buildings Input object or parameter named `osm_buildings`.
+#' @param os_buildings Input object or parameter named `os_buildings`.
+#' @param inspire Input object or parameter named `inspire`.
+#' @param inspire_scotland Input object or parameter named `inspire_scotland`.
+#' @return A combined data frame or table merging the provided inputs.
+#' @keywords internal
 combine_os_osm_buildings = function(osm_buildings, os_buildings, inspire, inspire_scotland){
 
   osm_buildings = sf::st_transform(osm_buildings, 27700)
@@ -69,6 +79,14 @@ combine_os_osm_buildings = function(osm_buildings, os_buildings, inspire, inspir
 
 }
 
+#' Add Building Heights
+#'
+#' @description Add building heights to an existing dataset.
+#' @param buildings Input object or parameter named `buildings`.
+#' @param os_10k_grid Input object or parameter named `os_10k_grid`.
+#' @param path_raster Path to the raster file or folder.
+#' @return A data frame produced by the function.
+#' @keywords internal
 add_building_heights = function(buildings, os_10k_grid, path_raster = "F:/DTM_DSM/GB_10k/Difference/"){
 
   # Simple Join takes ages
@@ -106,49 +124,36 @@ add_building_heights = function(buildings, os_10k_grid, path_raster = "F:/DTM_DS
 
 }
 
+#' Load Os 10k Grid
+#'
+#' @description Load os 10k grid data from the source path and return it as an R object.
+#' @details This function is used as part of the pipeline input ingestion stage.
+#' @param path File path to OS data
+#' @return A data frame containing the loaded dataset.
+#' @keywords internal
 load_os_10k_grid = function(path){
   sf::read_sf(path, layer = "10km_grid")
 }
 
-# building_height_internal = function(buildings_sub, path_raster){
-#
-#   r_diff = terra::rast(file.path(path_raster,paste0(buildings_sub$grid[1],".tiff")))
-#
-#   buildings_sub = terra::vect(buildings_sub)
-#   buildings_sub = terra::project(buildings_sub, r_diff)
-#
-#   heights_max = terra::extract(r_diff, buildings_sub, fun = max, na.rm = TRUE)
-#   heights_min = terra::extract(r_diff, buildings_sub, fun = min, na.rm = TRUE)
-#   volume = terra::extract(r_diff, buildings_sub, fun = sum, weights = FALSE, na.rm = TRUE)
-#   # Too slow with weights = TRUE
-#
-#   buildings_sub = sf::st_as_sf(buildings_sub)
-#
-#   buildings_sub$height_max = round(heights_max[,2],1)
-#   buildings_sub$heights_min = round(heights_min[,2],1)
-#   buildings_sub$volume = round(volume[,2] * 4,0)
-#
-#   buildings_sub
-#
-# }
-#
-# message(Sys.time())
-# foo = building_height_internal(buildings_sub, path_raster)
-# message(Sys.time())
 
 
+#' Building Height Internal
+#'
+#' @description Perform processing for building height internal.
+#' @param buildings_sub Input object or parameter named `buildings_sub`.
+#' @param path_raster Input object or parameter named `path_raster`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
 building_height_internal = function(buildings_sub, path_raster){
 
   r_diff = terra::rast(file.path(path_raster,paste0(buildings_sub$grid[1],".tiff")))
   terra::crs(r_diff) = "epsg:27700"
 
-  #buildings_sub = terra::vect(buildings_sub)
-  #buildings_sub = terra::project(buildings_sub, r_diff)
-
-  heights = exactextractr::exact_extract(r_diff, buildings_sub, c('min', 'max','weighted_sum'), weights = "area", progress = FALSE)
-
-
-  #buildings_sub = sf::st_as_sf(buildings_sub)
+  heights = exactextractr::exact_extract(r_diff,
+                                         buildings_sub,
+                                         c('min', 'max','weighted_sum'),
+                                         weights = "area",
+                                         progress = FALSE)
 
   buildings_sub$height_max = round(heights$max,1)
   buildings_sub$height_min = round(heights$min,1)
@@ -157,18 +162,3 @@ building_height_internal = function(buildings_sub, path_raster){
   buildings_sub
 
 }
-
-# buildings_sub = buildings[[1000]]
-# bench::mark(r1 = building_height_internal(buildings_sub, path_raster),
-#             r2 = building_height_internal_alt(buildings_sub, path_raster),
-#             check = FALSE
-#             )
-#
-# r1$height_max2 = r2$height_max
-# r1$height_min2 = r2$height_min
-# r1$volume2 = r2$volume
-# r1$vol_diff = r1$volume - r1$volume2
-#
-# tm_shape(r1) +
-#   tm_fill("vol_diff", popup.vars = c("height_max","height_max2","heights_min","height_min2","volume", "volume2"))
-

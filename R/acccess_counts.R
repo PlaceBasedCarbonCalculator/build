@@ -1,3 +1,35 @@
+#' Accessibility counts for points of interest
+#'
+#' @description Calculate zone-level accessibility summaries for points of
+#'   interest by comparing local service counts to national service densities.
+#'   This function uses spatial intersection between the supplied accessibility
+#'   zones and POI locations, then computes local points-per-person and local
+#'   services-per-10k-population metrics. It also joins in national baseline
+#'   rates so that local service levels can be expressed as differences and
+#'   standardized ratios.
+#' @details The returned data frame is intended for accessibility analysis on
+#'   LSOA/isochrone zones. If a zone identifier matches
+#'   `lookup_oa2021_lsoa2021`, population is filled from LSOA totals when
+#'   OA-level population is missing. Watch for zero-count or zero-population
+#'   zones, which can produce `NA` or infinite rates in the derived metrics.
+#' @param zones An `sf` geometry set representing accessibility zones around
+#'   origin points. Typically these are buffer zones or isochrones.
+#' @param poi An `sf` table of points of interest filtered for access
+#'   measurement. Must contain `groupname`, `categoryname`, and `classname`
+#'   columns.
+#' @param oa An `sf` table of OA centroid geometries with `OA21CD` identifiers
+#'   used to assign population to intersected zones.
+#' @param pop A data frame with `OA21CD` and `total_pop` values used to
+#'   calculate local population counts.
+#' @param lookup_oa2021_lsoa2021 A lookup table mapping `nearest_OA2021` to
+#'   `LSOA21CD` used when zones are matched by LSOA instead of OA.
+#' @param gb_pop Numeric total population value used to compute national average
+#'   service rates. Defaults to GB population.
+#' @return A data frame with one row per zone / service class combination.
+#'   Includes columns for local counts, population-adjusted local
+#'   points-per-person and points-per-10k, national baseline rates, and
+#'   standardized difference metrics.
+#' @keywords internal
 access_counts = function(zones, poi, oa, pop, lookup_oa2021_lsoa2021, gb_pop = 67.33e6){
   poi = poi[poi$measure_access,]
   # Calculate national rates
@@ -69,26 +101,25 @@ access_counts = function(zones, poi, oa, pop, lookup_oa2021_lsoa2021, gb_pop = 6
   summary_poi = dplyr::ungroup(summary_poi)
   summary_poi$sp10kp_diff_SD = summary_poi$sp10kp_diff / summary_poi$sp10kp_SD
 
-  # hist(summary_poi$sp10kp_diff_std)
-  #
-  # foo = summary_poi[summary_poi$LSOA11CD == "E01012007",]
-  #
-  # library(ggplot2)
-  # ggplot(foo, aes(x = sp10kp_diff_std, y = count, col = categoryname)) +
-  #   geom_point() +
-  #   theme(legend.position = "none") +
-  #   xlim(-1,1)
-  #
-  # foo = summary_poi[summary_poi$classname == "Bed and Breakfast and Backpacker Accommodation", ]
-  # hist(foo$local_pps, breaks = seq(0, 1130000, 100))
-  # abline(v = mean(foo$local_pps), col = "red")
-  # foo$diff = foo$local_pps - foo$nat_pps
-  # hist(foo$diff)
-  # sd(foo$local_pps)
   summary_poi
 
 }
 
+#' Summarise POI counts for a single zone
+#'
+#' @description Count the number of access-measure POIs in a single zone by
+#'   service group, category, and class. Any service classes missing from the
+#'   intersected zone are added with a count of zero so the output remains
+#'   complete across all tracked POI categories.
+#' @param x An integer vector of row indices returned by `sf::st_intersects`,
+#'   identifying POIs within a single zone.
+#' @param poi A data frame of POI records with `groupname`, `categoryname`, and
+#'   `classname` columns.
+#' @param poi_unique A POI template with one row per unique `classname` and
+#'   `count = 0`, used to preserve missing service classes.
+#' @return A data frame with columns `groupname`, `categoryname`, `classname`,
+#'   and `count`, representing the POI count breakdown for the zone.
+#' @keywords internal
 summarise_poi = function(x, poi, poi_unique){
   poi_sub = poi[x,]
   poi_sub = dplyr::group_by(poi_sub, groupname, categoryname, classname)
@@ -99,6 +130,16 @@ summarise_poi = function(x, poi, poi_unique){
   poi_sub
 }
 
+#' Summarise population for a zone
+#'
+#' @description Sum the total population for all output areas that intersect a
+#'   single zone. This helper is used by `access_counts` to derive the local
+#'   population denominator for service rate calculations.
+#' @param x An integer vector of row indices returned by `sf::st_intersects`,
+#'   identifying OA rows within a single zone.
+#' @param oa A data frame of OA centroid records containing `total_pop` values.
+#' @return A single numeric value equal to the summed population for the zone.
+#' @keywords internal
 summarise_pop = function(x, oa){
   pop_sub = oa[x,]
   pop_total = sum(pop_sub$total_pop)
