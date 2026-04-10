@@ -51,7 +51,6 @@ read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdi
 
   raw = read.csv(path)
 
-
   names(raw) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","ethnic6CD","ethnic6","residents")
   raw = raw[,c("LSOA21CD","NSSEC10","ethnic6","residents")]
 
@@ -59,6 +58,8 @@ read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdi
   raw$ethnic6 = simplify_ethnic6(raw$ethnic6)
   raw = raw[raw$ethnic6 != "DNA",] # 0 For all rows so remove
 
+  raw
+}
 
 #' Read Household Nssec Old
 #'
@@ -450,45 +451,6 @@ balance_nssec2 = function(hc, nssec, both, msoa){
   # rownames(mat) = nssec$NSSEC10
   # colnames(mat) = hc$household15
 
-  # Make Muliple Matrixes for One person, Coupel, Lone Parent, Other
-
-#' Make Mat
-#'
-#' @description Build mat and return the generated output.
-#' @param both Input object or parameter named `both`.
-#' @param hc Input object or parameter named `hc`.
-#' @param msoa Input object or parameter named `msoa`.
-#' @param type Input object or parameter named `type`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
-#' @keywords internal
-  make_mat = function(both, hc, msoa, type = "OnePerson"){
-    rsum_one = both[both$household6 == type,]
-    csum_one = hc[hc$household6 == type,]
-    msoa_one = msoa[msoa$household6 == type,]
-    if(nrow(msoa_one) > 0){
-      msoa_one = tidyr::pivot_wider(msoa_one[,c("NSSEC5","household15","count")],
-                                    names_from = "household15", values_from = "count")
-      msoa_one = as.data.frame(msoa_one)
-      rownames(msoa_one) = msoa_one$NSSEC5
-      msoa_one$NSSEC5 = NULL
-      msoa_one = as.matrix(msoa_one)
-      rsum_one = rsum_one[match(rsum_one$NSSEC5, rownames(msoa_one)),]
-      csum_one = csum_one[match(csum_one$household15, colnames(msoa_one)),]
-      mat_fin = furness_balance(msoa_one, rsum = rsum_one$count, csum = csum_one$count,
-                                n = 100, check = FALSE, int_only = TRUE, quiet = TRUE)
-    } else {
-      mat_one = matrix(1, nrow = nrow(rsum_one), ncol = nrow(csum_one))
-      rownames(mat_one) = rsum_one$NSSEC5
-      colnames(mat_one) = csum_one$household15
-      mat_fin = furness_balance(mat_one, rsum = rsum_one$count, csum = csum_one$count,
-                                n = 100, check = FALSE, int_only = TRUE, quiet = TRUE)
-    }
-
-
-
-    mat_fin
-  }
-
   mat_one = make_mat(both, hc, msoa, type ="OnePerson")
   mat_couple = make_mat(both, hc, msoa,  type ="CoupleFamily")
   mat_lone = make_mat(both, hc, msoa,  type ="LoneParent")
@@ -501,20 +463,54 @@ balance_nssec2 = function(hc, nssec, both, msoa){
   mat_all = as.data.frame(mat_all)
   mat_all$NSSEC5 = rownames(mat_all)
   mat_all = tidyr::pivot_wider(mat_all, names_from = "NSSEC5",
-     values_from = c("OnePersonOther","OnePersonOver66","FamilyOver66","CoupleChildren",
-                     "CoupleNoChildren","CoupleNonDepChildren","LoneParent",
-                     "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66",
-                     "OtherNoChildren"))
+                               values_from = c("OnePersonOther","OnePersonOver66","FamilyOver66","CoupleChildren",
+                                               "CoupleNoChildren","CoupleNonDepChildren","LoneParent",
+                                               "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66",
+                                               "OtherNoChildren"))
   mat_all$LSOA21CD = hc$LSOA21CD[1]
   mat_all
 
 }
 
 
-
-#' Top Architypes
+#' Make Multiple Matrices for One person, Couple, Lone Parent, Other
 #'
-#' @description Perform processing for top architypes.
+#' @description Build mat and return the generated output.
+#' @param both Input object or parameter named `both`.
+#' @param hc Input object or parameter named `hc`.
+#' @param msoa Input object or parameter named `msoa`.
+#' @param type Input object or parameter named `type`.
+#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @keywords internal
+make_mat = function(both, hc, msoa, type = "OnePerson"){
+  rsum_one = both[both$household6 == type,]
+  csum_one = hc[hc$household6 == type,]
+  msoa_one = msoa[msoa$household6 == type,]
+  if(nrow(msoa_one) > 0){
+    msoa_one = tidyr::pivot_wider(msoa_one[,c("NSSEC5","household15","count")],
+                                  names_from = "household15", values_from = "count")
+    msoa_one = as.data.frame(msoa_one)
+    rownames(msoa_one) = msoa_one$NSSEC5
+    msoa_one$NSSEC5 = NULL
+    msoa_one = as.matrix(msoa_one)
+    rsum_one = rsum_one[match(rsum_one$NSSEC5, rownames(msoa_one)),]
+    csum_one = csum_one[match(csum_one$household15, colnames(msoa_one)),]
+    mat_fin = furness_balance(msoa_one, rsum = rsum_one$count, csum = csum_one$count,
+                              n = 100, check = FALSE, int_only = TRUE, quiet = TRUE)
+  } else {
+    mat_one = matrix(1, nrow = nrow(rsum_one), ncol = nrow(csum_one))
+    rownames(mat_one) = rsum_one$NSSEC5
+    colnames(mat_one) = csum_one$household15
+    mat_fin = furness_balance(mat_one, rsum = rsum_one$count, csum = csum_one$count,
+                              n = 100, check = FALSE, int_only = TRUE, quiet = TRUE)
+  }
+  mat_fin
+}
+
+
+#' Top Archetypes
+#'
+#' @description Perform processing for top archetypes.
 #' @param x Input data object.
 #' @param n Input object or parameter named `n`.
 #' @return The function result, typically a data frame or list used in the pipeline.
