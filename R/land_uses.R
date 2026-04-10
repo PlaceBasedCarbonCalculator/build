@@ -310,23 +310,7 @@ remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
   df
 }
 
-# foo2 = remove_small_holes(foo, 100, 1)
-# foo2 = sf::st_simplify(foo2, TRUE, 10)
-# foo2 = sf::st_intersection(foo2)
-#
-# foo4 = sf::st_intersection(sf::st_set_precision(foo[c(47,2),], 0.1))
-#
-# foo3 = sf::st_intersection(foo[c(1:46,48:59),])
-#
-#
-# x = foo$geometry[[47]]
-# fizz = purrr::map(x[seq(2, length(x))], split_holes)
-# fizz = unlist(fizz, recursive = FALSE)
-# fizz = sf::st_sfc(fizz, crs = 27700)
-# fizz = sf::st_as_sf(fizz)
-# fizz$area = as.numeric(sf::st_area(fizz))
-# fizz$perimeters = as.numeric(sf::st_perimeter(fizz))
-# fizz$ap_ratio = fizz$perimeter / fizz$area
+
 
 
 
