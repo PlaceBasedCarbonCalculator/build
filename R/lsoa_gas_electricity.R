@@ -804,7 +804,13 @@ prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_
 #' @param other_heating_emissions){ Input object or parameter named `other_heating_emissions){`.
 #' @return A data frame or numeric summary containing the computed results.
 #' @keywords internal
-calculate_lsoa_gas_electric_emissions = function(domestic_gas, domestic_electricity, emissions_factors,
+calculate_lsoa_gas_electric_emissions = function(domestic_gas,
+                                                 domestic_electricity,
+                                                 emissions_factors,
+                                                 bills_gas_electric,
+                                                 bills_other_heating,
+                                                 other_heating_emissions){
+
   sub = dplyr::full_join(domestic_gas, domestic_electricity, by = c("LSOA21CD","year"))
   names(sub)[names(sub) == "meters.x"] = "meters_gas"
   names(sub)[names(sub) == "meters.y"] = "meters_elec"
