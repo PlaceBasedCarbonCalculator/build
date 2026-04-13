@@ -10,7 +10,7 @@ tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
                "igraph","plyr","terra","furrr","future","humanleague",
-               "jsonlite","readr","lubridate","purrr","yyjsonr"),
+               "jsonlite","readr","lubridate","purrr","yyjsonr","minty"),
   error = "continue" # If a target fails will attempt to run other targets
 )
 
