@@ -143,8 +143,7 @@ split_buildings = function(b,z){
     zout <- z[!wth,]
     #qtm(b[1,]) + qtm(zin, fill = "red") + qtm(zout, fill = "blue")
     suppressWarnings(suppressMessages(zout2 <- sf::st_intersection(b[1,], zout)))
-    zout2$LSOA21CD = zout2$LSOA21CD.1
-    zout2$LSOA21CD.1 <- NULL
+    
     b <- sf::st_drop_geometry(b)
     zin <- dplyr::left_join(zin, b, by = "LSOA21CD")
     zin <- zin[,names(zout2)]
@@ -153,8 +152,7 @@ split_buildings = function(b,z){
   } else {
     suppressWarnings(suppressMessages(b2 <- sf::st_intersection(b, z)))
     b2 <- b2[!duplicated(b2$geometry),]
-    b2$LSOA21CD = b2$LSOA21CD.1
-    b2$LSOA21CD.1 <- NULL
+    names(b2)[names(b2) == "LSOA21CD.1"] = "LSOA21CD"
     return(b2)
   }
 
@@ -180,7 +178,7 @@ split_merge = function(build, bounds) {
   zone_list <- lapply(dup, function(x){unique(x$LSOA21CD)})
   zone_list <- lapply(zone_list, function(x){bounds[bounds$LSOA21CD %in% x,]})
 
-  dup = purrr::map2(dup, zone_list, split_buildings, .progress = "Splitting low")
+  dup = purrr::map2(dup, zone_list, split_buildings, .progress = "Splitting buildings by zone")
   dup = dplyr::bind_rows(dup)
   res = rbind(dup, nodup)
   res
@@ -426,4 +424,87 @@ merge_woods = function(poly){
 
   pts
 
+}
+
+
+#' Process medium-detail zoomstack buildings
+#'
+#' @param path Path to the downloaded OS Zoomstack .
+#' @param bounds LSOA boundaries.
+#' @param scale which case to process
+#' @return An `sf` object with medium-detail buildings joined to LSOA boundaries.
+#' @keywords internal
+process_buildings_generic = function(path = "../inputdata/os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg", bounds,
+                                     scale = "med") {
+
+  if(scale == "med"){
+    layer = "district_buildings"
+  } else if (scale == "low") {
+    layer = "urban_areas"
+  } else if (scale == "verylow"){
+    layer = "urban_areas"
+  } else {
+    stop("Unknown scale")
+  }
+
+  sf::sf_use_s2(FALSE)
+
+  b <- sf::st_read(
+    path,
+    layer = layer,
+    quiet = TRUE
+  )
+
+  if(scale == "low"){
+    b = b[b$type == "Regional",]
+    b$type = NULL
+  }
+  if(scale == "verylow"){
+    b = b[b$type == "National",]
+    b$type = NULL
+  }
+
+  b <- change_geom_name(b)
+  b$id <- 1:nrow(b)
+
+  # Spatial join
+  b <- sf::st_join(b, bounds)
+
+  # Split duplicates
+  b <- split_merge(b, bounds)
+
+  # Transform and validate
+  b <- sf::st_transform(b, 4326)
+  b <- sf::st_make_valid(b)
+
+  b
+}
+
+
+#' Process high-detail zoomstack buildings
+#'
+#' @param buildings_heights An `sf` object with building heights and geometry.
+#' @param bounds_lsoa_GB_full Full-resolution LSOA boundaries.
+#' @return An `sf` object with high-detail buildings joined to LSOA boundaries.
+#' @keywords internal
+process_buildings_high = function(buildings_heights, bounds_lsoa_GB_full) {
+  sf::sf_use_s2(FALSE)
+
+  buildings_heights <- buildings_heights[, c("height_max", "geometry")]
+  names(buildings_heights)[names(buildings_heights) == "height_max"] <- "height"
+
+  buildings_heights$id <- 1:nrow(buildings_heights)
+
+  # Use duckspatial for faster spatial join
+  buildings_heights <- duckspatial::ddbs_join(buildings_heights, bounds_lsoa_GB_full)
+  buildings_heights <- duckspatial::ddbs_collect(buildings_heights)
+
+  # Split duplicates
+  buildings_heights <- split_merge(buildings_heights, bounds_lsoa_GB_full)
+
+  # Transform and validate
+  buildings_heights <- sf::st_transform(buildings_heights, 4326)
+  buildings_heights <- sf::st_make_valid(buildings_heights)
+
+  buildings_heights
 }

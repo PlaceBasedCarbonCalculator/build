@@ -937,8 +937,31 @@ tar_target(buildings_heights,{
 }),
 
 tar_target(zoomstack_buildings_lst_4326,{
+  #zoomstack_buildings_lsoa(buildings_heights, dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised)
+  list(high = buildings_lsoa_4326_high,
+       medium = buildings_lsoa_4326_med,
+       low = buildings_lsoa_4326_low,
+       verylow = buildings_lsoa_4326_verylow)
+}),
+
+tar_target(buildings_lsoa_4326_verylow,{
+  process_buildings_generic(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
+                            bounds_lsoa_GB_super_generalised, scale = "verylow")
+}),
+
+tar_target(buildings_lsoa_4326_low,{
+  process_buildings_generic(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
+                            bounds_lsoa_GB_generalised, scale = "low")
+}),
+
+tar_target(buildings_lsoa_4326_med,{
+  process_buildings_generic(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
+                            bounds_lsoa_GB_full, scale = "med")
+}),
+
+tar_target(buildings_lsoa_4326_high,{
   # Long running target ~ 9 hours
-  zoomstack_buildings_lsoa(buildings_heights, dl_os_zoomstack, bounds_lsoa_GB_full, bounds_lsoa_GB_generalised, bounds_lsoa_GB_super_generalised)
+  process_buildings_generic(buildings_heights, bounds_lsoa_GB_full)
 }),
 
 # Scenarios
