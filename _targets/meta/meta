@@ -332,6 +332,8 @@ flights_lsoa_emissions|stem|c0a4c2a0c5641c02|2b092991c3dc5f58|85b6660e5b318c1d|1
 lsoa_emissions_all|stem|44c98b64faaab266|451c684d240cef56|5ec7fbc7562204f8|1303375064||t20565.1195949824s|s226769248b|226769248|rds|local|vector|||17.87||
 lsoa_map_data|stem|2d4b6f8379dab7cf|c5f0e04c40a4f1d5|a6b715a9aed8b7eb|1195666468||t20565.1196577043s|s453212b|453212|rds|local|vector|||0.62||
 buildings_lsoa_4326_verylow|stem|10fb5c273c5c739c|10af158f289e0d42|ab416b4636ef71ab|-1412331183||t20567.40060583s|s11770754b|11770754|rds|local|vector|||85.77||
+buildings_lsoa_4326_low|stem|fb3d6ce5db843b0e|8903b90aa4f131e7|e08bf4247225eeba|-2077876925||t20567.4048510623s|s28974991b|28974991|rds|local|vector|||281.15||
+buildings_lsoa_4326_med|stem|6f926b96894c5116|25a47c79ffcc04de|a6f886dac93321ff|-339730093||t20567.6755104837s|s748154385b|748154385|rds|local|vector|||23040.84||
 read_bounds_shp|function|92c07670d7e85bff
 top_architypes|function|097f4ad996863485
 summarise_population|function|3f60779d9cfd6aea
@@ -536,7 +538,7 @@ read_osm_pbf_landuse|function|df800afeb357c9b4
 load_flights_od|function|cabb01b79a612c5c
 read_centroids_oa01|function|849ddeab432d29f0
 read_mot_km_pc|function|4612851004df4b4f
-split_buildings|function|374b2121767481c9
+split_buildings|function|3b4e3cbf66e761d7
 read_AccType_householdComp_scot|function|69bde3e50097a77f
 load_central_heating_2011|function|10fe014e653a5281
 read_householdComp4_AccType3_scot|function|8aafd259b7fcdd56
@@ -681,7 +683,7 @@ bal_func|function|85a5a074fc872392
 match_LCFS_synth_pop|function|de05053df5b1b623
 extrapolate_population_households|function|5f84d9864144601f
 value2grade|function|d26e79fc2835f83b
-split_merge|function|da908cc77e455bce
+split_merge|function|82b7612b0b639cbc
 load_income_scotland|function|5f03bda96ed43422
 load_postcode_gas_electricity|function|76efb46ccfdb8971
 summarise_household_composition|function|2f0dfc5271927d84
@@ -701,8 +703,9 @@ furness_balance|function|bd1b6a592320dfbc
 select_map_outputs|function|af8d4db2bead6dcc
 prep_postcode_gas_electic|function|6a3b43d583c70c5b
 combine_lsoa_emissions|function|e51d810ee4d2988f
-zoomstack_buildings_lsoa|function|32a4919f1b8d74b9
-process_buildings_generic|function|b5660c7fcfbb1894
+process_buildings_high|function|a0e1ce73aefd9820
+zoomstack_buildings_lsoa|function|a9f41f91c3f5bf19
+process_buildings_generic|function|3172955979da1eba
 load_LCFS_single|function|4a9b9c72778f84df
 split_lsoa_landuse|function|453f6035e2f78398
 fill_gaps|function|beb9c37f0057e6a1
@@ -720,7 +723,7 @@ read_household_nssec_old|function|bf84f4ecdb741d71
 balance_nssec2|function|6a40cbffbbd70dcd
 build_household_types|function|a8e93fa9c74dad41
 read_household_nssec|function|9c7d89004f08d08b
-buildings_lsoa_4326_low|stem|fb3d6ce5db843b0e|8903b90aa4f131e7|e08bf4247225eeba|-2077876925||t20567.4048510623s|s28974991b|28974991|rds|local|vector|||281.15||
+buildings_lsoa_4326_high|stem||91961b239ab3f0b3|b209942c73a15df6|-1392638135||t20567.8188311268s||0|rds|local|vector|||65.18||ArrowArrayAppendBytes() failed
 read_bounds_shp|function|92c07670d7e85bff
 top_architypes|function|097f4ad996863485
 summarise_population|function|3f60779d9cfd6aea
@@ -925,7 +928,7 @@ read_osm_pbf_landuse|function|df800afeb357c9b4
 load_flights_od|function|cabb01b79a612c5c
 read_centroids_oa01|function|849ddeab432d29f0
 read_mot_km_pc|function|4612851004df4b4f
-split_buildings|function|374b2121767481c9
+split_buildings|function|edfcdb615a4af993
 read_AccType_householdComp_scot|function|69bde3e50097a77f
 load_central_heating_2011|function|10fe014e653a5281
 read_householdComp4_AccType3_scot|function|8aafd259b7fcdd56
@@ -1070,7 +1073,7 @@ bal_func|function|85a5a074fc872392
 match_LCFS_synth_pop|function|de05053df5b1b623
 extrapolate_population_households|function|5f84d9864144601f
 value2grade|function|d26e79fc2835f83b
-split_merge|function|da908cc77e455bce
+split_merge|function|3b185d66825cd3d5
 load_income_scotland|function|5f03bda96ed43422
 load_postcode_gas_electricity|function|76efb46ccfdb8971
 summarise_household_composition|function|2f0dfc5271927d84
@@ -1090,8 +1093,9 @@ furness_balance|function|bd1b6a592320dfbc
 select_map_outputs|function|af8d4db2bead6dcc
 prep_postcode_gas_electic|function|6a3b43d583c70c5b
 combine_lsoa_emissions|function|e51d810ee4d2988f
-zoomstack_buildings_lsoa|function|32a4919f1b8d74b9
-process_buildings_generic|function|b5660c7fcfbb1894
+process_buildings_high|function|6eb04f5f251aaf66
+zoomstack_buildings_lsoa|function|b5672250804d0b38
+process_buildings_generic|function|f500a2c2b1d05f4b
 load_LCFS_single|function|4a9b9c72778f84df
 split_lsoa_landuse|function|453f6035e2f78398
 fill_gaps|function|beb9c37f0057e6a1

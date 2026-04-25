@@ -4,13 +4,15 @@
 # Load packages required to define the pipeline:
 library(targets)
 library(sf)
+library(rlang) # neaded for duckspatial "%||%"
 # Set target options:
 # packages that your targets need to run
 tar_option_set(
   packages = c("tibble","sf","readODS","readxl","dplyr","tidyr","smoothr",
                "osmextract","nngeo","pbapply","stplanr","rmapshaper",
                "igraph","plyr","terra","furrr","future","humanleague",
-               "jsonlite","readr","lubridate","purrr","yyjsonr","minty"),
+               "jsonlite","readr","lubridate","purrr","yyjsonr","minty",
+               "duckspatial"),
   error = "continue" # If a target fails will attempt to run other targets
 )
 
@@ -955,13 +957,14 @@ tar_target(buildings_lsoa_4326_low,{
 }),
 
 tar_target(buildings_lsoa_4326_med,{
+  # Long running target ~ 6 hours
   process_buildings_generic(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
                             bounds_lsoa_GB_full, scale = "med")
 }),
 
 tar_target(buildings_lsoa_4326_high,{
   # Long running target ~ 9 hours
-  process_buildings_generic(buildings_heights, bounds_lsoa_GB_full)
+  process_buildings_high(buildings_heights, bounds_lsoa_GB_full)
 }),
 
 # Scenarios

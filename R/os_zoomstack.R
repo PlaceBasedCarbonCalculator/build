@@ -143,7 +143,8 @@ split_buildings = function(b,z){
     zout <- z[!wth,]
     #qtm(b[1,]) + qtm(zin, fill = "red") + qtm(zout, fill = "blue")
     suppressWarnings(suppressMessages(zout2 <- sf::st_intersection(b[1,], zout)))
-    
+    zout2$LSOA21CD = NULL
+    names(zout2)[names(zout2) == "LSOA21CD.1"] = "LSOA21CD"
     b <- sf::st_drop_geometry(b)
     zin <- dplyr::left_join(zin, b, by = "LSOA21CD")
     zin <- zin[,names(zout2)]
@@ -152,6 +153,7 @@ split_buildings = function(b,z){
   } else {
     suppressWarnings(suppressMessages(b2 <- sf::st_intersection(b, z)))
     b2 <- b2[!duplicated(b2$geometry),]
+    b2$LSOA21CD = NULL
     names(b2)[names(b2) == "LSOA21CD.1"] = "LSOA21CD"
     return(b2)
   }
@@ -495,9 +497,16 @@ process_buildings_high = function(buildings_heights, bounds_lsoa_GB_full) {
 
   buildings_heights$id <- 1:nrow(buildings_heights)
 
+  # DUCK DB doesn't do mixed geometry
+  bounds_lsoa_GB_full <- sf::st_cast(bounds_lsoa_GB_full,"MULTIPOLYGON", warn = FALSE)
+
+  message(Sys.time()," starting spatial join, nrow = ",nrow(buildings_heights))
+
   # Use duckspatial for faster spatial join
   buildings_heights <- duckspatial::ddbs_join(buildings_heights, bounds_lsoa_GB_full)
   buildings_heights <- duckspatial::ddbs_collect(buildings_heights)
+
+  message(Sys.time()," spatial join complete nrow = ",nrow(buildings_heights))
 
   # Split duplicates
   buildings_heights <- split_merge(buildings_heights, bounds_lsoa_GB_full)
