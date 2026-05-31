@@ -503,8 +503,22 @@ process_buildings_high = function(buildings_heights, bounds_lsoa_GB_full) {
   message(Sys.time()," starting spatial join, nrow = ",nrow(buildings_heights))
 
   # Use duckspatial for faster spatial join
-  buildings_heights <- duckspatial::ddbs_join(buildings_heights, bounds_lsoa_GB_full)
-  buildings_heights <- duckspatial::ddbs_collect(buildings_heights)
+  # duckspatial can't do large datasets
+  # buildings_heights <- duckspatial::ddbs_join(buildings_heights, bounds_lsoa_GB_full)
+  # buildings_heights <- duckspatial::ddbs_collect(buildings_heights)
+
+  chunk_size <- 2e6
+  idx <- split(seq_len(nrow(buildings_heights)),
+               ceiling(seq_len(nrow(buildings_heights)) / chunk_size))
+
+  result <- pbapply::pblapply(idx, function(i) {
+    duckspatial::ddbs_collect(duckspatial::ddbs_join(
+      buildings_heights[i, ],
+      bounds_lsoa_GB_full
+    ))
+  })
+
+  buildings_heights <- dplyr::bind_rows(result)
 
   message(Sys.time()," spatial join complete nrow = ",nrow(buildings_heights))
 

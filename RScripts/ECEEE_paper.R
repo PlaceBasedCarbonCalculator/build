@@ -176,6 +176,15 @@ oac_plot = function(
   wrapped_labels <- stringr::str_wrap(unique(dat$lsoa_class_name), width = 20)
   names(wrapped_labels) <- unique(dat$lsoa_class_name)
 
+  # Reorder legend by y-value at the final year (top to bottom)
+  max_year <- max(dat$year, na.rm = TRUE)
+  final_year_data <- dat %>%
+    filter(year == max_year) %>%
+    arrange(desc({{var}}))
+  
+  legend_order <- final_year_data$lsoa_class_name
+  dat$lsoa_class_name <- factor(dat$lsoa_class_name, levels = legend_order)
+
   plot = ggplot(dat) +
     geom_line(aes(x = year,
                   y = {{var}},
@@ -235,10 +244,10 @@ lsoa_plot = function(var = "dom_elec_kgco2e_percap",
 
   tmap_options(component.autoscale = FALSE)
 
-  dat = dat[,c("LSOA21CD","year",var)]
-  dat = dat[dat$year %in% c(yr1, yr2),]
   dat = dat |>
-    pivot_wider(id_cols = "LSOA21CD", names_from = "year", values_from = var)
+    select(all_of(c("LSOA21CD","year",var))) |>
+    filter(year %in% c(yr1, yr2)) |>
+    pivot_wider(id_cols = "LSOA21CD", names_from = "year", values_from = all_of(var))
   dat$change = (dat[[as.character(yr2)]] - dat[[as.character(yr1)]]) / dat[[as.character(yr1)]] * 100
   dat$change[is.infinite(dat$change)] = NA
 
@@ -265,7 +274,13 @@ lsoa_plot = function(var = "dom_elec_kgco2e_percap",
       fill.legend = tm_legend(
         title = paste0(title," ",yr1,"-",yr2),
         orientation = "landscape",
-        position = tm_pos_out("center","bottom")
+        position = tm_pos_out("center","bottom"),
+        text.size = 1.2,
+        title.size = 1.5,
+        bg.color = "white",
+        bg.alpha = 0.8,
+        frame = FALSE,
+        width = 32
       )
     ) +
     tm_shape(islandBox) +
@@ -328,7 +343,7 @@ tmap_save(m2,
 #           "plots/eceee_fig4b_gas.png", dpi = 600, width = 4, height = 6)
 
 # Fig 4
-oac_plot(median_gas_kwh, expression("Household gas consumption kWh/yr"), lsoa_emissions_all)
+oac_plot(median_gas_kwh, expression("Household gas consumption kWh/yr"), domestic_gas_summary)
 ggsave("plots/eceee_fig4a_gas.png", dpi = 600, width = 4, height = 6)
 m2 = lsoa_plot("median_gas_kwh","% change in gas consumption",domestic_gas,
                bounds,borders,islandBox)

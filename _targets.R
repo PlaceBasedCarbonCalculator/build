@@ -963,7 +963,7 @@ tar_target(buildings_lsoa_4326_med,{
 }),
 
 tar_target(buildings_lsoa_4326_high,{
-  # Long running target ~ 9 hours
+  # Long running target ~ 32 hours
   process_buildings_high(buildings_heights, bounds_lsoa_GB_full)
 }),
 
