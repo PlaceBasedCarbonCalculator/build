@@ -12,6 +12,7 @@ tar_load(pt_frequency)
 tar_load(income_lsoa_msoa)
 tar_load(domestic_electricity)
 tar_load(domestic_gas)
+tar_load(population)
 
 bounds = read_sf("data/GB_LSOA21_for_plots.gpkg")
 islandBox = read_sf("data/island_boxes.gpkg")
@@ -52,11 +53,26 @@ f1 = left_join(bounds, area_classifications_11_21, by = "LSOA21CD")
 # set factor levels in the desired order
 f1$lsoa_class_name <- factor(f1$lsoa_class_name, levels = names(cols))
 
+# Add 2022 Population percetnages
+population = population[population$year == 2022,]
+population = population[,c("LSOA21CD","all_ages")]
+population = left_join(population, area_classifications_11_21, by = "LSOA21CD")
+population = population |> group_by(lsoa_class_name) |>
+  summarise(all_ages = sum(all_ages, na.rm = TRUE))
+population$percentage = round(population$all_ages / sum(population$all_ages) * 100,1)
+
+# Add population percentages to labels (always show one decimal place)
+population$label = paste0(population$lsoa_class_name, " ", sprintf("%.1f%%", population$percentage))
+levels(f1$lsoa_class_name) = population$label[match(levels(f1$lsoa_class_name), population$lsoa_class_name)]
+
+cols2 = setNames(cols, population$label[match(names(cols), population$lsoa_class_name)])
+
 m1 = tm_shape(f1) +
   tm_fill(fill = "lsoa_class_name",
-          fill.scale = tm_scale_ordinal(values = cols),
+          fill.scale = tm_scale_ordinal(values = cols2),
           fill.legend = tm_legend(
-              title = "LSOA Classification 2011")) +
+              title = "LSOA Classification 2011,\nwith 2022 population percentages",
+              frame = FALSE)) +
   tm_shape(borders) +
   tm_borders(lwd = 0.1, col = "black") +
   tm_layout(
@@ -69,7 +85,7 @@ m1 = tm_shape(f1) +
   tm_borders(lwd = 1, col = "black")
 
 
-tmap_save(m1,"plots/eceee_f1_lsoa_classifications.png", dpi = 600, width = 8, height = 8.5)
+tmap_save(m1,"plots/eceee_f1_lsoa_classifications_v2.png", dpi = 600, width = 8, height = 8.5)
 
 
 
@@ -177,7 +193,7 @@ oac_plot = function(
   names(wrapped_labels) <- unique(dat$lsoa_class_name)
 
   # Reorder legend by y-value at the final year (top to bottom)
-  max_year <- max(dat$year, na.rm = TRUE)
+  max_year <- max(xlims, na.rm = TRUE)
   final_year_data <- dat %>%
     filter(year == max_year) %>%
     arrange(desc({{var}}))
@@ -318,6 +334,15 @@ domestic_gas_summary = domestic_gas |>
 
 
 # Make Plots
+# Fig 12
+oac_plot(total_kgco2e_percap, expression("Total per person Emissions (kgCO"[2]*"e)"))
+ggsave("plots/eceee_fig12a_total.png", dpi = 600, width = 4, height = 6)
+m12 = lsoa_plot("total_kgco2e_percap","% change in total emissions",lsoa_emissions_all,
+               bounds,borders,islandBox)
+tmap_save(m12,
+          "plots/eceee_fig12_total.png", dpi = 600, width = 4, height = 6)
+
+
 # Fig 2
 oac_plot(dom_elec_kgco2e_percap, expression("Per person Electricity Emissions (kgCO"[2]*"e)"))
 ggsave("plots/eceee_fig2aelec.png", dpi = 600, width = 4, height = 6)
@@ -408,7 +433,13 @@ m8 = tm_shape(dat2) +
     fill.legend = tm_legend(
       title = "Percentage of private vehicles that are BEVs",
       orientation = "landscape",
-      position = tm_pos_out("center","bottom")
+      position = tm_pos_out("center","bottom"),
+      text.size = 1.2,
+      title.size = 1.5,
+      bg.color = "white",
+      bg.alpha = 0.8,
+      frame = FALSE,
+      width = 32
     )
   ) +
   tm_shape(islandBox) +
@@ -564,3 +595,90 @@ ggplot(vehil_pt2, aes(x = tph, y = vehiclesPHousehold, colour = lsoa_class_name)
   )
 
 ggsave("plots/eceee_fig8a_pt_vs_car.png", dpi = 600, width = 8, height = 6)
+
+
+# Figure 13: Breakdown by income
+tar_load(income_lsoa_msoa)
+tar_load(income_scot_dz22)
+income_lsoa_msoa = income_lsoa_msoa[income_lsoa_msoa$year == 2020,]
+income_scot_dz22 = income_scot_dz22[income_scot_dz22$year == 2020,]
+names(income_scot_dz22) = names(income_lsoa_msoa)
+income_lsoa_msoa = rbind(income_lsoa_msoa, income_scot_dz22)
+
+income_lsoa_msoa$income_band = cut(income_lsoa_msoa$total_annual_income,
+                             breaks = quantile(income_lsoa_msoa$total_annual_income, probs = seq(0, 1, by = 0.1), na.rm = TRUE),
+                             include.lowest = TRUE,
+                             labels = c("Lowest",paste0("D",2:9),"Highest"))
+income_lsoa_msoa$income_band2 = cut(income_lsoa_msoa$total_annual_income,
+                             breaks = quantile(income_lsoa_msoa$total_annual_income, probs = seq(0, 1, by = 0.1), na.rm = TRUE),
+                             include.lowest = TRUE,
+                             labels = c("Lowest",paste0("D",2:9),"Highest"))
+
+lsoa_emissions_income = left_join(lsoa_emissions_all, income_lsoa_msoa[,c("LSOA21CD","income_band")], by = "LSOA21CD")
+
+
+income_summary = lsoa_emissions_income |>
+  group_by(year, income_band) |>
+  summarise(total_kgco2e_percap = median(total_kgco2e_percap, na.rm = TRUE))
+
+# define a distinct 10-colour palette for income deciles (Lowest -> Highest)
+income_palette <- c(
+  "#A50026",
+"#D33A32",
+"#F0794B",
+"#FDBF71",
+"#FDE9A5",
+"#E8F5CF",
+"#BDE2EE",
+"#81B1D4",
+"#5278B6",
+"#313695"
+)
+
+income_palette = income_palette[10:1]
+
+p13 = ggplot(income_summary) +
+  geom_line(aes(x = year,
+                y = total_kgco2e_percap,
+                colour = income_band),
+            linewidth = 1) +
+  ylab(expression("Total per person emissions (kgCO"[2]*"e)")) +
+  xlab("Year") +
+  scale_x_continuous(
+    breaks  = seq(2010, 2022, 2),
+    expand  = c(0, 0),
+    limits  = c(2010, 2022)
+  ) +
+  scale_y_continuous(
+    expand  = c(0, 0),
+    limits  = c(0, 12000)
+  ) +
+  guides(
+    color = guide_legend(
+      title = "Income Decile",
+      ncol  = 1,
+      byrow = TRUE,    # ensures spacing applies cleanly
+      reverse = TRUE,  # show first (Lowest) at the bottom
+      override.aes = list(
+        size = 4.5  # artificially large point/line increases vertical spacing
+      )
+
+    )
+  ) +
+  scale_color_manual(values = income_palette, name = "Income Decile") +
+
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    axis.title.x = element_text(size = 8),   # x-axis label size
+    axis.title.y = element_text(size = 8),   # y-axis label siz
+    legend.spacing.y = unit(4, "mm"),   # increase vertical gap
+    legend.key.size   = unit(0.3, "cm"),
+    legend.key.height = unit(0.3, "cm"),
+    legend.key.width  = unit(0.3, "cm"),
+    legend.title = element_text(size = 8),
+    legend.text  = element_text(size = 7),
+    legend.box.margin = margin(0, 2, 0, 2)  # compress legend box
+  )
+
+p13
+ggsave("plots/eceee_fig13_income.png", dpi = 600, width = 6, height = 4)

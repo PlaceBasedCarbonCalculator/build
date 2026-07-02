@@ -234,7 +234,6 @@ lsoa_dno_lookup_GB|stem|098195cee6f37819|aadad285cadee489|f16eb9d531a3a025|-1192
 income_lsoa_msoa|stem|dcb4210a35c97b78|eb381c675204ce12|4a53c7b4462cd694|-1804975333||t20555.3462008301s|s616476b|616476|rds|local|vector|||2.95||
 oac01lsoa21|stem|685686efb32b9745|3de627e52be3c889|c96124cb9b50f6cc|1935767375||t20555.3637741467s|s438134b|438134|rds|local|vector|||1513.59||
 household_clusters|stem|42d4eeac20914e26|6267a7ebc82ec3ed|49e31d2a08978fd2|-1983834516||t20555.3687676021s|s4827651b|4827651|rds|local|vector|||424.72|UNRELIABLE VALUE: Future (<unnamed-1>) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to 'ignore'. [future <unnamed-1> (d64c699e629fc156c206b9fcf6ea60ee-1); on d64c699e629fc156c206b9fcf6ea60ee@UOL-PC-211077<50624>]. UNRELIABLE VALUE: Future (<unnamed-2>) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to 'ignore'. [future <unnamed-2> (d64c699e629fc156c206b9fcf6ea60ee-2); on d64c699e629fc156c206b9fcf6ea60ee@UOL-PC-211077<50624>]. UNRELIABLE VALUE: Future (<unnamed-3>) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to 'ignore'. [future <unnamed-3> (d64c699e629fc156c206b9fcf6ea60ee-3); on d64c699e629fc156c206b9fcf6ea60ee@UOL-PC-211077<50624>]. UNRELIABLE VALUE: Future (<unnamed-4>) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to 'ignore'. [future <unnamed-4> (d64c699e|
-lsoa_admin|stem|37b922f1c92c8951|d3c9dee70a922359|b100baa6da1743e4|-1485952592||t20555.3693043015s|s324437b|324437|rds|local|vector|||34.92|st_point_on_surface assumes attributes are constant over geometries|
 central_heating_2011_scotland|stem|e62436ba9d272e63|5b6392643f82a6f4|f105227fb812183f|-664623675||t20555.3693201789s|s96644b|96644|rds|local|vector|||0.73||
 income_scot_dz22|stem|7a7f049ecfe446d9|04061cf859189587|b247d801a88ca751|-1896752736||t20555.3791621025s|s581652b|581652|rds|local|vector|||849.66||
 house_prices_nowcast|stem|ef898f417577d7d5|c4c8be815652006d|850fe56e00c37d52|-124497076||t20555.3892282727s|s1104861010b|1104861010|rds|local|vector|||241.53||
@@ -316,6 +315,25 @@ flights_lsoa_emissions|stem|c0a4c2a0c5641c02|2b092991c3dc5f58|85b6660e5b318c1d|1
 lsoa_emissions_all|stem|44c98b64faaab266|451c684d240cef56|5ec7fbc7562204f8|1303375064||t20565.1195949824s|s226769248b|226769248|rds|local|vector|||17.87||
 lsoa_map_data|stem|2d4b6f8379dab7cf|c5f0e04c40a4f1d5|a6b715a9aed8b7eb|1195666468||t20565.1196577043s|s453212b|453212|rds|local|vector|||0.62||
 buildings_lsoa_4326_high|stem|f9d8a5aceed81a5f|91961b239ab3f0b3|bd83da3b2d28ae04|-1392638135||t20569.8173470204s|s2693227772b|2693227772|rds|local|vector|||121137.86||
+PLEF|stem|a8ed7559e69539d7|8eef14c5e7ae3f13|616027da7d9da41e|2126238213||t19838.5517078378s||497|rds|local|vector|||0.03||could not find function 'load_plef'
+bounds_postcode_area|stem|105664a918f20f4e|2a332b1f0a890cad|6a2dc588a87ad576|1317654448||t19938.5686908459s||39454557|rds|local|vector|||451.22||TopologyException: Ring edge missing at 504471.80897323112 307514.45295355655
+buildings_lsoa_4326_low|stem|fb3d6ce5db843b0e|8903b90aa4f131e7|1cf58fd969de4b92|-2077876925||t20569.93110173s|s28974991b|28974991|rds|local|vector|||203.56||
+buildings_lsoa_4326_verylow|stem|10fb5c273c5c739c|10af158f289e0d42|7ad5f98567630c09|-1412331183||t20569.9319461716s|s11770754b|11770754|rds|local|vector|||71.67||
+buildings_lsoa_4326_med|stem|6f926b96894c5116|25a47c79ffcc04de|c53f7fab0227d8e9|-339730093||t20570.1286623289s|s748154385b|748154385|rds|local|vector|||16916.56||
+zoomstack_buildings_lst_4326|stem|78897e63f07a4a99|d3d917c77eee95a6|f9ca57ded3f1b314|594570010||t20570.1362173395s|s3482129621b|3482129621|rds|local|vector|||0.02||
+build_population_jsons|stem|5b0bc6d104d64f76|90b04f7c0506eb73|951a345f76e048a0|-842498390||t20570.139001066s|s135b|135|rds|local|vector|||237.9||
+vehicle_summary_json|stem|6f244cd470184fd0|35fed054c362a9d1|023a134fff32a3be|-1875494818||t20570.1408281144s|s84b|84|rds|local|vector|||156.58||
+build_overview_jsons|stem|38a990e3261b9053|1b402675d41bfdb0|d18770840a9c6096|2061583066||t20570.1424579761s|s82b|82|rds|local|vector|||140.44||
+pmtiles_transport|stem|e37bc8a24304b186|f5e3e43dbccfebe5|08d856125b96fca7|50855935|outputdata/transport/zones_transport.pmtiles|t20570.1503710721s|s65872218b|65872218|file|local|vector|||9284.53||
+bulk_epc_nondom|stem|79a264cc58664594|8b810e574792889e|01734410769541bd|-1596869449|outputdata/bulk/epc_nondomestic_20260427.zip|t20570.2538080232s|s129031720b|129031720|file|local|vector|||93.89||
+oac_emissions_all|stem|2b52e18468559eba|0e22a8cfce01ab2a|d8e484e649b81b07|2042129683||t20570.2538863886s|s55918b|55918|rds|local|vector|||0.86||
+bulk_pbcc|stem|4611772fade46070|ec02c8977d58262e|95eca699077db24e|2096282106|outputdata/bulk/pbcc_lsoa_20260427.zip|t20570.2541851587s|s132020755b|132020755|file|local|vector|||21.87||
+la_emissions_all|stem|9f8bdeac0f322045|5f52fc4b2a6062da|dd0ffb5e181bf0fe|-1503602655||t20570.2542682315s|s789688b|789688|rds|local|vector|||2.1||
+build_historical_emissions_jsons|stem|a9f2c5565a07bb83|900ad8adef56b80f|ac83514da5c6185e|1811032421||t20570.2569365054s|s88b|88|rds|local|vector|||226.55|NAs introduced by coercion to integer range|
+pmtiles_retrofit|stem|eab9a8983b8aa6a2|fe0818c5bf6f8046|ef76460830ee54bc|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20570.263140096s|s78275342b|78275342|file|local|vector|||9633.49|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
+oac_emissions_summary_json|stem|c7170425b69b4f61|73c80e6704c4a38a|e124bf48cd2a5359|-213870537||t20570.37031594s|s82b|82|rds|local|vector|||18.9||
+pmtiles_pbcc|stem|02379124576e711a|1fe6186963515fd9|76d2965937f5ba3e|-800414012|outputdata/pbcc/zones_pbcc.pmtiles|t20570.3761536026s|s59235622b|59235622|file|local|vector|||10973.56||
+la_emissions_summary_json|stem|0f4c401e3ba24740|ae30dc92e0953489|5d89804e1aa697a2|-545267571||t20570.5055706883s|s81b|81|rds|local|vector|||570.12||
 read_bounds_shp|function|92c07670d7e85bff
 top_architypes|function|097f4ad996863485
 summarise_population|function|3f60779d9cfd6aea
@@ -324,7 +342,7 @@ car_km_2009_2011_to_2021|function|469d28b46d018537
 hole_area|function|ba2d5eb0f0a761d4
 read_hhSize|function|7ae4b0eee52a41a4
 read_CarVan5_Tenure3_scot|function|4987b01f18e3dbc9
-lsoa_admin_summary|function|8489d6c7cbb14c94
+lsoa_admin_summary|function|06b8463a8a498193
 download_scotland_population|function|7046c53efe52c2e0
 write2file|function|3f3d76ce11b73834
 load_consumption_multipliers|function|3020583a6524b343
@@ -674,7 +692,7 @@ make_community_photo_scotland|function|7414b538f0cf6a52
 backcast_dwelling_types|function|fb238e3a491fb89a
 build_synth_pop_seed|function|553ac986c17e6a9e
 build_pt_analysis|function|e6368ae661809ac4
-make_lsoa_overview_json|function|b9c16f025e292497
+make_lsoa_overview_json|function|76d27e141a45b175
 build_synth_pop_seed_scotland|function|3375968e8ae8a0ba
 sythetic_census_scot_old|function|68149b3c0f5c291f
 sythetic_census_scot|function|0998d49566bbd971
@@ -705,22 +723,4 @@ read_household_nssec_old|function|bf84f4ecdb741d71
 balance_nssec2|function|6a40cbffbbd70dcd
 build_household_types|function|a8e93fa9c74dad41
 read_household_nssec|function|9c7d89004f08d08b
-PLEF|stem|a8ed7559e69539d7|8eef14c5e7ae3f13|616027da7d9da41e|2126238213||t19838.5517078378s||497|rds|local|vector|||0.03||could not find function 'load_plef'
-bounds_postcode_area|stem|105664a918f20f4e|2a332b1f0a890cad|6a2dc588a87ad576|1317654448||t19938.5686908459s||39454557|rds|local|vector|||451.22||TopologyException: Ring edge missing at 504471.80897323112 307514.45295355655
-buildings_lsoa_4326_low|stem|fb3d6ce5db843b0e|8903b90aa4f131e7|1cf58fd969de4b92|-2077876925||t20569.93110173s|s28974991b|28974991|rds|local|vector|||203.56||
-buildings_lsoa_4326_verylow|stem|10fb5c273c5c739c|10af158f289e0d42|7ad5f98567630c09|-1412331183||t20569.9319461716s|s11770754b|11770754|rds|local|vector|||71.67||
-buildings_lsoa_4326_med|stem|6f926b96894c5116|25a47c79ffcc04de|c53f7fab0227d8e9|-339730093||t20570.1286623289s|s748154385b|748154385|rds|local|vector|||16916.56||
-zoomstack_buildings_lst_4326|stem|78897e63f07a4a99|d3d917c77eee95a6|f9ca57ded3f1b314|594570010||t20570.1362173395s|s3482129621b|3482129621|rds|local|vector|||0.02||
-build_population_jsons|stem|5b0bc6d104d64f76|90b04f7c0506eb73|951a345f76e048a0|-842498390||t20570.139001066s|s135b|135|rds|local|vector|||237.9||
-vehicle_summary_json|stem|6f244cd470184fd0|35fed054c362a9d1|023a134fff32a3be|-1875494818||t20570.1408281144s|s84b|84|rds|local|vector|||156.58||
-build_overview_jsons|stem|38a990e3261b9053|1b402675d41bfdb0|d18770840a9c6096|2061583066||t20570.1424579761s|s82b|82|rds|local|vector|||140.44||
-pmtiles_transport|stem|e37bc8a24304b186|f5e3e43dbccfebe5|08d856125b96fca7|50855935|outputdata/transport/zones_transport.pmtiles|t20570.1503710721s|s65872218b|65872218|file|local|vector|||9284.53||
-bulk_epc_nondom|stem|79a264cc58664594|8b810e574792889e|01734410769541bd|-1596869449|outputdata/bulk/epc_nondomestic_20260427.zip|t20570.2538080232s|s129031720b|129031720|file|local|vector|||93.89||
-oac_emissions_all|stem|2b52e18468559eba|0e22a8cfce01ab2a|d8e484e649b81b07|2042129683||t20570.2538863886s|s55918b|55918|rds|local|vector|||0.86||
-bulk_pbcc|stem|4611772fade46070|ec02c8977d58262e|95eca699077db24e|2096282106|outputdata/bulk/pbcc_lsoa_20260427.zip|t20570.2541851587s|s132020755b|132020755|file|local|vector|||21.87||
-la_emissions_all|stem|9f8bdeac0f322045|5f52fc4b2a6062da|dd0ffb5e181bf0fe|-1503602655||t20570.2542682315s|s789688b|789688|rds|local|vector|||2.1||
-build_historical_emissions_jsons|stem|a9f2c5565a07bb83|900ad8adef56b80f|ac83514da5c6185e|1811032421||t20570.2569365054s|s88b|88|rds|local|vector|||226.55|NAs introduced by coercion to integer range|
-pmtiles_retrofit|stem|eab9a8983b8aa6a2|fe0818c5bf6f8046|ef76460830ee54bc|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles|t20570.263140096s|s78275342b|78275342|file|local|vector|||9633.49|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
-oac_emissions_summary_json|stem|c7170425b69b4f61|73c80e6704c4a38a|e124bf48cd2a5359|-213870537||t20570.37031594s|s82b|82|rds|local|vector|||18.9||
-pmtiles_pbcc|stem|02379124576e711a|1fe6186963515fd9|76d2965937f5ba3e|-800414012|outputdata/pbcc/zones_pbcc.pmtiles|t20570.3761536026s|s59235622b|59235622|file|local|vector|||10973.56||
-la_emissions_summary_json|stem|0f4c401e3ba24740|ae30dc92e0953489|5d89804e1aa697a2|-545267571||t20570.5055706883s|s81b|81|rds|local|vector|||570.12||
+lsoa_admin|stem|a9b901f2a10e2bd3|57fefdcd4bb48473|d613102ab0e0ef7f|-1485952592||t20629.4562592499s|s859392b|859392|rds|local|vector|||13.48||

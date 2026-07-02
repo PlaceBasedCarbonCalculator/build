@@ -8,6 +8,8 @@
 #' @keywords internal
 make_lsoa_overview_json = function(lsoa_admin, area_classifications_11_21, lsoa_warnings){
 
+  
+  lsoa_admin = lsoa_admin[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   lsoa = dplyr::left_join(lsoa_admin, area_classifications_11_21, by = "LSOA21CD")
 
 

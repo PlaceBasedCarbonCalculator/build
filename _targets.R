@@ -363,7 +363,7 @@ tar_target(lsoa21_OAC21_summary,{
 }),
 
 tar_target(lsoa_admin,{
-  lsoa_admin_summary(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la)
+  lsoa_admin_summary(bounds_wards, bounds_parish, bounds_westminster, bounds_la, centroids_lsoa21, centroids_dz22)
 }),
 
 tar_target(lsoa_warnings,{

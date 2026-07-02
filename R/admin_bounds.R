@@ -454,19 +454,25 @@ read_bounds_dz11 <- function(path){
 #' @param bounds_wards Input object or parameter named `bounds_wards`.
 #' @param bounds_parish Input object or parameter named `bounds_parish`.
 #' @param bounds_westminster Input object or parameter named `bounds_westminster`.
-#' @param bounds_la){ Input object or parameter named `bounds_la){`.
+#' @param bounds_la Input object or parameter named `bounds_la`.
+#' @param centroids_lsoa21 Population Weighted Centroids
+#' @param centroids_dz22 Population Weighted Centroids
 #' @return The function result, typically a data frame or list used in the pipeline.
 #' @keywords internal
-lsoa_admin_summary = function(bounds_lsoa_GB_full, bounds_wards, bounds_parish, bounds_westminster, bounds_la){
+lsoa_admin_summary = function(bounds_wards, bounds_parish, bounds_westminster, bounds_la, centroids_lsoa21,
+                            centroids_dz22){
 
-  cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
+  centroids_dz22$LSOA21NM = NULL
+  cents = rbind(centroids_lsoa21, centroids_dz22)
+  #cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
 
   cents = sf::st_join(cents, bounds_wards)
   cents = sf::st_join(cents, bounds_parish)
   cents = sf::st_join(cents, bounds_westminster)
   cents = sf::st_join(cents, bounds_la)
-  cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
+  #cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
+  cents$PAR23CD[is.na(cents$PAR23CD)] = "Unparished"
 
   cents = sf::st_drop_geometry(cents)
   cents
