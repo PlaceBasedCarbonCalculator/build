@@ -1,7 +1,9 @@
 #' Read Acc Hhcomp
 #'
-#' @description Read Acc hhComp from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -28,8 +30,10 @@ read_Acc_hhComp = function(path = "../inputdata/population/census2021EW_Househol
 
 #' Read Acc Hhcomp6
 #'
-#' @description Read Acc hhComp6 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -50,8 +54,10 @@ read_Acc_hhComp6 = function(path = "../inputdata/population/census2021EW_Househo
 
 #' Read Acc Tenure
 #'
-#' @description Read Acc tenure from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -73,8 +79,10 @@ read_Acc_tenure = function(path = "../inputdata/population/census2021EW_Househol
 
 #' Read Acc Carvan
 #'
-#' @description Read Acc CarVan from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -95,8 +103,10 @@ read_Acc_CarVan = function(path = "../inputdata/population/census2021EW_Househol
 
 #' Read Hhsize Hhcomp
 #'
-#' @description Read hhSize hhComp from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -116,8 +126,10 @@ read_hhSize_hhComp = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Acc Hhsize
 #'
-#' @description Read Acc hhSize from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -138,8 +150,10 @@ read_Acc_hhSize = function(path = "../inputdata/population/census2021EW_Househol
 
 #' Read Carvan Hhcomp
 #'
-#' @description Read CarVan hhComp from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -161,8 +175,10 @@ read_CarVan_hhComp = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Tenure Hhsize
 #'
-#' @description Read Tenure hhSize from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -185,8 +201,10 @@ read_Tenure_hhSize = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Tenure Carvan
 #'
-#' @description Read Tenure CarVan from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -208,8 +226,10 @@ read_Tenure_CarVan = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Tenure Carvan Hhcomp6
 #'
-#' @description Read Tenure CarVan hhComp6 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -232,8 +252,10 @@ read_Tenure_CarVan_hhComp6 = function(path = "../inputdata/population/census2021
 
 #' Read Tenure Hhsize Carvan
 #'
-#' @description Read Tenure hhSize CarVan from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -257,8 +279,10 @@ read_Tenure_hhSize_CarVan = function(path = "../inputdata/population/census2021E
 
 #' Read Hhsize Carvan
 #'
-#' @description Read hhSize CarVan from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -280,8 +304,10 @@ read_hhSize_CarVan = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Tenure Nssec
 #'
-#' @description Read Tenure NSSEC from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -300,8 +326,10 @@ read_Tenure_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
 
 #' Read Hhcomp Nssec
 #'
-#' @description Read hhComp NSSEC from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -321,8 +349,10 @@ read_hhComp_NSSEC = function(path = "../inputdata/population/census2021EW_RefPer
 
 #' Read Hhcomp Tenure
 #'
-#' @description Read hhComp Tenure from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -353,32 +383,13 @@ read_hhComp_Tenure = function(path = "../inputdata/population/census2021EW_House
 
 #' Read Hhcomp6 Tenure
 #'
-#' @description Read hhComp6 Tenure from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
-#' @keywords internal
-read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Households_Tenure5_HouseholdComposition6_LSOA.csv"){
-
-  raw = readr::read_csv(path, show_col_types = FALSE)
-
-  names(raw) = c("LSOA21CD","LSOA21NM","hhComp6CD","hhComp6","Tenure5CD","Tenure5","households")
-  raw = raw[,c("LSOA21CD","hhComp6","Tenure5","households")]
-
-  raw = raw[raw$Tenure5 != "Does not apply",]
-  raw = raw[raw$hhComp6 != "Does not apply",]
-
-  raw$Tenure5 = simplify_Tenure5(raw$Tenure5)
-  raw$hhComp6 = simplify_household6(raw$hhComp6)
-
-  raw
-
-}
-
-#' Read Hhcomp6 Tenure
-#'
-#' @description Read hhComp6 Tenure from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
+#'   Note: this function was previously defined twice with near-identical
+#'   bodies; the duplicate has been removed (both source CSVs share the same
+#'   column order, so behaviour is unchanged).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -400,8 +411,10 @@ read_hhComp6_Tenure = function(path = "../inputdata/population/census2021EW_Hous
 
 #' Read Hhsize
 #'
-#' @description Read hhSize from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -418,8 +431,10 @@ read_hhSize = function(path = "../inputdata/population/census2021EW_Households_H
 
 #' Read Carvan
 #'
-#' @description Read CarVan from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -436,8 +451,10 @@ read_CarVan = function(path = "../inputdata/population/census2021EW_Households_C
 
 #' Read Tenure
 #'
-#' @description Read tenure from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -452,44 +469,17 @@ read_tenure = function(path = "../inputdata/population/census2021EW_Households_T
 
 }
 
-#' Split For Arrays
-#'
-#' @description Perform processing for split for arrays.
-#' @param x Input data object.
-#' @param lsoa_common){ Input object or parameter named `lsoa_common){`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-split_for_arrays = function(x, lsoa_common){
-  x = x[x$LSOA21CD %in% lsoa_common,]
-  x = x[order(x$LSOA21CD),]
-  x = dplyr::group_split(x, LSOA21CD)
-  x
-}
 
-#' Split For Arrays2
-#'
-#' @description Perform processing for split for arrays2.
-#' @param x Input data object.
-#' @param lsoa_all){ Input object or parameter named `lsoa_all){`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-split_for_arrays2 = function(x, lsoa_all){
-  y = lapply(lsoa_all, function(lsoa){
-    sub = x[x$LSOA21CD == lsoa,]
-    if(nrow(sub) == 0){
-      return(NULL)
-    }
-    sub
-    })
-  y
-}
 
-#' Split For Arrays3
+#' Split a census table into a per-LSOA list aligned to all zones
 #'
-#' @description Perform processing for split for arrays3.
-#' @param x Input data object.
-#' @param lsoa_all){ Input object or parameter named `lsoa_all){`.
-#' @return A data frame produced by the function.
+#' @description Group-splits a census cross-tab by zone and reorders the
+#'   list to match `lsoa_all`, leaving NULL entries for zones without data,
+#'   so that `pmap()` over several such lists stays aligned. The version
+#'   used by `sythetic_census()`.
+#' @param x Census cross-tab with `LSOA21CD`.
+#' @param lsoa_all Full ordered vector of zone codes.
+#' @return A named list aligned to `lsoa_all` (NULL where absent).
 #' @keywords internal
 split_for_arrays3 = function(x, lsoa_all){
   x = x[order(x$LSOA21CD),]
@@ -501,12 +491,20 @@ split_for_arrays3 = function(x, lsoa_all){
 }
 
 
-#' Sythetic Census
+#' Build the E&W synthetic household population from census 2021
 #'
-#' @description Perform processing for sythetic census.
-#' @param path_data Input object or parameter named `path_data`.
-#' @param synth_pop_seed){ Input object or parameter named `synth_pop_seed){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Estimates, for every E&W LSOA, the full five-way cross-tab
+#'   of households by accommodation type x tenure x household composition
+#'   (15) x household size x car ownership. Loads fourteen two/three-way
+#'   census extracts (several only partially published), splits them per
+#'   zone and runs `census_syth_combine_v4()` in parallel with the national
+#'   seed. This is the ~3.5 day `census21_synth_households` target
+#'   underlying the whole consumption model.
+#' @param path_data Folder of census 2021 extracts.
+#' @param synth_pop_seed National 4-way seed arrays
+#'   (`synth_pop_seed` target).
+#' @return A data frame of household counts per zone and attribute
+#'   combination, with convergence diagnostics.
 #' @keywords internal
 sythetic_census = function(path_data = file.path(parameters$path_data,"population"), synth_pop_seed){
 
@@ -591,27 +589,19 @@ sythetic_census = function(path_data = file.path(parameters$path_data,"populatio
 
 
 
-#' Census Syth Combine V4
+#' IPF one LSOA's household cross-tab from its census marginals
 #'
-#' @description Perform processing for census syth combine v4.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param Acc_tenure_sub Input object or parameter named `Acc_tenure_sub`.
-#' @param hhComp_Tenure_sub Input object or parameter named `hhComp_Tenure_sub`.
-#' @param Tenure_hhSize_CarVan_sub Input object or parameter named `Tenure_hhSize_CarVan_sub`.
-#' @param Acc_hhComp_sub Input object or parameter named `Acc_hhComp_sub`.
-#' @param Acc_hhComp6_sub Input object or parameter named `Acc_hhComp6_sub`.
-#' @param Acc_CarVan_sub Input object or parameter named `Acc_CarVan_sub`.
-#' @param hhSize_hhComp_sub Input object or parameter named `hhSize_hhComp_sub`.
-#' @param Acc_hhSize_sub Input object or parameter named `Acc_hhSize_sub`.
-#' @param hhComp6_Tenure_sub Input object or parameter named `hhComp6_Tenure_sub`.
-#' @param CarVan_hhComp_sub Input object or parameter named `CarVan_hhComp_sub`.
-#' @param Tenure_CarVan_hhComp6_sub Input object or parameter named `Tenure_CarVan_hhComp6_sub`.
-#' @param Tenure_hhSize_sub Input object or parameter named `Tenure_hhSize_sub`.
-#' @param Tenure_CarVan_sub Input object or parameter named `Tenure_CarVan_sub`.
-#' @param hhSize_CarVan_sub Input object or parameter named `hhSize_CarVan_sub`.
-#' @param seed Input object or parameter named `seed`.
-#' @param iter Input object or parameter named `iter`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Worker for `sythetic_census()`. Converts the zone's
+#'   available two/three-way census tables into arrays and runs
+#'   `mipfp::Ipfp` on the national seed, using whichever constraint
+#'   combination the (partially published) data supports; the result is
+#'   integerised with `int_trs()` and validated against the marginals.
+#' @param Acc_tenure_sub,hhComp_Tenure_sub,Tenure_hhSize_CarVan_sub,Acc_hhComp_sub,Acc_hhComp6_sub,Acc_CarVan_sub,hhSize_hhComp_sub,Acc_hhSize_sub,hhComp6_Tenure_sub,CarVan_hhComp_sub,Tenure_CarVan_hhComp6_sub,Tenure_hhSize_sub,Tenure_CarVan_sub,hhSize_CarVan_sub
+#'   One zone's rows of each census cross-tab (NULL where unpublished).
+#' @param seed National seed arrays (`synth_pop_seed` target).
+#' @param iter Maximum IPF iterations.
+#' @return A one-zone data frame of household counts per attribute
+#'   combination with convergence diagnostics.
 #' @keywords internal
 census_syth_combine_v4 = function(Acc_tenure_sub,
                                   hhComp_Tenure_sub,
@@ -880,14 +870,15 @@ census_syth_combine_v4 = function(Acc_tenure_sub,
 
 }
 
-#' Match Matrix Rsums
+#' Nudge a matrix so its row sums match another matrix
 #'
-#' @description Adjust mat2 so that it has the same rowsums as mat1
-#'     humnaleauge requires input matrixes to have the same total sums
-#'     but in many cases the rows for two matrix refer to the same variaible so should match
-#' @param mat1 Input object or parameter named `mat1`.
-#' @param mat2) Input object or parameter named `mat2)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Adjusts `mat2` cell-by-cell (+/- 1 at a time, never below
+#'   zero) until its row sums equal those of `mat1`. Needed because the IPF
+#'   inputs must agree on shared marginals, but ONS disclosure control
+#'   introduces small inconsistencies between published tables.
+#' @param mat1 Reference matrix providing the target row sums.
+#' @param mat2 Matrix to adjust.
+#' @return `mat2` with row sums matching `mat1`.
 #' @keywords internal
 match_matrix_rsums <- function(mat1, mat2) {
   # Calculate the row sums of both matrices
@@ -921,12 +912,14 @@ match_matrix_rsums <- function(mat1, mat2) {
   return(mat2)
 }
 
-#' Match Matrix Csums
+#' Nudge a matrix so its column sums match another matrix
 #'
-#' @description Match matrix csums values between datasets.
-#' @param mat1 Input object or parameter named `mat1`.
-#' @param mat2) Input object or parameter named `mat2)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Column-sum counterpart of `match_matrix_rsums()`; also used
+#'   by `build_backcasts_dwellings()` to rescale the dwelling-type matrix
+#'   to each year's council-tax band totals.
+#' @param mat1 Reference matrix providing the target column sums.
+#' @param mat2 Matrix to adjust.
+#' @return `mat2` with column sums matching `mat1`.
 #' @keywords internal
 match_matrix_csums <- function(mat1, mat2) {
   # Calculate the col sums of both matrices
@@ -962,11 +955,12 @@ match_matrix_csums <- function(mat1, mat2) {
 }
 
 
-#' Simplify Tenure5
+#' Shorten census tenure labels to Tenure5 codes
 #'
-#' @description Perform processing for simplify Tenure5.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Maps the census tenure labels to outright / mortgage /
+#'   socialrented / privaterented.
+#' @param x Character vector of census labels.
+#' @return Character vector of short codes.
 #' @keywords internal
 simplify_Tenure5 = function(x){
   x[x=="Owned: Owns outright"] = "outright"
@@ -976,11 +970,11 @@ simplify_Tenure5 = function(x){
   x
 }
 
-#' Simplify Hhsize5
+#' Shorten census household-size labels to hhSize5 codes
 #'
-#' @description Perform processing for simplify hhSize5.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Maps the census household-size labels to p1/p2/p3/p4+.
+#' @param x Character vector of census labels.
+#' @return Character vector of short codes.
 #' @keywords internal
 simplify_hhSize5 = function(x){
   x[x=="1 person in household"] = "p1"
@@ -990,11 +984,12 @@ simplify_hhSize5 = function(x){
   x
 }
 
-#' Simplify Carvan5
+#' Shorten census car/van labels to CarVan5 codes
 #'
-#' @description Perform processing for simplify CarVan5.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Maps the census car/van availability labels to
+#'   car0/car1/car2/car3+.
+#' @param x Character vector of census labels.
+#' @return Character vector of short codes.
 #' @keywords internal
 simplify_CarVan5 = function(x){
   x[x=="No cars or vans in household"] = "car0"
@@ -1004,11 +999,12 @@ simplify_CarVan5 = function(x){
   x
 }
 
-#' Simplify Acctype5
+#' Shorten census accommodation-type labels to AccType5 codes
 #'
-#' @description Perform processing for simplify AccType5.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Maps the census accommodation-type labels to detached /
+#'   semidetached / terraced / flat / caravan.
+#' @param x Character vector of census labels.
+#' @return Character vector of short codes.
 #' @keywords internal
 simplify_AccType5= function(x){
   x[x=="Whole house or bungalow: Detached"] = "detached"
