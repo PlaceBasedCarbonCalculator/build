@@ -1,31 +1,15 @@
-#' Write One
-#'
-#' @description Export one to disk or a specified output location.
-#' @param sub Subset object used within the function.
-#' @param idcol Input object or parameter named `idcol`.
-#' @param path File or directory path.
-#' @param dataframe Input object or parameter named `dataframe`.
-#' @param na){ Input object or parameter named `na){`.
-#' @return Usually returns the input invisibly after saving output to disk.
-#' @keywords internal
-write_one <- function(sub, idcol, path = "", dataframe, na){
-  #sub <- x[x[[idcol]] == idv, , drop = FALSE]
-  # ensure a data.frame (avoid tibble overhead)
-  sub <- as.data.frame(sub)
-  nmsub <- sub[[idcol]][1]
-  sub[[idcol]] <- NULL
-  outfile <- file.path(path, paste0(nmsub, ".json"))
-  yyjsonr::write_json_file(sub, outfile, dataframe = dataframe)
-  outfile
-}
 
-#' Convert Json
+#' Convert a single zone's data to a JSON string
 #'
-#' @description Perform processing for convert2json.
-#' @param sub Subset object used within the function.
-#' @param idcol Input object or parameter named `idcol`.
-#' @param dataframe){ Input object or parameter named `dataframe){`.
-#' @return A data frame produced by the function.
+#' @description Takes a data frame for a single zone, drops the ID column and
+#'   serialises the remaining columns to a JSON string. Used by
+#'   `export_zone_json()` via `purrr::map()` over the group-split data.
+#' @param sub Data frame containing rows for exactly one zone.
+#' @param idcol Name of the column holding the zone ID; its first value is used
+#'   to name the returned string.
+#' @param dataframe Passed to `yyjsonr::write_json_str()`; either "rows" or
+#'   "columns", controlling the JSON orientation.
+#' @return A named length-1 character vector: the JSON string, named by zone ID.
 #' @keywords internal
 convert2json <- function(sub, idcol, dataframe){
   sub <- as.data.frame(sub)
@@ -36,43 +20,48 @@ convert2json <- function(sub, idcol, dataframe){
   json
 }
 
-#' Write File
+#' Write a character string to a file
 #'
-#' @description Perform processing for write2file.
-#' @param content Input object or parameter named `content`.
-#' @param filename) Input object or parameter named `filename)`.
-#' @return Usually returns the input invisibly after saving output to disk.
+#' @description Thin wrapper around `writeLines()` used by `export_zone_json()`
+#'   so it can be mapped (optionally in parallel via `furrr`) over pairs of
+#'   JSON strings and file paths.
+#' @param content Character string (JSON) to write.
+#' @param filename Path of the file to write.
+#' @return The result of `writeLines()`, invisibly (NULL).
 #' @keywords internal
 write2file <- function(content, filename) {
   writeLines(content, filename)
 }
 
 
-#' Function to convert a data.frame into a folder of JSON files
-#' @param x data frame with column called geo_code
-#' @param idcol name of column with unique id
-#' @param path folder to save JSON
-#' @param zip logical, if true zips the json into a single zip folder
-#' @param rounddp numeric, how many decimpla places to round to
-#' @dataframe passed to toJSON
-#' @na passed to toJSON
+#' Export a data frame as one JSON file per zone
 #'
-#' Will drop any sf geometry and name files based on geo_code
-
-#' Export Zone Json
-#'
-#' @description Export zone json to disk or a specified output location.
-#' @param x Input data object.
-#' @param idcol Input object or parameter named `idcol`.
-#' @param path File or directory path.
-#' @param zip Logical zip ouputs
-#' @param rounddp Number of decimal points to round data to
-#' @param dataframe Input object or parameter named `dataframe`.
-#' @param reduce Reduce column names length
-#' @param na What should NAs be in JSON
-#' @param parallel Input object or parameter named `parallel`.
-#' @param workers Number of workers to use if `parallel` is TRUE
-#' @return Usually returns the input invisibly after saving output to disk.
+#' @description Splits a data frame by zone ID and writes one JSON file per
+#'   zone (named `<id>.json`) into `path`. Superseded: the `_targets.R` export
+#'   targets now use `export_zone_bin()` (see R/json_to_bin.R), which packs the
+#'   per-zone JSON into a single range-requestable binary instead. Any sf
+#'   geometry is dropped, numeric columns are rounded (or converted to integer
+#'   when `rounddp = 0`), and a `names_lookup.csv` recording any column-name
+#'   shortening is written alongside the output.
+#' @param x Data frame (may be sf or tibble) with one or more rows per zone.
+#' @param idcol Name of the column holding the unique zone ID (e.g. "LSOA21CD").
+#' @param path Output folder for the JSON files; created if missing, provided
+#'   the parent "outputdata" folder exists.
+#' @param zip Logical. If TRUE, the individual JSON files are bundled into
+#'   `<idcol>_json.zip` inside `path` and the loose files removed.
+#' @param rounddp Number of decimal places to round numeric columns to; 0
+#'   converts to integer.
+#' @param dataframe JSON orientation, "rows" or "columns"; passed to `yyjsonr`.
+#' @param reduce Logical. If TRUE, column names are shortened via
+#'   `reduce_name_length()` to reduce file size, with the mapping saved to
+#'   `names_lookup.csv`.
+#' @param na Unused (retained for backwards compatibility; NA handling is
+#'   whatever `yyjsonr` does by default, i.e. JSON null).
+#' @param parallel Logical. If TRUE and `future`/`furrr` are installed, files
+#'   are written in parallel using a multisession plan.
+#' @param workers Number of parallel workers; defaults to available cores - 1.
+#' @return The output `path` (or the zip file path when `zip = TRUE`), after
+#'   writing all files as a side effect.
 #' @keywords internal
 export_zone_json <- function(x,
                              idcol = "LSOA21CD",
@@ -120,7 +109,7 @@ export_zone_json <- function(x,
   for(i in seq_len(ncol(x))){
     if(inherits(x[[i]],"numeric")){
       if(rounddp == 0){
-        x[[i]] = as.integer(x[[i]])
+        x[[i]] = as.integer(round(x[[i]]))
       } else {
         x[[i]] = round(x[[i]], rounddp)
       }
@@ -146,7 +135,9 @@ export_zone_json <- function(x,
                      dataframe = dataframe,
                      .progress = TRUE)
   json <- unlist(json)
-  paths = file.path(path,paste0(names(json),".json"))
+  # temp_json_dir equals path when zip = FALSE, so the zip is built from the
+  # files actually written
+  paths = file.path(temp_json_dir,paste0(names(json),".json"))
 
   message("Writing JSON ",Sys.time())
 
@@ -190,13 +181,17 @@ export_zone_json <- function(x,
 
 }
 
-# Long names make the JSON files larger so reduce names and save a lookup
-
-#' Reduce Name Length
+#' Shorten column names to reduce JSON file size
 #'
-#' @description Perform processing for reduce name length.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Abbreviates column names by splitting on "_" and keeping the
+#'   first letter of each non-numeric part (numbers are kept whole), so e.g.
+#'   "total_emissions_2019" becomes "te2019". Duplicate abbreviations are
+#'   disambiguated with a letter prefix (B, C, ...). Long names make the
+#'   per-zone JSON files larger, so `export_zone_json(reduce = TRUE)` uses this
+#'   and saves the mapping as `names_lookup.csv`.
+#' @param x Character vector of original column names.
+#' @return A data frame with columns `x` (original names) and `y` (shortened
+#'   names), plus `dup`/`occurrences` bookkeeping columns when duplicates arise.
 #' @keywords internal
 reduce_name_length = function(x){
 

@@ -1,10 +1,21 @@
-#' Make Community Photo Scotland
+#' Build household types (community photo) for Scottish Data Zones
 #'
-#' @description Build community photo scotland and return the generated output.
-#' @param path File or directory path.
-#' @param bounds_iz22 Input object or parameter named `bounds_iz22`.
-#' @param lookup_DataZone_2022){ Lookup table used to map area codes or classifications.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Scottish equivalent of `build_household_types()`: estimates
+#'   households per 2022 Data Zone by 10-category household composition,
+#'   5-group NS-SEC and 3-group ethnicity from the Scotland Census 2022. IPF
+#'   (`mipfp::Ipfp`) is run in two stages: first at Intermediate Zone level
+#'   (composition x NS-SEC cross-tab constrained to the national three-way
+#'   seed and IZ ethnicity), then Data Zone level constrained to the IZ result
+#'   and DZ marginals. Runs in parallel via furrr. Used by the
+#'   `household_clusters_scot` target, feeding the community-pictures JSON.
+#' @param path Folder of Scotland Census 2022 CSV extracts.
+#' @param bounds_iz22 2022 Intermediate Zone boundaries (`bounds_iz22`
+#'   target); used to match IZ names to codes.
+#' @param lookup_DataZone_2022 Data Zone lookup (`lookup_DataZone_2022`
+#'   target) linking DZ22 to IZ22 codes.
+#' @return A data frame with `DataZone`, `householdComp10`, `NSSEC5`,
+#'   `ethnic3`, `households`, plus IPF convergence (`conv`) and error (`MAE`)
+#'   diagnostics.
 #' @keywords internal
 make_community_photo_scotland = function(path = "../inputdata/population_scotland/", bounds_iz22, lookup_DataZone_2022){
 
@@ -145,14 +156,20 @@ make_community_photo_scotland = function(path = "../inputdata/population_scotlan
 # eth = dz_ethnic2[[645]]
 
 
-#' Syth Communit Photo Dz Scot
+#' Downscale one Intermediate Zone's household types to its Data Zones
 #'
-#' @description Perform processing for syth communit photo dz scot.
-#' @param ra Input object or parameter named `ra`.
-#' @param nssec Input object or parameter named `nssec`.
-#' @param comp Input object or parameter named `comp`.
-#' @param eth){ Input object or parameter named `eth){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `make_community_photo_scotland()` (stage 2). Takes
+#'   the IZ-level composition x NS-SEC x ethnicity estimate and IPF-fits a
+#'   4-dimensional array adding the Data Zone dimension, constrained by DZ
+#'   NS-SEC and composition marginals and a DZ household-ethnicity estimate
+#'   derived from the population ethnicity split. Results are integerised
+#'   with `int_trs()` and validated against the marginals.
+#' @param ra IZ-level result from `syth_communit_photo_scot()` for one IZ.
+#' @param nssec DZ households by NS-SEC for the Data Zones in this IZ.
+#' @param comp DZ households by 10-category composition for the same zones.
+#' @param eth DZ population by White/Other ethnicity for the same zones.
+#' @return A data frame with `householdComp10`, `NSSEC5`, `ethnic3`,
+#'   `DataZone`, `households` (positive cells only), `conv` and `MAE`.
 #' @keywords internal
 syth_communit_photo_dz_scot = function(ra, nssec, comp, eth){
 
@@ -317,13 +334,18 @@ syth_communit_photo_dz_scot = function(ra, nssec, comp, eth){
 }
 
 
-#' Syth Communit Photo Scot
+#' Estimate composition x NS-SEC x ethnicity for one Intermediate Zone
 #'
-#' @description Perform processing for syth communit photo scot.
-#' @param hhns Input object or parameter named `hhns`.
-#' @param eth Input object or parameter named `eth`.
-#' @param seed){ Input object or parameter named `seed){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `make_community_photo_scotland()` (stage 1). IPF-fits
+#'   a 10 x 5 x 3 array for one IZ, seeded with the national composition x
+#'   NS-SEC x ethnicity cross-tab (zeros replaced with 0.5) and constrained by
+#'   the IZ's composition x NS-SEC table and ethnicity totals (rescaled to the
+#'   household total). Integerised with `int_trs()`.
+#' @param hhns IZ households by composition and NS-SEC (long format).
+#' @param eth One row of IZ household counts by white/black/other.
+#' @param seed National composition x NS-SEC x ethnicity cross-tab.
+#' @return A data frame with `householdComp10`, `NSSEC5`, `ethnic3`,
+#'   `households`, `MAE` and `IZCode`.
 #' @keywords internal
 syth_communit_photo_scot = function(hhns, eth, seed){
 
@@ -397,13 +419,17 @@ syth_communit_photo_scot = function(hhns, eth, seed){
 
 
 
-#' Read Hhcomp Nssec Iz Scot
+#' Read Scotland 2022 households by composition and NS-SEC per IZ
 #'
-#' @description Read hhComp nssec iz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the wide Scotland Census 2022 extract of households by
+#'   10-category composition x 10-category NS-SEC per Intermediate Zone
+#'   (columns named positionally), attaches IZ codes by matching names against
+#'   `bounds_iz22`, and pivots to long format.
+#' @param path Path to the wide CSV extract.
+#' @param bounds_iz22 IZ boundaries providing `IZCode`/`IZName`; row order
+#'   must match the CSV (checked by name).
+#' @return A long data frame with `IZCode`, `IZName`, `householdComp10`,
+#'   `NSSEC10` and `households`.
 #' @keywords internal
 read_hhComp_nssec_iz_scot = function(path = "../inputdata/population_scotland/scotlandcensus2022_NSSEC10_householdComp10_IntermiedateZone_wide2.csv", bounds_iz22){
 
@@ -441,12 +467,15 @@ read_hhComp_nssec_iz_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
-#' Read Hhcomp Nssec Ethnic Scot
+#' Read the national Scotland 2022 composition x NS-SEC x ethnicity table
 #'
-#' @description Read hhComp nssec ethnic scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the Scotland-wide census extract of households by
+#'   10-category composition x 10-category NS-SEC x 8-group ethnicity
+#'   (columns named positionally) and shortens the composition labels. Used
+#'   as the IPF seed in `make_community_photo_scotland()`.
+#' @param path Path to the wide CSV extract.
+#' @return A wide data frame: one row per composition category, one column
+#'   per `<NSSEC10>_<ethnic8>` combination.
 #' @keywords internal
 read_hhComp_nssec_ethnic_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_nssec10_ethnic8_Scotland.csv"){
 
@@ -480,13 +509,16 @@ read_hhComp_nssec_ethnic_scot = function(path = "../inputdata/population_scotlan
 
 }
 
-#' Read Ethnic8 Iz Scot
+#' Read Scotland 2022 households by 8-group ethnicity per IZ
 #'
-#' @description Read ethnic8 iz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the census extract of household ethnicity per
+#'   Intermediate Zone and attaches IZ codes by matching names against
+#'   `bounds_iz22`.
+#' @param path Path to the CSV extract.
+#' @param bounds_iz22 IZ boundaries providing `IZCode`/`IZName`; row order
+#'   must match the CSV (checked by name).
+#' @return A data frame with `IZCode`, `IZName` and one column per ethnic
+#'   group.
 #' @keywords internal
 read_ethnic8_iz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_ethnic8_IntermiedateZone.csv", bounds_iz22){
 
@@ -511,12 +543,12 @@ read_ethnic8_iz_scot = function(path = "../inputdata/population_scotland/scotlan
 
 }
 
-#' Read Nssec10 Dz Scot
+#' Read Scotland 2022 households by NS-SEC per Data Zone
 #'
-#' @description Read nssec10 dz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the census extract of households by 10-category NS-SEC
+#'   per 2022 Data Zone (columns named positionally, metadata rows removed).
+#' @param path Path to the CSV extract.
+#' @return A data frame with `DataZone` and one column per NS-SEC category.
 #' @keywords internal
 read_nssec10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_nssec10_DataZone.csv"){
 
@@ -542,12 +574,15 @@ read_nssec10_dz_scot = function(path = "../inputdata/population_scotland/scotlan
 
 }
 
-#' Read Hhcomp10 Dz Scot
+#' Read Scotland 2022 households by composition per Data Zone
 #'
-#' @description Read hhcomp10 dz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the census extract of households by 10-category
+#'   household composition per 2022 Data Zone (columns named positionally,
+#'   metadata rows removed). Note: this function was previously defined twice
+#'   in this file with identical bodies; the duplicate has been removed.
+#' @param path Path to the CSV extract.
+#' @return A data frame with `DataZone` and one column per composition
+#'   category.
 #' @keywords internal
 read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
 
@@ -571,43 +606,13 @@ read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotla
   raw
 }
 
-
-#' Read Hhcomp10 Dz Scot
+#' Read Scotland 2022 population by White/Other ethnicity per Data Zone
 #'
-#' @description Read hhcomp10 dz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
-#' @keywords internal
-read_hhcomp10_dz_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_DataZone.csv"){
-
-  # Read the CSV (skip the metadata rows)
-  raw = readr::read_csv(path, show_col_types = FALSE, skip = 11, col_names = FALSE)
-
-  # Household composition categories used in other readers in this file
-  householdComp10n = c("OnePersonOver66","OnePersonOther","FamilyOver66","CoupleNoChildren","CoupleChildren","CoupleNonDepChildren","LoneParent","LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66")
-
-  # Assign names: first column is DataZone label, then the 10 household composition columns, then optional dud
-  names(raw) = c("DataZone", householdComp10n,"total","dud")
-
-  # Drop dud/trailing column if present
-  raw$dud = NULL
-  raw$total = NULL
-
-  # Remove rows that are clearly not data
-  raw = raw[!is.na(raw$DataZone),]
-  raw = raw[!raw$DataZone %in% c("Total","INFO","(c) Copyright WingArc Australia 2018"),]
-
-  raw
-}
-
-# Note Population Not Households
-#' Read Ethnic2 Dz Scot
-#'
-#' @description Read ethnic2 dz scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Parses the census extract of people (note: population, not
+#'   households) by 2-group ethnicity per 2022 Data Zone. Used to estimate the
+#'   household ethnicity split in `syth_communit_photo_dz_scot()`.
+#' @param path Path to the CSV extract.
+#' @return A data frame with `DataZone`, `White` and `Other`.
 #' @keywords internal
 read_ethnic2_dz_scot = function(path = "../inputdata/population_scotland/scotlandcensus2022_Ethnic2_People_DataZone.csv"){
 

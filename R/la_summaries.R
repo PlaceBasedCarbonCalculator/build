@@ -1,10 +1,14 @@
-#' Make La Summary
+#' Summarise per-capita emissions by local authority
 #'
-#' @description Build la summary and return the generated output.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @param population Input object or parameter named `population`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Aggregates the per-LSOA emissions totals to local
+#'   authorities: for each LAD and year, total emissions per domain divided
+#'   by total population. A GB-wide row (LAD25CD = "GB") is prepended for
+#'   comparison. Used by the `la_emissions_all` target, exported by
+#'   `la_emissions_summary_json`.
+#' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
+#' @param lsoa_admin Zone-to-LA lookup (`lsoa_admin` target).
+#' @param population GB population (`population` target).
+#' @return A data frame per LAD25CD-year of per-capita emissions by domain.
 #' @keywords internal
 make_la_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
@@ -83,13 +87,15 @@ make_la_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
 }
 
-#' Make Westminster Summary
+#' Summarise per-capita emissions by Westminster constituency
 #'
-#' @description Build la summary and return the generated output.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @param population Input object or parameter named `population`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description As `make_la_summary()` but grouped by parliamentary
+#'   constituency (`PCON24CD`), without a GB row. Not currently wired to a
+#'   target.
+#' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
+#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param population GB population (`population` target).
+#' @return A data frame per PCON24CD-year of per-capita emissions.
 #' @keywords internal
 make_westminter_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
@@ -137,13 +143,14 @@ make_westminter_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
 }
 
-#' Make Parish Summary
+#' Summarise per-capita emissions by parish
 #'
-#' @description Build la summary and return the generated output.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @param population Input object or parameter named `population`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description As `make_la_summary()` but grouped by parish (`PAR23CD`),
+#'   without a GB row. Not currently wired to a target.
+#' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
+#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param population GB population (`population` target).
+#' @return A data frame per PAR23CD-year of per-capita emissions.
 #' @keywords internal
 make_parish_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
@@ -191,13 +198,14 @@ make_parish_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
 }
 
-#' Make Parish Summary
+#' Summarise per-capita emissions by electoral ward
 #'
-#' @description Build la summary and return the generated output.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @param population Input object or parameter named `population`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description As `make_la_summary()` but grouped by ward (`WD25CD`),
+#'   without a GB row. Not currently wired to a target.
+#' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
+#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param population GB population (`population` target).
+#' @return A data frame per WD25CD-year of per-capita emissions.
 #' @keywords internal
 make_ward_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
@@ -245,13 +253,16 @@ make_ward_summary = function(lsoa_emissions_all, lsoa_admin, population){
 
 }
 
-#' Make Oac Summary
+#' Summarise per-capita emissions by area classification group
 #'
-#' @description Build oac summary and return the generated output.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param area_classifications_11_21 Input object or parameter named `area_classifications_11_21`.
-#' @param population){ Input object or parameter named `population){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description As `make_la_summary()` but grouped by the 2011 LSOA area
+#'   classification group code, allowing "places like this" comparisons.
+#'   Used by the `oac_emissions_all` target, exported by
+#'   `oac_emissions_summary_json`.
+#' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
+#' @param area_classifications_11_21 Classifications on 2021 zones.
+#' @param population GB population (`population` target).
+#' @return A data frame per `lsoa_class_code`-year of per-capita emissions.
 #' @keywords internal
 make_oac_summary = function(lsoa_emissions_all, area_classifications_11_21, population){
 

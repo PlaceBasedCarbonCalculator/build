@@ -1,9 +1,11 @@
-#' Oac To 2021
+#' Carry the 2011 LSOA classification (SOAC) name onto 2021 zones
 #'
-#' @description Perform processing for OAC to 2021.
-#' @param lookup_OA_LSOA_MSOA_classifications Lookup table used to map area codes or classifications.
-#' @param lookup_lsoa_2011_21){ Lookup table used to map area codes or classifications.
-#' @return An sf object containing spatial data.
+#' @description Assigns each 2021 LSOA the SOAC11 classification name of its
+#'   first-matching 2011 LSOA; Scottish 2011 Data Zones pass through with
+#'   their own code. Used by the `SOAC_11` target.
+#' @param lookup_OA_LSOA_MSOA_classifications 2011 lookup with `SOAC11NM`.
+#' @param lookup_lsoa_2011_21 ONS 2011-to-2021 LSOA lookup.
+#' @return A data frame with `LSOA21CD`, `LSOA11CD` and `SOAC11NM`.
 #' @keywords internal
 OAC_to_2021 = function(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21){
 
@@ -24,24 +26,27 @@ OAC_to_2021 = function(lookup_OA_LSOA_MSOA_classifications, lookup_lsoa_2011_21)
 }
 
 
-#' Load Oac21
+#' Load the 2021 Output Area Classification (OAC21) for England & Wales
 #'
-#' @description Load OAC21 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the OAC 2021 CSV (supergroup/group/subgroup per 2021
+#'   OA). Used by the `oac21` target.
+#' @param path Path to `oac21ew.csv`.
+#' @return A data frame of OAC21 codes per `oa21cd`.
 #' @keywords internal
 load_OAC21 = function(path = file.path(parameters$path_data,"area_classifications/oac21ew.csv")){
   oac21 = readr::read_csv(path)
   oac21
 }
 
-#' Oac21 Lsoa21
+#' Summarise the OA-level OAC21 mix within each 2021 LSOA
 #'
-#' @description Perform processing for OAC21 lsoa21.
-#' @param oac21 Input object or parameter named `oac21`.
-#' @param lookup_postcode_OA_LSOA_MSOA_2021){ Lookup table used to map area codes or classifications.
-#' @return An sf object containing spatial data.
+#' @description Joins the OAC21 codes to LSOAs via the OA lookup and stores,
+#'   for each LSOA, frequency tables of the supergroups/groups/subgroups of
+#'   its OAs as list-columns. Used by the `lsoa21_OAC21_summary` target.
+#' @param oac21 OAC21 table (`oac21` target).
+#' @param lookup_postcode_OA_LSOA_MSOA_2021 Postcode/OA/LSOA lookup.
+#' @return A data frame with `lsoa21cd` and list-columns `supergroup`,
+#'   `group`, `subgroup` of frequency tables.
 #' @keywords internal
 OAC21_lsoa21 = function(oac21, lookup_postcode_OA_LSOA_MSOA_2021){
 
@@ -61,13 +66,17 @@ OAC21_lsoa21 = function(oac21, lookup_postcode_OA_LSOA_MSOA_2021){
 
 }
 
-#' Oac11 Dz22
+#' Summarise the 2011 OAC mix within each 2022 Scottish Data Zone
 #'
-#' @description Perform processing for OAC11 dz22.
-#' @param centroids_oa11_scotland Centroid geometries used for area matching.
-#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
-#' @param lookup_OA_LSOA_MSOA_classifications){ Lookup table used to map area codes or classifications.
-#' @return An sf object containing spatial data.
+#' @description Assigns 2011 Scottish OA centroids to 2022 Data Zones by
+#'   point-in-polygon (with a 50 m buffer retry for coastal misses), then
+#'   stores each zone's OAC11 code frequency table as a list-column. Zones
+#'   containing no OA centroid inherit the nearest OA's code. Used by the
+#'   `oac11dz22` target, which matches LCFS households by area type.
+#' @param centroids_oa11_scotland Scottish 2011 OA centroids.
+#' @param bounds_dz22 2022 Data Zone boundaries.
+#' @param lookup_OA_LSOA_MSOA_classifications 2011 lookup with `OAC11CD`.
+#' @return A data frame with `LSOA21CD` (2022 DZ) and list-column `OAC`.
 #' @keywords internal
 OAC11_dz22 = function(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_classifications){
 
@@ -118,13 +127,16 @@ OAC11_dz22 = function(centroids_oa11_scotland, bounds_dz22, lookup_OA_LSOA_MSOA_
 
 }
 
-#' Oac11 Lsoa21
+#' Summarise the 2011 OAC mix within each 2021 E&W LSOA
 #'
-#' @description Perform processing for OAC11 lsoa21.
-#' @param centroids_oa11 Centroid geometries used for area matching.
-#' @param bounds_lsoa21_full Input object or parameter named `bounds_lsoa21_full`.
-#' @param lookup_OA_LSOA_MSOA_classifications){ Lookup table used to map area codes or classifications.
-#' @return An sf object containing spatial data.
+#' @description As `OAC11_dz22()` but for England & Wales: 2011 OA centroids
+#'   are assigned to 2021 LSOAs (50 m buffer retry), each LSOA gets a
+#'   frequency table of OAC11 codes, and LSOAs without a centroid inherit
+#'   the nearest OA's code. Used by the `oac11lsoa21` target.
+#' @param centroids_oa11 E&W 2011 OA centroids (`centroids_oa11` target).
+#' @param bounds_lsoa21_full 2021 LSOA boundaries.
+#' @param lookup_OA_LSOA_MSOA_classifications 2011 lookup with `OAC11CD`.
+#' @return A data frame with `LSOA21CD` and list-column `OAC`.
 #' @keywords internal
 OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_classifications){
 
@@ -177,13 +189,16 @@ OAC11_lsoa21 = function(centroids_oa11, bounds_lsoa21_full, lookup_OA_LSOA_MSOA_
 
 }
 
-#' Oac01 Lsoa21
+#' Summarise the 2001 OAC mix within each 2021 E&W LSOA
 #'
-#' @description Perform processing for OAC01 lsoa21.
-#' @param centroids_oa01 Centroid geometries used for area matching.
-#' @param bounds_lsoa21_full Input object or parameter named `bounds_lsoa21_full`.
-#' @param oac01){ Input object or parameter named `oac01){`.
-#' @return An sf object containing spatial data.
+#' @description As `OAC11_lsoa21()` but using 2001 Output Areas and the 2001
+#'   OAC (subgroup codes), with a wider 130 m buffer retry. Used by the
+#'   `oac01lsoa21` target, which supports LCFS matching for survey years
+#'   before 2014.
+#' @param centroids_oa01 E&W 2001 OA centroids (`centroids_oa01` target).
+#' @param bounds_lsoa21_full 2021 LSOA boundaries.
+#' @param oac01 2001 OAC table (`oac01` target).
+#' @return A data frame with `LSOA21CD` and list-column `OAC`.
 #' @keywords internal
 OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
 
@@ -238,13 +253,14 @@ OAC01_lsoa21 = function(centroids_oa01, bounds_lsoa21_full, oac01){
 }
 
 
-#' Oac01 Dz22
+#' Summarise the 2001 OAC mix within each 2022 Scottish Data Zone
 #'
-#' @description Perform processing for OAC01 dz22.
-#' @param centroids_oa01_scotland Centroid geometries used for area matching.
-#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
-#' @param oac01){ Input object or parameter named `oac01){`.
-#' @return An sf object containing spatial data.
+#' @description As `OAC01_lsoa21()` but for Scotland's 2001 OAs and 2022
+#'   Data Zones. Used by the `oac01dz22` target.
+#' @param centroids_oa01_scotland Scottish 2001 OA centroids.
+#' @param bounds_dz22 2022 Data Zone boundaries.
+#' @param oac01 2001 OAC table (`oac01` target).
+#' @return A data frame with `LSOA21CD` (2022 DZ) and list-column `OAC`.
 #' @keywords internal
 OAC01_dz22 = function(centroids_oa01_scotland, bounds_dz22, oac01){
 
@@ -297,12 +313,12 @@ OAC01_dz22 = function(centroids_oa01_scotland, bounds_dz22, oac01){
 }
 
 
-#' Read Centroids Oa11
+#' Read 2011 Output Area population-weighted centroids (England & Wales)
 #'
-#' @description Read centroids oa11 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2011 OA PWC GeoPackage from the boundaries folder.
+#'   Used by the `centroids_oa11` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `OA11CD`.
 #' @keywords internal
 read_centroids_oa11 = function(path = "../inputdata/boundaries/"){
   oa = sf::st_read(file.path(path,"Output_Areas_Dec_2011_PWC_2022_2937497644548359762.gpkg"))
@@ -310,12 +326,12 @@ read_centroids_oa11 = function(path = "../inputdata/boundaries/"){
   oa
 }
 
-#' Read Centroids Oa01
+#' Read 2001 Output Area population-weighted centroids (England & Wales)
 #'
-#' @description Read centroids oa01 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2001 OA PWC GeoPackage from the boundaries folder.
+#'   Used by the `centroids_oa01` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame including `OA01CDOLD`.
 #' @keywords internal
 read_centroids_oa01 = function(path = "../inputdata/boundaries/"){
   oa = sf::st_read(file.path(path,"Output_Areas_2001_EW_PWC_6679101571236103446.gpkg"))
@@ -324,12 +340,12 @@ read_centroids_oa01 = function(path = "../inputdata/boundaries/"){
 }
 
 
-#' Read Oac01
+#' Read the 2001 Output Area Classification table
 #'
-#' @description Read OAC01 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the pre-saved 2001 OAC Rds (subgroup codes per 2001
+#'   OA). Used by the `oac01` target.
+#' @param path Path to `OAC_2001.Rds`.
+#' @return A data frame with `OA_CODE` and classification columns.
 #' @keywords internal
 read_OAC01 = function(path = "../inputdata/area_classifications/2001/OAC_2001.Rds"){
   oac = readRDS(path)

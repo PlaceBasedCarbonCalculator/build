@@ -1,11 +1,11 @@
 # Living Costs and Food Survey
 
-#' Load Lcfs
+#' Load every Living Costs and Food Survey release
 #'
-#' @description Load LCFS data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads each UKDA LCFS zip in `path` (one per survey year)
+#'   via `load_LCFS_single()`. Used by the `lcfs` target; secure data.
+#' @param path Folder of `LCFS_YYYY*_V1.zip` releases.
+#' @return A named list (by survey year) of lists of LCFS tables.
 #' @keywords internal
 load_LCFS = function(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded")) {
 
@@ -27,12 +27,13 @@ load_LCFS = function(path = file.path(parameters$path_secure_data,"Living Costs 
 }
 
 
-#' Load Lcfs Single
+#' Load one LCFS release from its UKDA zip
 #'
-#' @description Load LCFS single data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips a single LCFS release, reads every SPSS table and
+#'   names the list elements from the (heavily inconsistent) file names.
+#' @param path Path to one `LCFS_*.zip` release.
+#' @return A named list of data frames (household, people, expenditure
+#'   tables etc.).
 #' @keywords internal
 load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living Costs and Food Survey/Safeguarded","LCFS_20202021_V1.zip")){
 
@@ -545,11 +546,13 @@ load_LCFS_single = function(path = file.path(parameters$path_secure_data,"Living
 }
 
 
-#' Lowercase Cp
+#' Generate lowercase variants of LCFS spending codes
 #'
-#' @description Perform processing for lowercase CP.
-#' @param x) Input object or parameter named `x)`.
-#' @return A data frame produced by the function.
+#' @description LCFS variable codes (B/C/P/A prefixes) change case between
+#'   survey years; this returns both the original and lowercase-prefix
+#'   variants so `any_of()` selections match either.
+#' @param x Character vector of variable codes.
+#' @return The union of `x` and its lowercase-prefix variants.
 #' @keywords internal
 lowercase_CP <- function(x) {
   x_orig = x
@@ -561,12 +564,15 @@ lowercase_CP <- function(x) {
 
 
 
-#' Remove Extreme Consumption
+#' Cap extreme weekly spending values
 #'
-#' @description Perform processing for remove extreme consumption.
-#' @param x Input data object.
-#' @param type Input object or parameter named `type`.
-#' @return A data frame produced by the function.
+#' @description Winsorises a spending variable at the larger of its 99.99th
+#'   percentile and (2 x 99.5th percentile minus the 0.5th percentile),
+#'   messaging how many values were reduced. Protects the zone spending
+#'   shares from single implausible survey responses.
+#' @param x Numeric spending vector (pounds per week).
+#' @param type Label used in the message.
+#' @return `x` with values above the threshold capped.
 #' @keywords internal
 remove_extreme_consumption = function(x, type = ""){
   #hist(x, seq(min(x)-10, max(x)+10, 10))
@@ -584,12 +590,15 @@ remove_extreme_consumption = function(x, type = ""){
 
 
 
-#' Summarise Household Composition
+#' Derive census-style household composition for each LCFS household
 #'
-#' @description Summarise household composition into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param people){ Input object or parameter named `people){`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Applies `hh_comp()` to every household in the LCFS people
+#'   table to classify it into the census household-composition categories
+#'   used for synthetic-population matching. Ages recorded as "80 or older"
+#'   are treated as 81.
+#' @param people LCFS people table (one row per person, `case` = household).
+#' @return A data frame per household with `hhsize`, `hhcomp`, `hhcomp5`,
+#'   HRP employment and ethnicity.
 #' @keywords internal
 summarise_household_composition = function(people){
 
@@ -608,11 +617,16 @@ summarise_household_composition = function(people){
   ppl_summary
 }
 
-#' Hh Comp
+#' Classify one LCFS household into census composition categories
 #'
-#' @description Perform processing for hh comp.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `summarise_household_composition()`: uses the
+#'   relationship, age, education and employment variables to assign one
+#'   household to the census 15-category composition (OnePersonOver66,
+#'   CoupleChildren, LoneParent, FamilyOver66, etc.), mirroring the census
+#'   dependent-child rules.
+#' @param x People rows for one household (`case`).
+#' @return A one-row data frame with `case`, `hhsize`, `hhcomp`, optional
+#'   `hhcomp5`, `HRPemploy` and `HRPethnic`.
 #' @keywords internal
 hh_comp = function(x){
 
@@ -696,12 +710,17 @@ hh_comp = function(x){
   stop("Unknown example", x$case[1])
 }
 
-#' Subset Lcfs
+#' Pool two LCFS years into one matching dataset
 #'
-#' @description Perform processing for subset lcfs.
-#' @param lcfs Input object or parameter named `lcfs`.
-#' @param yrs Input object or parameter named `yrs`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Combines two consecutive LCFS releases (to boost sample
+#'   size), harmonises the variables needed for synthetic-population
+#'   matching (tenure, household composition via `hh_comp()`, OAC area type,
+#'   income, spending categories via `add_component_costs()`, vehicles and
+#'   flights) and caps extreme spending. See in-code TODOs for known source
+#'   issues (missing dwelling type post-2020, suspect OAC codes).
+#' @param lcfs List of releases from `load_LCFS()`.
+#' @param yrs Character names of the two releases to pool.
+#' @return A data frame of matched-ready households for the pooled years.
 #' @keywords internal
 subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
 
@@ -886,11 +905,13 @@ subset_lcfs = function(lcfs, yrs = c("20182019","20192020")){
 }
 
 
-#' Selected Lcfs
+#' Build the pooled two-year LCFS datasets for every base year
 #'
-#' @description Perform processing for selected lcfs.
-#' @param lcfs){ Input object or parameter named `lcfs){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Runs `subset_lcfs()` for each pair of survey years used by
+#'   the pipeline (2010/11 through 2022/23). Used by the `lcfs_clean`
+#'   target, consumed by the `match_LCFS_synth_pop*()` functions.
+#' @param lcfs List of releases from `load_LCFS()` (`lcfs` target).
+#' @return A named list of pooled household data frames, one per base year.
 #' @keywords internal
 selected_lcfs = function(lcfs){
 
@@ -907,12 +928,16 @@ selected_lcfs = function(lcfs){
 
 }
 
-#' Add Component Costs
+#' Build the detailed spending sub-components from raw LCFS codes
 #'
-#' @description Add component costs to an existing dataset.
-#' @param hh Input object or parameter named `hh`.
-#' @param yr Input object or parameter named `yr`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Sums the LCFS expenditure variables (which vary by survey
+#'   year, hence `any_of()` with both code cases) into the sub-components
+#'   the pipeline needs: gas/electricity, other fuels, second-dwelling
+#'   energy and rebates; vehicle purchase; motoring fuel vs other running
+#'   costs; and public transport vs air travel.
+#' @param hh Pooled household data frame from `subset_lcfs()`.
+#' @param yr Survey-year label controlling which codes are expected.
+#' @return `hh` with the additional `spend_*` component columns.
 #' @keywords internal
 add_component_costs = function(hh, yr = "2010"){
 
@@ -1057,11 +1082,13 @@ add_component_costs = function(hh, yr = "2010"){
 
 
 
-#' Clean Oac Codes
+#' Convert 2001 OAC descriptions to ONS subgroup codes
 #'
-#' @description Perform processing for clean OAC codes.
-#' @param values) Input object or parameter named `values)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Maps the descriptive 2001 OAC labels used in early LCFS
+#'   years (e.g. "Terraced Blue Collar (1)") to ONS subgroup codes ("1A1");
+#'   unmatched values pass through unchanged.
+#' @param values Character/factor vector of OAC labels.
+#' @return A character vector of OAC codes.
 #' @keywords internal
 clean_OAC_codes <- function(values) {
   # Create a mapping of descriptions to ONS codes

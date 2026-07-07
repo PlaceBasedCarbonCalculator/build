@@ -15,22 +15,19 @@
 # 3d buildings
 
 
-#' Function to convert a data.frame into a zipped cSV
-#' @param x data frame
-#' @param name output file name
-#' @param date date of output, defaults to today
-#' @param path output directory
-#' @param rounddp numeric, how many decimpla places to round to
-
-#' Bulk Export Csv Generic
+#' Export a data frame as a zipped CSV for bulk download
 #'
-#' @description Perform processing for bulk export csv generic.
-#' @param x Input data object.
-#' @param name Name or label used to identify output content.
-#' @param date Date or timestamp information.
-#' @param path File or directory path.
-#' @param rounddp Input object or parameter named `rounddp`.
-#' @return A data frame produced by the function.
+#' @description Writes a data frame to a dated CSV in a temp folder, zips it
+#'   into `path` as `<name>_<yyyymmdd>.zip`, and returns the zip path. Any sf
+#'   geometry is dropped and numeric columns are rounded. This is the generic
+#'   used by the `bulk_*` CSV export targets (PBCC emissions, household
+#'   clusters, PT frequency, access/proximity, EPC summary).
+#' @param x Data frame (may be sf or tibble) to export.
+#' @param name Base name for the output file (required).
+#' @param date Date stamp used in the file name; defaults to today.
+#' @param path Output directory, created if missing.
+#' @param rounddp Decimal places to round numeric columns to.
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_csv_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
@@ -89,15 +86,17 @@ bulk_export_csv_generic = function(x, name = NULL, date = Sys.Date(), path = "ou
 }
 
 
-#' Bulk Export Geojson Generic
+#' Convert a GeoJSON file to a zipped GeoPackage for bulk download
 #'
-#' @description Generic fucntion to export geojson files
-#' @param x Input data object.
-#' @param name Name or label used to identify output content.
-#' @param date Date or timestamp information.
-#' @param path File or directory path.
-#' @param rounddp Input object or parameter named `rounddp`.
-#' @return A data frame produced by the function.
+#' @description Reads a GeoJSON file from disk, rounds numeric columns, writes
+#'   it as a GeoPackage and zips it into `path` as `<name>_<yyyymmdd>.zip`.
+#'   Used by the EPC point-data bulk export targets.
+#' @param x Path to an existing GeoJSON file.
+#' @param name Base name for the output file (required).
+#' @param date Date stamp used in the file name; defaults to today.
+#' @param path Output directory, created if missing.
+#' @param rounddp Decimal places to round numeric columns to.
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
@@ -156,15 +155,17 @@ bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path =
 
 }
 
-#' Bulk Export Sf Generic
+#' Export an sf object as a zipped GeoPackage for bulk download
 #'
-#' @description Gneric Export fucntion for SF data frames
-#' @param x Input data object.
-#' @param name Name or label used to identify output content.
-#' @param date Date or timestamp information.
-#' @param path File or directory path.
-#' @param rounddp Input object or parameter named `rounddp`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Writes an in-memory sf data frame to a GeoPackage (numeric
+#'   columns rounded) and zips it into `path` as `<name>_<yyyymmdd>.zip`. Used
+#'   by `bulk_export_buildings()` for the building-heights layer.
+#' @param x sf data frame to export.
+#' @param name Base name for the output file (required).
+#' @param date Date stamp used in the file name; defaults to today.
+#' @param path Output directory, created if missing.
+#' @param rounddp Decimal places to round numeric columns to.
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_sf_generic = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk", rounddp = 2){
 
@@ -212,91 +213,96 @@ bulk_export_sf_generic = function(x, name = NULL, date = Sys.Date(), path = "out
 
 }
 
-#' Bulk Export Pbcc
+#' Bulk export the per-LSOA emissions table
 #'
-#' @description Perform processing for bulk export pbcc.
-#' @param x Input data object.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_csv_generic()` used by the
+#'   `bulk_pbcc` target. Note the default value references a global
+#'   (`lsoa_emissions_all_forcasts`) that no longer exists; the target passes
+#'   `lsoa_emissions_all` explicitly.
+#' @param x Per-LSOA emissions data frame (`lsoa_emissions_all` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_pbcc = function(x = lsoa_emissions_all_forcasts){
   bulk_export_csv_generic(x, "pbcc_lsoa")
 }
 
-#' Bulk Export Household Clusters
+#' Bulk export the household clusters table
 #'
-#' @description Perform processing for bulk export household clusters.
-#' @param x Input data object.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_csv_generic()` used by the
+#'   `bulk_household_clusters` target.
+#' @param x Household clusters data frame (`household_clusters` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_household_clusters = function(x = household_clusters){
   bulk_export_csv_generic(x, "household_clusters")
 }
 
-#' Bulk Export Pt Frequency
+#' Bulk export the public transport frequency table
 #'
-#' @description Perform processing for bulk export pt frequency.
-#' @param x Input data object.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_csv_generic()` used by the
+#'   `bulk_pt_frequency` target.
+#' @param x PT frequency data frame (`pt_frequency` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_pt_frequency = function(x = pt_frequency){
   bulk_export_csv_generic(x, "pt_frequency")
 }
 
-#' Bulk Export Access Proximity
+#' Bulk export the access/proximity table
 #'
-#' @description Compute accessibility or proximity metrics for zones and POIs.
-#' @param x Input data object.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_csv_generic()` used by the
+#'   `bulk_access_proximity` target.
+#' @param x Access/proximity data frame (`access_proximity` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_access_proximity = function(x = access_proximity){
   bulk_export_csv_generic(x, "access_proximity")
 }
 
-#' Bulk Export Inspire
+#' Bulk export the domestic EPC LSOA summary
 #'
-#' @description Perform processing for bulk export inspire.
-#' @param ){ Input object or parameter named `){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-bulk_export_inspire = function(){
-
-}
-#' Bulk Export Epc Dom Summary
-#'
-#' @description Perform processing for bulk export epc dom summary.
-#' @param x Input data object.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_csv_generic()` used by the
+#'   `bulk_epc_dom_summary` target.
+#' @param x Domestic EPC summary data frame (`epc_dom_summary` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_epc_dom_summary = function(x = epc_dom_summary){
   bulk_export_csv_generic(x, "epc_dom_summary")
 }
 
 
-#' Bulk Export Epc Dom
+#' Bulk export domestic EPC points as zipped GeoPackage
 #'
-#' @description Perform processing for bulk export epc dom.
-#' @param geojson_epc_dom){ Input object or parameter named `geojson_epc_dom){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_geojson_generic()`. The corresponding
+#'   `bulk_epc_dom` target is currently commented out in `_targets.R` due to a
+#'   JSON parsing error on the large epc_dom.geojson file.
+#' @param geojson_epc_dom Path to the domestic EPC GeoJSON (`geojson_epc_dom`
+#'   target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_epc_dom = function(geojson_epc_dom){
   bulk_export_geojson_generic(geojson_epc_dom, "epc_domestic")
 }
 
-#' Bulk Export Epc Nondom
+#' Bulk export non-domestic EPC points as zipped GeoPackage
 #'
-#' @description Perform processing for bulk export epc nondom.
-#' @param geojson_epc_nondom){ Input object or parameter named `geojson_epc_nondom){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_geojson_generic()` used by the
+#'   `bulk_epc_nondom` target.
+#' @param geojson_epc_nondom Path to the non-domestic EPC GeoJSON
+#'   (`geojson_epc_nondom` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_epc_nondom = function(geojson_epc_nondom){
   bulk_export_geojson_generic(geojson_epc_nondom, "epc_nondomestic")
 }
 
-#' Bulk Export Buildings
+#' Bulk export building footprints with heights as zipped GeoPackage
 #'
-#' @description Perform processing for bulk export buildings.
-#' @param buildings_heights){ Input object or parameter named `buildings_heights){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Wrapper for `bulk_export_sf_generic()` used by the
+#'   `bulk_buildings_heights` target.
+#' @param buildings_heights sf building footprints with height attributes
+#'   (`buildings_heights` target).
+#' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_buildings = function(buildings_heights){
   bulk_export_sf_generic(buildings_heights, "buildings_heights")

@@ -1,14 +1,14 @@
-#' Function to make geojson for tippecanoe (zones)
-#' @param z sf data frame with zones
-#' @param path folder to save results
-#' @example
-
-#' Make Geojson
+#' Write an sf object to GeoJSON for tippecanoe
 #'
-#' @description Build geojson and return the generated output.
-#' @param z Input object or parameter named `z`.
-#' @param path File or directory path.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Writes zones/points to a GeoJSON file ready to be turned into
+#'   PMTiles by `make_pmtiles()`. Transforms to WGS84 (EPSG:4326) if needed,
+#'   sets coordinate precision to 6 decimal places, and overwrites any existing
+#'   file at `path`. Used by the various `geojson_*` targets (wards, parish,
+#'   LA, EPC points, postcodes, etc.).
+#' @param z An sf data frame of zones or points.
+#' @param path File path for the output GeoJSON (including file name).
+#' @return The output `path`, after writing the file as a side effect. Warns if
+#'   `z` has more than 15 columns, as wide attribute tables bloat tiles.
 #' @keywords internal
 make_geojson <- function(z, path = "outputs/zones.geojson"){
 

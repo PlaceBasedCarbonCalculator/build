@@ -1,9 +1,12 @@
-#' Read Mot Km Pc
+#' Read total vehicle-km per postcode area from anonymised MOT data
 #'
-#' @description Read mot km pc from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the pre-cleaned Rds of total annual vehicle km per
+#'   postcode area (2005-2023) derived from anonymised MOT odometer records
+#'   (secure data). Used by the `car_km_pc` target, which provides the trend
+#'   over time for `extraplote_car_km_trends2()`.
+#' @param path Path to `postcode_total_vkm_2005_2023.Rds`.
+#' @return An sf data frame with `PC_AREA`, one column per year and postcode
+#'   area geometry.
 #' @keywords internal
 read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Anoymised MOT/clean/postcode_total_vkm_2005_2023.Rds")){
   vkm = readRDS(path)
@@ -13,18 +16,27 @@ read_mot_km_pc = function(path = file.path(parameters$path_secure_data,"CARS/Ano
 
 
 
-#' Extraplote Car Km Trends2
+#' Estimate annual car/van/company km per zone, 2010-2023
 #'
-#' @description Perform processing for extraplote car km trends2.
-#' @param car_km_pc Input object or parameter named `car_km_pc`.
-#' @param car_km_2009_2011 Input object or parameter named `car_km_2009_2011`.
-#' @param centroids_lsoa21 LSOA 2021 centroid geometries.
-#' @param centroids_dz22 Centroid geometries used for area matching.
-#' @param vehicle_registrations_21 Input object or parameter named `vehicle_registrations_21`.
-#' @param lookup_lsoa_2011_21 LSOA lookup table spanning 2011 and 2021 boundaries.
-#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
-#' @param years Year values used for filtering or loading.
-#' @return An sf object containing spatial data.
+#' @description Downscales postcode-area total vehicle-km (from anonymised
+#'   MOT data) to GB zones. Each zone is assigned to a postcode area by
+#'   centroid; the area total is split into company/private then car/van
+#'   using DfT registration ratios; each zone's share is weighted by its
+#'   vehicle count times its 2011 per-vehicle km (from the RAC/MOT 2009-11
+#'   data, carried over boundary changes; City of London EC/WC areas borrow
+#'   the W profile as they have no MOT tests). Used by the `car_km_lsoa_21`
+#'   target, feeding `calculate_car_emissions()`.
+#' @param car_km_pc Postcode-area total vkm (`car_km_pc` target).
+#' @param car_km_2009_2011 RAC/MOT LSOA outputs (`car_km_2009_2011` target).
+#' @param centroids_lsoa21 E&W LSOA centroids (`centroids_lsoa21` target).
+#' @param centroids_dz22 Scottish DZ centroids (`centroids_dz22` target).
+#' @param vehicle_registrations_21 DfT registrations
+#'   (`vehicle_registrations` target).
+#' @param lookup_lsoa_2011_21 ONS 2011-to-2021 LSOA lookup.
+#' @param lookup_dz_2011_22 Data Zone 2011-to-2022 split shares.
+#' @param years Years to estimate.
+#' @return A data frame per zone-year with vehicle counts, `PC_AREA`,
+#'   `car_km`, `van_km` and `company_km`.
 #' @keywords internal
 extraplote_car_km_trends2 = function(car_km_pc,
                                      car_km_2009_2011,
@@ -163,55 +175,4 @@ extraplote_car_km_trends2 = function(car_km_pc,
 
 }
 
-#' Car Km 11 To 21
-#'
-#' @description Perform processing for car km 11 to 21.
-#' @param car_km_lsoa_11 Input object or parameter named `car_km_lsoa_11`.
-#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-car_km_11_to_21 = function(car_km_lsoa_11, lsoa_11_21_tools){
-
-  names(car_km_lsoa_11)[1] = "LSOA11CD"
-
-  car_km_S = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_split$LSOA11CD,]
-  car_km_M = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_merge$LSOA11CD,]
-  car_km_U = car_km_lsoa_11[car_km_lsoa_11$LSOA11CD %in% lsoa_11_21_tools$lookup_unchanged$LSOA11CD,]
-
-  #Unchanged
-  car_km_U = dplyr::left_join(car_km_U, lsoa_11_21_tools$lookup_unchanged, by = "LSOA11CD")
-
-  # Merge
-  car_km_M = dplyr::left_join(car_km_M, lsoa_11_21_tools$lookup_merge, by = "LSOA11CD")
-  car_km_M = dplyr::select(car_km_M, -LSOA11CD)
-  car_km_M = dplyr::group_by(car_km_M, LSOA21CD)
-  car_km_M = dplyr::summarise_all(car_km_M, sum, na.rm = TRUE)
-  car_km_M = dplyr::ungroup(car_km_M)
-
-  #Split
-  lookup_split = lsoa_11_21_tools$lookup_split
-  lookup_split = lookup_split[,c("LSOA11CD","LSOA21CD","year","household_ratio")]
-  lookup_split = lookup_split[lookup_split$year %in% 2009:2023,]
-
-  names(car_km_S) = gsub("vans_total","vanstotal",names(car_km_S))
-  names(car_km_S) = gsub("van_km","vankm",names(car_km_S))
-  names(car_km_S) = gsub("car_km","carkm",names(car_km_S))
-
-  car_km_S = dplyr::left_join(lsoa_11_21_tools$lookup_split, car_km_S,
-                                    by = "LSOA11CD", relationship = "many-to-many")
-  car_km_S = as.data.frame(car_km_S)
-  for(i in 5:6){
-    car_km_S[i] = car_km_S[,i ,drop = TRUE] * car_km_S$pop_ratio
-  }
-
-  nms = c("LSOA21CD",paste0("van_km_",10:23),paste0("car_km_",10:23))
-
-  car_km_S = car_km_S[,nms]
-  car_km_M = car_km_M[,nms]
-  car_km_U = car_km_U[,nms]
-
-  final = rbind(car_km_S, car_km_M, car_km_U)
-  final
-
-}
 

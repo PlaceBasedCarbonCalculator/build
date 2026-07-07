@@ -1,9 +1,12 @@
-#' Read Datazone Lookup 2022
+#' Read the 2022 Scottish Data Zone lookup CSV
 #'
-#' @description Read datazone lookup 2022 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the lookup linking 2022 Data Zones to higher Scottish
+#'   geographies (Intermediate Zones, councils, etc.). Used by the
+#'   `lookup_DataZone_2022` target, which feeds the Scottish household
+#'   clustering.
+#' @param path Boundaries folder containing
+#'   `DataZone2022lookup_2024-12-16.csv`.
+#' @return A data frame with the full contents of the lookup CSV.
 #' @keywords internal
 read_datazone_lookup_2022 = function(path = "../inputdata/boundaries/"){
 

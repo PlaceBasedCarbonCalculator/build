@@ -1,15 +1,23 @@
-#' Combine Lsoa Emissions
+#' Build the master per-LSOA emissions table with grades
 #'
-#' @description Combine lsoa emissions inputs into a single consolidated result.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param flights_lsoa_emissions Input object or parameter named `flights_lsoa_emissions`.
-#' @param consumption_emissions Input object or parameter named `consumption_emissions`.
-#' @param car_emissions Input object or parameter named `car_emissions`.
-#' @param domestic_electricity_emissions Input object or parameter named `domestic_electricity_emissions`.
-#' @param domestic_gas_emissions Input object or parameter named `domestic_gas_emissions`.
-#' @param other_heating_emissions Input object or parameter named `other_heating_emissions`.
-#' @param max_year Input object or parameter named `max_year`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Joins every emissions domain (domestic gas/electricity,
+#'   other heating, car/van/company driving, flights and the consumption
+#'   categories from the synthetic population) into one table per zone-year
+#'   up to `max_year`, derives combined goods-and-services and grand totals
+#'   (per-capita and absolute), and grades every per-capita measure A+ to
+#'   F- within each year via `value2grade()`. Zones with implausible company
+#'   car rates (>2000 kgCO2e/person) have that component excluded from
+#'   their total. This is the `lsoa_emissions_all` target - the core output
+#'   behind the map, JSONs, LA/OAC summaries and bulk download.
+#' @param flights_lsoa_emissions `flights_lsoa_emissions` target.
+#' @param consumption_emissions `consumption_emissions` target.
+#' @param car_emissions `car_emissions` target.
+#' @param domestic_electricity_emissions `domestic_electricity_emissions`.
+#' @param domestic_gas_emissions `domestic_gas_emissions` target.
+#' @param other_heating_emissions `other_heating_emissions` target.
+#' @param max_year Latest year to include (2022 in `_targets.R`).
+#' @return A data frame per LSOA-year with per-capita and total emissions
+#'   for every domain plus `*_grade` columns.
 #' @keywords internal
 combine_lsoa_emissions = function(flights_lsoa_emissions,
                                   consumption_emissions,

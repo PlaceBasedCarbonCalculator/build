@@ -1,17 +1,24 @@
 # Match Up Land Registry Data with UPRN when Possible
 # Or Postcode Centroid when not
 
-#' Land Registry Add UPRN
+#' Geocode Land Registry transactions via UPRNs, EPC addresses and postcodes
 #'
-#' @description Perform processing for land registry add uprn.
-#' @param house_price_lr Input object or parameter named `house_price_lr`.
-#' @param house_prices_ubdc Input object or parameter named `house_prices_ubdc`.
-#' @param uprn_historical Input object or parameter named `uprn_historical`.
-#' @param lookup_postcode_OA_LSOA_MSOA_2021 Lookup table used to map area codes or classifications.
-#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
-#' @param path_epc Input object or parameter named `path_epc`.
-#' @param path_epc_nondom Input object or parameter named `path_epc_nondom`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Attaches a UPRN and 2021 LSOA to every price-paid
+#'   transaction through a cascade of matches: (1) the UBDC transaction-UPRN
+#'   lookup; (2) other transactions at the same address that did match; (3-6)
+#'   normalised address+postcode matching against the domestic then
+#'   non-domestic EPC registers (two address formats each, newest EPC wins on
+#'   duplicates); (7) any remainder gets an LSOA from its postcode only.
+#'   Matched transactions get coordinates from `uprn_historical` and an LSOA
+#'   by spatial join. Used by the `house_price_lr_uprn` target.
+#' @param house_price_lr Land Registry transactions (`house_price_lr`).
+#' @param house_prices_ubdc UBDC linkage table (`house_prices_ubdc`).
+#' @param uprn_historical UPRN coordinates (`uprn_historical` target).
+#' @param lookup_postcode_OA_LSOA_MSOA_2021 Postcode-to-LSOA lookup.
+#' @param bounds_lsoa_GB_full GB zone boundaries for the spatial join.
+#' @param path_epc,path_epc_nondom Paths to the cleaned EPC Rds files.
+#' @return A data frame of all transactions with `uprn` (where matched) and
+#'   `LSOA21CD` (where locatable); unmatched rows keep NA.
 #' @keywords internal
 land_registry_add_uprn = function(house_price_lr,
                                   house_prices_ubdc,
@@ -200,11 +207,16 @@ land_registry_add_uprn = function(house_price_lr,
 
 }
 
-#' House Price LSOA Summary
+#' Summarise house prices per LSOA per year
 #'
-#' @description Perform processing for house price LSOA summary.
-#' @param house_price_lr_uprn Input object or parameter named `house_price_lr_uprn`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Aggregates the geocoded price-paid transactions to
+#'   transaction counts and price quantiles (min/25/median/75/max) per 2021
+#'   LSOA per year. Used by the `house_prices_lsoa` target, exported by
+#'   `prices_json`.
+#' @param house_price_lr_uprn Geocoded transactions
+#'   (`house_price_lr_uprn` target).
+#' @return A data frame per LSOA-year of transaction counts and price
+#'   quantiles.
 #' @keywords internal
 house_price_lsoa_summary = function(house_price_lr_uprn){
 
@@ -225,13 +237,20 @@ house_price_lsoa_summary = function(house_price_lr_uprn){
   house_price_lsoa
 }
 
-# Extrapolate todays price from hisotrical price
-#' House Price Extrapolate
+#' Nowcast each property's value to 2024 prices
 #'
-#' @description Perform processing for house price extrapolate.
-#' @param house_price_lr_uprn Input object or parameter named `house_price_lr_uprn`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Estimates a 2024 value for every property from its most
+#'   recent sale: median prices per local authority, year and property type
+#'   give a growth multiple to 2024 (type "O"/other uses the all-type LA
+#'   median as its transactions are too sparse), which is applied to the last
+#'   sale price and rounded to the nearest 1,000 pounds. Used by the
+#'   `house_prices_nowcast` target, feeding the retrofit map and EPC/LR
+#'   combined outputs.
+#' @param house_price_lr_uprn Geocoded transactions
+#'   (`house_price_lr_uprn` target).
+#' @param lsoa_admin Zone-to-LA lookup (`lsoa_admin` target).
+#' @return A data frame with one row per property (latest sale) including
+#'   `growth_multiple` and `price_2024`.
 #' @keywords internal
 house_price_extrapolate = function(house_price_lr_uprn, lsoa_admin){
 

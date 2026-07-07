@@ -1,8 +1,14 @@
-#' Load Emissions Factors
+#' DEFRA greenhouse gas conversion factors, 2010-2025
 #'
-#' @description Make emissions factors data from DEFRA
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @return A data frame containing the loaded dataset.
+#' @description Returns a hard-coded table of annual UK emissions factors
+#'   (kgCO2e per kWh) for grid electricity, natural gas, heating oil and coal,
+#'   taken from the DEFRA/BEIS greenhouse gas conversion factor publications.
+#' @details Used by the `emissions_factors` target, which feeds the domestic
+#'   gas/electricity emissions targets, postcode-level energy emissions and
+#'   other-heating calculations. Values are per unit of energy consumed
+#'   (location-based for electricity).
+#' @return A data frame with columns `year` (2010-2025), `electricity_kgco2e`,
+#'   `gas_kgco2e`, `oil_kgco2e` and `coal_kgco2e`.
 #' @keywords internal
 load_emissions_factors = function(){
 

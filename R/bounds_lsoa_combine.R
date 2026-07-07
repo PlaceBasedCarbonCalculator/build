@@ -1,12 +1,18 @@
-#' Combine LSOA Bounds
+#' Combine E&W LSOA and Scottish Data Zone boundaries into one GB layer
 #'
-#' @description Combine LSOA bounds inputs into a single consolidated result.
-#' @details Merge LSOA and Data Zone boundaries, and simplify Data Zones for
-#'   low-res equivalents.
-#' @param bounds_lsoa Input object or parameter named `bounds_lsoa`.
-#' @param bounds_dz11 Input object or parameter named `bounds_dz11`.
-#' @param keep Input object or parameter named `keep`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Renames the Data Zone code column to `LSOA21CD` and appends
+#'   the Scottish zones to the England & Wales LSOAs, giving a single GB zone
+#'   layer. Scottish Data Zones are only published at full resolution, so when
+#'   `keep < 1` they are simplified with `rmapshaper::ms_simplify()` to match
+#'   the generalisation of the E&W layer. Used by the `bounds_lsoa_GB_full`
+#'   (keep = 1), `bounds_lsoa_GB_generalised` (keep = 0.2) and
+#'   `bounds_lsoa_GB_super_generalised` (keep = 0.05) targets.
+#' @param bounds_lsoa sf 2021 LSOA boundaries for England & Wales.
+#' @param bounds_dz11 sf 2022 Scottish Data Zone boundaries (`bounds_dz22`
+#'   target; the parameter name is historical).
+#' @param keep Proportion of vertices to retain when simplifying the Data
+#'   Zones; 1 means no simplification.
+#' @return An sf data frame of GB zones with a single `LSOA21CD` column.
 #' @keywords internal
 combine_lsoa_bounds = function(bounds_lsoa, bounds_dz11, keep = 1){
   names(bounds_dz11)[1] = "LSOA21CD"

@@ -1,18 +1,22 @@
-#' Summarise Access Proximity
+#' Combine the accessibility and proximity scores into one table per LSOA
 #'
-#' @description Summarise access proximity into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param access_poi_circle_15min Input object or parameter named `access_poi_circle_15min`.
-#' @param access_poi_iso_15min Input object or parameter named `access_poi_iso_15min`.
-#' @param access_poi_circle_30min Input object or parameter named `access_poi_circle_30min`.
-#' @param access_poi_iso_30min Input object or parameter named `access_poi_iso_30min`.
-#' @param access_poi_circle_45min Input object or parameter named `access_poi_circle_45min`.
-#' @param access_poi_iso_45min Input object or parameter named `access_poi_iso_45min`.
-#' @param access_poi_circle_60min Input object or parameter named `access_poi_circle_60min`.
-#' @param access_poi_iso_60min Input object or parameter named `access_poi_iso_60min`.
-#' @param lookup_oa2021_lsoa2021 OA-to-LSOA lookup table.
-#' @param area_classifications Area classification lookup table.
-#' @return A summary data frame with aggregated metrics.
+#' @description Merges the eight `access_counts()` outputs (walking
+#'   isochrones = "access", straight-line circles = "proximity", at
+#'   15/30/45/60 minutes) into one row per LSOA and POI class. Isochrone
+#'   results are re-keyed from OA to LSOA via the nearest-OA lookup. The
+#'   standardised scores (`sp10kp_diff_SD`) are clipped to [-2.9, 3]; -3
+#'   flags zones whose catchment population is under half the national
+#'   people-per-service (too few people to expect the service), and -2.9
+#'   marks other missing values. Used by the `access_proximity` target,
+#'   exported by `build_access_jsons` and the bulk download.
+#' @param access_poi_circle_15min,access_poi_circle_30min,access_poi_circle_45min,access_poi_circle_60min
+#'   Circle-based results (`access_poi_circle_*` targets).
+#' @param access_poi_iso_15min,access_poi_iso_30min,access_poi_iso_45min,access_poi_iso_60min
+#'   Isochrone-based results (`access_poi_iso_*` targets).
+#' @param lookup_oa2021_lsoa2021 Nearest-OA lookup (`lookup_oa2021_lsoa2021`).
+#' @param area_classifications Currently unused.
+#' @return A data frame per LSOA x POI class with `access_15` ...
+#'   `proximity_60` scores and catchment populations.
 #' @keywords internal
 summarise_access_proximity = function(access_poi_circle_15min,
                                       access_poi_iso_15min,

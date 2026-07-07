@@ -1,9 +1,9 @@
-#' Read Jobs Industry
+#' Read 2021 census workday jobs by industry per MSOA
 #'
-#' @description Read jobs industry from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the WD015 workday-population-by-industry
+#'   table. Not currently wired to a target.
+#' @param path Path to `wd015.zip`.
+#' @return A data frame with `MSOA21CD`, industry code/name and job counts.
 #' @keywords internal
 read_jobs_industry = function(path = "../inputdata/industry/wd015.zip"){
   dir.create(file.path(tempdir(),"industry"))
@@ -15,12 +15,12 @@ read_jobs_industry = function(path = "../inputdata/industry/wd015.zip"){
 }
 
 
-#' Read Industry Classifications
+#' Read the manufacturing flexibility classification of industries
 #'
-#' @description Read industry classifications from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the workbook categorising manufacturing activities by
+#'   perceived flexibility/workforce. Not currently wired to a target.
+#' @param path Path to the xlsx workbook.
+#' @return A data frame with `industry_name` and `category`.
 #' @keywords internal
 read_industry_classifications = function(path = "../inputdata/industry/Manufacturing activities by perceived flexibility and workforce.xlsx"){
   classif <- readxl::read_xlsx(path)

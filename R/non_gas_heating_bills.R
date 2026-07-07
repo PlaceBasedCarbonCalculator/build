@@ -1,13 +1,18 @@
-#TODO; This is a very rough estimate of energy spending on fuels other than
-#gas/electric it assumes that heat demand is the UK average and that people by
-#oil or smokeless solid fuel.
-#' Estimate Other Heating Bills
+#' Estimate spending on heating fuels other than gas/electricity
 #'
-#' @description Perform processing for estimate other heating bills.
-#' @param ch_all Input object or parameter named `ch_all`.
-#' @param prices_other_heating Input object or parameter named `prices_other_heating`.
-#' @param population){ Input object or parameter named `population){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Rough estimate of household spend on oil, solid fuel and
+#'   other heating fuels per LSOA: households using each fuel (from the
+#'   census central-heating data) x the LSOA's median gas demand (as a proxy
+#'   for heat demand) x the fuel price (oil price used where no better price
+#'   exists). Averaged over all households in the zone. Used by the
+#'   `bills_other_heating` target.
+#' @param ch_all Other-heating table with fuel counts and `median_gas_kwh`
+#'   (the `other_heating_emissions` target).
+#' @param prices_other_heating Fuel prices per kWh
+#'   (`prices_other_heating` target).
+#' @param population GB population/households (`population` target).
+#' @return A data frame with `LSOA21CD`, `year`, `otherheating_spend_total`
+#'   and `otherheating_average_bill`.
 #' @keywords internal
 estimate_other_heating_bills = function(ch_all, prices_other_heating, population){
 

@@ -1,9 +1,11 @@
-#' Load Ubdc House Prices
+#' Load the UBDC price-paid-to-UPRN linkage table
 #'
-#' @description Load ubdc house prices data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the Urban Big Data Centre lookup that links
+#'   Land Registry price-paid transaction IDs to UPRNs and USRNs. Used by the
+#'   `house_prices_ubdc` target, which lets `land_registry_add_uprn()`
+#'   geocode transactions.
+#' @param path Path to `ppdid_uprn_usrn.zip`.
+#' @return A data frame with `transactionid`, `uprn`, `parentuprn`, `usrn`.
 #' @keywords internal
 load_ubdc_house_prices = function(path = "../inputdata/house prices/ppdid_uprn_usrn.zip"){
   dir.create(file.path(tempdir(),"ubdc"))
@@ -15,12 +17,14 @@ load_ubdc_house_prices = function(path = "../inputdata/house prices/ppdid_uprn_u
 }
 
 
-#' Load Lr Price Paid
+#' Load Land Registry price paid data
 #'
-#' @description Load lr price paid data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads every Land Registry price-paid CSV in `path` (headerless
+#'   annual extracts), de-duplicates on transaction ID and converts the
+#'   categorical columns to factors. Used by the `house_price_lr` target.
+#' @param path Folder of price-paid CSV files.
+#' @return A data frame of transactions: price, date, postcode, property
+#'   type, new-build/freehold flags, address fields and category.
 #' @keywords internal
 load_lr_price_paid = function(path = "../inputdata/house prices/land registry/"){
   fls = list.files(path)

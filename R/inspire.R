@@ -1,9 +1,12 @@
-#' Load Inspire Scotland
+#' Load Scottish INSPIRE cadastral parcels
 #'
-#' @description Load inspire scotland data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads every zipped INSPIRE cadastral parcel shapefile (one per
+#'   local authority) in `path` and binds them into one layer tagged with the
+#'   source zip name as `local_authority`. Unlike the England & Wales loader,
+#'   no grid-artefact cleaning is applied. Used by the `inspire_scotland`
+#'   target, which feeds `combine_os_osm_buildings()`.
+#' @param path Folder of INSPIRE Scotland zip files.
+#' @return An sf data frame with `local_authority`, `inspireid` and geometry.
 #' @keywords internal
 load_inspire_scotland = function(path = file.path(parameters$path_data,"INSPIRE_scotland")) {
   zips = list.files(path, pattern = ".zip", full.names = TRUE)
@@ -27,12 +30,23 @@ load_inspire_scotland = function(path = file.path(parameters$path_data,"INSPIRE_
 }
 
 
-#' Load Inspire
+#' Load and clean England & Wales INSPIRE cadastral parcels
 #'
-#' @description Load inspire data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads every zipped INSPIRE GML (one per local authority) and
+#'   repairs an artefact of the INSPIRE publication process: parcels are
+#'   arbitrarily split along a 500 m national grid. For each LA the function
+#'   rebuilds the 500 m grid, finds parcels whose edges lie on it, and merges
+#'   the two polygons either side of each shared grid-line segment back
+#'   together; a final pass merges any remaining exact 500 m squares into
+#'   their neighbours. LA names are cleaned ("...Borough_Council" etc.
+#'   stripped) and stored as `local_authority`. Used by the `inspire` target,
+#'   which feeds `combine_os_osm_buildings()`. Slow, and known to fail on some
+#'   inputs (e.g. City of London: "Splitting a Line by a GeometryCollection is
+#'   unsupported").
+#' @param path Folder of INSPIRE zip files, each containing
+#'   `Land_Registry_Cadastral_Parcels.gml`.
+#' @return An sf data frame with `local_authority`, `INSPIREID`, `area` (m2)
+#'   and polygon geometry.
 #' @keywords internal
 load_inspire = function(path = file.path(parameters$path_data,"INSPIRE")){
 
@@ -134,9 +148,8 @@ load_inspire = function(path = file.path(parameters$path_data,"INSPIRE")){
     poly_new$area <- as.numeric(sf::st_area(poly_new))
     poly_new$perimiter <- as.numeric(sf::st_perimeter(poly_new))
 
-    # Final Pass for any perfect squares
-    poly_squares <- poly_new[poly_new$area == 250000,]
-    poly_squares <- poly_new[poly_new$perimiter == 2000,]
+    # Final Pass for any perfect squares (500m x 500m: area and perimeter must both match)
+    poly_squares <- poly_new[poly_new$area == 250000 & poly_new$perimiter == 2000,]
 
     if(nrow(poly_squares) > 0){
       poly_new <- poly_new[!poly_new$INSPIREID %in% poly_squares$INSPIREID,]
@@ -147,7 +160,7 @@ load_inspire = function(path = file.path(parameters$path_data,"INSPIRE")){
         poly_sel <- poly_new[sqr,, op = sf::st_intersects]
         poly_new <- poly_new[!poly_new$INSPIREID %in% poly_sel$INSPIREID,]
         poly_sel <- rbind(poly_sel, sqr)
-        poly_sel_geom <- st_union(poly_sel)
+        poly_sel_geom <- sf::st_union(poly_sel)
         poly_sel <- poly_sel[1,]
         poly_sel$GEOMETRY <- poly_sel_geom
         poly_new <- rbind(poly_new, poly_sel)
@@ -158,8 +171,8 @@ load_inspire = function(path = file.path(parameters$path_data,"INSPIRE")){
     if("sfc_POLYGON" %in% class(poly_new$GEOMETRY)){
       # DO nothing
     } else {
-      poly_mp <- poly_new[st_geometry_type(poly_new) == "MULTIPOLYGON",]
-      poly_new <- poly_new[st_geometry_type(poly_new) == "POLYGON",]
+      poly_mp <- poly_new[sf::st_geometry_type(poly_new) == "MULTIPOLYGON",]
+      poly_new <- poly_new[sf::st_geometry_type(poly_new) == "POLYGON",]
       poly_mp <- sf::st_cast(poly_mp, "POLYGON")
       poly_new <- rbind(poly_new, poly_mp)
       rm(poly_mp)

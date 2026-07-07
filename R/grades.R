@@ -1,10 +1,17 @@
-#' Value Grade
+#' Convert numeric values to A+ to F- grades by percentile
 #'
-#' @description Perform processing for value2grade.
-#' @param x Input data object.
-#' @param high_good Input object or parameter named `high_good`.
-#' @param zeroNA Input object or parameter named `zeroNA`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Ranks values into percentiles (via `percentile()` in
+#'   flights.R) and maps each percentile to an 18-band letter grade from "A+"
+#'   (best) to "F-" (worst), with wider bands in the middle of the
+#'   distribution. Used for the emissions grades shown on the Carbon & Place
+#'   map (see `combine_lsoa_emissions()` and `select_map_outputs()`).
+#' @param x Numeric vector to grade.
+#' @param high_good Logical. If TRUE, high values get good grades (e.g. a
+#'   large percentage emissions reduction is an "A+"); if FALSE (default), low
+#'   values get good grades (e.g. low emissions).
+#' @param zeroNA Logical, passed to `percentile()`. If TRUE, zeros are treated
+#'   as missing when computing percentile breaks.
+#' @return A character vector of grades; missing values become the string "NA".
 #' @keywords internal
 value2grade <- function(x, high_good = FALSE, zeroNA = TRUE){
 

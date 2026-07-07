@@ -1,22 +1,26 @@
-#' Load Flights Od
+#' Load the airport-to-airport flight emissions dataset
 #'
-#' @description Load flights od data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the pre-built GeoPackage of passenger flows and annual
+#'   emissions between airport pairs (from the CREDS long-distance travel
+#'   work). Used by the `flights_od` target.
+#' @param path Path to `od_emissions_<year>.gpkg`.
+#' @return An sf data frame of airport-pair lines with `emissions_YYYY`
+#'   columns.
 #' @keywords internal
 load_flights_od = function(path = "../../creds2/LDT/data/clean/od_emissions_2021.gpkg") {
   pass_od <- sf::read_sf(path)
   pass_od
 }
 
-#' Load Flights Airports
+#' Load airports and tag them with their UK home nation
 #'
-#' @description Load flights airports data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param bounds_la) Input object or parameter named `bounds_la)`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the cleaned airports GeoPackage and spatially joins each
+#'   airport to a home nation (E/W/S/N, derived by dissolving local authority
+#'   boundaries on the first letter of their code); airports outside the UK
+#'   become "Other Country". Used by the `flights_airports` target.
+#' @param path Path to the cleaned airports GeoPackage.
+#' @param bounds_la Local authority boundaries (`bounds_la` target).
+#' @return An sf POINT data frame of airports with a `country_uk` column.
 #' @keywords internal
 load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_clean_second_pass_2021.gpkg", bounds_la) {
   airports <- sf::read_sf(path)
@@ -34,15 +38,21 @@ load_flights_airports = function(path = "../../creds2/LDT/data/clean/airports_cl
 
 }
 
-# Get annual emissions for each to the home nations
-# Note some flight emissions are allocated outside the UK
-#' Get Flights Total Emissions
+#' Total annual flight emissions attributable to each home nation
 #'
-#' @description Compute a carbon emission or footprint summary.
-#' @param flights_od Input object or parameter named `flights_od`.
-#' @param flights_airports Input object or parameter named `flights_airports`.
-#' @param max_year Input object or parameter named `max_year`.
-#' @return A data frame produced by the function.
+#' @description Aggregates airport-pair emissions to national totals for
+#'   2010 onwards. Domestic (UK-UK) emissions are split 50:50 between the
+#'   origin and destination nations. International emissions are assigned to
+#'   the UK end of the route, scaled by 0.64 (about 34% of passengers are
+#'   foreign residents, whose emissions are not counted), pooled across
+#'   England/Scotland/Wales ("ESW") because passengers freely cross borders
+#'   to fly, and Northern Ireland's international flights are excluded from
+#'   the GB total. Used by the `flights_total_emissions` target.
+#' @param flights_od Airport-pair emissions (`flights_od` target).
+#' @param flights_airports Airports with `country_uk` (`flights_airports`).
+#' @param max_year Latest emissions year column to use.
+#' @return A data frame with `country_uk`, `type`
+#'   ("domestic"/"international") and `emissions_YYYY` columns.
 #' @keywords internal
 get_flights_total_emissions = function(flights_od, flights_airports, max_year = 2024) {
 
@@ -75,13 +85,7 @@ get_flights_total_emissions = function(flights_od, flights_airports, max_year = 
                                     flights_summary$toclass == "Other Country"), ]
 
   # Split Domestic emissions 50:50 between nations
-#' Part Sum
-#'
-#' @description Perform processing for part sum.
-#' @param x Input data object.
-#' @param frac Input object or parameter named `frac`.
-#' @return A data frame produced by the function.
-#' @keywords internal
+  # (local helper: sum then take a fraction, e.g. half to each nation)
   part_sum = function(x, frac = 0.5){
     sum(x, na.rm = TRUE) * frac
   }
@@ -140,12 +144,21 @@ get_flights_total_emissions = function(flights_od, flights_airports, max_year = 
 
 }
 
-#' Get Flights Lsoa Emissions
+#' Distribute national flight emissions to zones by estimated flying habits
 #'
-#' @description Compute a carbon emission or footprint summary.
-#' @param flights_total_emissions Input object or parameter named `flights_total_emissions`.
-#' @param consumption_emissions){ Input object or parameter named `consumption_emissions){`.
-#' @return A data frame produced by the function.
+#' @description Downscales the national flight emissions totals to LSOAs.
+#'   Each zone's share of the domestic total (within its nation) and the GB
+#'   international total is weighted by the flight counts estimated from the
+#'   synthetic population/LCFS consumption data (returns counted twice). A
+#'   consistency check verifies the 2022 zone totals sum back to the national
+#'   figure. Used by the `flights_lsoa_emissions` target, feeding
+#'   `combine_lsoa_emissions()`.
+#' @param flights_total_emissions National totals
+#'   (`flights_total_emissions` target).
+#' @param consumption_emissions Per-zone consumption results including
+#'   flight counts (`consumption_emissions` target).
+#' @return A data frame per zone-year with flight counts,
+#'   `emissions_international`, `emissions_domestic` and `emissions_percap`.
 #' @keywords internal
 get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emissions){
 
@@ -227,12 +240,17 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
 
 
 
-#' Percentile
+#' Assign each value its percentile rank (0-100)
 #'
-#' @description Perform processing for percentile.
-#' @param dat Input object or parameter named `dat`.
-#' @param zeroNA Input object or parameter named `zeroNA`.
-#' @return A data frame produced by the function.
+#' @description Computes the 0-100 percentile breaks of `dat` and returns,
+#'   for each value, the percentile band it falls in. Duplicate break values
+#'   (common with many zeros) are collapsed so ties share the same
+#'   percentile. Used by `value2grade()` in grades.R to convert emissions to
+#'   A+ to F- grades.
+#' @param dat Numeric vector.
+#' @param zeroNA If TRUE, zeros are treated as NA (excluded from break
+#'   calculation and returned as NA).
+#' @return An integer vector of percentiles (0-100), NA where `dat` is NA.
 #' @keywords internal
 percentile <- function(dat, zeroNA = FALSE){
   if(zeroNA){
