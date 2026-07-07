@@ -1,10 +1,17 @@
 
-#' Load Msoa Income
+#' Load ONS small-area income estimates for MSOAs
 #'
-#' @description Load msoa income data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS "Income estimates for small areas" Excel releases
+#'   for 2012, 2014, 2016, 2018, 2020 and 2023 and combines them into a single
+#'   long table of total (gross, unequivalised) household income per MSOA.
+#' @details Used by the `income_msoa` target, which is then downscaled to LSOA
+#'   via `match_income_lsoa_msoa()`. The 2012 and 2014 releases report weekly
+#'   income and are converted to annual (x 365/7); later releases are already
+#'   annual. 2012-2020 use 2011 MSOA codes (`MSOA11`); 2023 uses 2021 codes
+#'   (`MSOA21`).
+#' @param path Folder containing `income2012.xls` ... `income2023.xlsx`.
+#' @return A data frame with columns `MSOA11` (or `MSOA21` for 2023),
+#'   `total_annual_income`, `upper_limit`, `lower_limit` and `year`.
 #' @keywords internal
 load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   #TODO: Total Weakly Income or Net weekly Income / Equivalised  / Before / After Housing Costs
@@ -32,8 +39,8 @@ load_msoa_income = function(path = file.path(parameters$path_data,"income")){
   income2014 = income2014[!is.na(income2014$MSOAname),]
   income2014 = income2014[,c("MSOA11","total_weekly_income","upper_limit","lower_limit")]
   income2014$total_weekly_income = as.numeric(income2014$total_weekly_income)
-  income2014$upper_limit = as.numeric(income2014$upper_limit) * 52
-  income2014$lower_limit = as.numeric(income2014$lower_limit) * 52
+  income2014$upper_limit = as.numeric(income2014$upper_limit)
+  income2014$lower_limit = as.numeric(income2014$lower_limit)
   income2014$year = 2014
 
   names(income2016) = c("MSOA11","MSOAname","Localauthoritycode","Localauthorityname","Regioncode","Regionname",
