@@ -1,9 +1,13 @@
-#' Load Nts
+#' Load the National Travel Survey (safeguarded) SPSS tables
 #'
-#' @description Load NTS data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips the UKDA NTS 2002-2023 SPSS release, reads every table,
+#'   names the list elements using the UKDA lookup workbook (deduplicated with
+#'   letter suffixes), and replaces coded columns with their labelled values
+#'   using the response-levels lookup. Used by the `nts` target; downstream
+#'   use is still under development.
+#' @param path Folder containing `NTS_Safeguarded_2002_2023_SPSS_V1.zip`
+#'   (secure data).
+#' @return A named list of data frames, one per NTS table.
 #' @keywords internal
 load_NTS = function(path = file.path(parameters$path_secure_data,"National Travel Survey/Safeguarded/")){
 
@@ -93,8 +97,7 @@ load_NTS = function(path = file.path(parameters$path_secure_data,"National Trave
 }
 
 
-
-#' Build Nts Zones
+#' Build Nts Zones - unfinished fucntion
 #'
 #' @description Build nts zones and return the generated output.
 #' @param nts){ Input object or parameter named `nts){`.
