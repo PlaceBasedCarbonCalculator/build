@@ -2,9 +2,10 @@
 #'
 #' @description Summarise LSOA transport data to local authority scale using
 #'   population-weighted means.
-#' @param transport_lsoa_data Input object or parameter named `transport_lsoa_data`.
-#' @param lsoa_admin Input object or parameter named `lsoa_admin`.
-#' @param population Input object or parameter named `population`.
+#' @param transport_lsoa_data Transport map attributes
+#'   (`transport_lsoa_data` target).
+#' @param lsoa_admin Zone-to-LA lookup (`lsoa_admin` target).
+#' @param population GB population (`population` target).
 #' @param pop_year Year to use for population weights.
 #' @return A data frame with transport variables summarised at LAD25CD level.
 #' @keywords internal

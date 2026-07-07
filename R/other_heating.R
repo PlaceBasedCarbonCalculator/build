@@ -1,13 +1,23 @@
-#' Calculate Other Heating
+#' Estimate emissions from heating fuels other than mains gas/electricity
 #'
-#' @description Calculate other heating and return the computed result.
-#' @param central_heating_2021 Input object or parameter named `central_heating_2021`.
-#' @param central_heating_2011 Input object or parameter named `central_heating_2011`.
-#' @param central_heating_2011_scotland Input object or parameter named `central_heating_2011_scotland`.
-#' @param central_heating_2022_scotland Input object or parameter named `central_heating_2022_scotland`.
-#' @param domestic_gas Input object or parameter named `domestic_gas`.
-#' @param population){ Input object or parameter named `population){`.
-#' @return A data frame or numeric summary containing the computed results.
+#' @description Estimates annual emissions from oil, solid fuel, "other" and
+#'   mixed heating per GB zone for 2010-2024. Census 2011 and 2021/22 counts
+#'   of households by heating fuel are interpolated between the census years
+#'   (`distribute_other_heating()`); each household is assumed to need the
+#'   GB-median gas consumption for that year, multiplied by a DEFRA 2020
+#'   emissions factor per fuel (gas factor used for mixed heating). Used by
+#'   the `other_heating_emissions` target, feeding the combined emissions and
+#'   heating bills.
+#' @param central_heating_2021 E&W census 2021 heating counts on 2021 LSOAs.
+#' @param central_heating_2011 E&W census 2011 heating counts converted to
+#'   2021 LSOAs.
+#' @param central_heating_2011_scotland Scottish 2011 counts on 2022 DZs.
+#' @param central_heating_2022_scotland Scottish 2022 counts on 2022 DZs.
+#' @param domestic_gas LSOA gas data used for the median-consumption proxy.
+#' @param population GB population (`population` target) for per-capita rates.
+#' @return A data frame per zone-year with fuel counts, per-fuel emissions
+#'   totals, `heating_other_emissions_total`, `heating_other_kgco2e_percap`,
+#'   `median_gas_kwh` and population columns.
 #' @keywords internal
 calculate_other_heating = function(central_heating_2021,
                                    central_heating_2011,
@@ -38,6 +48,7 @@ calculate_other_heating = function(central_heating_2021,
   central_heating_2021 = central_heating_2021[,c("LSOA21CD","all_households","bottled_gas",
                                                   "oil","wood","solid_fuel",
                                                   "heat_network",
+                                                  "renewable_energy",
                                                   "other_central_heating",
                                                  "two_types_no_renewable_energy",
                                                  "two_types_inc_renewable_energy")]
@@ -56,6 +67,7 @@ calculate_other_heating = function(central_heating_2021,
   central_heating_2021$bottled_gas[is.na(central_heating_2021$bottled_gas)] = 0
   central_heating_2021$wood[is.na(central_heating_2021$wood)] = 0
   central_heating_2021$heat_network[is.na(central_heating_2021$heat_network)] = 0
+  central_heating_2021$renewable_energy[is.na(central_heating_2021$renewable_energy)] = 0
   central_heating_2021$two_types_inc_renewable_energy[is.na(central_heating_2021$two_types_inc_renewable_energy)] = 0
 
   central_heating_2021_list = dplyr::group_split(central_heating_2021, LSOA21CD)
@@ -98,12 +110,14 @@ calculate_other_heating = function(central_heating_2021,
 }
 
 
-#' Load Central Heating 2011
+#' Load 2011 census central heating (QS415UK) for E&W LSOAs
 #'
-#' @description Load central heating 2011 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads households by central heating type per 2011 LSOA from
+#'   the Nomis QS415UK extract. Used by the `central_heating_2011` target
+#'   before conversion to 2021 LSOAs.
+#' @param path Folder containing `QS415UK - central heating.csv`.
+#' @return A data frame with `LSOA11CD`, `all_households` and heating-type
+#'   counts.
 #' @keywords internal
 load_central_heating_2011 = function(path = file.path(parameters$path_data,"nomis","2011")){
   dat = read.csv(file.path(path,"QS415UK - central heating.csv"), skip = 7)
@@ -117,12 +131,16 @@ load_central_heating_2011 = function(path = file.path(parameters$path_data,"nomi
 }
 
 
-#' Distribute Other Heating
+#' Interpolate heating-fuel counts between the 2011 and 2021 censuses
 #'
-#' @description Perform processing for distribute other heating.
-#' @param ch21 Input object or parameter named `ch21`.
-#' @param ch11){ Input object or parameter named `ch11){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `calculate_other_heating()`. For one zone, builds
+#'   comparable oil / solid fuel / other / two-or-more counts at the two
+#'   census points (2021 wood counted as solid fuel; heat networks, renewable
+#'   energy and other central heating as "other"), fits a linear trend for
+#'   2012-2020, and holds the census values flat for 2010 and 2022-2024.
+#' @param ch21 One zone's 2021/22 census heating counts.
+#' @param ch11 The same zone's 2011 census heating counts.
+#' @return A data frame with 15 rows (years 2010-2024) of fuel counts.
 #' @keywords internal
 distribute_other_heating = function(ch21, ch11){
 
@@ -164,12 +182,14 @@ distribute_other_heating = function(ch21, ch11){
 
 }
 
-#' Central Heating 2011 To 2021
+#' Convert 2011 central heating counts to 2021 LSOA boundaries
 #'
-#' @description Perform processing for central heating 2011 to 2021.
-#' @param central_heating_2011 Input object or parameter named `central_heating_2011`.
-#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
-#' @return A data frame produced by the function.
+#' @description Applies the standard 2011-to-2021 conversion: unchanged zones
+#'   pass through, merged zones are summed, and split zones are apportioned by
+#'   the 2011 household ratio from `lsoa_convert_2011_2021_pre_data()`.
+#' @param central_heating_2011 Output of `load_central_heating_2011()`.
+#' @param lsoa_11_21_tools Conversion lookups (`lsoa_11_21_tools` target).
+#' @return A data frame of heating counts per 2021 LSOA.
 #' @keywords internal
 central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
 
@@ -211,12 +231,14 @@ central_heating_2011_to_2021 = function(central_heating_2011, lsoa_11_21_tools){
 
 }
 
-#' Load Cental Heating Scotland 2011
+#' Load Scotland 2011 census central heating per Data Zone
 #'
-#' @description Load cental heating scotland 2011 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads occupied households by central heating type per 2011
+#'   Data Zone (the Scotland-total row is dropped). Used by the
+#'   `central_heating_2011_scotland` target before conversion to 2022 zones.
+#' @param path Path to `scotland_2011_centralheating.csv`.
+#' @return A data frame with `DataZone11`, `occupied_households` and
+#'   heating-type counts.
 #' @keywords internal
 load_cental_heating_scotland_2011 = function(path = "../inputdata/gas_electric/scotland_2011_centralheating.csv"){
 
@@ -231,12 +253,14 @@ load_cental_heating_scotland_2011 = function(path = "../inputdata/gas_electric/s
   ch
 }
 
-#' Load Cental Heating Scotland 2022
+#' Load Scotland Census 2022 central heating per Data Zone
 #'
-#' @description Load cental heating scotland 2022 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads and pivots the Scotland Census 2022 extract of
+#'   households by central heating type per 2022 Data Zone. Used by the
+#'   `central_heating_2022_scotland` target.
+#' @param path Path to `scotland_2022_centralheating.csv`.
+#' @return A wide data frame with `LSOA21CD` (2022 DZ code) and heating-type
+#'   counts including `solid_fuel_exwood` and `total`.
 #' @keywords internal
 load_cental_heating_scotland_2022 = function(path = "../inputdata/gas_electric/scotland_2022_centralheating.csv"){
 
@@ -253,12 +277,15 @@ load_cental_heating_scotland_2022 = function(path = "../inputdata/gas_electric/s
   ch
 }
 
-#' Central Heating 2011 To 2022 Scotland
+#' Convert Scotland 2011 central heating counts to 2022 Data Zones
 #'
-#' @description Perform processing for central heating 2011 to 2022 scotland.
-#' @param sub Subset object used within the function.
-#' @param lookup_dz_2011_22_pre){ Lookup table used to map area codes or classifications.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Re-apportions the 2011 Data Zone heating counts onto 2022
+#'   Data Zones using the UPRN-weighted split shares from
+#'   `make_dz_11_22_lookup()`.
+#' @param sub Output of `load_cental_heating_scotland_2011()`.
+#' @param lookup_dz_2011_22_pre The `lookup_dz_2011_22_pre` target.
+#' @return A data frame of rounded heating counts per 2022 Data Zone
+#'   (`LSOA21CD`).
 #' @keywords internal
 central_heating_2011_to_2022_scotland = function(sub, lookup_dz_2011_22_pre){
 
@@ -291,12 +318,17 @@ central_heating_2011_to_2022_scotland = function(sub, lookup_dz_2011_22_pre){
 
 }
 
-#' Load Other Heating Prices
+#' Load DESNZ solid fuel and heating oil prices per kWh
 #'
-#' @description Load other heating prices data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads DESNZ table 2.1.3a (retail prices of coal, smokeless
+#'   fuel and heating oil), averages the monthly prices per year from 2010,
+#'   and converts to pounds per kWh using typical energy densities (8.47
+#'   kWh/kg coal, 7.5 kWh/kg smokeless, 9.8 kWh/litre oil). Used by the
+#'   `prices_other_heating` target, feeding
+#'   `estimate_other_heating_bills()`.
+#' @param path Folder containing `table_211_213.xlsx`.
+#' @return A data frame with `year`, `coal_pound_kwh`, `smokeless_pound_kwh`
+#'   and `oil_pound_kwh`.
 #' @keywords internal
 load_other_heating_prices = function(path = "../inputdata/gas_electric/prices"){
 

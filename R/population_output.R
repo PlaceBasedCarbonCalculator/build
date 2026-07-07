@@ -1,9 +1,12 @@
-#' Summarise Population
+#' Select and rename population columns for the website JSON export
 #'
-#' @description Summarise population into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param population){ Input object or parameter named `population){`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Filters the GB population series to 2010 onwards and shortens
+#'   the age-band column names (e.g. "0-4" -> "a04") to reduce JSON size. Used
+#'   by the `population_summary` target, exported per zone by
+#'   `build_population_jsons`.
+#' @param population GB population table (`population` target).
+#' @return A data frame with `LSOA21CD`, `year`, short-named age bands,
+#'   `households_est` and `all_properties`.
 #' @keywords internal
 summarise_population = function(population){
 

@@ -1,3 +1,16 @@
+#' Load public transport frequency per zone, 2004-2023
+#'
+#' @description Reads the pre-computed trips-per-zone-by-mode Rds files (from
+#'   the UK2GTFS/BODS timetable analysis; 2012-2013 are unavailable), averages
+#'   Monday-Friday into weekday figures per time period, computes a
+#'   time-weighted average daytime trips-per-hour (`tph_daytime_avg`), and
+#'   pivots wide to one row per zone with `<measure>_<year>_<route_type>`
+#'   columns (route type 1100/air is dropped). Route types follow GTFS: 0
+#'   tram, 1 metro, 2 rail, 3 bus, 4 ferry. Used by the `pt_frequency`
+#'   target, feeding the PT JSONs, transport map data and bulk export.
+#' @param path The inputdata folder containing `pt_frequency/`.
+#' @return A wide data frame with `zone_id` and rounded frequency columns.
+#' @keywords internal
 load_pt_frequency = function(path = parameters$path_data){
 
   zone_service = list()
@@ -152,6 +165,20 @@ load_pt_frequency = function(path = parameters$path_data){
 
 
 
+#' Build the per-LSOA attribute table for the transport map
+#'
+#' @description Assembles the variables shown on the transport map tiles
+#'   (`transport_lsoa_data` target, consumed by `pmtiles_transport`): latest
+#'   BEV/ULEV percentages and vehicles per household from the vehicle
+#'   summary (Scotland uses `year_scot` as its registration data lags), 2023
+#'   daytime trips-per-hour by mode, and the percentage change in bus
+#'   frequency from the 2006-08 maximum to 2023.
+#' @param pt_frequency Wide PT frequency table (`pt_frequency` target).
+#' @param vehicle_summary Vehicle summary (`vehicle_summary` target).
+#' @param year Year of vehicle data for England & Wales.
+#' @param year_scot Year of vehicle data for Scotland.
+#' @return A data frame with one row per LSOA and the map attribute columns.
+#' @keywords internal
 select_transport_vars = function(pt_frequency, vehicle_summary, year = 2024, year_scot = 2022){
 
   vehicle_summary$country = substr(vehicle_summary$LSOA21CD,1,1)

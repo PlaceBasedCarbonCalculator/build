@@ -1,12 +1,18 @@
-#' Combine Uprn Epc Lr
+#' Classify every UPRN as domestic/non-domestic and attach EPC and price data
 #'
-#' @description Combine uprn epc lr inputs into a single consolidated result.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param uprn_historical Input object or parameter named `uprn_historical`.
-#' @param house_prices_nowcast Input object or parameter named `house_prices_nowcast`.
-#' @param path_epc_dom Input object or parameter named `path_epc_dom`.
-#' @param path_epc_nondom Input object or parameter named `path_epc_nondom`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Combines the UPRN history with the domestic and non-domestic
+#'   EPC registers and the geocoded Land Registry data. Each UPRN is
+#'   classified as domestic, non-domestic, unknown or ambiguous depending on
+#'   which registers it appears in; `exists` (present in the latest UPRN
+#'   release) and `newbuild` (first seen after June 2020) flags are added;
+#'   the latest sale and 2024 nowcast price are joined; and the most recent
+#'   EPC record is attached to the matching class. Used by the
+#'   `uprn_historical_epc_lr` target, which feeds the EPC/UPRN point GeoJSONs
+#'   and PMTiles.
+#' @param uprn_historical UPRN first/last-seen table (`uprn_historical`).
+#' @param house_prices_nowcast Property-level prices (`house_prices_nowcast`).
+#' @param path_epc_dom,path_epc_nondom Paths to the cleaned EPC Rds files.
+#' @return A list with `domestic`, `nondomestic` and `unknown` data frames.
 #' @keywords internal
 combine_uprn_epc_lr = function(uprn_historical,
                                house_prices_nowcast,

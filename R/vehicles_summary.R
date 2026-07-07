@@ -1,10 +1,22 @@
-#' Make Vehicle Summary
+#' Summarise DfT vehicle and ULEV registrations per LSOA
 #'
-#' @description Build vehicle summary and return the generated output.
-#' @param vehicle_registrations Input object or parameter named `vehicle_registrations`.
-#' @param ulev_registrations Input object or parameter named `ulev_registrations`.
-#' @param population){ Input object or parameter named `population){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Combines the DfT vehicle-registration and ULEV tables (Q1 of
+#'   each year, Northern Ireland and "Miscellaneous" rows dropped) into one
+#'   wide table per zone-year. ULEV fuels are grouped (BEV, PHEV, HEV, REEV,
+#'   fuel cell, ICE-ULEV), ICE counts are derived as total minus ULEVs, and
+#'   percentage BEV/ULEV plus vehicles per person/adult/household (private
+#'   keepership) are added using the `population` target. Used by the
+#'   `vehicle_summary` target, exported by `vehicle_summary_json` and used in
+#'   the transport map data.
+#' @param vehicle_registrations Wide DfT registrations table
+#'   (`vehicle_registrations` target) with `<BodyType>_<Keepership>_<Licence>`
+#'   columns.
+#' @param ulev_registrations Wide ULEV table (`ulev_registrations` target)
+#'   with `<Fuel>_<Keepership>` columns.
+#' @param population GB population (`population` target).
+#' @return A wide data frame per LSOA-year with vehicle counts by body type,
+#'   licence status and keepership, ULEV counts by fuel group, and per-capita
+#'   rates.
 #' @keywords internal
 make_vehicle_summary = function(vehicle_registrations, ulev_registrations, population){
 

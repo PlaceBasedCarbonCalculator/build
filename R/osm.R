@@ -1,9 +1,12 @@
-#' Read Osm Pbf Landuse
+#' Extract land use polygons from the OSM UK extract
 #'
-#' @description Read osm pbf landuse from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads multipolygons from the united-kingdom OSM pbf and keeps
+#'   those with a relevant land use: selected landuse/amenity/leisure/tourism/
+#'   natural values plus anything military, larger than 100 m2, transformed
+#'   to EPSG:27700. Used by the `osm_land` target, combined with OS layers in
+#'   `combine_land_use()`.
+#' @param path Folder containing `united-kingdom-latest.osm.pbf`.
+#' @return An sf data frame of land use polygons with tag columns and `area`.
 #' @keywords internal
 read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
 
@@ -51,12 +54,15 @@ read_osm_pbf_landuse = function(path = file.path(parameters$path_data,"osm")){
 }
 
 
-#' Read Osm Pbf Buildings
+#' Extract building footprints from the OSM UK extract
 #'
-#' @description Read osm pbf buildings from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads multipolygons tagged `building` from the
+#'   united-kingdom OSM pbf and casts them to single polygons. Used by the
+#'   `osm_buildings` target, combined with OS/INSPIRE data in
+#'   `combine_os_osm_buildings()`.
+#' @param path Folder containing `united-kingdom-latest.osm.pbf`.
+#' @return An sf POLYGON data frame with `osm_id`, `building` and
+#'   `building_part`.
 #' @keywords internal
 read_osm_pbf_buildings = function(path = file.path(parameters$path_data,"osm")){
 

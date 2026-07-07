@@ -1,9 +1,10 @@
-#' Load Uprn
+#' Load OS Open UPRN points in WGS84
 #'
-#' @description Load uprn data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the June 2024 OS Open UPRN CSV and returns
+#'   every UPRN as an sf point in lng/lat. Used by the `uprn` target. Note the
+#'   full dataset is ~40M points, so this is memory-hungry.
+#' @param path Folder containing `osopenuprn_202406_csv.zip`.
+#' @return An sf POINT data frame (EPSG:4326) with `UPRN`.
 #' @keywords internal
 load_uprn = function(path = file.path(parameters$path_data,"os_uprn")) {
 
@@ -11,18 +12,20 @@ load_uprn = function(path = file.path(parameters$path_data,"os_uprn")) {
   unzip(file.path(path,"osopenuprn_202406_csv.zip"), exdir = file.path(tempdir(),"uprn"))
 
   uprn = readr::read_csv(file.path(tempdir(),"uprn","osopenuprn_202406.csv"))
+  unlink(file.path(tempdir(),"uprn"), recursive = TRUE)
   uprn = uprn[,c("UPRN","LATITUDE","LONGITUDE")]
   uprn = sf::st_as_sf(uprn, coords = c("LONGITUDE","LATITUDE"), crs = 4326)
   uprn
 }
 
 
-#' Load Uprn 27700
+#' Load OS Open UPRN points in British National Grid
 #'
-#' @description Load uprn 27700 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description As `load_uprn()` but keeps the easting/northing coordinates
+#'   (EPSG:27700) instead of lng/lat. Used by the `uprn_bng` target, which
+#'   feeds the Data Zone 2011-to-2022 lookup.
+#' @param path Folder containing `osopenuprn_202406_csv.zip`.
+#' @return An sf POINT data frame (EPSG:27700) with `UPRN`.
 #' @keywords internal
 load_uprn_27700 = function(path = file.path(parameters$path_data,"os_uprn")) {
 
@@ -30,24 +33,31 @@ load_uprn_27700 = function(path = file.path(parameters$path_data,"os_uprn")) {
   unzip(file.path(path,"osopenuprn_202406_csv.zip"), exdir = file.path(tempdir(),"uprn"))
 
   uprn = readr::read_csv(file.path(tempdir(),"uprn","osopenuprn_202406.csv"))
+  unlink(file.path(tempdir(),"uprn"), recursive = TRUE)
   uprn = uprn[,c("UPRN","X_COORDINATE","Y_COORDINATE")]
   uprn = sf::st_as_sf(uprn, coords = c("X_COORDINATE","Y_COORDINATE"), crs = 27700)
   uprn
 }
 
 
-#' Load Uprn Historical
+#' Build first/last-seen dates for UPRNs from historical OS releases
 #'
-#' @description Load uprn historical data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads every monthly OS Open UPRN CSV in the archive
+#'   (2020-2025), stamps each with its release date (parsed from the yyyymm in
+#'   the file name), and summarises per UPRN: the first and last release it
+#'   appears in and its most recent coordinates. Used by the `uprn_historical`
+#'   target, which supports matching EPC/Land Registry records to addresses
+#'   that have been created or retired over time.
+#' @param path Path to `osopenuprn_2020_2025_all.zip` containing the monthly
+#'   CSVs.
+#' @return A data frame with `UPRN`, `date_first`, `date_last`,
+#'   `X_COORDINATE`, `Y_COORDINATE`, `LATITUDE`, `LONGITUDE`.
 #' @keywords internal
 load_uprn_historical = function(path = "../inputdata/os_uprn/osopenuprn_2020_2025_all.zip"){
   dir.create(file.path(tempdir(),"uprn"))
   unzip(path, exdir = file.path(tempdir(),"uprn"))
   fls = list.files(file.path(tempdir(),"uprn"), pattern = ".csv", recursive = TRUE)
-  dts = as.numeric(substr(fls,nchar(fls)[1] - 9, nchar(fls)[1] - 4))
+  dts = as.numeric(substr(fls,nchar(fls) - 9, nchar(fls) - 4))
   fls = fls[order(dts)]
 
   uprn = list()

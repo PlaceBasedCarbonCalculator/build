@@ -2,12 +2,16 @@
 #reported as ‘0’ and counts fewer than five reported as negligible and denoted
 #by ‘-’.
 
-#' Load Voa Ctsop1
+#' Load VOA CTSOP1.1: dwellings by council tax band per LSOA, 1993-2024
 #'
-#' @description Load voa CTSOP1 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by council tax
+#'   band" annual CSVs, keeping LSOA rows. Counts are rounded to the nearest
+#'   10 by VOA, with fewer-than-five shown as "-" (read as NA). Used by the
+#'   `dwellings_tax_band` target - the key annual dwelling-count series for
+#'   the household extrapolation and VOA JSONs.
+#' @param path Folder containing `CTSOP1-1-1993-2024.zip`.
+#' @return A data frame with `ecode` (LSOA code), `year`, `band_a` ...
+#'   `band_i` and `all_properties`.
 #' @keywords internal
 load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
@@ -49,12 +53,15 @@ load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Load Voa Ctsop3
+#' Load VOA CTSOP3.1: dwellings by type and bedrooms per LSOA, 2020-2024
 #'
-#' @description Load voa CTSOP3 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by type and
+#'   number of bedrooms" CSVs (bungalow / flat-maisonette / terraced / semi /
+#'   detached x 1-6+ bedrooms, per council tax band), keeping LSOA rows.
+#'   Used by the `dwellings_type` target.
+#' @param path Folder containing `CTSOP3-1-2020-2024.zip`.
+#' @return A data frame with `ecode`, `band`, `year` and type-by-bedroom
+#'   count columns.
 #' @keywords internal
 load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
@@ -134,12 +141,14 @@ load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Load Voa Ctsop4
+#' Load VOA CTSOP4.1: dwellings by build period per LSOA, 2020-2024
 #'
-#' @description Load voa CTSOP4 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by build
+#'   period" CSVs (pre-1900 through 2022-2024, per council tax band), keeping
+#'   LSOA rows. Used by the `dwellings_age` target.
+#' @param path Folder containing `CTSOP4-1-2020-2024.zip`.
+#' @return A data frame with `ecode`, `band`, `year` and `bp_*` build-period
+#'   count columns.
 #' @keywords internal
 load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
@@ -202,12 +211,13 @@ load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Summarise Voa Post2010
+#' Prepare the council-tax-band series for JSON export (2010+)
 #'
-#' @description Summarise voa post2010 into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param dwellings_tax_band) Input object or parameter named `dwellings_tax_band)`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Filters the CTSOP1 series to 2010 onwards and shortens the
+#'   column names (banda, bandb, ...) for the per-zone JSON files. Used by
+#'   the `voa_json_2010` target.
+#' @param dwellings_tax_band CTSOP1 table (`dwellings_tax_band` target).
+#' @return A data frame with `LSOA21CD`, `year` and band counts, sorted.
 #' @keywords internal
 summarise_voa_post2010 = function(dwellings_tax_band) {
   dwellings_tax_band = dwellings_tax_band[dwellings_tax_band$year >= 2010,]
@@ -219,13 +229,16 @@ summarise_voa_post2010 = function(dwellings_tax_band) {
 
 }
 
-#' Summarise Voa Post2020
+#' Combine dwelling type/bedrooms and build period for JSON export (2020+)
 #'
-#' @description Summarise voa post2020 into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param dwellings_type Input object or parameter named `dwellings_type`.
-#' @param dwellings_age) Input object or parameter named `dwellings_age)`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Takes the all-bands rows of the CTSOP3 and CTSOP4 tables,
+#'   derives bedroom-count totals across dwelling types, collapses the
+#'   2009-2021 single-year build periods into one band, shortens column
+#'   names and joins the two tables. Used by the `voa_json_2020` target.
+#' @param dwellings_type CTSOP3 table (`dwellings_type` target).
+#' @param dwellings_age CTSOP4 table (`dwellings_age` target).
+#' @return A data frame per LSOA-year of dwelling type, bedroom and build
+#'   period counts.
 #' @keywords internal
 summarise_voa_post2020 = function(dwellings_type, dwellings_age) {
   dwellings_type = dwellings_type[dwellings_type$band == "All",]

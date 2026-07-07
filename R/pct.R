@@ -1,9 +1,11 @@
-#' Download Pct
+#' Download Propensity to Cycle Tool national outputs
 #'
-#' @description Download the pct resource and return the local file path.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return The local path or file name of the downloaded resource.
+#' @description Downloads the PCT commute and school LSOA zone and route
+#'   network Rds files from the npct/pct-outputs-national GitHub repo.
+#'   Skipped if `path` already holds more than 3 Rds files. This is the
+#'   `dl_pct` target; the files are not yet consumed by other targets.
+#' @param path Folder to store the downloads; created if missing.
+#' @return `path`.
 #' @keywords internal
 download_pct <- function(path){
   if(!dir.exists(path)){

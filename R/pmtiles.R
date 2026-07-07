@@ -1,26 +1,35 @@
-#' Make Pmtiles
+#' Convert a GeoJSON file to PMTiles using tippecanoe
 #'
-#' @description Build pmtiles and return the generated output.
-#' @param input Input object or parameter named `input`.
-#' @param geojson Input object or parameter named `geojson`.
-#' @param pmtiles Input object or parameter named `pmtiles`.
-#' @param name Name or label used to identify output content.
-#' @param layer Input object or parameter named `layer`.
-#' @param output_path A file or directory path used by the function.
-#' @param attribution Input object or parameter named `attribution`.
-#' @param min_zoom Input object or parameter named `min_zoom`.
-#' @param max_zoom Input object or parameter named `max_zoom`.
-#' @param extend_zoom Input object or parameter named `extend_zoom`.
-#' @param coalesce Input object or parameter named `coalesce`.
-#' @param drop Input object or parameter named `drop`.
-#' @param shared_borders Input object or parameter named `shared_borders`.
-#' @param max_tile_bytes Input object or parameter named `max_tile_bytes`.
-#' @param simplification Input object or parameter named `simplification`.
-#' @param buffer Input object or parameter named `buffer`.
-#' @param drop_rate Input object or parameter named `drop_rate`.
-#' @param force Input object or parameter named `force`.
-#' @param new_line_delim Input object or parameter named `new_line_delim`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Shells out to `tippecanoe` to build a PMTiles vector tileset
+#'   from a GeoJSON file inside `output_path`. On Windows the command is run
+#'   through WSL (so tippecanoe must be installed in WSL); on unix it runs
+#'   directly. Used by all the `pmtiles_*` targets and by
+#'   `make_pmtiles_stack()`.
+#' @param input Unused; kept so targets can declare a dependency on the
+#'   GeoJSON-producing target.
+#' @param geojson File name of the input GeoJSON, relative to `output_path`.
+#' @param pmtiles File name of the output PMTiles, relative to `output_path`.
+#' @param name Tileset name passed to tippecanoe `--name`.
+#' @param layer Layer name passed to tippecanoe `--layer`; defaults to `name`.
+#' @param output_path Folder containing the GeoJSON, where the PMTiles is
+#'   written; the tippecanoe command is run from this folder.
+#' @param attribution Attribution string embedded in the tileset.
+#' @param min_zoom Minimum zoom level to tile.
+#' @param max_zoom Maximum zoom level; NA uses tippecanoe's `-zg` (guess).
+#' @param extend_zoom If TRUE, adds `--extend-zooms-if-still-dropping`.
+#' @param coalesce If TRUE, adds `--coalesce-smallest-as-needed`.
+#' @param drop If TRUE, adds `--drop-densest-as-needed`.
+#' @param shared_borders If TRUE, adds `--detect-shared-borders` (recommended
+#'   for zone polygons so simplified borders still align).
+#' @param max_tile_bytes Maximum bytes per tile (`--maximum-tile-bytes`).
+#' @param simplification Simplification factor at max zoom (`--simplification`).
+#' @param buffer Tile buffer in screen pixels (`--buffer`).
+#' @param drop_rate Point drop rate between zooms (`--drop-rate`); NA omits.
+#' @param force If TRUE, adds `--force` to overwrite existing output.
+#' @param new_line_delim If TRUE, adds `-P` to read the GeoJSON in parallel
+#'   (requires newline-delimited features).
+#' @return The path to the PMTiles file (`output_path/pmtiles`); errors with
+#'   the tippecanoe output if the file was not created.
 #' @keywords internal
 make_pmtiles = function(input = NULL,
                         geojson = "school_locations.geojson",
@@ -41,11 +50,6 @@ make_pmtiles = function(input = NULL,
                         force = TRUE,
                         new_line_delim = TRUE
                         ){
-
-  # Check input
-  if(file.path(output_path, geojson) != file.path(output_path, geojson)){
-    stop("input does not match")
-  }
 
   if(!dir.exists(output_path)){
     stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
@@ -80,7 +84,7 @@ make_pmtiles = function(input = NULL,
 
 
   if(.Platform$OS.type == "unix") {
-    command_cd = paste0('cd ',outputdata)
+    command_cd = paste0('cd ',output_path)
     command_all = paste(c(command_cd, command_tippecanoe), collapse = "; ")
   } else {
     # Using WSL
@@ -101,13 +105,18 @@ make_pmtiles = function(input = NULL,
 }
 
 
-#' Join Pmtiles
+#' Merge several PMTiles files into one with tile-join
 #'
-#' @description Combine pmtiles inputs into a single consolidated result.
-#' @param output Input object or parameter named `output`.
-#' @param inputs Input object or parameter named `inputs`.
-#' @param output_path A file or directory path used by the function.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Shells out to `tile-join` (part of tippecanoe, via WSL on
+#'   Windows) to combine multiple PMTiles files - typically the high/medium/low
+#'   zoom-range tilesets built by `make_pmtiles_stack()` - into a single
+#'   tileset covering all zoom levels.
+#' @param output File name of the merged PMTiles, relative to `output_path`.
+#' @param inputs Character vector of input PMTiles file names, relative to
+#'   `output_path`.
+#' @param output_path Folder containing the inputs and receiving the output.
+#' @return The path to the merged PMTiles file; errors with the tile-join
+#'   output if the file was not created.
 #' @keywords internal
 join_pmtiles = function(output = 'dasymetric.pmtiles',
                         inputs = c('dasymetric_verylow.pmtiles',
@@ -159,19 +168,30 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
 }
 
 
-# Common need is to low/med/high zooms
-#' Make Pmtiles Stack
+#' Build a multi-resolution PMTiles stack for LSOA data
 #'
-#' @description Build pmtiles stack and return the generated output.
-#' @param lsoa_data Input object or parameter named `lsoa_data`.
-#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
-#' @param bounds_lsoa_GB_generalised Input object or parameter named `bounds_lsoa_GB_generalised`.
-#' @param bounds_lsoa_GB_super_generalised Input object or parameter named `bounds_lsoa_GB_super_generalised`.
-#' @param zoomstack_buildings_lst_4326 Input object or parameter named `zoomstack_buildings_lst_4326`.
-#' @param name Name or label used to identify output content.
-#' @param output_path A file or directory path used by the function.
-#' @param rounddp Input object or parameter named `rounddp`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Joins per-LSOA attribute data onto full, generalised and
+#'   super-generalised boundary layers, writes each as GeoJSON, tiles each at
+#'   an appropriate zoom range, and merges them into a single
+#'   `zones_<name>.pmtiles`. If building footprints are supplied, an analogous
+#'   four-level `buildings_<name>.pmtiles` (dasymetric) stack is also built.
+#'   Used by the `pmtiles_retrofit`, `pmtiles_transport` and `pmtiles_pbcc`
+#'   targets.
+#' @param lsoa_data Data frame with `LSOA21CD` plus the attribute columns to
+#'   put in the tiles. Numeric columns are rounded to `rounddp`.
+#' @param bounds_lsoa_GB_full sf LSOA/DZ boundaries, full resolution (zooms 12-13).
+#' @param bounds_lsoa_GB_generalised sf boundaries, generalised (zooms 9-11).
+#' @param bounds_lsoa_GB_super_generalised sf boundaries, super-generalised
+#'   (zooms 4-8).
+#' @param zoomstack_buildings_lst_4326 Optional list with elements `high`,
+#'   `medium`, `low`, `verylow`: building footprints tagged with `LSOA21CD`,
+#'   used for the dasymetric building-level tiles.
+#' @param name Suffix used in all output file names, e.g. "retrofit".
+#' @param output_path Existing folder in which all GeoJSON/PMTiles are written.
+#' @param rounddp Decimal places to round numeric attribute columns to; 0
+#'   converts to integer.
+#' @return The path to `zones_<name>.pmtiles`, plus the path to
+#'   `buildings_<name>.pmtiles` when building footprints are supplied.
 #' @keywords internal
 make_pmtiles_stack = function(lsoa_data,
                               bounds_lsoa_GB_full,
@@ -191,7 +211,7 @@ make_pmtiles_stack = function(lsoa_data,
   for(i in seq_len(ncol(lsoa_data))){
     if(inherits(lsoa_data[[i]],"numeric")){
       if(rounddp == 0){
-        lsoa_data[[i]] = as.integer(lsoa_data[[i]])
+        lsoa_data[[i]] = as.integer(round(lsoa_data[[i]]))
       } else {
         lsoa_data[[i]] = round(lsoa_data[[i]], rounddp)
       }
@@ -305,10 +325,10 @@ make_pmtiles_stack = function(lsoa_data,
     if(file.exists(file.path(output_path, paste0("buildings_",name,".pmtiles")))){
       res2 = file.path(output_path, paste0("buildings_",name,".pmtiles"))
     } else {
-      stop("Output failed to create", file.path(output_path, paste0("zones_",name,".pmtiles")))
+      stop("Output failed to create", file.path(output_path, paste0("buildings_",name,".pmtiles")))
     }
 
-    #res = c(res, res2)
+    res = c(res, res2)
 
   }
 

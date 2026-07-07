@@ -1,9 +1,13 @@
-#' Load Scotland Council Tax
+#' Load Scottish dwellings by council tax band per Data Zone
 #'
-#' @description Load scotland council tax data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the statistics.gov.scot dwellings-by-band
+#'   extracts (2011 Data Zones), pivots to one row per zone-year with a
+#'   column per band, and renames to match the E&W VOA table (`LSOA11CD`,
+#'   `all_properties`). Used by the `dwellings_tax_band_scotland` target,
+#'   which supplies pre-2014 dwelling counts to the population interpolation.
+#' @param path Folder containing the zipped `dwellings-by-band-DZ*.csv` files.
+#' @return A data frame with `LSOA11CD` (2011 DZ), `year`, per-band counts
+#'   and `all_properties`.
 #' @keywords internal
 load_scotland_council_tax = function(path = "../inputdata/council_tax_scotland/"){
 

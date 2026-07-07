@@ -1,9 +1,16 @@
-#' Make Similarity Table
+#' Pre-compute similarity scores between LCFS households and census types
 #'
-#' @description Build similarity table and return the generated output.
-#' @param hh Input object or parameter named `hh`.
-#' @param oac_year Input object or parameter named `oac_year`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Builds hand-crafted similarity matrices for tenure,
+#'   household composition, size, car ownership and OAC (same subgroup 1,
+#'   same group 0.8, same supergroup 0.5), then pre-evaluates the score of
+#'   every LCFS household against every possible attribute value. This
+#'   turns the matching in `match_hh_census3()` into cheap lookups. Errors
+#'   if any LCFS OAC code is not in the chosen classification.
+#' @param hh LCFS household table with `Tenure5`, `hhComp15`, `hhSize5`,
+#'   `CarVan5` and `OAC` columns.
+#' @param oac_year Which OAC vintage the codes use (2001, 2011 or 2021).
+#' @return A nested list: per attribute, per attribute value, a numeric
+#'   vector of scores (one per LCFS household).
 #' @keywords internal
 make_similarity_table = function(hh, oac_year = 2011){
   nms_Tenure <- c("outright", "mortgage", "socialrented", "privaterented")
@@ -154,17 +161,18 @@ make_similarity_table = function(hh, oac_year = 2011){
 
 
 
-#' Match Hh Census3
+#' Fast LCFS match for one census household type using the similarity table
 #'
-#' @description Match hh census3 values between datasets.
-#' @param Tenure5 Input object or parameter named `Tenure5`.
-#' @param hhComp15 Input object or parameter named `hhComp15`.
-#' @param hhSize5 Input object or parameter named `hhSize5`.
-#' @param CarVan5 Input object or parameter named `CarVan5`.
-#' @param OACs Input object or parameter named `OACs`.
-#' @param hh Input object or parameter named `hh`.
-#' @param similarity_table) Input object or parameter named `similarity_table)`.
-#' @return A data frame produced by the function.
+#' @description Fastest matching variant: sums the pre-computed score
+#'   vectors from `make_similarity_table()` (taking the best across the
+#'   zone's OAC codes) and returns all LCFS households achieving the
+#'   maximum score. Used by `match_LCFS_synth_pop_scotland()`.
+#' @param Tenure5,hhComp15,hhSize5,CarVan5 Census household attributes.
+#' @param OACs Space-separated OAC codes of the zone.
+#' @param hh LCFS household table.
+#' @param similarity_table Output of `make_similarity_table()`.
+#' @return A one-row data frame with the match score, number of matches and
+#'   a list-column of candidate `household_id`s.
 #' @keywords internal
 match_hh_census3 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similarity_table) {
 
@@ -195,7 +203,7 @@ match_hh_census3 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similari
       household_id = I(list(hh_sub$household_id))
     ))
   } else {
-    message(unlist(input_vars))
-    stop()
+    stop("No matching LCFS households for: ",
+         paste(Tenure5, hhComp15, hhSize5, CarVan5, OACs, collapse = " "))
   }
 }

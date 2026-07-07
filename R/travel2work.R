@@ -1,10 +1,16 @@
-#' Load Travel2work
+#' Estimate commuting distance and emissions from the 2011 travel-to-work OD
 #'
-#' @description Load travel2work data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param cents){ Input object or parameter named `cents){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the census 2011 method-of-travel-to-work origin-
+#'   destination table (WM12EW CT0489), builds straight lines between LSOA
+#'   centroids, scales length by a 1.2 circuity factor, converts commuter
+#'   counts to annual km (220 working days x 1.9 trips/day DfT assumption)
+#'   per mode, and applies DEFRA 2020 business-travel emissions factors.
+#'   Flows to/from outside England & Wales are excluded. Used by the
+#'   `travel2work` target.
+#' @param path Path to the zipped OD CSV (secure data).
+#' @param cents 2011 LSOA population-weighted centroids (`centroids_lsoa11`).
+#' @return An sf LINESTRING data frame per OD pair with commuter counts,
+#'   `km_*` and `kgco2e_*` columns per mode.
 #' @keywords internal
 load_travel2work = function(path, cents){
   dir.create(file.path(tempdir(),"t2w"))

@@ -1,10 +1,14 @@
-#' Match Income Lsoa Msoa
+#' Assign MSOA income estimates to their constituent 2021 LSOAs
 #'
-#' @description Match income lsoa msoa values between datasets.
-#' @param income_msoa Input object or parameter named `income_msoa`.
-#' @param lookup_MSOA_2011_21 Lookup table used to map area codes or classifications.
-#' @param lookup_OA_LSOA_MSOA_2021) Lookup table used to map area codes or classifications.
-#' @return A data frame produced by the function.
+#' @description Gives every 2021 LSOA the income estimate of its parent
+#'   MSOA (2011 MSOAs bridged via the 2011-to-2021 best-fit lookup for the
+#'   pre-2023 releases). Used by the `income_lsoa_msoa` target, feeding the
+#'   retrofit map and the E&W synthetic-population income matching.
+#' @param income_msoa ONS MSOA income estimates (`income_msoa` target).
+#' @param lookup_MSOA_2011_21 MSOA best-fit lookup (`lookup_MSOA_2011_21`).
+#' @param lookup_OA_LSOA_MSOA_2021 2021 geography lookup.
+#' @return A data frame with `LSOA21CD`, `year`, `total_annual_income` and
+#'   the confidence limits.
 #' @keywords internal
 match_income_lsoa_msoa = function(income_msoa,
                                   lookup_MSOA_2011_21,
@@ -39,14 +43,18 @@ match_income_lsoa_msoa = function(income_msoa,
 }
 
 
-#'  Select a random id form the list of matches, give more weight those close to average income.
+#' Pick one matched LCFS household, weighted towards the zone's income
 #'
-#' @description Perform processing for select id income.
-#' @param lst Input object or parameter named `lst`.
-#' @param mean_income Input object or parameter named `mean_income`.
-#' @param sd_income Input object or parameter named `sd_income`.
-#' @param hh){ Input object or parameter named `hh){`.
-#' @return A data frame produced by the function.
+#' @description From the candidate LCFS household IDs matched to a
+#'   synthetic household, samples one with probability weighted by a normal
+#'   density centred on the zone's mean income (falling back to uniform if
+#'   all weights are zero).
+#' @param lst Candidate LCFS `household_id`s.
+#' @param mean_income Zone mean annual income.
+#' @param sd_income Zone income standard deviation (from the confidence
+#'   limits).
+#' @param hh LCFS household table with `annual_income`.
+#' @return A single selected household ID.
 #' @keywords internal
 select_id_income = function(lst, mean_income, sd_income, hh){
   lst = unlist(lst)
@@ -69,17 +77,27 @@ select_id_income = function(lst, mean_income, sd_income, hh){
 
 }
 
-#' Match Lcfs Synth Pop
+#' Attach LCFS spending to every E&W synthetic household
 #'
-#' @description Match LCFS synth pop values between datasets.
-#' @param census21_synth_households Input object or parameter named `census21_synth_households`.
-#' @param lcfs_clean Input object or parameter named `lcfs_clean`.
-#' @param oac11lsoa21 Input object or parameter named `oac11lsoa21`.
-#' @param income_lsoa_msoa Input object or parameter named `income_lsoa_msoa`.
-#' @param population Population dataset.
-#' @param dwellings_type_backcast Input object or parameter named `dwellings_type_backcast`.
-#' @param base_year Input object or parameter named `base_year`.
-#' @return A data frame produced by the function.
+#' @description The heart of the consumption model for England & Wales: the
+#'   census-2021 synthetic households are rescaled to the target year's
+#'   household counts and dwelling mix (`select_synth_pop_year()` with the
+#'   dwelling-type backcast), then each household is matched to an LCFS
+#'   household with the same tenure, composition, size, car ownership and
+#'   OAC area type (with similarity fallbacks via `match_hh_census3()`),
+#'   picking among candidates by zone income (`select_id_income()`). Used by
+#'   the seven `synth_households_lcfs_*` targets (base years 2010/11 to
+#'   2022/23).
+#' @param census21_synth_households `census21_synth_households` target.
+#' @param lcfs_clean Pooled LCFS datasets (`lcfs_clean` target).
+#' @param oac11lsoa21 OAC mix per zone (`oac11lsoa21` or `oac01lsoa21`).
+#' @param income_lsoa_msoa Zone income estimates (`income_lsoa_msoa`).
+#' @param population GB population/households (`population` target).
+#' @param dwellings_type_backcast Dwelling types by year
+#'   (`dwellings_type_backcast` target).
+#' @param base_year LCFS base year, e.g. "2020/21".
+#' @return A data frame with one row per synthetic household including the
+#'   matched LCFS spending, income and flight variables.
 #' @keywords internal
 match_LCFS_synth_pop = function(census21_synth_households,
                                 lcfs_clean,
@@ -245,16 +263,24 @@ match_LCFS_synth_pop = function(census21_synth_households,
 
 }
 
-#' Match Lcfs Synth Pop Scotland
+#' Attach LCFS spending to every Scottish synthetic household
 #'
-#' @description Match LCFS synth pop scotland values between datasets.
-#' @param scot_synth_households Input object or parameter named `scot_synth_households`.
-#' @param lcfs_clean Input object or parameter named `lcfs_clean`.
-#' @param oac11dz22 Input object or parameter named `oac11dz22`.
-#' @param income_scot_dz22 Input object or parameter named `income_scot_dz22`.
-#' @param population Population dataset.
-#' @param base_year Input object or parameter named `base_year`.
-#' @return A data frame produced by the function.
+#' @description Scottish counterpart of `match_LCFS_synth_pop()`: the
+#'   Scotland-2022 synthetic households are rescaled to the target year via
+#'   `select_synth_pop_year_scot()` (no dwelling-type backcast available),
+#'   then matched to LCFS households on tenure, 10-category composition,
+#'   size, cars and OAC via the similarity-table approach
+#'   (`match_hh_census3()`), sampling by Data Zone income. Scottish income
+#'   estimates only exist for 2014-2020 (2016 substitutes 2017). Used by
+#'   the `synth_households_lcfs_*_scotland` targets.
+#' @param scot_synth_households `scot_synth_households` target.
+#' @param lcfs_clean Pooled LCFS datasets (`lcfs_clean` target).
+#' @param oac11dz22 OAC mix per DZ (`oac11dz22` or `oac01dz22`).
+#' @param income_scot_dz22 DZ income estimates (`income_scot_dz22`).
+#' @param population GB population/households (`population` target).
+#' @param base_year LCFS base year, e.g. "2020/21".
+#' @return A data frame with one row per synthetic household including the
+#'   matched LCFS spending, income and flight variables.
 #' @keywords internal
 match_LCFS_synth_pop_scotland = function(scot_synth_households,
                                          lcfs_clean,
@@ -404,11 +430,13 @@ match_LCFS_synth_pop_scotland = function(scot_synth_households,
 
 }
 
-#' Convert Housing Tenure
+#' Map LCFS tenure labels to the census Tenure5 categories
 #'
-#' @description Perform processing for convert housing tenure.
-#' @param housing_tenure) Input object or parameter named `housing_tenure)`.
-#' @return A data frame produced by the function.
+#' @description Converts the LCFS tenure descriptions to the pipeline's
+#'   five tenure categories (outright, mortgage, socialrented,
+#'   privaterented; rent-free counts as private rented).
+#' @param housing_tenure Character/factor vector of LCFS tenure labels.
+#' @return A character vector of Tenure5 codes (NA if unmatched).
 #' @keywords internal
 convert_housing_tenure <- function(housing_tenure) {
   # Define a named vector for mapping
@@ -431,11 +459,12 @@ convert_housing_tenure <- function(housing_tenure) {
   return(converted_tenure)
 }
 
-#' Convert Nssec
+#' Map LCFS NS-SEC labels to census NS-SEC codes
 #'
-#' @description Perform processing for convert NSSEC.
-#' @param ns_sec) Input object or parameter named `ns_sec)`.
-#' @return A data frame produced by the function.
+#' @description Converts the LCFS NS-SEC descriptions to the shortened
+#'   census codes (L1L2L3 ... L15, DNA) used elsewhere in the pipeline.
+#' @param ns_sec Character vector of LCFS NS-SEC labels.
+#' @return A named character vector of codes.
 #' @keywords internal
 convert_NSSEC <- function(ns_sec) {
   # Create a named vector for mapping
@@ -462,20 +491,15 @@ convert_NSSEC <- function(ns_sec) {
   return(new_classification)
 }
 
-#' Convert Household Size
+#' Band household sizes into the census hhSize5 categories
 #'
-#' @description Perform processing for convert household size.
-#' @param hhsize) Input object or parameter named `hhsize)`.
-#' @return A data frame produced by the function.
+#' @description Converts numeric household sizes to the p0/p1/p2/p3/p4+
+#'   bands used for census matching.
+#' @param hhsize Integer vector of household sizes.
+#' @return A character vector of size bands (NA preserved).
 #' @keywords internal
 convert_household_size <- function(hhsize) {
-  # Define a function to classify the number of cars
-#' Classify Hh
-#'
-#' @description Perform processing for classify hh.
-#' @param n) Input object or parameter named `n)`.
-#' @return A data frame produced by the function.
-#' @keywords internal
+  # classify one household size into a band
   classify_hh <- function(n) {
     if (is.na(n)) {
       return(NA)
@@ -499,20 +523,15 @@ convert_household_size <- function(hhsize) {
   return(classified_hh)
 }
 
-#' Convert Car Ownership
+#' Band car counts into the census CarVan5 categories
 #'
-#' @description Perform processing for convert car ownership.
-#' @param num_cars) Input object or parameter named `num_cars)`.
-#' @return A data frame produced by the function.
+#' @description Converts numeric car/van counts to the car0/car1/car2/car3+
+#'   bands used for census matching.
+#' @param num_cars Integer vector of cars/vans per household.
+#' @return A character vector of car bands (NA preserved).
 #' @keywords internal
 convert_car_ownership <- function(num_cars) {
-  # Define a function to classify the number of cars
-#' Classify Cars
-#'
-#' @description Perform processing for classify cars.
-#' @param n) Input object or parameter named `n)`.
-#' @return A data frame produced by the function.
-#' @keywords internal
+  # classify one car count into a band
   classify_cars <- function(n) {
     if (is.na(n)) {
       return(NA)
@@ -558,214 +577,24 @@ convert_car_ownership <- function(num_cars) {
 # }
 
 
-#' Match Hh Census
+
+
+
+
+
+
+#' Resample one LSOA's synthetic households to a target year (E&W)
 #'
-#' @description Match hh census values between datasets.
-#' @param Tenure5 Input object or parameter named `Tenure5`.
-#' @param hhComp15 Input object or parameter named `hhComp15`.
-#' @param hhSize5 Input object or parameter named `hhSize5`.
-#' @param CarVan5 Input object or parameter named `CarVan5`.
-#' @param OACs Input object or parameter named `OACs`.
-#' @param upper_limit Input object or parameter named `upper_limit`.
-#' @param lower_limit Input object or parameter named `lower_limit`.
-#' @param hh Input object or parameter named `hh`.
-#' @param similarity_matrices) Input object or parameter named `similarity_matrices)`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-match_hh_census <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, upper_limit, lower_limit, hh, similarity_matrices) {
-
-
-  # Create named vectors for the input variables to match the dimension names in the similarity matrices
-  input_vars <- list(
-    Tenure5 = as.character(Tenure5),
-    hhComp15 = as.character(hhComp15),
-    hhSize5 = hhSize5,
-    CarVan5 = CarVan5,
-    OAC = unlist(strsplit(OACs," "))
-  )
-
-  # Initialize similarity scores as a numeric vector
-  similarity_scores <- numeric(nrow(hh))
-
-  # Calculate similarity scores using vectorized operations
-  for (var in names(input_vars)) {
-    sim_matrix <- similarity_matrices[[var]]
-    input_value <- input_vars[[var]]
-    hh_values <- hh[[var]]
-
-    if(var == "OAC"){
-      #Special case LSOAs can have multiple OACs,
-      #input_value$subgroup = as.character(input_value$subgroup)
-      #sim_matrix[,!colnames(sim_matrix) %in% input_value$subgroup] = 0
-      #sim_matrix[,!colnames(sim_matrix) %in% input_value] = 0
-
-      # Map the input value and household values to their corresponding indices
-      input_index <- which(rownames(sim_matrix) %in% input_value)
-      hh_indices <- match(hh_values, colnames(sim_matrix))
-
-      # Extract the similarity scores for all households at once
-      scores <- sim_matrix[input_index, hh_indices]
-      if(inherits(scores,"matrix")){
-        scores <- apply(scores, 2, max, na.rm = TRUE)
-      }
-
-
-    } else {
-      # Map the input value and household values to their corresponding indices
-      input_index <- which(rownames(sim_matrix) == input_value)
-      hh_indices <- match(hh_values, colnames(sim_matrix))
-
-      # Extract the similarity scores for all households at once
-      scores <- sim_matrix[input_index, hh_indices]
-    }
-
-    similarity_scores <- similarity_scores + scores
-
-
-  }
-
-  # Find the maximum similarity score
-  max_score <- max(similarity_scores, na.rm = TRUE)
-
-  # Get all households with the maximum similarity score
-  hh_sub <- hh[similarity_scores == max_score, ]
-
-  # Multiple Options so check income
-  if(any(hh_sub$annual_income  >= lower_limit)){
-    hh_sub <- hh_sub[hh_sub$annual_income  >= lower_limit,]
-    max_score = max_score + 1
-  } else {
-    hh_sub <- hh_sub[hh_sub$annual_income  == max(hh_sub$annual_income),]
-    max_score = max_score + min(max(hh_sub$annual_income)/lower_limit,1)
-  }
-
-  if(any(hh_sub$annual_income  <= upper_limit)){
-    hh_sub <- hh_sub[hh_sub$annual_income  <= upper_limit,]
-    max_score = max_score + 1
-  } else {
-    hh_sub <- hh_sub[hh_sub$annual_income  == min(hh_sub$annual_income),]
-    max_score = max_score + min(min(hh_sub$annual_income)/lower_limit,1)
-  }
-
-
-  if (nrow(hh_sub) > 0) {
-    return(data.frame(
-      Tenure5 = Tenure5,
-      hhComp15 = hhComp15,
-      hhSize5 = hhSize5,
-      CarVan5 = CarVan5,
-      OACs = OACs,
-      upper_limit = upper_limit,
-      lower_limit = lower_limit,
-      n_match = nrow(hh_sub),
-      match_score = max_score / 7,
-      household_id = I(list(hh_sub$household_id))
-    ))
-  } else {
-    message(unlist(input_vars))
-    stop()
-  }
-}
-
-
-
-#' Match Hh Census2
-#'
-#' @description Match hh census2 values between datasets.
-#' @param Tenure5 Input object or parameter named `Tenure5`.
-#' @param hhComp15 Input object or parameter named `hhComp15`.
-#' @param hhSize5 Input object or parameter named `hhSize5`.
-#' @param CarVan5 Input object or parameter named `CarVan5`.
-#' @param OACs Input object or parameter named `OACs`.
-#' @param hh Input object or parameter named `hh`.
-#' @param similarity_matrices) Input object or parameter named `similarity_matrices)`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-match_hh_census2 <- function(Tenure5,hhComp15,hhSize5,CarVan5,OACs, hh, similarity_matrices) {
-
-
-  # Create named vectors for the input variables to match the dimension names in the similarity matrices
-  input_vars <- list(
-    Tenure5 = as.character(Tenure5),
-    hhComp15 = as.character(hhComp15),
-    hhSize5 = hhSize5,
-    CarVan5 = CarVan5,
-    OAC = unlist(strsplit(OACs," "))
-  )
-
-  # Initialize similarity scores as a numeric vector
-  similarity_scores <- numeric(nrow(hh))
-
-  # Calculate similarity scores using vectorized operations
-  for (var in names(input_vars)) {
-    sim_matrix <- similarity_matrices[[var]]
-    input_value <- input_vars[[var]]
-    hh_values <- hh[[var]]
-
-    if(var == "OAC"){
-      #Special case LSOAs can have multiple OACs,
-      #input_value$subgroup = as.character(input_value$subgroup)
-      #sim_matrix[,!colnames(sim_matrix) %in% input_value$subgroup] = 0
-      #sim_matrix[,!colnames(sim_matrix) %in% input_value] = 0
-
-      # Map the input value and household values to their corresponding indices
-      input_index <- which(rownames(sim_matrix) %in% input_value)
-      hh_indices <- match(hh_values, colnames(sim_matrix))
-
-      # Extract the similarity scores for all households at once
-      scores <- sim_matrix[input_index, hh_indices]
-      if(inherits(scores,"matrix")){
-        scores <- apply(scores, 2, max, na.rm = TRUE)
-      }
-
-
-    } else {
-      # Map the input value and household values to their corresponding indices
-      input_index <- which(rownames(sim_matrix) == input_value)
-      hh_indices <- match(hh_values, colnames(sim_matrix))
-
-      # Extract the similarity scores for all households at once
-      scores <- sim_matrix[input_index, hh_indices]
-    }
-
-    similarity_scores <- similarity_scores + scores
-
-
-  }
-
-  # Find the maximum similarity score
-  max_score <- max(similarity_scores, na.rm = TRUE)
-
-  # Get all households with the maximum similarity score
-  hh_sub <- hh[similarity_scores == max_score, ]
-
-  if (nrow(hh_sub) > 0) {
-    return(data.frame(
-      Tenure5 = Tenure5,
-      hhComp15 = hhComp15,
-      hhSize5 = hhSize5,
-      CarVan5 = CarVan5,
-      OACs = OACs,
-      n_match = nrow(hh_sub),
-      match_score = max_score / 5,
-      household_id = I(list(hh_sub$household_id))
-    ))
-  } else {
-    message(unlist(input_vars))
-    stop()
-  }
-}
-
-
-
-# For each LSOA select the number of households require for each year
-#' Select Synth Pop Year
-#'
-#' @description Perform processing for select synth pop year.
-#' @param cen Input object or parameter named `cen`.
-#' @param pop Population lookup table.
-#' @param bk){ Input object or parameter named `bk){`.
-#' @return A data frame produced by the function.
+#' @description Adjusts the census-2021 synthetic households of one zone to
+#'   represent an earlier/later year: the backcast dwelling-type counts are
+#'   scaled by the year's occupancy rate (households / dwellings), then the
+#'   right number of households of each accommodation type is sampled from
+#'   the 2021 synthetic set (with replacement if more are needed than
+#'   exist).
+#' @param cen Synthetic households for one zone.
+#' @param pop One row of household/dwelling counts for the target year.
+#' @param bk One row of backcast dwelling-type counts for the target year.
+#' @return The resampled synthetic household data frame.
 #' @keywords internal
 select_synth_pop_year = function(cen, pop, bk){
   if(!all(unique(c(cen$LSOA21CD,pop$LSOA21CD)) %in% unique(bk$lsoa21cd))){
@@ -815,12 +644,15 @@ select_synth_pop_year = function(cen, pop, bk){
 }
 
 
-#' Select Synth Pop Year Scot
+#' Resample one Data Zone's synthetic households to a target year (Scotland)
 #'
-#' @description Perform processing for select synth pop year scot.
-#' @param cen Input object or parameter named `cen`.
-#' @param pop){ Input object or parameter named `pop){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Scottish version of `select_synth_pop_year()`: without a
+#'   dwelling-type backcast, simply samples the target year's household
+#'   count from the 2022 synthetic set (topping up with replacement when
+#'   more households are needed than exist).
+#' @param cen Synthetic households for one Data Zone.
+#' @param pop One row of household counts for the target year.
+#' @return The resampled synthetic household data frame.
 #' @keywords internal
 select_synth_pop_year_scot = function(cen, pop){
   if(length(unique(c(cen$LSOA21CD,pop$LSOA21CD))) != 1){
