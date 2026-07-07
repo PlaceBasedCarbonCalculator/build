@@ -1,9 +1,13 @@
-#' Load Gas Elec Prices
+#' Load DESNZ regional gas and electricity prices
 #'
-#' @description Load gas elec prices data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the DESNZ quarterly energy prices tables 2.3.4 (gas)
+#'   and 2.2.4 (electricity): average variable unit price and fixed cost per
+#'   region (gas LDZ / electricity PES areas), harmonising the Scottish region
+#'   names. Used by the `prices_gas_electric` target, which feeds
+#'   `estimate_gas_electric_bills()`.
+#' @param path Folder containing `table_234.xlsx` and `table_224.xlsx`.
+#' @return A data frame with `year`, `region`, `gas_price_kwh`,
+#'   `gas_price_fixed`, `elec_price_kwh`, `elec_price_fixed`.
 #' @keywords internal
 load_gas_elec_prices = function(path = "../inputdata/gas_electric/prices"){
 
@@ -42,12 +46,13 @@ load_gas_elec_prices = function(path = "../inputdata/gas_electric/prices"){
 #DNO or PES Areas
 #https://www.neso.energy/data-portal/gis-boundaries-gb-dno-license-areas
 
-#' Load Dno Areas
+#' Load GB electricity DNO licence area boundaries
 #'
-#' @description Load dno areas data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the NESO DNO licence area shapefile and adds
+#'   a `region` column renamed to match the DESNZ price-table region names.
+#'   Used by the `bounds_dno` target.
+#' @param path Folder containing the DNO licence areas zip.
+#' @return An sf data frame of the 14 DNO areas with a `region` column.
 #' @keywords internal
 load_dno_areas = function(path = "../inputdata/gas_electric/"){
   dir.create(file.path(tempdir(),"dno"))
@@ -68,13 +73,16 @@ load_dno_areas = function(path = "../inputdata/gas_electric/"){
 
 }
 
-#' Make Lsoa To Dno Lookup
+#' Assign every GB zone to its DNO price region
 #'
-#' @description Build lsoa to dno lookup and return the generated output.
-#' @param dno Input object or parameter named `dno`.
-#' @param centroids_lsoa21 LSOA 2021 centroid geometries.
-#' @param centroids_dz22){ Centroid geometries used for area matching.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Spatially joins LSOA and Data Zone centroids to the DNO
+#'   licence areas so regional energy prices can be applied per zone. One
+#'   coastal LSOA (Barrow-in-Furness) misses the polygons and is manually
+#'   assigned to "North West". Used by the `lsoa_dno_lookup_GB` target.
+#' @param dno DNO areas with `region` (`bounds_dno` target).
+#' @param centroids_lsoa21 E&W LSOA centroids (`centroids_lsoa21` target).
+#' @param centroids_dz22 Scottish DZ centroids (`centroids_dz22` target).
+#' @return A data frame with `LSOA21CD` and `region`.
 #' @keywords internal
 make_lsoa_to_dno_lookup = function(dno, centroids_lsoa21, centroids_dz22){
   dno = dno[,c("region")]
@@ -96,14 +104,19 @@ make_lsoa_to_dno_lookup = function(dno, centroids_lsoa21, centroids_dz22){
 }
 
 
-#' Estimate Gas Electric Bills
+#' Estimate average household gas and electricity bills per LSOA
 #'
-#' @description Perform processing for estimate gas electric bills.
-#' @param domestic_gas Input object or parameter named `domestic_gas`.
-#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
-#' @param prices_gas_electric Input object or parameter named `prices_gas_electric`.
-#' @param lsoa_dno_lookup_GB){ Input object or parameter named `lsoa_dno_lookup_GB){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Combines LSOA gas/electricity consumption with regional DESNZ
+#'   prices (via the DNO lookup): total bill = meters x fixed cost + kWh x
+#'   unit price, then averaged per meter. Used by the `bills_gas_electric`
+#'   target, feeding the retrofit map data and energy JSONs.
+#' @param domestic_gas LSOA gas consumption (`domestic_gas` target).
+#' @param domestic_electricity LSOA electricity consumption
+#'   (`domestic_electricity` target).
+#' @param prices_gas_electric Regional prices (`prices_gas_electric` target).
+#' @param lsoa_dno_lookup_GB Zone-to-region lookup (`lsoa_dno_lookup_GB`).
+#' @return A data frame per LSOA-year with unit prices and `gas_average_bill`,
+#'   `elec_average_bill` and `energy_average_bill` (pounds).
 #' @keywords internal
 estimate_gas_electric_bills = function(domestic_gas, domestic_electricity, prices_gas_electric, lsoa_dno_lookup_GB){
 
@@ -127,7 +140,7 @@ estimate_gas_electric_bills = function(domestic_gas, domestic_electricity, price
   bills$gas_total_bill = bills$gas_fixed_bill + bills$gas_energy_bill
   bills$elec_total_bill = bills$elec_fixed_bill + bills$elec_energy_bill
 
-  bills$gas_average_bill = bills$gas_total_bill / bills$elec_meters
+  bills$gas_average_bill = bills$gas_total_bill / bills$elec_meters # Average bill over all households, not just those with gas meters, to avoid biasing the average upwards in areas with low gas penetration
   bills$elec_average_bill = bills$elec_total_bill / bills$elec_meters
 
   bills$gas_average_bill[is.na(bills$gas_average_bill)] = 0
