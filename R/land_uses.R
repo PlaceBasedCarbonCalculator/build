@@ -1,11 +1,17 @@
-#' Combine Land Use
+#' Combine OS and OSM layers into a single land cover map
 #'
-#' @description Combine land use inputs into a single consolidated result.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param os_land Input object or parameter named `os_land`.
-#' @param os_greenspace Input object or parameter named `os_greenspace`.
-#' @param osm_land){ Input object or parameter named `osm_land){`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Merges OS Zoomstack sites/water/woodland, OS Open Greenspace
+#'   and the filtered OSM land use polygons into one national land cover
+#'   layer. Natural cover (woods, water, greenspace, heath, wetland) is
+#'   unioned into "natural" polygons; man-made uses (industrial, retail,
+#'   military, attractions, etc.) are unioned per type and overlaps between
+#'   types are resolved by differencing larger polygons against smaller
+#'   ones. Polygons under 10 m2 are dropped. Used by the `landcover` target,
+#'   input to `split_lsoa_landuse()`.
+#' @param os_land Zoomstack sites/water/woodland (`os_land` target).
+#' @param os_greenspace OS Open Greenspace (`os_greenspace` target).
+#' @param osm_land OSM land use polygons (`osm_land` target).
+#' @return An sf POLYGON data frame with `type` and `area` columns.
 #' @keywords internal
 combine_land_use = function(os_land, os_greenspace, osm_land){
 
@@ -110,12 +116,20 @@ combine_land_use = function(os_land, os_greenspace, osm_land){
   landcover
 }
 
-#' Split Lsoa Landuse
+#' Split each LSOA into residential and non-residential land
 #'
-#' @description Perform processing for split lsoa landuse.
-#' @param landcover Input object or parameter named `landcover`.
-#' @param bounds_lsoa_GB_full){ Input object or parameter named `bounds_lsoa_GB_full){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Produces the dasymetric base layer: overlapping land cover
+#'   polygons are resolved by priority (natural first, then extractive,
+#'   military, industrial/commercial, leisure, transport uses), intersected
+#'   with the GB zone boundaries per type, and the remainder of each zone
+#'   (after removing all non-residential land and sliver artefacts) is
+#'   labelled "residential". Zones with no land cover at all pass through
+#'   whole. Heavy geometry work is clustered with igraph to keep
+#'   intersections local. Used by the `bounds_lsoa_GB_full_landuse` target.
+#' @param landcover National land cover (`landcover` target).
+#' @param bounds_lsoa_GB_full GB zone boundaries (`bounds_lsoa_GB_full`).
+#' @return An sf data frame of `LSOA21CD` x `type` polygons (including
+#'   "residential"), with `area`.
 #' @keywords internal
 split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 
@@ -295,30 +309,18 @@ split_lsoa_landuse = function(landcover, bounds_lsoa_GB_full){
 }
 
 
-#' Fast St Difference
+
+
+
+#' Remove small or thin holes from polygons
 #'
-#' @description Perform processing for fast st difference.
-#' @param x Input data object.
-#' @param y){ Input object or parameter named `y){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-fast_st_difference = function(x, y){
-  inter = lengths(sf::st_intersects(y))
-  y_inter = sf::st_union(y[inter > 1,])
-  y_solo = sf::st_combine(y[inter == 1,])
-  message(Sys.time()," Start difference")
-  sf::st_difference(x,sf::st_union(y_inter,y_solo))
-}
-
-
-
-#' Remove Small Holes
-#'
-#' @description Perform processing for remove small holes.
-#' @param df Input object or parameter named `df`.
-#' @param min_size Input object or parameter named `min_size`.
-#' @param max_ap_ratio Input object or parameter named `max_ap_ratio`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Drops interior rings that are smaller than `min_size` m2 or
+#'   whose perimeter/area ratio exceeds `max_ap_ratio` (thin slivers), which
+#'   otherwise cause topology errors in later intersections.
+#' @param df sf POLYGON data frame (EPSG:27700).
+#' @param min_size Minimum hole area to keep, m2.
+#' @param max_ap_ratio Maximum perimeter/area ratio to keep.
+#' @return `df` with cleaned geometries.
 #' @keywords internal
 remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
   geom = purrr::map(sf::st_geometry(df), remove_small_holes_single,
@@ -333,13 +335,15 @@ remove_small_holes = function(df, min_size = 5, max_ap_ratio = 1){
 
 
 
-#' Remove Small Holes Single
+#' Remove small or thin holes from a single polygon
 #'
-#' @description Perform processing for remove small holes single.
-#' @param x Input data object.
-#' @param min_size Input object or parameter named `min_size`.
-#' @param max_ap_ratio Input object or parameter named `max_ap_ratio`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Worker for `remove_small_holes()`: evaluates each interior
+#'   ring's area and perimeter/area ratio and rebuilds the polygon keeping
+#'   only substantial holes.
+#' @param x A single sfg POLYGON (list of rings; first is the exterior).
+#' @param min_size Minimum hole area to keep, m2.
+#' @param max_ap_ratio Maximum perimeter/area ratio to keep.
+#' @return The cleaned sfg POLYGON.
 #' @keywords internal
 remove_small_holes_single = function(x, min_size = 5, max_ap_ratio = 1){
   if(length(x) > 1){
@@ -354,22 +358,25 @@ remove_small_holes_single = function(x, min_size = 5, max_ap_ratio = 1){
   x
 }
 
-#' Hole Area
+#' Area and perimeter of one polygon ring
 #'
-#' @description Perform processing for hole area.
-#' @param y){ Input object or parameter named `y){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Helper for `remove_small_holes_single()`: converts a ring's
+#'   coordinate matrix to a polygon and measures it.
+#' @param y Coordinate matrix of a polygon ring.
+#' @return Numeric vector `c(area_m2, perimeter_m)`.
 #' @keywords internal
 hole_area = function(y){
   y = sf::st_sfc(sf::st_polygon(list(y)), crs = 27700)
   c(as.numeric(sf::st_area(y)), as.numeric(sf::st_perimeter(y)))
 }
 
-#' Try Inter
+#' st_intersection with a reduced-precision fallback
 #'
-#' @description Perform processing for try inter.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Attempts `sf::st_intersection(x)`; if it fails with a
+#'   topology error, retries at 0.1 m precision (`st_set_precision(x, 10)`),
+#'   which resolves most side-location-conflict errors.
+#' @param x sf object to self-intersect.
+#' @return The intersection result.
 #' @keywords internal
 try_inter = function(x){
   res = suppressMessages(suppressWarnings(try(sf::st_intersection(x), silent = TRUE)))
