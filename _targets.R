@@ -1031,6 +1031,10 @@ tar_target(buildings,{
   combine_os_osm_buildings(osm_buildings, os_buildings, inspire, inspire_scotland)
 }),
 
+# tar_target(buildings_v2,{
+#   combine_os_osm_buildings_v2(osm_buildings, os_buildings, inspire, inspire_scotland)
+# }),
+
 #TODO: Make reproducible
 tar_target(buildings_heights,{
   add_building_heights(buildings, os_10k_grid, path_raster = "F:/DTM_DSM/GB_10k/Difference/")
@@ -1064,6 +1068,15 @@ tar_target(buildings_lsoa_4326_high,{
   # Long running target ~ 32 hours
   process_buildings_high(buildings_heights, bounds_lsoa_GB_full)
 }),
+
+tar_target(buildings_lsoa_4326_high_v2,{
+  process_buildings_high_v2(buildings_heights, bounds_lsoa_GB_full)
+}),
+
+# tar_target(buildings_lsoa_4326_med_v2,{
+#   process_buildings_generic_v2(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
+#                                bounds_lsoa_GB_full, scale = "med")
+# }),
 
 # Scenarios
 
@@ -1108,11 +1121,11 @@ tar_target(synth_pop_seed_scotland,{
 }),
 
 tar_target(census21_synth_households,{
-  sythetic_census(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
+  sythetic_census_v2(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
 }),
 
 tar_target(scot_synth_households,{
-  sythetic_census_scot(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland) # Long running ~ 3.5 days
+  sythetic_census_scot_v2(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland) # Long running ~ 3.5 days
 }),
 
 tar_target(lcfs,{
