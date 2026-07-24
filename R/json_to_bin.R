@@ -9,6 +9,8 @@
 #'   concatenates them into a single date-stamped binary file, with a JSON
 #'   index (plus gzipped copy) recording each record's byte offset and length
 #'   so a client can extract one record with an HTTP range request.
+#'   Compression runs in parallel over a temporary `future` multisession plan
+#'   (restored on exit); the records are then written sequentially.
 #'
 #'   Output files are `data_<name>_<YYYY-MM-DD>.bin`,
 #'   `index_<name>_<YYYY-MM-DD>.json` and `index_<name>_<YYYY-MM-DD>.json.gz`.
@@ -65,36 +67,32 @@ write_json_bin <- function(json, path, name, quality = 11, meta = list()){
 
   message("Writing ", bin_name, " ", Sys.time())
 
+  # Compress in parallel; writing stays sequential as each record's offset
+  # depends on the lengths of all the records before it
+  oplan <- future::plan("multisession")
+  on.exit(future::plan(oplan), add = TRUE)
+  compressed <- furrr::future_map(json, function(j){
+    brotli::brotli_compress(charToRaw(j), quality = quality)
+  }, .progress = TRUE)
+  future::plan(oplan)
+
+  compressed_length <- unname(lengths(compressed))
+  original_length <- unname(nchar(json, type = "bytes"))
+  offsets <- c(0, cumsum(compressed_length))[seq_along(json)]
+
   con <- file(bin_path, open = "wb")
-  # Don't leave the connection open if compression fails part way through
+  # Don't leave the connection open if the write fails part way through
   on.exit(try(close(con), silent = TRUE), add = TRUE)
 
-  index <- vector("list", length(json))
-  offset <- 0
-
-  for(i in seq_along(json)) {
-
-    # Convert to raw bytes
-    json_raw <- charToRaw(json[i])
-
-    # Brotli compress
-    compressed <- brotli::brotli_compress(json_raw, quality = quality)
-
-    # Record location
-    index[[i]] <- list(
-      offset = offset,
-      compressed_length = length(compressed),
-      original_length = length(json_raw)
-    )
-
-    # Append to file
-    writeBin(compressed, con)
-
-    # Update offset
-    offset <- offset + length(compressed)
+  for(i in seq_along(compressed)) {
+    writeBin(compressed[[i]], con)
   }
 
   close(con)
+
+  index <- Map(function(o, cl, ol){
+    list(offset = o, compressed_length = cl, original_length = ol)
+  }, offsets, compressed_length, original_length)
   names(index) <- names(json)
 
   jsonlite::write_json(
@@ -133,6 +131,32 @@ write_json_bin <- function(json, path, name, quality = 11, meta = list()){
 
   invisible(c(bin_path, index_path, index_gz_path))
 
+}
+
+
+#' Read a bin index file back into a data frame of byte ranges
+#'
+#' @description Reads the JSON index written by `write_json_bin()` and returns
+#'   one row per record with its byte `offset` and `compressed_length`. Used to
+#'   carry a record's range outside the index, e.g. joining postcode offsets onto
+#'   the postcode GeoJSON so `postcodes.pmtiles` can carry each feature's range
+#'   and the website can skip downloading the (huge) postcode index.
+#' @param index_path Path to an `index_<name>_<date>.json` file (the second
+#'   element of the vector returned by `export_zone_bin()`/`write_json_bin()`).
+#' @return A data frame with `id` (record ID), `bin_offset` and `bin_clen`
+#'   (compressed length in bytes). Offsets are doubles so large binaries (offset
+#'   beyond 2^31) are represented exactly.
+#' @keywords internal
+read_bin_index <- function(index_path){
+  idx <- jsonlite::read_json(index_path, simplifyVector = FALSE)
+  zones <- idx$zones
+  data.frame(
+    id = names(zones),
+    bin_offset = vapply(zones, function(z) as.numeric(z$offset), numeric(1)),
+    bin_clen = vapply(zones, function(z) as.numeric(z$compressed_length), numeric(1)),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
 }
 
 
@@ -204,6 +228,8 @@ export_zone_bin <- function(x,
 
   message("Converting JSON ",Sys.time())
 
+  # Deliberately not parallel: yyjsonr converts faster than the data chunks
+  # can be serialised to parallel workers (measured ~17x slower with furrr)
   json <- purrr::map(x, convert2json, idcol = idcol,
                      dataframe = dataframe,
                      .progress = TRUE)

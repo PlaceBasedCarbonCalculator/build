@@ -496,13 +496,40 @@ lsoa_admin_summary = function(bounds_wards, bounds_parish, bounds_westminster, b
   cents = rbind(centroids_lsoa21, centroids_dz22)
   #cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
 
-  cents = sf::st_join(cents, bounds_wards)
+  # Point-in-polygon join, falling back to nearest feature for centroids that
+  # fall in gaps between polygons (e.g. rivers)
+  join_nearest_fallback = function(x, y){
+    ycols = setdiff(names(y), attr(y, "sf_column"))
+    x = sf::st_join(x, y)
+    failed = is.na(x[[ycols[1]]])
+    if(any(failed)){
+      nearest = sf::st_nearest_feature(x[failed,], y)
+      x[failed, ycols] = sf::st_drop_geometry(y)[nearest, ycols]
+    }
+    x
+  }
+
+  cents = join_nearest_fallback(cents, bounds_wards)
+  # No fallback for parishes: NA legitimately means unparished
   cents = sf::st_join(cents, bounds_parish)
-  cents = sf::st_join(cents, bounds_westminster)
-  cents = sf::st_join(cents, bounds_la)
+  cents = join_nearest_fallback(cents, bounds_westminster)
+  cents = join_nearest_fallback(cents, bounds_la)
   #cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
   cents$PAR23CD[is.na(cents$PAR23CD)] = "Unparished"
+
+  # Ward/parish names are often shared by several different wards/parishes;
+  # for those append the local authority name to disambiguate
+  add_la_to_duplicates = function(nm, cd, la){
+    lookup = unique(data.frame(nm = nm, cd = cd))
+    dup_names = unique(lookup$nm[duplicated(lookup$nm)])
+    sel = nm %in% dup_names
+    nm[sel] = paste0(nm[sel], " (", la[sel], ")")
+    nm
+  }
+
+  cents$WD25NM = add_la_to_duplicates(cents$WD25NM, cents$WD25CD, cents$LAD25NM)
+  cents$PAR23NM = add_la_to_duplicates(cents$PAR23NM, cents$PAR23CD, cents$LAD25NM)
 
   cents = sf::st_drop_geometry(cents)
   cents

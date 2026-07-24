@@ -114,23 +114,54 @@ build_household_types = function(households_nssec, residents_ethnic){
 #'   proportionally, so the website can draw a "community photo" of the
 #'   area's household mix. Used by the `household_pics_json` target for both
 #'   E&W and Scotland.
-#' @param combined_long Long household-type table with `LSOA21CD`, `NSSEC5`,
-#'   `householdComposition`, `ethnic` and `households`.
-#' @return A data frame with `LSOA21CD`, `id`
+#' @param combined_long Long household-type table with the id column named in
+#'   `idcol`, plus `NSSEC5`, `householdComposition`, `ethnic` and `households`.
+#' @param idcol Name of the zone id column to group and key the output by
+#'   (default "LSOA21CD"). Aggregated area tables pass their area code column
+#'   (e.g. "WD25CD") so the same picture-allocation logic builds an area's
+#'   community photo - see `agg_area_household_pics()`.
+#' @return A data frame with the `idcol` column, `id`
 #'   (`<NSSEC5>_<composition>_<ethnic>`) and `pic` (number of pictures).
 #' @keywords internal
-select_household_pics = function(combined_long){
+select_household_pics = function(combined_long, idcol = "LSOA21CD"){
 
-  long_lst = dplyr::group_split(combined_long, combined_long$LSOA21CD, .keep = FALSE)
+  long_lst = dplyr::group_split(combined_long, combined_long[[idcol]], .keep = FALSE)
   cats = purrr::map(long_lst, top_architypes, n = 48, .progress = TRUE)
   cats = dplyr::bind_rows(cats)
 
-  # Doing 48 images per LSOA for 90% of housholds in 90% of LSOAs
+  # Doing 48 images per zone for 90% of housholds in 90% of zones
   cats_top = cats[cats$cumpic <= 48,]
   cats_top$id = paste0(cats_top$NSSEC5,"_",cats_top$householdComposition,"_",cats_top$ethnic)
-  cats_top = cats_top[,c("LSOA21CD","id","pic")]
+  cats_top = cats_top[,c(idcol,"id","pic")]
   cats_top
 
+}
+
+#' Build an area's community photo from summed LSOA household clusters
+#'
+#' @description Joins the area code onto the per-LSOA household-type table,
+#'   sums the households of each archetype (`NSSEC5` x `householdComposition` x
+#'   `ethnic`) across the LSOAs of each area, then runs the same
+#'   `select_household_pics()` picture allocation keyed by the area code. Drops
+#'   LSOAs with no code for this area type and the "Unparished" pseudo-parish
+#'   (as `join_area_and_weight()` does). Called for every level by
+#'   `agg_all_levels()`.
+#' @param combined_long GB household-type table (`household_clusters_gb`), with
+#'   `LSOA21CD`, `NSSEC5`, `householdComposition`, `ethnic`, `households`.
+#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param area_col The area code column to aggregate to (e.g. "WD25CD").
+#' @return A data frame with the `area_col` column, `id` and `pic` - the same
+#'   shape as the per-LSOA `select_household_pics()` output.
+#' @keywords internal
+agg_area_household_pics = function(combined_long, lsoa_admin, area_col){
+  admin = lsoa_admin[, c("LSOA21CD", area_col)]
+  x = dplyr::left_join(combined_long, admin, by = "LSOA21CD")
+  x = x[!is.na(x[[area_col]]) & x[[area_col]] != "Unparished", ]
+  x = x |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(
+      c(area_col, "NSSEC5", "householdComposition", "ethnic")))) |>
+    dplyr::summarise(households = sum(households, na.rm = TRUE), .groups = "drop")
+  select_household_pics(x, idcol = area_col)
 }
 
 

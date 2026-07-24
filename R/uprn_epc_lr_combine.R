@@ -5,7 +5,7 @@
 #'   classified as domestic, non-domestic, unknown or ambiguous depending on
 #'   which registers it appears in; `exists` (present in the latest UPRN
 #'   release) and `newbuild` (first seen after June 2020) flags are added;
-#'   the latest sale and 2024 nowcast price are joined; and the most recent
+#'   the latest sale and 2025 nowcast price are joined; and the most recent
 #'   EPC record is attached to the matching class. Used by the
 #'   `uprn_historical_epc_lr` target, which feeds the EPC/UPRN point GeoJSONs
 #'   and PMTiles.
@@ -61,10 +61,10 @@ combine_uprn_epc_lr = function(uprn_historical,
   house_prices_nowcast$date = as.Date(house_prices_nowcast$date)
 
   uprn_historical = left_join(uprn_historical,
-                              house_prices_nowcast[,c("uprn","price","price_2024","date","property_type","freehold","address1","address2")],
+                              house_prices_nowcast[,c("uprn","price","price_2025","date","property_type","freehold","address1","address2")],
                               by = c("UPRN" = "uprn"))
   # Non existent properties can't have a price
-  uprn_historical$price_2024[!uprn_historical$exists] = NA
+  uprn_historical$price_2025[!uprn_historical$exists] = NA
 
   epc_dom = epc_dom[order(epc_dom$year, decreasing = TRUE),]
   epc_dom = epc_dom[!duplicated(epc_dom$UPRN),]

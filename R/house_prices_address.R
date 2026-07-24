@@ -237,11 +237,11 @@ house_price_lsoa_summary = function(house_price_lr_uprn){
   house_price_lsoa
 }
 
-#' Nowcast each property's value to 2024 prices
+#' Nowcast each property's value to 2025 prices
 #'
-#' @description Estimates a 2024 value for every property from its most
+#' @description Estimates a 2025 value for every property from its most
 #'   recent sale: median prices per local authority, year and property type
-#'   give a growth multiple to 2024 (type "O"/other uses the all-type LA
+#'   give a growth multiple to 2025 (type "O"/other uses the all-type LA
 #'   median as its transactions are too sparse), which is applied to the last
 #'   sale price and rounded to the nearest 1,000 pounds. Used by the
 #'   `house_prices_nowcast` target, feeding the retrofit map and EPC/LR
@@ -250,7 +250,7 @@ house_price_lsoa_summary = function(house_price_lr_uprn){
 #'   (`house_price_lr_uprn` target).
 #' @param lsoa_admin Zone-to-LA lookup (`lsoa_admin` target).
 #' @return A data frame with one row per property (latest sale) including
-#'   `growth_multiple` and `price_2024`.
+#'   `growth_multiple` and `price_2025`.
 #' @keywords internal
 house_price_extrapolate = function(house_price_lr_uprn, lsoa_admin){
 
@@ -281,24 +281,24 @@ house_price_extrapolate = function(house_price_lr_uprn, lsoa_admin){
   house_price_la = rbind(house_price_la, house_price_la_O)
   house_price_la = dplyr::ungroup(house_price_la)
 
-  # Get change to 2024
+  # Get change to 2025
 
-  # 1) Build a lookup of 2024 prices for each LAD25CD + property_type
-  price_2024_lookup <- house_price_la |>
-    dplyr::filter(year == 2024) |>
+  # 1) Build a lookup of 2025 prices for each LAD25CD + property_type
+  price_2025_lookup <- house_price_la |>
+    dplyr::filter(year == 2025) |>
     dplyr::select(
       LAD25CD,
       property_type,
-      price_median_2024 = price_median
+      price_median_2025 = price_median
     )
 
   # 2) Join back to the full table
   house_price_la_w_growth <- house_price_la |>
-    dplyr::left_join(price_2024_lookup, by = c("LAD25CD", "property_type")) |>
+    dplyr::left_join(price_2025_lookup, by = c("LAD25CD", "property_type")) |>
     # 3) Compute growth multiple: "how many times the price has increased"
     dplyr::mutate(
       growth_multiple = dplyr::case_when(
-        !is.na(price_median_2024) & price_median > 0 ~ price_median_2024 / price_median,
+        !is.na(price_median_2025) & price_median > 0 ~ price_median_2025 / price_median,
         TRUE ~ NA_real_
       )
     )
@@ -315,7 +315,7 @@ house_price_extrapolate = function(house_price_lr_uprn, lsoa_admin){
                                  by = c("LAD25CD","year","property_type")
                                  )
 
-  uprn_latest$price_2024 = round(uprn_latest$price * uprn_latest$growth_multiple/1000,0) * 1000
+  uprn_latest$price_2025 = round(uprn_latest$price * uprn_latest$growth_multiple/1000,0) * 1000
 
   uprn_latest
 

@@ -111,13 +111,13 @@ select_retofit_vars = function(epc_dom_summary,
   sub$percent_EPC = gsub(",","-",sub$percent_EPC)
 
   # House Prices
-  # Not all areas have a transaction in 2024, so take most recent year
+  # Not all areas have a transaction in 2025, so take most recent year
 
 
-  house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2024")]
+  house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2025")]
   house_prices_nowcast = house_prices_nowcast |>
     dplyr::group_by(LSOA21CD) |>
-    dplyr::summarise(price_2024 = median(price_2024))
+    dplyr::summarise(price_2025 = median(price_2025))
   sub = dplyr::left_join(sub, house_prices_nowcast, by = "LSOA21CD")
 
 
@@ -134,7 +134,7 @@ select_retofit_vars = function(epc_dom_summary,
   sub = dplyr::left_join(sub, income, by = "LSOA21CD")
   #sub$house_income_ratio = round(sub$price_median / sub$total_annual_income,1)
 
-  sub$house_income_ratio = round(sub$price_2024 / sub$total_annual_income,1)
+  sub$house_income_ratio = round(sub$price_2025 / sub$total_annual_income,1)
 
   #Energy
   domestic_gas = domestic_gas[domestic_gas$year == max(domestic_gas$year),]
@@ -157,7 +157,7 @@ select_retofit_vars = function(epc_dom_summary,
 
   sub = sub[,c("LSOA21CD","epc_score_avg","floor_area_avg","modal_age","modal_wall",
                "modal_roof","modal_heat","modal_window","modal_mainheat","modal_mainfuel",
-               "modal_floord","modal_type","modal_tenure","percent_EPC","price_2024",
+               "modal_floord","modal_type","modal_tenure","percent_EPC","price_2025",
                "house_income_ratio","median_gas_kwh","median_elec_kwh","fuelcost_bivaraite" )]
 
   sub

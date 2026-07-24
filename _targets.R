@@ -103,13 +103,30 @@ tar_target(household_clusters_scot,{
   make_community_photo_scotland(path = "../inputdata/population_scotland/", bounds_iz22, lookup_DataZone_2022)
 }),
 
+# E&W and Scotland household-type clusters combined into one GB table (shared by
+# the per-LSOA community photo and the area-level community photos below).
+tar_target(household_clusters_gb,{
+  scot = household_clusters_scot[,c("NSSEC5","DataZone","householdComp10","ethnic3","households")]
+  names(scot) = c("NSSEC5","LSOA21CD","householdComposition","ethnic","households")
+  scot$ethnic = as.character(scot$ethnic)
+  scot$ethnic = paste0(toupper(substr(scot$ethnic, 1, 1)), substr(scot$ethnic, 2, nchar(scot$ethnic)))
+  rbind(household_clusters, scot)
+}),
+
 tar_target(household_pics_json,{
-  household_clusters_scot2 = household_clusters_scot[,c("NSSEC5","DataZone","householdComp10","ethnic3","households")]
-  names(household_clusters_scot2) = c("NSSEC5","LSOA21CD","householdComposition","ethnic","households")
-  household_clusters_scot2$ethnic = as.character(household_clusters_scot2$ethnic)
-  household_clusters_scot2$ethnic = paste0(toupper(substr(as.character(household_clusters_scot2$ethnic), 1, 1)), substr(household_clusters_scot2$ethnic, 2, nchar(household_clusters_scot2$ethnic)))
-  sub = select_household_pics(rbind(household_clusters,household_clusters_scot2))
+  sub = select_household_pics(household_clusters_gb)
   export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 0, name = "community_pics", dataframe = "columns")
+}),
+
+# Community photos aggregated to LA / ward / parish / constituency: sum each
+# household archetype across the area's LSOAs, then allocate the 48 picture
+# slots (see R/family_portraits.R). Powers the demographics tab community photo
+# on the area report cards. Deploy the {level}_community_pics bins to the blob.
+tar_target(area_household_pics,{
+  agg_all_levels(agg_area_household_pics, household_clusters_gb, lsoa_admin)
+}),
+tar_target(area_household_pics_json,{
+  export_area_bins(area_household_pics, "community_pics", rounddp = 0)
 }),
 
 
@@ -164,6 +181,12 @@ tar_target(bills_other_heating,{
 }),
 tar_target(geojson_postcode,{
   sub = prep_postcode_gas_electic(postcode_gas_electricity_emissions, bounds_postcodes_2024)
+  # Carry each postcode's byte range from the postcode .bin into the pmtiles, so
+  # the website reads a postcode's energy record by range request without ever
+  # downloading the ~1.5M-record index. The dependency on build_postcode_jsons
+  # (which returns read_bin_index()) keeps the .bin and postcodes.pmtiles in
+  # lockstep - the offsets are only valid for the .bin they were packed from.
+  sub = dplyr::left_join(sub, build_postcode_jsons, by = c("postcode" = "id"))
   make_geojson(sub, "outputdata/postcodes.geojson")
 }, format = "file"),
 
@@ -296,9 +319,9 @@ tar_target(bounds_postcodes_2015,{
 tar_target(postcode_points,{
   read_postcode_points(path = file.path(parameters$path_secure_data,"Postcodes/codepo_20251101/codepo_gpkg_gb.zip"))
 }),
-tar_target(bounds_postcode_area,{
-  make_postcode_areas(bounds_postcodes_2024)
-}),
+# tar_target(bounds_postcode_area,{ # Failing with topological error not currently in use.
+#   make_postcode_areas(bounds_postcodes_2024)
+# }),
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
 }),
@@ -378,9 +401,9 @@ tar_target(bounds_lsoa_GB_generalised,{
 tar_target(bounds_lsoa_GB_super_generalised,{
   combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz22, keep = 0.05)
 }),
-tar_target(uprn,{
-  load_uprn(path = file.path(parameters$path_data,"os_uprn"))
-}),
+# tar_target(uprn,{
+#   load_uprn(path = file.path(parameters$path_data,"os_uprn"))
+# }),
 tar_target(uprn_bng,{
   load_uprn_27700(path = file.path(parameters$path_data,"os_uprn"))
 }),
@@ -756,7 +779,8 @@ tar_target(area_epc_dom,{
   agg_all_levels(agg_area_epc, epc_dom_summary, lsoa_admin, population)
 }),
 tar_target(area_epc_dom_json,{
-  export_area_bins(area_epc_dom, "epc_dom")
+  # dataframe = "rows" to match the per-LSOA epc_dom export (build_epc_dom_jsons)
+  export_area_bins(area_epc_dom, "epc_dom", dataframe = "rows")
 }),
 
 tar_target(area_gas_electric,{
@@ -766,6 +790,23 @@ tar_target(area_gas_electric,{
 }),
 tar_target(area_gas_electric_json,{
   export_area_bins(area_gas_electric, "gas_electric")
+}),
+
+tar_target(area_prices,{
+  agg_all_levels(agg_area_prices, house_prices_lsoa, lsoa_admin, population)
+}),
+tar_target(area_prices_json,{
+  # rounddp = 0 to match the per-LSOA prices_json export (whole pounds)
+  export_area_bins(area_prices, "prices", rounddp = 0)
+}),
+
+tar_target(area_population,{
+  agg_all_levels(agg_area_population, population_summary, lsoa_admin, population)
+}),
+tar_target(area_population_json,{
+  # dataframe = "columns" (export_area_bins default) to match the per-LSOA
+  # population export (build_population_jsons)
+  export_area_bins(area_population, "population")
 }),
 
 # Per-area simplified boundary GeoJSONs for the report-page locator maps
@@ -1002,9 +1043,9 @@ tar_target(oac_emissions_all,{
 }),
 
 # PLEF Forecasts
-tar_target(PLEF,{
-  load_plef(path = file.path(parameters$path_data,"PLEF"))
-}),
+# tar_target(PLEF,{
+#   load_plef(path = file.path(parameters$path_data,"PLEF"))
+# }),
 
 # tar_target(PLEF_emissions,{
 #   forcast_emissions_plef(lsoa_emissions_all, PLEF)
@@ -1065,13 +1106,13 @@ tar_target(buildings_lsoa_4326_med,{
 }),
 
 tar_target(buildings_lsoa_4326_high,{
-  # Long running target ~ 32 hours
+  # Long running target ~ 52 hours
   process_buildings_high(buildings_heights, bounds_lsoa_GB_full)
 }),
 
-tar_target(buildings_lsoa_4326_high_v2,{
-  process_buildings_high_v2(buildings_heights, bounds_lsoa_GB_full)
-}),
+# tar_target(buildings_lsoa_4326_high_v2,{
+#   process_buildings_high_v2(buildings_heights, bounds_lsoa_GB_full)
+# }),
 
 # tar_target(buildings_lsoa_4326_med_v2,{
 #   process_buildings_generic_v2(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
@@ -1293,8 +1334,11 @@ tar_target(build_postcode_jsons,{
                                               "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
                                               "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
   # ~1.5M postcodes: use a lower brotli quality so compression time stays sane
-  export_zone_bin(x, idcol = "postcode", name = "postcode",
-                  rounddp = 0, dataframe = "columns", quality = 5)
+  paths = export_zone_bin(x, idcol = "postcode", name = "postcode",
+                          rounddp = 0, dataframe = "columns", quality = 5)
+  # Return the record byte ranges (postcode/bin_offset/bin_clen) so geojson_postcode
+  # can bake them into postcodes.pmtiles (see there). paths[2] is the index JSON.
+  read_bin_index(paths[2])
 }),
 
 tar_target(build_overview_jsons,{
