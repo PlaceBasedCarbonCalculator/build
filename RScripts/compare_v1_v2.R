@@ -103,24 +103,13 @@ print(head(a2))
 # The same pattern applies to the other audit rewrites; run each v2 function
 # and compare against the stored v1 target. Uncomment as needed.
 
-## uprn_historical (v1 ~3.7 h; v2 aggregates in DuckDB)
-# t_u = system.time({
-#   v2_u = load_uprn_historical_v2(file.path(parameters$path_data,"os_uprn/osopenuprn_2020_2025_all.zip"))
-# })
-# print(t_u)
-# v1_u = tar_read(uprn_historical)
-# stopifnot(nrow(v1_u) == nrow(v2_u))
-# i = sample(nrow(v1_u), 1e5)
-# print(all.equal(as.data.frame(v1_u[i,]), as.data.frame(v2_u[match(v1_u$UPRN[i], v2_u$UPRN),]),
-#                 check.attributes = FALSE))
-
-## inspire (v1 ~7.3 h sequential; v2 parallel over LA zips)
-# t_i = system.time({
-#   v2_i = load_inspire_v2(file.path(parameters$path_data,"INSPIRE"))
-# })
-# print(t_i)
-# v1_i = tar_read(inspire)
-# print(c(v1 = nrow(v1_i), v2 = nrow(v2_i)))  # identical processing => equal
+## uprn_historical / inspire: no longer comparable here. Both are now built
+## by the LandOwnership repo (July 2026 - it owns all UPRN / address / parcel
+## work), so R/uprn.R::load_uprn_historical(), R/uprn_v2.R and
+## R/inspire.R::load_inspire() / R/inspire_v2.R have been deleted from this
+## repo. The `uprn_historical` target is gone and `inspire` now just reads
+## LandOwnership's `inspire_clean` (see R/landownership_resources.R). To
+## benchmark those, run the comparison in the LandOwnership repo instead.
 
 ## bounds_lsoa_GB_full_landuse (v1 ~44.6 h; v2 parallelises the 5 slow stages)
 # tar_load(landcover)

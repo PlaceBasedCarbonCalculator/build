@@ -28,8 +28,11 @@
 #' @param force If TRUE, adds `--force` to overwrite existing output.
 #' @param new_line_delim If TRUE, adds `-P` to read the GeoJSON in parallel
 #'   (requires newline-delimited features).
-#' @return The path to the PMTiles file (`output_path/pmtiles`); errors with
-#'   the tippecanoe output if the file was not created.
+#' @param date Creation-date stamp inserted before the `.pmtiles` extension
+#'   of `pmtiles` (e.g. `"zones.pmtiles"` becomes `"zones_20260728.pmtiles"`).
+#'   Defaults to today's date; pass `NA` to disable stamping.
+#' @return The path to the PMTiles file (`output_path/pmtiles`, date-stamped);
+#'   errors with the tippecanoe output if the file was not created.
 #' @keywords internal
 make_pmtiles = function(input = NULL,
                         geojson = "school_locations.geojson",
@@ -48,8 +51,13 @@ make_pmtiles = function(input = NULL,
                         buffer = 5,
                         drop_rate = NA,
                         force = TRUE,
-                        new_line_delim = TRUE
+                        new_line_delim = TRUE,
+                        date = format(Sys.Date(), "%Y%m%d")
                         ){
+
+  if(!is.na(date)){
+    pmtiles = sub("\\.pmtiles$", paste0("_",date,".pmtiles"), pmtiles)
+  }
 
   if(!dir.exists(output_path)){
     stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
@@ -115,16 +123,24 @@ make_pmtiles = function(input = NULL,
 #' @param inputs Character vector of input PMTiles file names, relative to
 #'   `output_path`.
 #' @param output_path Folder containing the inputs and receiving the output.
-#' @return The path to the merged PMTiles file; errors with the tile-join
-#'   output if the file was not created.
+#' @param date Creation-date stamp inserted before the `.pmtiles` extension
+#'   of `output` (e.g. `"zones.pmtiles"` becomes `"zones_20260728.pmtiles"`).
+#'   Defaults to today's date; pass `NA` to disable stamping.
+#' @return The path to the merged PMTiles file (date-stamped); errors with
+#'   the tile-join output if the file was not created.
 #' @keywords internal
 join_pmtiles = function(output = 'dasymetric.pmtiles',
                         inputs = c('dasymetric_verylow.pmtiles',
                                    'dasymetric_low.pmtiles',
                                    'dasymetric_med.pmtiles',
                                    'dasymetric_high.pmtiles'),
-                        output_path = "outputdata"
+                        output_path = "outputdata",
+                        date = format(Sys.Date(), "%Y%m%d")
                         ){
+
+  if(!is.na(date)){
+    output = sub("\\.pmtiles$", paste0("_",date,".pmtiles"), output)
+  }
 
   if(!dir.exists(output_path)){
     stop("'",output_path, "' does not exist as a writeable folder in ",getwd())
@@ -172,11 +188,11 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
 #'
 #' @description Joins per-LSOA attribute data onto full, generalised and
 #'   super-generalised boundary layers, writes each as GeoJSON, tiles each at
-#'   an appropriate zoom range, and merges them into a single
-#'   `zones_<name>.pmtiles`. If building footprints are supplied, an analogous
-#'   four-level `buildings_<name>.pmtiles` (dasymetric) stack is also built.
-#'   Used by the `pmtiles_retrofit`, `pmtiles_transport` and `pmtiles_pbcc`
-#'   targets.
+#'   an appropriate zoom range, and merges them into a single, date-stamped
+#'   `zones_<name>_<date>.pmtiles`. If building footprints are supplied, an
+#'   analogous four-level `buildings_<name>_<date>.pmtiles` (dasymetric) stack
+#'   is also built. Used by the `pmtiles_retrofit`, `pmtiles_transport` and
+#'   `pmtiles_pbcc` targets.
 #' @param lsoa_data Data frame with `LSOA21CD` plus the attribute columns to
 #'   put in the tiles. Numeric columns are rounded to `rounddp`.
 #' @param bounds_lsoa_GB_full sf LSOA/DZ boundaries, full resolution (zooms 12-13).
@@ -190,8 +206,9 @@ join_pmtiles = function(output = 'dasymetric.pmtiles',
 #' @param output_path Existing folder in which all GeoJSON/PMTiles are written.
 #' @param rounddp Decimal places to round numeric attribute columns to; 0
 #'   converts to integer.
-#' @return The path to `zones_<name>.pmtiles`, plus the path to
-#'   `buildings_<name>.pmtiles` when building footprints are supplied.
+#' @return The path to the date-stamped `zones_<name>_<date>.pmtiles`, plus
+#'   the path to `buildings_<name>_<date>.pmtiles` when building footprints
+#'   are supplied.
 #' @keywords internal
 make_pmtiles_stack = function(lsoa_data,
                               bounds_lsoa_GB_full,
@@ -234,38 +251,29 @@ make_pmtiles_stack = function(lsoa_data,
   rm(zones_low)
 
   # Make pmtiles
-  make_pmtiles(NULL,
+  path_zones_high = make_pmtiles(NULL,
                paste0("zones_",name,"_high.geojson"),
                paste0("zones_",name,"_high.pmtiles"),
                name = "zones", shared_borders = TRUE, extend_zoom = TRUE,
                coalesce = TRUE, min_zoom = 12, max_zoom = 13, output_path = output_path)
 
 
-  make_pmtiles(NULL,
+  path_zones_medium = make_pmtiles(NULL,
                paste0("zones_",name,"_medium.geojson"),
                paste0("zones_",name,"_medium.pmtiles"),
                name = "zones", shared_borders = TRUE,
                coalesce = TRUE, min_zoom = 9, max_zoom = 11, output_path = output_path)
 
-  make_pmtiles(NULL,
+  path_zones_low = make_pmtiles(NULL,
                paste0("zones_",name,"_low.geojson"),
                paste0("zones_",name,"_low.pmtiles"),
                name = "zones", shared_borders = TRUE,
                coalesce = TRUE, min_zoom = 4, max_zoom = 8, output_path = output_path)
 
   # Join pmtiles
-  join_pmtiles(paste0("zones_",name,".pmtiles"),
-               c(paste0("zones_",name,"_high.pmtiles"),
-                 paste0("zones_",name,"_medium.pmtiles"),
-                 paste0("zones_",name,"_low.pmtiles")),
+  res = join_pmtiles(paste0("zones_",name,".pmtiles"),
+               basename(c(path_zones_high, path_zones_medium, path_zones_low)),
                output_path = output_path)
-
-
-  if(file.exists(file.path(output_path, paste0("zones_",name,".pmtiles")))){
-    res = file.path(output_path, paste0("zones_",name,".pmtiles"))
-  } else {
-    stop("Output failed to create", file.path(output_path, paste0("zones_",name,".pmtiles")))
-  }
 
 
 
@@ -288,45 +296,36 @@ make_pmtiles_stack = function(lsoa_data,
 
 
     # Make pmtiles
-    make_pmtiles(NULL,
+    path_buildings_high = make_pmtiles(NULL,
                  paste0("buildings_",name,"_high.geojson"),
                  paste0("buildings_",name,"_high.pmtiles"),
                  name = "buildings", shared_borders = TRUE, extend_zoom = TRUE,
                  coalesce = TRUE, min_zoom = 14, max_zoom = 15, output_path = output_path)
 
 
-    make_pmtiles(NULL,
+    path_buildings_medium = make_pmtiles(NULL,
                  paste0("buildings_",name,"_medium.geojson"),
                  paste0("buildings_",name,"_medium.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
                  coalesce = TRUE, min_zoom = 12, max_zoom = 13, output_path = output_path)
 
-    make_pmtiles(NULL,
+    path_buildings_low = make_pmtiles(NULL,
                  paste0("buildings_",name,"_low.geojson"),
                  paste0("buildings_",name,"_low.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
                  coalesce = TRUE, min_zoom = 8, max_zoom = 11, output_path = output_path)
 
-    make_pmtiles(NULL,
+    path_buildings_verylow = make_pmtiles(NULL,
                  paste0("buildings_",name,"_verylow.geojson"),
                  paste0("buildings_",name,"_verylow.pmtiles"),
                  name = "buildings", shared_borders = TRUE,
                  coalesce = TRUE, min_zoom = 4, max_zoom = 7, output_path = output_path)
 
     # Join pmtiles
-    join_pmtiles(paste0("buildings_",name,".pmtiles"),
-                 c(paste0("buildings_",name,"_high.pmtiles"),
-                   paste0("buildings_",name,"_medium.pmtiles"),
-                   paste0("buildings_",name,"_low.pmtiles"),
-                   paste0("buildings_",name,"_verylow.pmtiles")),
+    res2 = join_pmtiles(paste0("buildings_",name,".pmtiles"),
+                 basename(c(path_buildings_high, path_buildings_medium,
+                            path_buildings_low, path_buildings_verylow)),
                  output_path = output_path)
-
-
-    if(file.exists(file.path(output_path, paste0("buildings_",name,".pmtiles")))){
-      res2 = file.path(output_path, paste0("buildings_",name,".pmtiles"))
-    } else {
-      stop("Output failed to create", file.path(output_path, paste0("buildings_",name,".pmtiles")))
-    }
 
     res = c(res, res2)
 

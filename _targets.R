@@ -408,9 +408,10 @@ tar_target(uprn_bng,{
   load_uprn_27700(path = file.path(parameters$path_data,"os_uprn"))
 }),
 
-tar_target(uprn_historical,{
-  load_uprn_historical(path = file.path(parameters$path_data,"os_uprn/osopenuprn_2020_2025_all.zip"))
-}),
+# uprn_historical is built by the LandOwnership repo (it owns all UPRN /
+# address work as of July 2026). Nothing in this pipeline needs it directly
+# any more - it reaches us inside the objects read by
+# R/landownership_resources.R. The EPC repo reads LandOwnership's copy.
 
 # Points of Interest
 tar_target(poi,{
@@ -445,8 +446,11 @@ tar_target(bounds_lsoa_GB_full_landuse,{
 
 
 # Inspire polygons
+# England & Wales parcels are cleaned by the LandOwnership repo (2026 release,
+# loaded in parallel) - see R/landownership_resources.R. Scotland is not
+# covered there, so it is still loaded here.
 tar_target(inspire,{
-  load_inspire(path = file.path(parameters$path_data,"INSPIRE"))
+  load_lo_inspire()
 }),
 
 tar_target(inspire_scotland,{
@@ -586,7 +590,7 @@ tar_target(car_km_lsoa_21,{
 
 # Public Transport Frequency
 tar_target(pt_frequency,{
-  load_pt_frequency(parameters$path_data)
+  load_pt_frequency("../PublicTransportAnalysis/data")
 }),
 
 tar_target(pt_json,{
@@ -611,20 +615,13 @@ tar_target(building_age_2011,{
   load_building_age_2011(path = file.path(parameters$path_secure_data,"CDRC/building age price"))
 }),
 
-tar_target(house_price_lr,{
-  load_lr_price_paid(path = file.path(parameters$path_data,"house prices/land registry"))
-}),
-
-tar_target(house_prices_ubdc,{
-  load_ubdc_house_prices(path = file.path(parameters$path_data,"house prices/ppdid_uprn_usrn.zip"))
-}),
-
+# Land Registry Price Paid, and the UPRN classification built on top of it,
+# are produced by the LandOwnership repo - see R/landownership_resources.R.
+# We read its `_final` variants (post fuzzy rematch) rather than rebuilding
+# house_price_lr / house_prices_ubdc / the matching cascade here. The LSOA
+# summary below was never ported, so it stays.
 tar_target(house_price_lr_uprn,{
-  land_registry_add_uprn(house_price_lr,house_prices_ubdc,uprn_historical,
-                       lookup_postcode_OA_LSOA_MSOA_2021,
-                       bounds_lsoa_GB_full,
-                       path_epc = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
-                       path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  load_lo_house_price_lr_uprn()
 }),
 
 tar_target(house_prices_lsoa,{
@@ -632,14 +629,11 @@ tar_target(house_prices_lsoa,{
 }),
 
 tar_target(house_prices_nowcast,{
-  house_price_extrapolate(house_price_lr_uprn, lsoa_admin)
+  load_lo_house_prices_nowcast()
 }),
 
 tar_target(uprn_historical_epc_lr,{
-  combine_uprn_epc_lr(uprn_historical,
-                      house_prices_nowcast,
-                      path_epc_dom = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
-                      path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  load_lo_uprn_historical_epc_lr()
 }),
 
 tar_target(housing_type_2021,{
