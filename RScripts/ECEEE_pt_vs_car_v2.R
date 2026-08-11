@@ -28,10 +28,12 @@
 # TWO DELIBERATE DEPARTURES from ECEEE_paper.R, both fixing defects rather
 # than restyling. Each is explained in full at the point it happens:
 #
-#   1. The palette is rebuilt from the classification's own group codes. The
-#      original covers 21 of the 24 groups and includes one name that is not in
-#      the 2021 classification, which silently deleted a fifth of the country
-#      and shifted colours within supergroup 7.
+#   1. The palette is replaced with the project's published one (the PBCC map's
+#      lsoa_class_code colours) and keyed by group code. ECEEE_paper.R's
+#      palette covers 21 of the 24 groups, includes one name that is not in the
+#      2021 classification, and uses the wrong hue for supergroups 5, 6 and 7 -
+#      so the figure both dropped a fifth of the country and coloured several
+#      classifications as though they belonged to a different supergroup.
 #   2. Scotland is included. The original compares a GB x-axis against an
 #      England-and-Wales y-axis; this costs two years at the recent end but
 #      makes both axes GB.
@@ -78,28 +80,33 @@ tar_load(area_classifications_11_21)
 # Keyed by group CODE rather than name below, so a future rename cannot
 # reintroduce this class of bug quietly: an unmatched code stops the script.
 #
-# Colours 1a-7a are the original values, unchanged, so anything already correct
-# stays byte-identical to the published figure. The shading follows the
-# original's own scheme - one hue per supergroup, dark to light within it.
+# The values below are the project's own area classification palette, taken
+# from the Carbon & Place PBCC tool (pbcc/datasets.js, lineColours.zones
+# .lsoa_class_code in the website repo) - the one already on the published map,
+# keyed by the same group codes and covering all 24 groups.
 #
-# NEW, and worth a look before publication:
-#   7b  reuses #ef9fa5, the light pink that sat in the 7-family slot under the
-#       wrong name. Same supergroup, same position, so this is a relabel.
-#   8a-8c  are a teal ramp that had to be invented, because supergroup 8 has no
-#       colour anywhere in the original. Teal was chosen as the nearest unused
-#       hue - brown, green, blue, amber, purple, red and pink are all taken. If
-#       the paper is meant to match an official ONS colour set, override these
-#       three; they are the only values here not traceable to the original.
+# ECEEE_paper.R's palette is NOT a subset of it. It agrees for supergroups 1-4a
+# and then diverges badly:
+#
+#   supergroup 5  orange in the real palette, purple in ECEEE_paper.R
+#   6a            pink in the real palette, red in ECEEE_paper.R
+#   supergroup 7  purple in the real palette, red/pink in ECEEE_paper.R
+#   supergroup 8  grey in the real palette, absent from ECEEE_paper.R
+#   4b-4d         different shades of the same yellow family
+#
+# So the figure was not merely missing four classifications, it was drawing
+# several of the others in another supergroup's colours - readers matching the
+# figure against the maps on the site would have mis-identified them.
 class_cols = c(
-  "1a" = '#955123',                                                  # Cosmopolitan student neighbourhoods
-  "2a" = '#007f42', "2b" = '#3ea456', "2c" = '#8aca8e', "2d" = '#cfe8d1',  # Countryside living
-  "3a" = '#00498d', "3b" = '#2967ad', "3c" = '#7b99c7', "3d" = '#b9c8e1',  # Ethnically diverse professionals
-  "4a" = '#e3ac20', "4b" = '#eac364', "4c" = '#f2dca6', "4d" = '#f7ebd0',  # Hard-pressed communities
-  "5a" = '#6f3d79', "5b" = '#8e6494', "5c" = '#ad8bb0', "5d" = '#ccb2cc',
-  "5e" = '#e9d9e9',                                                  # Industrious communities
-  "6a" = '#d0021b',                                                  # Inner city cosmopolitan
-  "7a" = '#e0505f', "7b" = '#ef9fa5',                                # Multicultural living
-  "8a" = '#00767d', "8b" = '#4aa8ae', "8c" = '#a5d5d8'               # Suburban living  (NEW)
+  "1a" = '#955123',                                                       # Cosmopolitan student neighbourhoods
+  "2a" = '#007f42', "2b" = '#3ea456', "2c" = '#8aca8e', "2d" = '#cfe8d1', # Countryside living
+  "3a" = '#00498d', "3b" = '#2967ad', "3c" = '#7b99c7', "3d" = '#b9c8e1', # Ethnically diverse professionals
+  "4a" = '#e3ac20', "4b" = '#edca1a', "4c" = '#f6e896', "4d" = '#fcf5d8', # Hard-pressed communities
+  "5a" = '#e64c2b', "5b" = '#ec773c', "5c" = '#faa460', "5d" = '#fcc9a0',
+  "5e" = '#fee4ce',                                                       # Industrious communities
+  "6a" = '#f79ff0',                                                       # Inner city cosmopolitan
+  "7a" = '#6a339a', "7b" = '#9f84bd',                                     # Multicultural living
+  "8a" = '#576362', "8b" = '#a1a2a1', "8c" = '#e5e4e3'                    # Suburban living
 )
 
 # ---------------------------------------------------------------------------
