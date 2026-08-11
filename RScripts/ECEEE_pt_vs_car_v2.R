@@ -25,12 +25,20 @@
 # Everything from the palette down to the arrow geometry is kept exactly as in
 # ECEEE_paper.R. This is the same figure with newer data, not a redesign.
 #
-# ONE INHERITED CAVEAT, carried through deliberately rather than silently
-# fixed: the two axes cover different geographies. vehicle_summary2 drops
-# Scotland (DVLA registrations for Scotland lag), pt_summary does not, so the
-# x value for a class is a GB median and the y value an England-and-Wales one.
-# That is how the published figure was built. Changing it here would make this
-# render incomparable with the published one, which defeats the point of a v2.
+# TWO DELIBERATE DEPARTURES from ECEEE_paper.R, both fixing defects rather
+# than restyling. Each is explained in full at the point it happens:
+#
+#   1. The palette is rebuilt from the classification's own group codes. The
+#      original covers 21 of the 24 groups and includes one name that is not in
+#      the 2021 classification, which silently deleted a fifth of the country
+#      and shifted colours within supergroup 7.
+#   2. Scotland is included. The original compares a GB x-axis against an
+#      England-and-Wales y-axis; this costs two years at the recent end but
+#      makes both axes GB.
+#
+# Because of 2 the period is shorter than the published figure's, and because
+# of 1 there are more trajectories. This is a corrected figure, not a restyled
+# one.
 
 library(targets)
 library(dplyr)
@@ -45,29 +53,54 @@ tar_load(pt_frequency)
 tar_load(area_classifications_11_21)
 
 # ---------------------------------------------------------------------------
-# Palette (verbatim from ECEEE_paper.R - the ONS area classification colours)
+# Palette
 # ---------------------------------------------------------------------------
-cols = c("Cosmopolitan student neighbourhoods" ='#955123',
-         "Ageing rural neighbourhoods" ='#007f42',
-         "Prospering countryside life" ='#3ea456',
-         "Remoter communities" ='#8aca8e',
-         "Rural traits" ='#cfe8d1',
-         "Achieving neighbourhoods" ='#00498d',
-         "Asian traits" ='#2967ad',
-         "Highly qualified professionals" ='#7b99c7',
-         "Households in terraces and flats" ='#b9c8e1',
-         "Challenged white communities" ='#e3ac20',
-         "Constrained renters" ='#eac364',
-         "Hampered neighbourhoods" ='#f2dca6',
-         "Hard-pressed flat dwellers" ='#f7ebd0',
-         "Ageing urban communities" ='#6f3d79',
-         "Aspiring urban households" ='#8e6494',
-         "Comfortable neighbourhoods" ='#ad8bb0',
-         "Endeavouring social renters" ='#ccb2cc',
-         "Primary sector workers" ='#e9d9e9',
-         "Inner city cosmopolitan" ='#d0021b',
-         "Urban cultural mix" ='#e0505f',
-         "Aspirational techies" ='#ef9fa5')
+# The palette in ECEEE_paper.R is incomplete, and that is why the first render
+# of this figure was missing classifications and mis-assigning colours.
+#
+# The 2021 ONS area classification has 8 supergroups and 24 groups (1a-8c).
+# The original `cols` vector has 21 entries: it runs correctly from 1a to 7a,
+# then ends with "Aspirational techies", which is not a group name in the 2021
+# classification at all - it appears to be from an earlier draft. So the
+# palette was:
+#
+#   - missing 7b Young ethnic communities (1,744 LSOAs)
+#   - missing the whole of supergroup 8, Suburban living:
+#       8a Affluent communities  (2,012)
+#       8b Ageing suburbanites   (2,924)
+#       8c Comfortable suburbia  (2,384)
+#   - carrying one entry, "Aspirational techies", matching no data
+#
+# Those four groups are ~9,000 LSOAs, a fifth of the country. Because
+# ECEEE_paper.R sets the factor levels to names(cols), every one of them became
+# NA and was then dropped by the !is.na() filter - silently, with no warning.
+#
+# Keyed by group CODE rather than name below, so a future rename cannot
+# reintroduce this class of bug quietly: an unmatched code stops the script.
+#
+# Colours 1a-7a are the original values, unchanged, so anything already correct
+# stays byte-identical to the published figure. The shading follows the
+# original's own scheme - one hue per supergroup, dark to light within it.
+#
+# NEW, and worth a look before publication:
+#   7b  reuses #ef9fa5, the light pink that sat in the 7-family slot under the
+#       wrong name. Same supergroup, same position, so this is a relabel.
+#   8a-8c  are a teal ramp that had to be invented, because supergroup 8 has no
+#       colour anywhere in the original. Teal was chosen as the nearest unused
+#       hue - brown, green, blue, amber, purple, red and pink are all taken. If
+#       the paper is meant to match an official ONS colour set, override these
+#       three; they are the only values here not traceable to the original.
+class_cols = c(
+  "1a" = '#955123',                                                  # Cosmopolitan student neighbourhoods
+  "2a" = '#007f42', "2b" = '#3ea456', "2c" = '#8aca8e', "2d" = '#cfe8d1',  # Countryside living
+  "3a" = '#00498d', "3b" = '#2967ad', "3c" = '#7b99c7', "3d" = '#b9c8e1',  # Ethnically diverse professionals
+  "4a" = '#e3ac20', "4b" = '#eac364', "4c" = '#f2dca6', "4d" = '#f7ebd0',  # Hard-pressed communities
+  "5a" = '#6f3d79', "5b" = '#8e6494', "5c" = '#ad8bb0', "5d" = '#ccb2cc',
+  "5e" = '#e9d9e9',                                                  # Industrious communities
+  "6a" = '#d0021b',                                                  # Inner city cosmopolitan
+  "7a" = '#e0505f', "7b" = '#ef9fa5',                                # Multicultural living
+  "8a" = '#00767d', "8b" = '#4aa8ae', "8c" = '#a5d5d8'               # Suburban living  (NEW)
+)
 
 # ---------------------------------------------------------------------------
 # Data prep (verbatim from ECEEE_paper.R)
@@ -91,9 +124,28 @@ pt_frequency2 = pt_frequency2[pt_frequency2$year >= 2010,]
 names(pt_frequency2)[1] = "LSOA21CD"
 pt_frequency2$year = as.integer(pt_frequency2$year)
 
-area_classifications_11_21 = area_classifications_11_21[c("LSOA21CD","lsoa_class_name")]
+# Map every group code in the data to a colour, and fail loudly if any code has
+# none - the failure mode this replaces was silent deletion of a fifth of the
+# country. Legend order follows the code (1a...8c), so the colour families read
+# in order rather than alphabetically.
+area_classifications_11_21 = area_classifications_11_21[c("LSOA21CD","lsoa_class_code","lsoa_class_name")]
+
+class_lookup = area_classifications_11_21 |>
+  distinct(lsoa_class_code, lsoa_class_name) |>
+  arrange(lsoa_class_code)
+
+unknown = setdiff(class_lookup$lsoa_class_code, names(class_cols))
+if (length(unknown) > 0) {
+  stop("No colour defined for area classification code(s): ", paste(unknown, collapse = ", "),
+       ". Add them to class_cols.")
+}
+
+# Named by the label that will appear in the legend.
+cols = setNames(class_cols[class_lookup$lsoa_class_code], class_lookup$lsoa_class_name)
+
 area_classifications_11_21$lsoa_class_name = factor(area_classifications_11_21$lsoa_class_name,
-                                                    levels = names(cols))
+                                                    levels = class_lookup$lsoa_class_name)
+area_classifications_11_21$lsoa_class_code = NULL
 
 pt_frequency2 = left_join(pt_frequency2,
                           area_classifications_11_21, by = "LSOA21CD")
@@ -107,32 +159,40 @@ vehicle_summary = left_join(vehicle_summary,
 
 vehicle_summary$country = substr(vehicle_summary$LSOA21CD,1,1)
 
-# Drop the years where vehiclesPHousehold is not yet populated.
+# Scotland is INCLUDED here, unlike in ECEEE_paper.R.
 #
-# This is NOT in the original script, and it has to be here. vehicle_summary
-# now extends to 2025, and in 2025 vehiclesPHousehold is exactly 0.000 for all
-# 35,672 English and Welsh LSOAs - the household denominator for that year is
-# missing, not the vehicles. A median of a column of zeros is zero, so without
-# this filter every class gets a spurious 2025 point on the axis and the figure
-# grows twenty vertical lines plunging to zero. (Scotland is in the same state
-# from 2023, which is why the main pipeline pins Scotland to 2022 and England
-# and Wales to 2024 in select_transport_vars().)
+# The original drops it ("Missing recent scotland data") and so compares a GB
+# median on the x-axis against an England-and-Wales median on the y-axis. The
+# vehicle data does cover Scotland - 7,392 Data Zones, fully classified - it
+# just stops earlier, so the fix is to shorten the period rather than to drop a
+# country. Both axes are now GB.
 #
-# The test is "was any zone in this year non-zero", not a hard-coded year, so
-# 2025 reappears by itself once the household figures land. Genuine per-zone
-# zeros - 81 LSOAs in 2010, falling to none by 2019 - are untouched, because
-# the filter drops whole empty years rather than individual zero rows.
+# Which years survive is derived from the data, not hard-coded, because
+# vehiclesPHousehold is present but *zero* in the years where the household
+# denominator is missing rather than being NA - the trap that put twenty
+# vertical lines through the first render of this figure. A year is kept only
+# if EVERY country in it has at least one non-zero zone:
+#
+#   England & Wales   real to 2024, all 35,672 zones exactly 0.000 in 2025
+#   Scotland          real to 2022, all 7,392 zones exactly 0.000 from 2023
+#
+# so the common window is 2010-2022. That is two years shorter than the
+# England-and-Wales-only version, which is the price of a consistent
+# geography. Genuine per-zone zeros (81 LSOAs in 2010, none by 2019) are
+# untouched - whole empty country-years are dropped, not individual rows - and
+# the window extends itself as each country's figures land.
 years_with_vehicle_data = vehicle_summary |>
-  filter(country != "S") |>
+  group_by(year, country) |>
+  summarise(has_data = any(vehiclesPHousehold > 0, na.rm = TRUE), .groups = "drop") |>
   group_by(year) |>
-  summarise(has_data = any(vehiclesPHousehold > 0, na.rm = TRUE)) |>
-  filter(has_data) |>
+  summarise(all_countries = all(has_data)) |>
+  filter(all_countries) |>
   pull(year)
 
-message("vehicle years used: ", paste(range(years_with_vehicle_data), collapse = " - "))
+message("vehicle years used (GB): ", paste(range(years_with_vehicle_data), collapse = " - "))
 
 vehicle_summary2 = vehicle_summary |>
-  filter(country != "S", year %in% years_with_vehicle_data) |>
+  filter(year %in% years_with_vehicle_data) |>
   group_by(year, lsoa_class_name) |>
   summarise(vehiclesPHousehold = median(vehiclesPHousehold, na.rm = TRUE))
 
