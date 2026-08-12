@@ -51,8 +51,12 @@
 #   Options:
 #     --go          perform the upload (default is a dry run)
 #     --no-md5      skip the local MD5 pass (faster; loses integrity checking)
-#     --only=NAME   restrict to one destination container, for a staged run:
-#                   pbcc-pmtiles | pbcc-jsonbin | pbcc-data
+#     --only=NAME   restrict the run, either to one destination container
+#                   (pbcc-pmtiles | pbcc-jsonbin | pbcc-data) or to a single
+#                   destination blob name from the manifest. Useful for
+#                   proving the credential on one small file before starting
+#                   19 GB of tiles. A scoped run writes its own receipt and
+#                   does not mark the whole job done.
 #
 #   Credentials come from the environment and are never written to disk:
 #
@@ -129,7 +133,13 @@ script_dir <- tryCatch({
   if (length(f)) dirname(normalizePath(sub("^--file=", "", f[1]))) else getwd()
 }, error = function(e) getwd())
 
-RECEIPT <- file.path(script_dir, "azure_upload_20260812_receipt.csv")
+# A scoped run (--only=) gets its own receipt, so that finishing one container
+# or one file does not block the full run. Only an unscoped clean run writes
+# the receipt that marks the whole job done.
+RECEIPT <- file.path(script_dir, if (is.na(ONLY))
+  "azure_upload_20260812_receipt.csv"
+else
+  sprintf("azure_upload_20260812_receipt_%s.csv", gsub("[^A-Za-z0-9]+", "_", ONLY)))
 
 # --- roots -------------------------------------------------------------------
 # Absolute, because the three sources live in different repos and one is not in
@@ -301,9 +311,14 @@ bulk <- rbind(
 manifest <- rbind(tiles, jsonbin, bulk)
 
 if (!is.na(ONLY)) {
-  if (!ONLY %in% manifest$container)
-    stop("--only= must be one of: ", paste(unique(manifest$container), collapse = ", "))
-  manifest <- manifest[manifest$container == ONLY, ]
+  keep <- manifest$container == ONLY | manifest$dest == ONLY
+  if (!any(keep))
+    stop("--only= matched nothing. Give either a container (",
+         paste(unique(manifest$container), collapse = ", "),
+         ") or one destination blob name from the manifest.")
+  manifest <- manifest[keep, ]
+  message("--only=", ONLY, ": restricted to ", nrow(manifest),
+          " of the full manifest")
 }
 
 if (any(duplicated(paste(manifest$container, manifest$dest))))
@@ -495,8 +510,14 @@ receipt$run_at <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
 if (n_bad == 0) {
   write.csv(receipt, RECEIPT, row.names = FALSE)
   message("\nReceipt written to ", RECEIPT)
-  message("This script will refuse to run again while that file exists.")
-  message("\nThe site can now be deployed.")
+  if (is.na(ONLY)) {
+    message("This script will refuse to run again while that file exists.")
+    message("\nEvery file the site references is now on Azure. It can be deployed.")
+  } else {
+    message("This is a scoped run (--only=", ONLY, "), so it does NOT mark the ",
+            "whole job done.\nRe-run without --only= to upload the rest. ",
+            "Do not deploy the site until that has finished.")
+  }
 } else {
   partial <- sub("\\.csv$", "_partial.csv", RECEIPT)
   write.csv(receipt, partial, row.names = FALSE)
