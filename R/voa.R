@@ -211,16 +211,79 @@ load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
 }
 
+#' Convert the Scottish council-tax-band counts from 2011 to 2022 Data Zones
+#'
+#' @description Apportions each 2011 Data Zone's dwelling counts across the
+#'   2022 Data Zones it overlaps, in proportion to the postcode counts in
+#'   `lookup_dz_2011_22_pre`, then sums by 2022 zone - the same
+#'   split-and-sum used for the Scottish population and household counts in
+#'   `interpolate_population_dz11_dz22()`, written vectorised here because
+#'   this table is small enough not to need the per-zone loop.
+#' @param dwellings_tax_band_scotland Scottish council-tax-band counts per
+#'   2011 Data Zone (`dwellings_tax_band_scotland` target).
+#' @param lookup_dz_2011_22_pre 2011-to-2022 Data Zone overlap lookup with
+#'   postcode `count` weights (`lookup_dz_2011_22_pre` target).
+#' @return A data frame with `ecode` (2022 Data Zone), `year`, per-band
+#'   counts and `all_properties`.
+#' @keywords internal
+scotland_tax_band_dz22 = function(dwellings_tax_band_scotland, lookup_dz_2011_22_pre) {
+
+  lookup = sf::st_drop_geometry(lookup_dz_2011_22_pre)[,c("DataZone","DataZone22","count")]
+  lookup = lookup |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+  bands = c("band_a","band_b","band_c","band_d","band_e","band_f","band_g",
+            "band_h","all_properties")
+
+  out = dplyr::inner_join(dwellings_tax_band_scotland, lookup[,c("DataZone","DataZone22","splitshare")],
+                          by = c("LSOA11CD" = "DataZone"),
+                          relationship = "many-to-many")
+
+  for(b in bands){
+    out[[b]] = out[[b]] * out$splitshare
+  }
+
+  out = out |>
+    dplyr::group_by(DataZone22, year) |>
+    dplyr::summarise(dplyr::across(dplyr::all_of(bands), \(x) round(sum(x, na.rm = TRUE))),
+                     .groups = "drop")
+
+  names(out)[names(out) == "DataZone22"] = "ecode"
+  out
+}
+
 #' Prepare the council-tax-band series for JSON export (2010+)
 #'
-#' @description Filters the CTSOP1 series to 2010 onwards and shortens the
-#'   column names (banda, bandb, ...) for the per-zone JSON files. Used by
-#'   the `voa_json_2010` target.
+#' @description Filters the CTSOP1 series to 2010 onwards, appends the
+#'   equivalent Scottish council-tax-band counts on 2022 Data Zones, and
+#'   shortens the column names (banda, bandb, ...) for the per-zone export.
+#'   Used by the `voa_json_2010` target.
+#'
+#'   Scotland is included because the VOA publishes England and Wales only,
+#'   and a chart that silently has no data north of the border reads as a
+#'   fault rather than as a boundary of the source. The Scottish council tax
+#'   register is the same measure on the same bands (A-H), published by
+#'   statistics.gov.scot, so the two series concatenate directly. Band I is
+#'   the one asymmetry - it exists only in Wales - and stays NA for both
+#'   Scottish and English zones.
 #' @param dwellings_tax_band CTSOP1 table (`dwellings_tax_band` target).
+#' @param dwellings_tax_band_scotland Scottish council-tax-band counts per
+#'   2011 Data Zone (`dwellings_tax_band_scotland` target).
+#' @param lookup_dz_2011_22_pre 2011-to-2022 Data Zone overlap lookup.
 #' @return A data frame with `LSOA21CD`, `year` and band counts, sorted.
 #' @keywords internal
-summarise_voa_post2010 = function(dwellings_tax_band) {
+summarise_voa_post2010 = function(dwellings_tax_band, dwellings_tax_band_scotland,
+                                  lookup_dz_2011_22_pre) {
   dwellings_tax_band = dwellings_tax_band[dwellings_tax_band$year >= 2010,]
+
+  scot = scotland_tax_band_dz22(dwellings_tax_band_scotland, lookup_dz_2011_22_pre)
+  scot = scot[scot$year >= 2010,]
+  scot$band_i = NA_integer_
+
+  dwellings_tax_band = dplyr::bind_rows(dwellings_tax_band, scot[,names(dwellings_tax_band)])
+
   names(dwellings_tax_band) = gsub("_","",names(dwellings_tax_band))
   names(dwellings_tax_band)[1] = "LSOA21CD"
   dwellings_tax_band = dwellings_tax_band[order(dwellings_tax_band$LSOA21CD, dwellings_tax_band$year),]

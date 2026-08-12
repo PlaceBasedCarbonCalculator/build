@@ -597,7 +597,12 @@ tar_target(pt_json,{
   ptf = pt_frequency[!is.na(pt_frequency$zone_id),]
   names(ptf) = gsub("Morning_Peak","MorningPeak",names(ptf))
   names(ptf) = gsub("Afternoon_Peak","AfternoonPeak",names(ptf))
-  ptf = tidyr::pivot_longer(ptf, cols = tph_weekday_MorningPeak_2004_2:tph_daytime_avg_2023_4,
+  # Select the tph_ columns by name, not by a first:last range. The range used
+  # to end at tph_daytime_avg_2023_4, which was the last column when the series
+  # ended in 2023; once 2024 and 2025 were added their tph_daytime_avg_* columns
+  # (6 and 7 of them) sorted after that endpoint and were silently dropped from
+  # the export, while the rest of those two years came through.
+  ptf = tidyr::pivot_longer(ptf, cols = tidyselect::starts_with("tph_"),
                             names_prefix = "tph_",
                             names_sep = "_",
                             names_to = c("day","time","year","mode"))
@@ -843,7 +848,10 @@ tar_target(boundary_bin_la,{
 }),
 
 tar_target(voa_json_2010,{
-  sub = summarise_voa_post2010(dwellings_tax_band)
+  # GB, not just E&W: the Scottish council tax register carries the same
+  # bands and is folded in on 2022 Data Zones - see summarise_voa_post2010().
+  sub = summarise_voa_post2010(dwellings_tax_band, dwellings_tax_band_scotland,
+                               lookup_dz_2011_22_pre)
   export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 1, name = "voa_2010", dataframe = "columns")
 }),
 
@@ -1119,7 +1127,10 @@ tar_target(buildings_lsoa_4326_high,{
 
 # Build GeoJSON
 tar_target(lsoa_map_data,{
-  select_map_outputs(lsoa_emissions_all, area_classifications_11_21, year = 2019)
+  # The latest year in lsoa_emissions_all (max_year above). Was 2019, chosen as
+  # the last pre-COVID year, which left the map two years behind the report
+  # cards - those read the last year in the data and label it.
+  select_map_outputs(lsoa_emissions_all, area_classifications_11_21, year = 2022)
 }),
 
 tar_target(geojson_wards,{
