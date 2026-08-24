@@ -238,11 +238,13 @@ load_pt_frequency = function(path = parameters$path_data){
 #' @param tph_years Years to carry daytime trips-per-hour columns for.
 #' @param change_years Years to compute a bus change-since-2006-08 column for;
 #'   must all appear in `tph_years`.
+#' @param rounddp Number of decimal places to round the final output to.
 #' @return A data frame with one row per LSOA and the map attribute columns.
 #' @keywords internal
 select_transport_vars = function(pt_frequency, vehicle_summary, year = 2024, year_scot = 2022,
-                                 tph_years = c(2023, 2024, 2025),
-                                 change_years = c(2023, 2025)){
+                                 tph_years = 2025,
+                                 change_years = 2025,
+                                 rounddp = 1){
 
   stopifnot(all(change_years %in% tph_years))
 
@@ -288,6 +290,14 @@ select_transport_vars = function(pt_frequency, vehicle_summary, year = 2024, yea
   names(pt_frequency)[1] = "LSOA21CD"
 
   join = dplyr::left_join(vehicle_summary, pt_frequency, by = "LSOA21CD")
+
+  # Round
+  for(i in 1:ncol(join)){
+    if(inherits(join[[i]], "numeric")){
+      join[[col]] = round(join[[col]], rounddp)
+    }
+  }
+
   join
 
 }

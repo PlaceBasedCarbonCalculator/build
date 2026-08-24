@@ -607,6 +607,7 @@ tar_target(pt_json,{
                             names_sep = "_",
                             names_to = c("day","time","year","mode"))
   ptf = tidyr::pivot_wider(ptf, names_from = c("day","time","mode"), values_from = "value", id_cols = c("zone_id","year"))
+  ptf = ptf[order(ptf$zone_id, ptf$year),]
   export_zone_bin(ptf, idcol = "zone_id", rounddp = 2, name = "pt_frequency", dataframe = "columns")
 }),
 
