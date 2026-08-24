@@ -1,9 +1,10 @@
-#' Load Consumption Lookup
+#' Load the PBCC mapping between DEFRA products and LCFS categories
 #'
-#' @description Load consumption lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads `PBCC_lookup.xlsx`, which maps DEFRA COICOP product
+#'   codes onto the extended LCFS spending categories used by the synthetic
+#'   population. Used by the `consumption_lookup` target.
+#' @param path Path to `PBCC_lookup.xlsx`.
+#' @return The lookup as a data frame.
 #' @keywords internal
 load_consumption_lookup = function(path = "../inputdata/consumption/PBCC_lookup.xlsx"){
   lookup = readxl::read_xlsx(path)
@@ -11,21 +12,33 @@ load_consumption_lookup = function(path = "../inputdata/consumption/PBCC_lookup.
 }
 
 
-#' Calculate Consumption Lsoa
+#' Distribute national consumption emissions to zones by synthetic spending
 #'
-#' @description Calculate consumption lsoa and return the computed result.
-#' @param consumption_syth_pop Input object or parameter named `consumption_syth_pop`.
-#' @param population Population dataset.
-#' @param consumption_nations Input object or parameter named `consumption_nations`.
-#' @param consumption_lookup Input object or parameter named `consumption_lookup`.
-#' @param consumption_multipliers_uk) Input object or parameter named `consumption_multipliers_uk)`.
-#' @return A data frame or numeric summary containing the computed results.
+#' @description The core consumption-footprint calculation: each zone's
+#'   share of its nation's emissions for each spending category equals its
+#'   share of national synthetic-population spending in that category
+#'   (grouped by DEFRA products via the PBCC lookup). Odd years reuse the
+#'   previous even year's synthetic population. Public transport and
+#'   non-fuel vehicle costs are additionally estimated with GHG-per-pound
+#'   multipliers as no national total exists for them. Per-capita rates are
+#'   added using the population target. Used by the `consumption_emissions`
+#'   target, feeding flights, the master emissions table and JSONs.
+#' @param consumption_syth_pop Zone spending (`consumption_syth_pop`).
+#' @param population GB population (`population` target).
+#' @param consumption_nations National footprints by product
+#'   (`consumption_nations` target).
+#' @param consumption_lookup Product-category mapping (`consumption_lookup`).
+#' @param consumption_multipliers_uk GHG/pound multipliers
+#'   (`consumption_multipliers_uk` target).
+#' @return A data frame per zone-year with spending, `emissions_*` totals
+#'   and `emissions_percap_*` columns (zeros where population is zero).
 #' @keywords internal
 calculate_consumption_lsoa = function(consumption_syth_pop, population, consumption_nations, consumption_lookup, consumption_multipliers_uk) {
 
   population = population[,c("LSOA21CD","year","all_ages")]
   population = population[population$year >= 2010,]
 
+  # Older cached versions of consumption_syth_pop named the zone column "by"
   names(consumption_syth_pop)[names(consumption_syth_pop) == "by"] = "LSOA21CD"
 
 
@@ -200,11 +213,12 @@ calculate_consumption_lsoa = function(consumption_syth_pop, population, consumpt
 }
 
 
-#' Remove Inf
+#' Replace Inf and NaN with zero
 #'
-#' @description Perform processing for remove inf.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Utility for per-capita divisions where zero population
+#'   produces Inf/NaN.
+#' @param x Numeric vector.
+#' @return `x` with infinite and NaN values set to 0.
 #' @keywords internal
 remove_inf = function(x){
   x[is.infinite(x)] = 0

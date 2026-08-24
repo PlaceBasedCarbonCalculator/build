@@ -1,9 +1,10 @@
-#' Download Area Classifications
+#' Download the ONS 2011 residential area classification data
 #'
-#' @description Download the area classifications resource and return the local file path.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return The local path or file name of the downloaded resource.
+#' @description Downloads the ONS 2011 area classification census data zip
+#'   into `path` (skipped if already present). This is the
+#'   `dl_area_classifications` target.
+#' @param path Folder to store the download; created if missing.
+#' @return `path`.
 #' @keywords internal
 download_area_classifications = function(path){
   if(!dir.exists(path)){
@@ -21,12 +22,15 @@ download_area_classifications = function(path){
 }
 
 
-#' Load Area Classifications
+#' Load the 2011 LSOA residential area classification (SOAC)
 #'
-#' @description Load area classifications data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the ONS 2011 area classification workbook,
+#'   keeping the supergroup and group codes/names per 2011 LSOA/Data Zone.
+#'   Used by the `area_classifications` target.
+#' @param path Folder containing `2011censusdata.zip`
+#'   (`dl_area_classifications` target).
+#' @return A data frame with `LSOACD11`, `supergroup_code`,
+#'   `supergroup_name`, `lsoa_class_code`, `lsoa_class_name`.
 #' @keywords internal
 load_area_classifications = function(path){
 
@@ -44,13 +48,18 @@ load_area_classifications = function(path){
   classif
 }
 
-#' Match 2011 Classifications 2021
+#' Carry the 2011 area classification onto 2021/2022 zones
 #'
-#' @description Match 2011 classifications 2021 values between datasets.
-#' @param area_classifications Area classification lookup table.
-#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
-#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Assigns each 2021 LSOA / 2022 Data Zone the classification
+#'   of its best-matching 2011 zone: Scottish zones use the largest UPRN
+#'   split share, merged/split E&W zones take the first matching parent.
+#'   Used by the `area_classifications_11_21` target, which feeds the map
+#'   outputs, OAC emissions summaries and overview JSONs.
+#' @param area_classifications 2011 classifications
+#'   (`area_classifications` target).
+#' @param lookup_dz_2011_22 Data Zone split shares (`lookup_dz_2011_22`).
+#' @param lsoa_11_21_tools E&W conversion lookups (`lsoa_11_21_tools`).
+#' @return A data frame with `LSOA21CD` and the classification columns.
 #' @keywords internal
 match_2011_classifications_2021 = function(area_classifications, lookup_dz_2011_22, lsoa_11_21_tools){
 

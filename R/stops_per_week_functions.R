@@ -1,10 +1,16 @@
-#' Build Pt Analysis
+#' Count public transport trips per zone for one year of GTFS archives
 #'
-#' @description Build pt analysis and return the generated output.
-#' @param zone Input object or parameter named `zone`.
-#' @param i Input object or parameter named `i`.
-#' @param path File or directory path.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Offline analysis (not a pipeline target) used to produce the
+#'   `trips_per_lsoa21_22_by_mode_YYYY.Rds` files consumed by
+#'   `load_pt_frequency()`. Picks the appropriate GTFS source per year
+#'   (NPTDR before 2012, Traveline Bus Archive 2014-2017, TransXChange +
+#'   ATOC rail 2018+), cleans it and counts trips per zone/time band over a
+#'   representative month via `gtfs_trips_per_zone()`. For 2023 two bus
+#'   snapshots are compared and the maximum taken.
+#' @param zone sf zones (e.g. GB LSOA boundaries).
+#' @param i Year to process (2004-2011, 2014-2023).
+#' @param path Folder holding the UK2GTFS archives.
+#' @return A data frame of trips/tph per zone, time band and route type.
 #' @keywords internal
 build_pt_analysis <- function(zone, i = 2023, path = "D:/OneDrive - University of Leeds/Data/UK2GTFS/"){
 
@@ -237,16 +243,15 @@ count_weekday_runs <- function(cal){
 
 
 
-#' Gtfs Stop Frequency
+#' Average services per week at each GTFS stop
 #'
-#' @description Perform processing for gtfs stop frequency.
-#' @param gtfs GTFS object from gtfs_read()
-#' @param startdate Start date
-#' @param enddate End date
-#' @param gtfs Input object or parameter named `gtfs`.
-#' @param startdate Input object or parameter named `startdate`.
-#' @param enddate Input object or parameter named `enddate`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Counts how many times each stop is served between two dates,
+#'   accounting for calendar day-of-week patterns and calendar_dates
+#'   exceptions (extra/cancelled runs), and converts to stops per week.
+#' @param gtfs GTFS object from `UK2GTFS::gtfs_read()`.
+#' @param startdate,enddate Date range to analyse.
+#' @return The GTFS `stops` table with `stops_total` and `stops_per_week`
+#'   columns joined on.
 #' @keywords internal
 gtfs_stop_frequency <- function(gtfs,
                                 startdate = lubridate::ymd("2020-03-01"),
@@ -323,16 +328,14 @@ gtfs_stop_frequency <- function(gtfs,
 }
 
 
-#' Gtfs Trim Dates
+#' Trim a GTFS feed to a date range
 #'
-#' @description Perform processing for gtfs trim dates.
-#' @param gtfs GTFS object from gtfs_read()
-#' @param startdate Start date
-#' @param enddate End date
-#' @param gtfs Input object or parameter named `gtfs`.
-#' @param startdate Input object or parameter named `startdate`.
-#' @param enddate Input object or parameter named `enddate`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Clips the calendar, calendar_dates, trips and stop_times of a
+#'   GTFS object so only services operating between `startdate` and `enddate`
+#'   remain, with service start/end dates clamped to the range.
+#' @param gtfs GTFS object from `UK2GTFS::gtfs_read()`.
+#' @param startdate,enddate Date range to keep.
+#' @return The trimmed GTFS object.
 #' @keywords internal
 gtfs_trim_dates <- function(gtfs,
                             startdate = lubridate::ymd("2020-03-01"),
@@ -381,16 +384,21 @@ gtfs_trim_dates <- function(gtfs,
 
 
 
-#' Gtfs Trips Per Zone
+#' Count public transport trips serving each zone by day and time band
 #'
-#' @description Prepare or summarise zone-based accessibility results.
-#' @param gtfs Input object or parameter named `gtfs`.
-#' @param zone Input object or parameter named `zone`.
-#' @param startdate Input object or parameter named `startdate`.
-#' @param enddate Input object or parameter named `enddate`.
-#' @param zone_id Identifier values used for joining or grouping.
-#' @param by_mode Input object or parameter named `by_mode`.
-#' @return An sf object containing spatial data.
+#' @description For each zone, counts unique trips stopping in the zone over
+#'   the study period, split by day of week and time band (Night, Morning
+#'   Peak, Midday, Afternoon Peak, Evening) and optionally by GTFS route
+#'   type. Calendar exceptions are applied, and trips-per-hour figures are
+#'   derived from the number of each weekday in the period and the band
+#'   lengths. Zone processing is parallelised with future.apply.
+#' @param gtfs GTFS object from `UK2GTFS::gtfs_read()`.
+#' @param zone sf zones; transformed to EPSG:4326 if needed.
+#' @param startdate,enddate Date range to analyse (default: first month).
+#' @param zone_id Column of `zone` holding the zone identifier.
+#' @param by_mode If TRUE, results are split by GTFS `route_type`.
+#' @return A wide data frame per zone (and route type) with `runs_*` and
+#'   `tph_*` columns per day/time band and route counts.
 #' @keywords internal
 gtfs_trips_per_zone <- function(gtfs,
                                 zone,
@@ -545,13 +553,16 @@ gtfs_trips_per_zone <- function(gtfs,
 }
 
 
-#' Internal Trips Per Zone
+#' Summarise trips for one zone (worker for gtfs_trips_per_zone)
 #'
-#' @description Prepare or summarise zone-based accessibility results.
-#' @param x Input data object.
-#' @param by_mode Input object or parameter named `by_mode`.
-#' @param days_tot){ Input object or parameter named `days_tot){`.
-#' @return A data frame produced by the function.
+#' @description Deduplicates trips within one zone, sums runs per day of week
+#'   and time band (optionally by route type), converts to trips per hour
+#'   using the number of each weekday in the study period and the band
+#'   lengths, and pivots wide.
+#' @param x stop_times rows for one zone with runs columns.
+#' @param by_mode If TRUE, group by GTFS `route_type`.
+#' @param days_tot Table of weekday counts in the study period.
+#' @return A wide one-zone data frame of runs/tph/route counts.
 #' @keywords internal
 internal_trips_per_zone <- function(x, by_mode = TRUE, days_tot){
   x <- x[!duplicated(x$trip_id),]

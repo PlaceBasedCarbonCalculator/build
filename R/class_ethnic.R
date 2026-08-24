@@ -1,49 +1,13 @@
-#' Read Class Ethinic
+
+#' Read 2021 census residents by NS-SEC and ethnicity for LSOAs
 #'
-#' @description Read class ethinic from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
-#' @keywords internal
-read_class_ethinic = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
-
-  dir = file.path(tempdir(),"class_ethnic")
-  dir.create(dir)
-  unzip(path, exdir = dir)
-  raw = read.csv(file.path(dir,"census2021EW_class_ethnic.csv"))
-  unlink(dir, recursive = TRUE)
-
-  names(raw) = c("x","Total","AB","C1","C2","DE")
-  raw_numb = raw[raw$x %in% c("Asian, Asian British or Asian Welsh",
-                              "Black, Black British, Black Welsh, Caribbean or African",
-                              "Mixed or Multiple ethnic groups",
-                              "White",
-                              "Other ethnic group"),]
-  raw_msoa = raw$Total[raw$x == "Area Name  :"]
-  raw_numb$x[raw_numb$x == "Asian, Asian British or Asian Welsh"] = "Asian"
-  raw_numb$x[raw_numb$x == "Black, Black British, Black Welsh, Caribbean or African"] = "Black"
-  raw_numb$x[raw_numb$x == "Mixed or Multiple ethnic groups"] = "Mixed"
-  raw_numb$x[raw_numb$x == "Other ethnic group"] = "Other"
-  raw_numb$Total = NULL
-
-  raw_msoa = strsplit(raw_msoa," : ")
-  raw_msoa = sapply(raw_msoa, `[[`, 1)
-  raw_numb$msoa21cd = rep(raw_msoa, each = 5)
-  raw_numb[2:5] = lapply(raw_numb[2:5], as.numeric)
-
-
-  wide = tidyr::pivot_wider(raw_numb, names_from = "x", values_from = c("AB","C1","C2","DE"))
-
-  wide
-
-}
-
-#' Read Nssec Ethinic
-#'
-#' @description Read NSSEC ethinic from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the (partial) custom census table of usual residents by
+#'   10-category NS-SEC and 6-group ethnicity per LSOA, simplifying the
+#'   category labels. Used by the `NSSEC_ethinic_residents` target, an input
+#'   to `build_household_types()` (the household "community photo"
+#'   clustering).
+#' @param path Path to the LSOA-level NS-SEC x ethnicity CSV.
+#' @return A data frame with `LSOA21CD`, `NSSEC10`, `ethnic6` and `residents`.
 #' @keywords internal
 read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdidents_NSSEC10_Ethnicity_LSOA_partial.csv"
                               #,path2 = "../inputdata/population/census2021EW_Residents_Ethnicity_LSOA.csv"
@@ -61,84 +25,27 @@ read_NSSEC_ethinic = function(path = "../inputdata/population/census2021EW_Resdi
   raw
 }
 
-#' Read Household Nssec Old
+
+
+#' Build households by NS-SEC (5) and household composition (15) per LSOA
 #'
-#' @description Read household nssec old from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
-#' @keywords internal
-read_household_nssec_old = function(path = "../inputdata/population/census2021EW_HouseholdComposition.zip"){
-
-  dir = file.path(tempdir(),"class_ethnic")
-  dir.create(dir)
-  unzip(path, exdir = dir)
-  raw6 = read.csv(file.path(dir,"census2021EW_HouseholdComposition_NSSEC6.csv"))
-  raw8 = read.csv(file.path(dir,"census2021EW_HouseholdComposition_NSSEC8_partial.csv"))
-  raw_hc = read.csv(file.path(dir,"census2021EW_HouseholdComposition.csv"))
-  raw_nssec = read.csv(file.path(dir,"census2021EW_NSSEC.csv"))
-  unlink(dir, recursive = TRUE)
-
-  names(raw6) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","household6CD","household6","count")
-  names(raw8) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","household8CD","household8","count")
-  names(raw_hc) = c("LSOA21CD","LSOA21NM","household8CD","household8","count")
-  names(raw_nssec) = c("LSOA21CD","LSOA21NM","NSSEC10CD","NSSEC10","count")
-
-  raw6 = raw6[,c("LSOA21CD","NSSEC10","household6","count")]
-  raw8 = raw8[,c("LSOA21CD","NSSEC10","household8","count")]
-  raw_hc = raw_hc[,c("LSOA21CD","household8","count")]
-  raw_nssec = raw_nssec[,c("LSOA21CD","NSSEC10","count")]
-
-  raw_hc = raw_hc[!raw_hc$LSOA21CD %in% raw8$LSOA21CD,]
-  raw_nssec = raw_nssec[!raw_nssec$LSOA21CD %in% raw8$LSOA21CD,]
-
-  raw6$NSSEC10 = simplify_nssec(raw6$NSSEC10)
-  raw8$NSSEC10 = simplify_nssec(raw8$NSSEC10)
-  raw_nssec$NSSEC10 = simplify_nssec(raw_nssec$NSSEC10)
-
-  raw6$household6 = simplify_household6(raw6$household6)
-  raw8$household8 = simplify_household8(raw8$household8)
-  raw_hc$household8 = simplify_household8(raw_hc$household8)
-
-  raw_hc = raw_hc[order(raw_hc$LSOA21CD),]
-  raw_nssec = raw_nssec[order(raw_nssec$LSOA21CD),]
-
-  # Drop DNA and Lone Parent as same in 6 and 8
-  raw_hc = raw_hc[!raw_hc$household8 %in% c("LoneParent","DNA"),]
-
-  lst_hc = dplyr::group_split(raw_hc, raw_hc$LSOA21CD, .keep = FALSE)
-  lst_nssec = dplyr::group_split(raw_nssec, raw_nssec$LSOA21CD, .keep = FALSE)
-
-  lst_bal = purrr::map2(lst_hc, lst_nssec, balance_nssec, .progress = TRUE)
-  lst_bal = dplyr::bind_rows(lst_bal)
-
-  wide6 = tidyr::pivot_wider(raw6, names_from = "household6", values_from = "count")
-  wide8 = tidyr::pivot_wider(raw8, names_from = "household8", values_from = "count")
-  wide8$DNA = NULL
-  wide8$LoneParent = NULL
-  lst_bal = lst_bal[names(wide8)]
-  wide8 = rbind(wide8, lst_bal)
-
-
-  wide = dplyr::left_join(wide6[,c("LSOA21CD", "NSSEC10","LoneParent","DNA")],
-                          wide8, by = c("LSOA21CD", "NSSEC10"))
-
-
-  wide
-
-}
-
-
-#' Read Household Nssec
-#'
-#' @description Read household nssec from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path1 Input object or parameter named `path1`.
-#' @param path2 Input object or parameter named `path2`.
-#' @param path File or directory path.
-#' @param path_msoa Input object or parameter named `path_msoa`.
-#' @param lookup_postcode_OA_LSOA_MSOA_2021 Lookup table used to map area codes or classifications.
-#' @return A data frame containing the loaded dataset.
+#' @description Combines several 2021 census tables to estimate, for every
+#'   E&W LSOA, the number of households in each combination of 5-category
+#'   NS-SEC and 15-category household composition (married/cohabiting merged
+#'   into "Couple"). Where the full LSOA cross-tab was published (the
+#'   "partial" file) it is used directly; for the remaining LSOAs the
+#'   marginals (household composition, NS-SEC, and the NS-SEC x 6-category
+#'   composition table) are Furness-balanced in `balance_nssec2()` using the
+#'   MSOA-level cross-tab as the seed. Used by the `NSSEC_household` target,
+#'   an input to `build_household_types()`.
+#' @param path1 LSOA households by 15-category composition CSV.
+#' @param path2 Partial LSOA NS-SEC x composition-15 cross-tab CSV.
+#' @param path Zip containing the NS-SEC and NS-SEC x composition-6 tables.
+#' @param path_msoa MSOA-level NS-SEC x composition-15 cross-tab CSV.
+#' @param lookup_postcode_OA_LSOA_MSOA_2021 Postcode/OA/LSOA/MSOA lookup used
+#'   to map MSOA seeds onto their LSOAs.
+#' @return A wide data frame with `LSOA21CD` and one column per
+#'   `<household15>_<NSSEC5>` combination.
 #' @keywords internal
 read_household_nssec = function(path1 = "../inputdata/population/census2021EW_Households_HouseholdComposition15_LSOA.csv",
                                 path2 = "../inputdata/population/census2021EW_RefPerson_NSSEC10_Houshold15_LSOA_partial.csv",
@@ -281,11 +188,13 @@ read_household_nssec = function(path1 = "../inputdata/population/census2021EW_Ho
   res
 }
 
-#' Simplify Nssec
+#' Shorten census NS-SEC category labels to codes
 #'
-#' @description Perform processing for simplify nssec.
-#' @param nsec){ Input object or parameter named `nsec){`.
-#' @return A data frame produced by the function.
+#' @description Reduces the long census NS-SEC labels (e.g. "L1, L2 and L3:
+#'   Higher managerial...") to compact codes ("L1L2L3"); "Does not apply"
+#'   becomes "DNA".
+#' @param nsec Character vector of census NS-SEC labels.
+#' @return Character vector of shortened codes.
 #' @keywords internal
 simplify_nssec = function(nsec){
   nsec = strsplit(nsec,":")
@@ -298,11 +207,12 @@ simplify_nssec = function(nsec){
 }
 
 
-#' Nssec10 To Nssec5
+#' Collapse 10-category NS-SEC codes into 5 groups
 #'
-#' @description Convert nssec10 to nssec5.
-#' @param nsec){ Input object or parameter named `nsec){`.
-#' @return A data frame produced by the function.
+#' @description Maps the shortened NS-SEC codes to five groups: "higher",
+#'   "intermediate", "routine", "students" and "unemployed".
+#' @param nsec Character vector of codes from `simplify_nssec()`.
+#' @return Character vector of 5-group labels.
 #' @keywords internal
 nssec10_to_nssec5 = function(nsec){
 
@@ -314,11 +224,13 @@ nssec10_to_nssec5 = function(nsec){
   nsec
 }
 
-#' Simplify Household6
+#' Shorten 6-category household composition labels
 #'
-#' @description Perform processing for simplify household6.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Maps the census 6-category household composition labels to
+#'   compact codes (OnePerson, FamilyOver66, CoupleFamily, LoneParent,
+#'   Other6, DNA).
+#' @param x Character vector of census labels.
+#' @return Character vector of shortened codes.
 #' @keywords internal
 simplify_household6 = function(x){
   x[x=="Does not apply"] = "DNA"
@@ -331,11 +243,12 @@ simplify_household6 = function(x){
 
 }
 
-#' Simplify Household8
+#' Shorten 8-category household composition labels
 #'
-#' @description Perform processing for simplify household8.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Maps the census 8-category household composition labels to
+#'   compact codes (OnePersonOver66, CoupleChildren, etc.).
+#' @param x Character vector of census labels.
+#' @return Character vector of shortened codes.
 #' @keywords internal
 simplify_household8 = function(x){
   x[x=="Does not apply"] = "DNA"
@@ -350,11 +263,14 @@ simplify_household8 = function(x){
 
 }
 
-#' Simplify Household15
+#' Shorten 15-category household composition labels
 #'
-#' @description Perform processing for simplify household15.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Maps the census 15-category household composition labels to
+#'   compact codes (MarriedChildren, CohabitNoChildren, LoneParent, etc.).
+#'   Married/cohabiting are kept separate here and merged into "Couple" by the
+#'   callers.
+#' @param x Character vector of census labels.
+#' @return Character vector of shortened codes.
 #' @keywords internal
 simplify_household15 = function(x){
   x[x=="Does not apply"] = "DNA"
@@ -377,11 +293,12 @@ simplify_household15 = function(x){
 
 
 
-#' Simplify Ethnic6
+#' Shorten 6-group ethnicity labels
 #'
-#' @description Perform processing for simplify ethnic6.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Maps the census ethnicity labels to short codes (Asian, Black,
+#'   Mixed, White, Other, DNA).
+#' @param x Character vector of census labels.
+#' @return Character vector of shortened codes.
 #' @keywords internal
 simplify_ethnic6 = function(x){
   x[x=="Does not apply"] = "DNA"
@@ -396,43 +313,23 @@ simplify_ethnic6 = function(x){
 
 
 
-#' Balance Nssec
+
+
+
+
+#' Estimate NS-SEC (5) x household composition (15) for one LSOA
 #'
-#' @description Perform processing for balance nssec.
-#' @param x Input data object.
-#' @param y){ Input object or parameter named `y){`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-balance_nssec = function(x, y){
-  # Check
-  if(x$LSOA21CD[1] != y$LSOA21CD[1]){
-    stop("LSOAs of X and Y don't match")
-  }
-  mat = matrix(NA, nrow = 10, ncol = 6)
-  rownames(mat) = y$NSSEC10
-  colnames(mat) = x$household8
-
-
-  mat = furness_partial(mat, rsum = y$count, csum = x$count, n = 200, check = FALSE, int_only = FALSE)
-  mat = as.data.frame(mat)
-  mat$NSSEC10 = rownames(mat)
-  rownames(mat) = NULL
-  mat$LSOA21CD = x$LSOA21CD[1]
-  mat
-
-}
-
-
-
-
-#' Balance Nssec2
-#'
-#' @description Perform processing for balance nssec2.
-#' @param hc Input object or parameter named `hc`.
-#' @param nssec Input object or parameter named `nssec`.
-#' @param both Input object or parameter named `both`.
-#' @param msoa){ Input object or parameter named `msoa){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `read_household_nssec()` covering LSOAs without a
+#'   published cross-tab. For each 6-category composition group it
+#'   Furness-balances (via `make_mat()`) the LSOA marginals against the
+#'   MSOA-level cross-tab used as a seed, then assembles the groups into one
+#'   wide row.
+#' @param hc Households by 15-category composition for one LSOA.
+#' @param nssec Households by 5-group NS-SEC for the same LSOA.
+#' @param both Households by NS-SEC x 6-category composition for the LSOA.
+#' @param msoa MSOA-level NS-SEC x 15-category cross-tab (seed).
+#' @return A one-row wide data frame with `LSOA21CD` and
+#'   `<household15>_<NSSEC5>` columns.
 #' @keywords internal
 balance_nssec2 = function(hc, nssec, both, msoa){
   # Check
@@ -473,14 +370,18 @@ balance_nssec2 = function(hc, nssec, both, msoa){
 }
 
 
-#' Make Multiple Matrices for One person, Couple, Lone Parent, Other
+#' Furness-balance one household-composition group for one LSOA
 #'
-#' @description Build mat and return the generated output.
-#' @param both Input object or parameter named `both`.
-#' @param hc Input object or parameter named `hc`.
-#' @param msoa Input object or parameter named `msoa`.
-#' @param type Input object or parameter named `type`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Helper for `balance_nssec2()`. For one 6-category composition
+#'   group (`type`), balances the NS-SEC row totals against the 15-category
+#'   column totals; the MSOA cross-tab is the seed matrix when available,
+#'   otherwise a uniform seed of 1s is used.
+#' @param both LSOA NS-SEC x 6-category composition counts (row totals).
+#' @param hc LSOA 15-category composition counts (column totals).
+#' @param msoa MSOA NS-SEC x 15-category seed cross-tab.
+#' @param type The 6-category group to balance ("OnePerson", "CoupleFamily",
+#'   "LoneParent" or "Other6").
+#' @return A balanced integer matrix (NS-SEC rows x 15-category columns).
 #' @keywords internal
 make_mat = function(both, hc, msoa, type = "OnePerson"){
   rsum_one = both[both$household6 == type,]
@@ -493,8 +394,8 @@ make_mat = function(both, hc, msoa, type = "OnePerson"){
     rownames(msoa_one) = msoa_one$NSSEC5
     msoa_one$NSSEC5 = NULL
     msoa_one = as.matrix(msoa_one)
-    rsum_one = rsum_one[match(rsum_one$NSSEC5, rownames(msoa_one)),]
-    csum_one = csum_one[match(csum_one$household15, colnames(msoa_one)),]
+    rsum_one = rsum_one[match(rownames(msoa_one), rsum_one$NSSEC5),]
+    csum_one = csum_one[match(colnames(msoa_one), csum_one$household15),]
     mat_fin = furness_balance(msoa_one, rsum = rsum_one$count, csum = csum_one$count,
                               n = 100, check = FALSE, int_only = TRUE, quiet = TRUE)
   } else {
@@ -508,12 +409,15 @@ make_mat = function(both, hc, msoa, type = "OnePerson"){
 }
 
 
-#' Top Archetypes
+#' Rank household archetypes and allocate picture counts
 #'
-#' @description Perform processing for top archetypes.
-#' @param x Input data object.
-#' @param n Input object or parameter named `n`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Sorts household types by frequency and works out how many of
+#'   `n` picture slots each type should get (at least 1) for the household
+#'   "community photo" visualisation.
+#' @param x Data frame with a `households` count column.
+#' @param n Total number of picture slots available.
+#' @return `x` sorted by frequency with added `per` (percent), `cum`
+#'   (cumulative percent), `pic` (allocated pictures) and `cumpic` columns.
 #' @keywords internal
 top_architypes = function(x, n = 48){
   x = x[order(x$households, decreasing = TRUE),]

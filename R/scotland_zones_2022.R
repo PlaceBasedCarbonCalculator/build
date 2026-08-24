@@ -1,9 +1,11 @@
-#' Read Intermidiate Zones 2022
+#' Read 2022 Scottish Intermediate Zone boundaries
 #'
-#' @description Read intermidiate zones 2022 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the 2022 Intermediate Zone boundary shapefile
+#'   (mean high water clipped). Used by the `bounds_iz22` target, which feeds
+#'   the Scottish household "community photo" clustering.
+#' @param path Boundaries folder containing `SG_IntermediateZoneBdry_2022.zip`
+#'   (the `dl_boundaries` target).
+#' @return An sf data frame with `IZCode`, `IZName` and geometry.
 #' @keywords internal
 read_intermidiate_zones_2022 = function(path = "../inputdata/boundaries"){
 

@@ -1,12 +1,14 @@
-#' Load House Prices
+#' Load ONS median house prices per LSOA and convert to 2021 boundaries
 #'
-#' @description Load house prices data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param "house_price_age" Input object or parameter named `"house_price_age"`.
-#' @param path File or directory path.
-#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS median-price quarterly series (Q1 values,
+#'   1995-2018) plus the March 2020/2021 HPSSA release, then converts from
+#'   2011 to 2021 LSOAs: unchanged zones pass through, merged zones take the
+#'   mean price, and split zones inherit the parent's price (medians cannot
+#'   be split). Used by the `house_prices` target.
+#' @param path Folder containing `Median_Prices_Quarterly.csv` and
+#'   `hpssa202103.csv`.
+#' @param lsoa_11_21_tools Conversion lookups (`lsoa_11_21_tools` target).
+#' @return A long data frame with `LSOA21CD`, `year` and `houseprice`.
 #' @keywords internal
 load_house_prices = function(path = file.path(parameters$path_data,"house_price_age"),
                              lsoa_11_21_tools){
@@ -92,15 +94,15 @@ load_house_prices = function(path = file.path(parameters$path_data,"house_price_
 }
 
 
-#' Load House Transactions
+#' Load ONS house transaction counts per LSOA and convert to 2021 boundaries
 #'
-#' @description Load house transactions data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param "house_price_age" Input object or parameter named `"house_price_age"`.
-#' @param path File or directory path.
-#' @param lsoa_11_21_tools){ Input object or parameter named `lsoa_11_21_tools){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS quarterly transaction counts (Q1 values,
+#'   kept from 2003), and converts from 2011 to 2021 LSOAs: unchanged zones
+#'   pass through, merged zones are summed, split zones are apportioned by
+#'   household ratio. Used by the `house_transactions` target.
+#' @param path Folder containing `Transaction_Count_Quarterly.csv`.
+#' @param lsoa_11_21_tools Conversion lookups (`lsoa_11_21_tools` target).
+#' @return A long data frame with `LSOA21CD`, `year` and `housetransactions`.
 #' @keywords internal
 load_house_transactions = function(path = file.path(parameters$path_data,"house_price_age"),
                                    lsoa_11_21_tools){

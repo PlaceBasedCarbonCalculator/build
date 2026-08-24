@@ -1,9 +1,11 @@
-#' Read Bounds
+#' Read a boundary GeoPackage and standardise the geometry column
 #'
-#' @description Read bounds from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads a GeoPackage of boundaries and renames whatever the
+#'   geometry column is called (e.g. "SHAPE" in ONS Open Geography downloads)
+#'   to "geometry", dropping the original. Shared helper for the various
+#'   `read_bounds_*` / `read_centroids_*` functions in this file.
+#' @param path Path to a GeoPackage file.
+#' @return An sf data frame with its geometry column named "geometry".
 #' @keywords internal
 read_bounds <- function(path = file.path(data_path(),"boundaries/Local_Authority_Districts_May_2023_UK_BFC_V2_179125415192200502.gpkg")){
   bounds <- sf::read_sf(path)
@@ -13,12 +15,13 @@ read_bounds <- function(path = file.path(data_path(),"boundaries/Local_Authority
   bounds
 }
 
-#' Read Bounds Shp
+#' Read a zipped shapefile of boundaries
 #'
-#' @description Read bounds shp from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Unzips a boundary shapefile to a temp folder, reads it, and
+#'   drops the ONS bookkeeping columns (BNG_E, BNG_N, LONG, LAT, GlobalID).
+#'   Errors if the zip contains more than one .shp file.
+#' @param path Path to a zip file containing exactly one shapefile.
+#' @return An sf data frame of boundaries.
 #' @keywords internal
 read_bounds_shp <- function(path = file.path("../inputdata/","boundaries/LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")){
   dir.create(file.path(tempdir(),"bounds"))
@@ -34,12 +37,14 @@ read_bounds_shp <- function(path = file.path("../inputdata/","boundaries/LAD_MAY
 }
 
 
-#' Download Boundaries
+#' Download the bundled boundaries release from GitHub
 #'
-#' @description Download the boundaries resource and return the local file path.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return The local path or file name of the downloaded resource.
+#' @description Downloads and unzips the `Boundaries.zip` release from the
+#'   PlaceBasedCarbonCalculator/inputdata GitHub repo into `path`. Skipped if
+#'   the folder already contains more than 9 GeoPackages. This is the
+#'   `dl_boundaries` target that almost all boundary/lookup targets depend on.
+#' @param path Folder to store the boundary files in; created if missing.
+#' @return `path`, for use as the input to the `read_bounds_*` functions.
 #' @keywords internal
 download_boundaries <- function(path = file.path(data_path(),"boundaries")){
   if(!dir.exists(path)){
@@ -56,12 +61,12 @@ download_boundaries <- function(path = file.path(data_path(),"boundaries")){
   path
 }
 
-#' Read Bounds La
+#' Read Local Authority District boundaries (May 2025, UK, full clipped)
 #'
-#' @description Read bounds la from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the LAD May 2025 BFC boundaries from the downloaded
+#'   boundaries folder. Used by the `bounds_la` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `LAD25CD` and `LAD25NM`.
 #' @keywords internal
 read_bounds_la <- function(path){
   file_path = file.path(path, "LAD_MAY_2025_UK_BFC_V2_1170922526770375649.zip")
@@ -71,12 +76,12 @@ read_bounds_la <- function(path){
 }
 
 
-#' Read Bounds Wards
+#' Read electoral ward boundaries (May 2025, UK, full clipped)
 #'
-#' @description Read bounds wards from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the ward May 2025 BFC boundaries from the downloaded
+#'   boundaries folder. Used by the `bounds_wards` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `WD25CD` and `WD25NM`.
 #' @keywords internal
 read_bounds_wards <- function(path){
   file_path = file.path(path, "Wards_(May_2025)_Boundaries_UK_BFC_(V2).zip")
@@ -85,12 +90,12 @@ read_bounds_wards <- function(path){
   bounds
 }
 
-#' Read Bounds Parish
+#' Read parish boundaries (May 2023, England & Wales, full clipped)
 #'
-#' @description Read bounds parish from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the parish May 2023 BFC boundaries from the downloaded
+#'   boundaries folder. Used by the `bounds_parish` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `PAR23CD` and `PAR23NM`.
 #' @keywords internal
 read_bounds_parish <- function(path){
   file_path = file.path(path, "Parishes_May_2023_Boundaries_EW_BFC_5274983877488017783.gpkg")
@@ -99,12 +104,12 @@ read_bounds_parish <- function(path){
   bounds
 }
 
-#' Read Bounds Westminster
+#' Read Westminster parliamentary constituency boundaries (July 2024, UK)
 #'
-#' @description Read bounds westminster from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the constituency July 2024 BFC boundaries from the
+#'   downloaded boundaries folder. Used by the `bounds_westminster` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `PCON24CD` and `PCON24NM`.
 #' @keywords internal
 read_bounds_westminster <- function(path){
   file_path = file.path(path, "Westminster_Parliamentary_Constituencies_July_2024_Boundaries_UK_BFC_-6236279356162627018.gpkg")
@@ -113,12 +118,13 @@ read_bounds_westminster <- function(path){
   bounds
 }
 
-#' Read Bounds Lsoa Full
+#' Read 2021 LSOA boundaries, full resolution (BFC)
 #'
-#' @description Read bounds lsoa full from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the full-clipped 2021 LSOA boundaries for England &
+#'   Wales and makes the geometries valid. Used by the `bounds_lsoa21_full`
+#'   target and combined with Scottish Data Zones in `combine_lsoa_bounds()`.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `LSOA21CD` and `LSOA21NM`.
 #' @keywords internal
 read_bounds_lsoa_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BFC_V8_4078143405809415814.gpkg")
@@ -128,12 +134,13 @@ read_bounds_lsoa_full <- function(path){
   bounds
 }
 
-#' Read Bounds Lsoa Generalised
+#' Read 2021 LSOA boundaries, generalised (BGC, 20m)
 #'
-#' @description Read bounds lsoa generalised from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the generalised 2021 LSOA boundaries for England &
+#'   Wales and makes the geometries valid. Used by the
+#'   `bounds_lsoa21_generalised` target for mid-zoom map tiles.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `LSOA21CD` and `LSOA21NM`.
 #' @keywords internal
 read_bounds_lsoa_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BGC_V3_2542665517405622314.gpkg")
@@ -143,12 +150,13 @@ read_bounds_lsoa_generalised <- function(path){
   bounds
 }
 
-#' Read Bounds Lsoa Super Generalised
+#' Read 2021 LSOA boundaries, super-generalised (BSC, 200m)
 #'
-#' @description Read bounds lsoa super generalised from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the super-generalised 2021 LSOA boundaries for England &
+#'   Wales and makes the geometries valid. Used by the
+#'   `bounds_lsoa21_super_generalised` target for low-zoom map tiles.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `LSOA21CD` and `LSOA21NM`.
 #' @keywords internal
 read_bounds_lsoa_super_generalised <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_2021_EW_BSC_v2_8443070537763669663.gpkg")
@@ -158,12 +166,12 @@ read_bounds_lsoa_super_generalised <- function(path){
   bounds
 }
 
-#' Read Centroids
+#' Read 2011 LSOA population-weighted centroids (England & Wales)
 #'
-#' @description Read centroids from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2011 LSOA population-weighted centroids from the
+#'   downloaded boundaries folder. Used by the `centroids_lsoa11` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `LSOA11CD` and `LSOA11NM`.
 #' @keywords internal
 read_centroids <- function(path){
   file_path = file.path(path, "LSOA_Dec_2011_PWC_in_England_and_Wales_2022_4940074699479565285.gpkg")
@@ -173,12 +181,15 @@ read_centroids <- function(path){
   bounds
 }
 
-#' Read Centroids Dz11
+#' Read 2011 Scottish Data Zone centroids
 #'
-#' @description Read centroids dz11 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2011 Data Zone centroids from a zipped shapefile in
+#'   the boundaries folder. Columns are renamed to `LSOA11CD`/`LSOA11NM` so
+#'   Scottish zones can be treated interchangeably with E&W LSOAs downstream.
+#'   Used by the `centroids_dz11` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `LSOA11CD` and `LSOA11NM` (Data Zone
+#'   codes/names).
 #' @keywords internal
 read_centroids_dz11 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
@@ -191,12 +202,15 @@ read_centroids_dz11 <- function(path){
   cents
 }
 
-#' Read Centroids Dz22
+#' Read 2022 Scottish Data Zone centroids
 #'
-#' @description Read centroids dz22 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2022 Data Zone centroids from a zipped shapefile in
+#'   the boundaries folder. Columns are renamed to `LSOA21CD`/`LSOA21NM` so
+#'   Scottish zones can be treated interchangeably with E&W 2021 LSOAs
+#'   downstream. Used by the `centroids_dz22` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `LSOA21CD` and `LSOA21NM` (Data Zone
+#'   codes/names).
 #' @keywords internal
 read_centroids_dz22 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
@@ -209,12 +223,13 @@ read_centroids_dz22 <- function(path){
   cents
 }
 
-#' Read Centroids Oa21
+#' Read 2021 Output Area population-weighted centroids (England & Wales)
 #'
-#' @description Read centroids oa21 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2021 OA population-weighted centroids from the
+#'   downloaded boundaries folder. Used by the `centroids_oa21` target and the
+#'   accessibility analysis.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `OA21CD`.
 #' @keywords internal
 read_centroids_oa21 <- function(path){
   file_path = file.path(path, "Output_Areas_2021_PWC_V3_-4067204786746319875.gpkg")
@@ -223,12 +238,12 @@ read_centroids_oa21 <- function(path){
   bounds
 }
 
-#' Read Centroids Lsoa21
+#' Read 2021 LSOA population-weighted centroids (England & Wales)
 #'
-#' @description Read centroids lsoa21 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Reads the 2021 LSOA population-weighted centroids from the
+#'   downloaded boundaries folder. Used by the `centroids_lsoa21` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `LSOA21CD`.
 #' @keywords internal
 read_centroids_lsoa21 <- function(path){
   file_path = file.path(path, "LSOA_Dec_2021_PWC_for_England_and_Wales_2022_-7410472461544737417.gpkg")
@@ -237,12 +252,15 @@ read_centroids_lsoa21 <- function(path){
   bounds
 }
 
-#' Read Postcodes
+#' Read postcode polygon boundaries from a nested zip
 #'
-#' @description Read postcodes from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return An sf object containing the loaded spatial data.
+#' @description Unzips the (secure) postcode polygons archive, which contains
+#'   one zipped shapefile per postcode area, reads each and binds them into a
+#'   single layer via `bind_sf()`. Used by the `bounds_postcodes_2015/2020/2024`
+#'   targets.
+#' @param path Path to the outer zip of postcode polygon shapefiles.
+#' @return An sf data frame with `POSTCODE`, `PC_AREA` and geometry for every
+#'   unit postcode.
 #' @keywords internal
 read_postcodes <- function(path){
   dir.create(file.path(tempdir(),"postcodes"))
@@ -270,11 +288,14 @@ read_postcodes <- function(path){
   postcodes
 }
 
-#' Make Postcode Areas
+#' Dissolve unit postcodes into postcode areas
 #'
-#' @description Build postcode areas and return the generated output.
-#' @param postcodes){ Input object or parameter named `postcodes){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Unions the unit postcode polygons by postcode area (e.g. "LS",
+#'   "M") to give one polygon per area. Used by the `bounds_postcode_area`
+#'   target.
+#' @param postcodes sf data frame from `read_postcodes()` with a `PC_AREA`
+#'   column.
+#' @return An sf data frame with one dissolved polygon per `PC_AREA`.
 #' @keywords internal
 make_postcode_areas <- function(postcodes){
   postcodes <- dplyr::group_by(postcodes, PC_AREA)
@@ -282,12 +303,12 @@ make_postcode_areas <- function(postcodes){
   postcodes
 }
 
-#' Read Postcode Points
+#' Read OS Code-Point postcode centroids
 #'
-#' @description Read postcode points from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return An sf object containing the loaded spatial data.
+#' @description Unzips the OS Code-Point Open GeoPackage and reads the unit
+#'   postcode points. Used by the `postcode_points` target.
+#' @param path Path to the `codepo_gpkg_gb.zip` archive.
+#' @return An sf POINT data frame with `postcode` and geometry.
 #' @keywords internal
 read_postcode_points = function(path = "D:/OneDrive - University of Leeds/Data/Postcodes/codepo_20251101/codepo_gpkg_gb.zip"){
   dir.create(file.path(tempdir(),"postcodes"))
@@ -298,12 +319,15 @@ read_postcode_points = function(path = "D:/OneDrive - University of Leeds/Data/P
   points
 }
 
-#' Load Lsoa 2011 2021 Lookup
+#' Load the ONS 2011-to-2021 LSOA lookup
 #'
-#' @description Load LSOA 2011 2021 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS best-fit lookup between 2011 and 2021 LSOAs for
+#'   England & Wales, including the change indicator (`CHGIND`: U unchanged,
+#'   S split, M merged, X fragmented). Used by the `lookup_lsoa_2011_21`
+#'   target, which underpins all 2011-to-2021 data conversions.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with `LSOA11CD`, `LSOA21CD`, `LSOA21NM`, `CHGIND`,
+#'   `LAD22CD`, `LAD22NM`.
 #' @keywords internal
 load_LSOA_2011_2021_lookup <- function(path){
   file_path = file.path(path, "LSOA_(2011)_to_LSOA_(2021)_to_Local_Authority_District_(2022)_Lookup_for_England_and_Wales_(Version_2).csv")
@@ -312,12 +336,14 @@ load_LSOA_2011_2021_lookup <- function(path){
   lookup
 }
 
-#' Load Lsoa 2001 2011 Lookup
+#' Load the ONS 2001-to-2011 LSOA lookup
 #'
-#' @description Load LSOA 2001 2011 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS lookup between 2001 and 2011 LSOAs for England &
+#'   Wales, including the change indicator. Used by the `lookup_lsoa_2001_11`
+#'   target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with `LSOA01CD`, `LSOA11CD`, `CHGIND`, `LAD11CD`,
+#'   `LAD11NM`.
 #' @keywords internal
 load_LSOA_2001_2011_lookup <- function(path){
   file_path = file.path(path, "Lower_Layer_Super_Output_Area_(2001)_to_Lower_Layer_Super_Output_Area_(2011)_to_Local_Authority_District_(2011)_Lookup_in_England_and_Wales.csv")
@@ -326,12 +352,15 @@ load_LSOA_2001_2011_lookup <- function(path){
   lookup
 }
 
-#' Load Oa Lsoa Msoa Class 2011 Lookup
+#' Load the GB 2011 OA/LSOA/MSOA lookup with area classifications
 #'
-#' @description Load OA LSOA MSOA class 2011 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the 2017 GB lookup linking 2011 Output Areas to LSOAs,
+#'   MSOAs and LADs, including the 2011 Output Area Classification (OAC11) and
+#'   LSOA classification (SOAC11) codes. Used by the
+#'   `lookup_OA_LSOA_MSOA_classifications` target and the OAC-related targets.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with OA/LSOA/MSOA/LAD codes and OAC/SOAC
+#'   classification codes and names.
 #' @keywords internal
 load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   file_path = file.path(path, "GB_OA_LSOA_MSOA_LAD_Classifications_2017.csv")
@@ -340,26 +369,29 @@ load_OA_LSOA_MSOA_class_2011_lookup <- function(path){
   lookup
 }
 
-#' Load Oa Lsoa Msoa 2021 Lookup
+#' Load the England & Wales 2021 OA/LSOA/MSOA/LAD lookup
 #'
-#' @description Load OA LSOA MSOA 2021 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the 2021 census geography lookup linking Output Areas to
+#'   LSOAs, MSOAs and LADs. Used by the `lookup_OA_LSOA_MSOA_2021` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with `OA21CD`, `LSOA21CD`, `MSOA21CD`, `LAD22CD`
+#'   and `LAD22NM`.
 #' @keywords internal
 load_OA_LSOA_MSOA_2021_lookup <- function(path){
   file_path = file.path(path, "OA_LSOA_MSOA_LAD_2021_Lookup_EW_v3.csv")
   lookup = readr::read_csv(file_path)
-  lookup = lookup[,c("OA21CD", "LSOA21CD", "MSOA21CD", "LAD22CD", "LAD22CD","LAD22NM")]
+  lookup = lookup[,c("OA21CD", "LSOA21CD", "MSOA21CD", "LAD22CD", "LAD22NM")]
   lookup
 }
 
-#' Load Postcode Oa Lsoa Msoa Class 2021 Lookup
+#' Load the UK postcode to 2021 census geography lookup
 #'
-#' @description Load postcode OA LSOA MSOA class 2021 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the ONS February 2024 postcode-to-OA/LSOA/
+#'   MSOA/LAD lookup for the UK. Used by the `lookup_postcode_OA_LSOA_MSOA_2021`
+#'   target (e.g. for geocoding EPC and house-price records).
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with `pcds`, `oa21cd`, `lsoa21cd`, `msoa21cd`,
+#'   `ladcd`, `ladnm`.
 #' @keywords internal
 load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   dir.create(file.path(tempdir(),"lookup"))
@@ -369,12 +401,13 @@ load_postcode_OA_LSOA_MSOA_class_2021_lookup <- function(path){
   lookup
 }
 
-#' Load Msoa 2011 2021 Lookup
+#' Load the ONS 2011-to-2021 MSOA best-fit lookup
 #'
-#' @description Load MSOA 2011 2021 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the ONS best-fit lookup between 2011 and 2021 MSOAs for
+#'   England & Wales. Used by the `lookup_MSOA_2011_21` target (income
+#'   downscaling).
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return A data frame with all columns of the ONS lookup CSV.
 #' @keywords internal
 load_MSOA_2011_2021_lookup <- function(path){
   file_path = file.path(path, "MSOA_(2011)_to_MSOA_(2021)_to_Local_Authority_District_(2022)_Best_Fit_Lookup_for_EW_(V2).csv")
@@ -383,27 +416,17 @@ load_MSOA_2011_2021_lookup <- function(path){
 }
 
 
-#' Load Oa Dz Iz 2022 Lookup
-#'
-#' @description Load OA DZ IZ 2022 lookup data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
-#' @keywords internal
-load_OA_DZ_IZ_2022_lookup <- function(path = "../inputdata/boundaries/"){
-  dir.create(file.path(tempdir(),"lookup"))
-  unzip(file.path(path,"oa22_dz22_iz22.zip"), exdir = file.path(tempdir(),"lookup"))
-  lookup = readr::read_csv(file.path(tempdir(),"lookup","OA22_DZ22_IZ22.csv"))
-  lookup
-}
 
-# Bind list of SF data frames together using faster data.table::rbindlist
-#' Bind Sf
+#' Fast row-bind a list of sf data frames
 #'
-#' @description Perform processing for bind sf.
-#' @param x Input data object.
-#' @param idcol Input object or parameter named `idcol`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Binds a list of sf data frames using
+#'   `data.table::rbindlist()`, which is much faster than `rbind()` for many
+#'   parts, then restores the sfc geometry column and bbox. All elements must
+#'   share the same column order (`use.names = FALSE`).
+#' @param x List of sf data frames with identical columns.
+#' @param idcol Optional name for an ID column recording which list element
+#'   each row came from (passed to `rbindlist`).
+#' @return A single sf data frame.
 #' @keywords internal
 bind_sf = function(x, idcol = NULL) {
   if (length(x) == 0) stop("Empty list")
@@ -414,12 +437,12 @@ bind_sf = function(x, idcol = NULL) {
   x
 }
 
-#' Read Bounds Lsoa11 Full
+#' Read 2011 LSOA boundaries, full resolution (BFC)
 #'
-#' @description Read bounds lsoa11 full from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the full-clipped 2011 LSOA boundaries for England &
+#'   Wales. Used by the `bounds_lsoa11_full` target.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `LSOA11CD` and `LSOA11NM`.
 #' @keywords internal
 read_bounds_lsoa11_full <- function(path){
   file_path = file.path(path, "Lower_layer_Super_Output_Areas_Dec_2011_Boundaries_Full_Clipped_BFC_EW_V3_2022_3969098746815328641.gpkg")
@@ -429,12 +452,13 @@ read_bounds_lsoa11_full <- function(path){
 }
 
 
-#' Read Bounds Dz11
+#' Read 2011 Scottish Data Zone boundaries
 #'
-#' @description Read bounds dz11 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the 2011 Data Zone boundary shapefile and
+#'   makes the geometries valid. Used by the `bounds_dz11` target and the
+#'   2011-to-2022 Data Zone lookup.
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf data frame with `DataZone` and geometry.
 #' @keywords internal
 read_bounds_dz11 <- function(path){
   dir.create(file.path(tempdir(),"dz"))
@@ -447,17 +471,23 @@ read_bounds_dz11 <- function(path){
 }
 
 
-#' Lsoa Admin Summary
+#' Assign each LSOA/Data Zone to its administrative areas
 #'
-#' @description Perform processing for lsoa admin summary.
-#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
-#' @param bounds_wards Input object or parameter named `bounds_wards`.
-#' @param bounds_parish Input object or parameter named `bounds_parish`.
-#' @param bounds_westminster Input object or parameter named `bounds_westminster`.
-#' @param bounds_la Input object or parameter named `bounds_la`.
-#' @param centroids_lsoa21 Population Weighted Centroids
-#' @param centroids_dz22 Population Weighted Centroids
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Spatially joins the GB LSOA/DZ population-weighted centroids
+#'   to ward, parish, Westminster constituency and local authority boundaries,
+#'   giving a lookup of which administrative areas each zone sits in. Zones
+#'   outside any parish are labelled "Unparished". Used by the `lsoa_admin`
+#'   target, which feeds the LSOA overview JSONs, LA summaries and house price
+#'   extrapolation.
+#' @param bounds_wards Ward boundaries (`bounds_wards` target).
+#' @param bounds_parish Parish boundaries (`bounds_parish` target).
+#' @param bounds_westminster Constituency boundaries (`bounds_westminster`).
+#' @param bounds_la Local authority boundaries (`bounds_la` target).
+#' @param centroids_lsoa21 E&W 2021 LSOA population-weighted centroids.
+#' @param centroids_dz22 Scottish 2022 Data Zone centroids (with columns
+#'   renamed to LSOA21CD/LSOA21NM).
+#' @return A data frame (geometry dropped) with one row per zone and the
+#'   codes/names of the administrative areas containing its centroid.
 #' @keywords internal
 lsoa_admin_summary = function(bounds_wards, bounds_parish, bounds_westminster, bounds_la, centroids_lsoa21,
                             centroids_dz22){
@@ -466,13 +496,40 @@ lsoa_admin_summary = function(bounds_wards, bounds_parish, bounds_westminster, b
   cents = rbind(centroids_lsoa21, centroids_dz22)
   #cents = sf::st_point_on_surface(bounds_lsoa_GB_full)
 
-  cents = sf::st_join(cents, bounds_wards)
+  # Point-in-polygon join, falling back to nearest feature for centroids that
+  # fall in gaps between polygons (e.g. rivers)
+  join_nearest_fallback = function(x, y){
+    ycols = setdiff(names(y), attr(y, "sf_column"))
+    x = sf::st_join(x, y)
+    failed = is.na(x[[ycols[1]]])
+    if(any(failed)){
+      nearest = sf::st_nearest_feature(x[failed,], y)
+      x[failed, ycols] = sf::st_drop_geometry(y)[nearest, ycols]
+    }
+    x
+  }
+
+  cents = join_nearest_fallback(cents, bounds_wards)
+  # No fallback for parishes: NA legitimately means unparished
   cents = sf::st_join(cents, bounds_parish)
-  cents = sf::st_join(cents, bounds_westminster)
-  cents = sf::st_join(cents, bounds_la)
+  cents = join_nearest_fallback(cents, bounds_westminster)
+  cents = join_nearest_fallback(cents, bounds_la)
   #cents = cents[,c("LSOA21CD","WD25NM","PAR23NM","PCON24NM","LAD25NM","LAD25CD")]
   cents$PAR23NM[is.na(cents$PAR23NM)] = "Unparished"
   cents$PAR23CD[is.na(cents$PAR23CD)] = "Unparished"
+
+  # Ward/parish names are often shared by several different wards/parishes;
+  # for those append the local authority name to disambiguate
+  add_la_to_duplicates = function(nm, cd, la){
+    lookup = unique(data.frame(nm = nm, cd = cd))
+    dup_names = unique(lookup$nm[duplicated(lookup$nm)])
+    sel = nm %in% dup_names
+    nm[sel] = paste0(nm[sel], " (", la[sel], ")")
+    nm
+  }
+
+  cents$WD25NM = add_la_to_duplicates(cents$WD25NM, cents$WD25CD, cents$LAD25NM)
+  cents$PAR23NM = add_la_to_duplicates(cents$PAR23NM, cents$PAR23CD, cents$LAD25NM)
 
   cents = sf::st_drop_geometry(cents)
   cents
@@ -480,12 +537,13 @@ lsoa_admin_summary = function(bounds_wards, bounds_parish, bounds_westminster, b
 }
 
 
-#' Read Cents Scotland Oa11
+#' Read 2011 Scottish Output Area population-weighted centroids
 #'
-#' @description Read cents scotland oa11 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the 2011 Scottish OA population-weighted
+#'   centroids. Used by the `centroids_oa11_scotland` target (OAC lookups for
+#'   Scotland).
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `OA11`.
 #' @keywords internal
 read_cents_scotland_oa11 = function(path = "../inputdata/boundaries/"){
   dir.create(file.path(tempdir(),"dz"))
@@ -498,12 +556,13 @@ read_cents_scotland_oa11 = function(path = "../inputdata/boundaries/"){
 
 }
 
-#' Read Cents Scotland Oa01
+#' Read 2001 Scottish Output Area household-weighted centroids
 #'
-#' @description Read cents scotland oa01 from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the 2001 Scottish OA household-weighted
+#'   centroids. Used by the `centroids_oa01_scotland` target (2001 OAC lookups
+#'   for Scotland).
+#' @param path Boundaries folder (the `dl_boundaries` target).
+#' @return An sf POINT data frame with `OA01` and `NRSoldOutp`.
 #' @keywords internal
 read_cents_scotland_oa01 = function(path = "../inputdata/boundaries/"){
   dir.create(file.path(tempdir(),"dz"))

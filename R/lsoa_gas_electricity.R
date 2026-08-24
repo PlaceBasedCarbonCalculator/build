@@ -155,8 +155,12 @@ load_lsoa_gas <- function(path){
 #' @return A data frame with MSOA non-domestic gas values for each year.
 load_msoa_gas_nondom <- function(path){
 
+  # Read whichever annual sheets the workbook actually contains
+  sheets = readxl::excel_sheets(file.path(path,"MSOA_non_domestic_gas_2010-2024.xlsx"))
+  yrs = intersect(2010:2024, suppressWarnings(as.integer(sheets)))
+
   gas = list()
-  for(i in 2010:2021){
+  for(i in yrs){
     sub <- readxl::read_excel(file.path(path,"MSOA_non_domestic_gas_2010-2024.xlsx"),
                               sheet = as.character(i))
     sub <- as.data.frame(sub)
@@ -343,6 +347,9 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
                                             meters = sum(meters, na.rm = TRUE))
   domestic_electricity_M = dplyr::ungroup(domestic_electricity_M)
 
+  domestic_electricity_M$mean_elec_kwh = ifelse(is.nan(domestic_electricity_M$mean_elec_kwh), 0, domestic_electricity_M$mean_elec_kwh)
+  domestic_electricity_M$median_elec_kwh = ifelse(is.nan(domestic_electricity_M$median_elec_kwh), 0, domestic_electricity_M$median_elec_kwh)
+
   lookup_split = lsoa_11_21_tools$lookup_split
   lookup_split = lookup_split[,c("LSOA11CD","LSOA21CD","year","household_ratio")]
   lookup_split = lookup_split[lookup_split$year %in% unique(domestic_electricity_S$year),]
@@ -354,11 +361,10 @@ lsoa_electric_to_2021 <- function(domestic_electricity_11, lsoa_11_21_tools, loo
   domestic_electricity_S$meters = domestic_electricity_S$meters * domestic_electricity_S$household_ratio
   domestic_electricity_S$total_elec_kwh = domestic_electricity_S$total_elec_kwh * domestic_electricity_S$household_ratio
   domestic_electricity_S$mean_elec_kwh = domestic_electricity_S$total_elec_kwh / domestic_electricity_S$meters
+  domestic_electricity_S$mean_elec_kwh = ifelse(is.nan(domestic_electricity_S$mean_elec_kwh), 0, domestic_electricity_S$mean_elec_kwh)
 
   #TODO: How do you get the median of a subgroup? For now assuming unchanged
-
-
-  # Split ratio operations are handled in the current `domestic_electricity_S` path.
+  domestic_electricity_S$median_elec_kwh = ifelse(domestic_electricity_S$mean_elec_kwh == 0, 0, domestic_electricity_S$median_elec_kwh)
 
   nms = c("LSOA21CD","year","meters","total_elec_kwh","mean_elec_kwh","median_elec_kwh")
 
@@ -664,13 +670,16 @@ load_postcode_gas_electricity = function(path = file.path(parameters$path_data,"
   geall
 }
 
-#' Clean Postcode Elec
+#' Standardise one year of postcode electricity data
 #'
-#' @description Load or manipulate geographic boundary or point datasets.
-#' @param sub Subset object used within the function.
-#' @param year Year value used for filtering or loading.
-#' @param type){ Input object or parameter named `type){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Helper for `load_postcode_gas_electricity()`: selects the
+#'   meter/consumption columns and renames them with the meter type and year
+#'   embedded (e.g. `elec_totalkwh_std_2019`), removing the "All postcodes"
+#'   total row.
+#' @param sub Raw data frame from one postcode electricity CSV.
+#' @param year The year the file covers.
+#' @param type Meter type label: "all", "std" or "eco7".
+#' @return A data frame with `postcode` plus four year/type-stamped columns.
 #' @keywords internal
 clean_postcode_elec = function(sub, year, type){
   sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
@@ -680,12 +689,14 @@ clean_postcode_elec = function(sub, year, type){
   sub
 }
 
-#' Clean Postcode Gas
+#' Standardise one year of postcode gas data
 #'
-#' @description Load or manipulate geographic boundary or point datasets.
-#' @param sub Subset object used within the function.
-#' @param year){ Input object or parameter named `year){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Helper for `load_postcode_gas_electricity()`: selects the
+#'   meter/consumption columns and renames them with the year embedded (e.g.
+#'   `gas_totalkwh_2019`), removing the "All postcodes" total row.
+#' @param sub Raw data frame from one postcode gas CSV.
+#' @param year The year the file covers.
+#' @return A data frame with `postcode` plus four year-stamped columns.
 #' @keywords internal
 clean_postcode_gas = function(sub, year){
   sub = sub[,c("Postcode","Num_meters","Total_cons_kwh","Mean_cons_kwh","Median_cons_kwh")]
@@ -696,12 +707,19 @@ clean_postcode_gas = function(sub, year){
 }
 
 
-#' Calculate Postcode Gas Electric Emissions
+#' Calculate gas and electricity emissions per postcode per year
 #'
-#' @description Calculate postcode gas electric emissions and return the computed result.
-#' @param postcode_gas_electricity Input object or parameter named `postcode_gas_electricity`.
-#' @param emissions_factors){ Input object or parameter named `emissions_factors){`.
-#' @return A data frame or numeric summary containing the computed results.
+#' @description Reshapes the wide postcode energy table to long
+#'   (postcode-year rows) and multiplies each consumption statistic by the
+#'   DEFRA emissions factor for that year. Missing Economy 7 / standard meter
+#'   counts are inferred from the "all meters" total. Used by the
+#'   `postcode_gas_electricity_emissions` target, feeding the postcode JSONs
+#'   and the postcode GeoJSON/PMTiles.
+#' @param postcode_gas_electricity Wide table from
+#'   `load_postcode_gas_electricity()`.
+#' @param emissions_factors DEFRA factors (`emissions_factors` target).
+#' @return A long data frame per postcode-year with kWh and kgCO2e columns
+#'   for gas and each electricity meter type.
 #' @keywords internal
 calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, emissions_factors){
 
@@ -756,12 +774,12 @@ calculate_postcode_gas_electric_emissions = function(postcode_gas_electricity, e
 
 }
 
-#' Sum Na
+#' Add two vectors treating NA as zero
 #'
-#' @description Perform processing for sumNA.
-#' @param x Input data object.
-#' @param y){ Input object or parameter named `y){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Element-wise sum where missing values count as 0, so a
+#'   postcode with gas but no electricity data still gets a combined total.
+#' @param x,y Numeric vectors of equal length.
+#' @return The element-wise sum.
 #' @keywords internal
 sumNA = function(x, y){
   x[is.na(x)] = 0
@@ -770,12 +788,18 @@ sumNA = function(x, y){
 }
 
 
-#' Prep Postcode Gas Electic
+#' Grade latest postcode energy emissions and attach polygons
 #'
-#' @description Load or manipulate geographic boundary or point datasets.
-#' @param postcode_gas_electricity_emissions Input object or parameter named `postcode_gas_electricity_emissions`.
-#' @param bounds_postcodes_2024){ Input object or parameter named `bounds_postcodes_2024){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Takes the most recent year of postcode emissions, grades the
+#'   median gas, electricity and combined emissions (A+ to F- via
+#'   `value2grade()`) and joins on the 2024 postcode polygons ready for
+#'   GeoJSON export. Used by the `geojson_postcode` target.
+#' @param postcode_gas_electricity_emissions Output of
+#'   `calculate_postcode_gas_electric_emissions()`.
+#' @param bounds_postcodes_2024 Postcode polygons (`bounds_postcodes_2024`
+#'   target).
+#' @return An sf data frame with `postcode`, `gas`, `elec` and `combined`
+#'   grades.
 #' @keywords internal
 prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_postcodes_2024){
   sub = postcode_gas_electricity_emissions[postcode_gas_electricity_emissions$year == max(postcode_gas_electricity_emissions$year, na.rm = TRUE), ]
@@ -793,16 +817,24 @@ prep_postcode_gas_electic = function(postcode_gas_electricity_emissions, bounds_
 }
 
 
-#' Calculate Lsoa Gas Electric Emissions
+#' Build the per-LSOA historical domestic energy table for JSON export
 #'
-#' @description Calculate lsoa gas electric emissions and return the computed result.
-#' @param domestic_gas Input object or parameter named `domestic_gas`.
-#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
-#' @param emissions_factors Input object or parameter named `emissions_factors`.
-#' @param bills_gas_electric Input object or parameter named `bills_gas_electric`.
-#' @param bills_other_heating Input object or parameter named `bills_other_heating`.
-#' @param other_heating_emissions){ Input object or parameter named `other_heating_emissions){`.
-#' @return A data frame or numeric summary containing the computed results.
+#' @description Combines domestic gas and electricity consumption with DEFRA
+#'   emissions factors, estimated energy bills and other-heating emissions
+#'   into one table per LSOA per year. The other-heating bill is added to the
+#'   combined energy bill where available (Scotland is missing 2023-24). Used
+#'   by the `build_historical_domestic_gas_elec_jsons` target.
+#' @param domestic_gas LSOA gas consumption on 2021 zones (`domestic_gas`).
+#' @param domestic_electricity LSOA electricity consumption
+#'   (`domestic_electricity`).
+#' @param emissions_factors DEFRA factors (`emissions_factors` target).
+#' @param bills_gas_electric Estimated bills (`bills_gas_electric` target).
+#' @param bills_other_heating Estimated non-gas heating bills
+#'   (`bills_other_heating` target).
+#' @param other_heating_emissions Non-gas heating emissions
+#'   (`other_heating_emissions` target).
+#' @return A data frame per LSOA-year with meters, kWh, kgCO2e and average
+#'   bill columns.
 #' @keywords internal
 calculate_lsoa_gas_electric_emissions = function(domestic_gas,
                                                  domestic_electricity,

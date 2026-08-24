@@ -1,9 +1,13 @@
-#' Read Scotland Households
+#' Read NRS household estimates for Scottish Data Zones, 2014-2023
 #'
-#' @description Read scotland households from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads each year's sheet of the NRS small-area household
+#'   estimates workbook (2011 Data Zones), covering total, occupied, vacant,
+#'   second-home and council-tax-exempt dwellings. Used by the
+#'   `households_scotland` target, which feeds the 2022 Data Zone population
+#'   interpolation. See the long comment below for NRS data-quality caveats.
+#' @param path Path to `household-estimates.xlsx`.
+#' @return A data frame with `dz11cd`, dwelling-count columns and `year`
+#'   (2014-2023).
 #' @keywords internal
 read_scotland_households = function(path = "../inputdata/population_scotland/household-estimates.xlsx"){
   hh = list()

@@ -1,9 +1,12 @@
-#' Dowload Nomis
+#' Download 2021 census bulk tables from Nomis
 #'
-#' @description Perform processing for dowload nomis.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Downloads 23 zipped 2021 census topic summary tables (TS001
+#'   etc. covering households, demographics, housing, travel and health) from
+#'   the Nomis bulk download service into `path`. Existing files are
+#'   re-downloaded. This is the `dl_nomis` target, a prerequisite of the
+#'   census-table loaders below and in other files.
+#' @param path Folder to store the zips; created if missing.
+#' @return TRUE, for use as a targets dependency.
 #' @keywords internal
 dowload_nomis = function(path = file.path(parameters$path_data,"nomis")){
   if(!dir.exists(path)){
@@ -52,12 +55,13 @@ dowload_nomis = function(path = file.path(parameters$path_data,"nomis")){
 
 }
 
-#' Load Population 2021
+#' Load 2021 census population by 5-year age band (TS007a) for LSOAs
 #'
-#' @description Load population 2021 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the LSOA-level table from the downloaded
+#'   `census2021-ts007a.zip`. Used by the `population_2021` target.
+#' @param path Folder of Nomis downloads (`dl_nomis` target).
+#' @return A data frame with `year`, `LSOA21`, `all_ages` and age bands
+#'   "0-4" ... "85+".
 #' @keywords internal
 load_population_2021 = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts007a.zip"))
@@ -68,12 +72,12 @@ load_population_2021 = function(path = file.path(parameters$path_data,"nomis")){
   dat
 }
 
-# Helper function to unzip to temp dir and read in LSOA table
-#' Unzip Nomis
+#' Unzip a Nomis census bulk zip and read its LSOA-level CSV
 #'
-#' @description Perform processing for unzip nomis.
-#' @param file Input object or parameter named `file`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Helper for the census-table loaders: extracts a Nomis bulk
+#'   zip to a temp folder, reads the file matching `lsoa.csv`, and cleans up.
+#' @param file Path to a `census2021-*.zip` bulk download.
+#' @return A data frame of the LSOA-level census table.
 #' @keywords internal
 unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
 
@@ -85,12 +89,14 @@ unzip_nomis = function(file = file.path(path,"census2021-ts007a.zip")){
   fl
 }
 
-#' Load Census 2021 Vehicles
+#' Load 2021 census car/van availability (TS045) for LSOAs
 #'
-#' @description Load census 2021 vehicles data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads households by number of cars/vans from the downloaded
+#'   `census2021-ts045.zip` and estimates the total vehicles per LSOA
+#'   (3+ car households counted as 3). Used by the `vehicle_cenus21` target.
+#' @param path Folder of Nomis downloads (`dl_nomis` target).
+#' @return A data frame with `year`, `LSOA21`, household counts by car
+#'   ownership and `total_carvan_est`.
 #' @keywords internal
 load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts045.zip"))
@@ -100,12 +106,13 @@ load_census_2021_vehicles = function(path = file.path(parameters$path_data,"nomi
   dat
 }
 
-#' Load Census 2021 Households
+#' Load 2021 census household counts (TS041) for LSOAs
 #'
-#' @description Load census 2021 households data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the number of households per LSOA from the downloaded
+#'   `census2021-ts041.zip`. Used by the `households_cenus21` target, which
+#'   anchors the historical household extrapolation.
+#' @param path Folder of Nomis downloads (`dl_nomis` target).
+#' @return A data frame with `year`, `LSOA21` and `households_total`.
 #' @keywords internal
 load_census_2021_households = function(path = file.path(parameters$path_data,"nomis")){
   dat = unzip_nomis(file.path(path,"census2021-ts041.zip"))

@@ -1,16 +1,23 @@
-#' Select Retofit Vars
+#' Build the per-LSOA attribute table for the retrofit map
 #'
-#' @description Perform processing for select retofit vars.
-#' @param epc_dom_summary Input object or parameter named `epc_dom_summary`.
-#' @param population Population dataset.
-#' @param house_prices_nowcast Input object or parameter named `house_prices_nowcast`.
-#' @param income_lsoa_msoa Input object or parameter named `income_lsoa_msoa`.
-#' @param income_scot_dz22 Input object or parameter named `income_scot_dz22`.
-#' @param domestic_electricity Input object or parameter named `domestic_electricity`.
-#' @param domestic_gas Input object or parameter named `domestic_gas`.
-#' @param bills_gas_electric Input object or parameter named `bills_gas_electric`.
-#' @param bills_other_heating) Input object or parameter named `bills_other_heating)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Assembles the variables shown on the retrofit map tiles
+#'   (`retrofit_lsoa_data` target, consumed by `pmtiles_retrofit`): modal EPC
+#'   characteristics per zone (age, wall/roof/heating/window ratings, main
+#'   heating system and fuel, floor construction, dwelling type, tenure),
+#'   banded average EPC score, floor area and EPC coverage, the 2024 house
+#'   price, income and price-to-income ratio, median gas/electricity use,
+#'   and a 5x5 bivariate fuel-cost vs income category. Latest available year
+#'   is used for each input (Scotland lags E&W for other-heating bills).
+#' @param epc_dom_summary Per-LSOA EPC counts (`epc_dom_summary` target).
+#' @param population GB population/households (`population` target; 2022 used).
+#' @param house_prices_nowcast Extrapolated prices (`house_prices_nowcast`).
+#' @param income_lsoa_msoa E&W LSOA income estimates (`income_lsoa_msoa`).
+#' @param income_scot_dz22 Scottish DZ income estimates (`income_scot_dz22`).
+#' @param domestic_electricity LSOA electricity use (`domestic_electricity`).
+#' @param domestic_gas LSOA gas use (`domestic_gas`).
+#' @param bills_gas_electric Estimated bills (`bills_gas_electric`).
+#' @param bills_other_heating Non-gas heating bills (`bills_other_heating`).
+#' @return A data frame with one row per LSOA and the map attribute columns.
 #' @keywords internal
 select_retofit_vars = function(epc_dom_summary,
                                population,
@@ -38,7 +45,7 @@ select_retofit_vars = function(epc_dom_summary,
 
   bills_other_heating = rbind(bills_other_heating_EW, bills_other_heating_S)
 
-  if(length(unique(c(bills_gas_electric$year[1]),c(bills_other_heating$year[1]))) != 1){
+  if(length(unique(c(bills_gas_electric$year[1], bills_other_heating$year[1]))) != 1){
     stop("Other heating and gas/electric bills are from different years")
   }
   bills_gas_electric$year = NULL
@@ -104,13 +111,13 @@ select_retofit_vars = function(epc_dom_summary,
   sub$percent_EPC = gsub(",","-",sub$percent_EPC)
 
   # House Prices
-  # Not all areas have a transaction in 2024, so take most recent year
+  # Not all areas have a transaction in 2025, so take most recent year
 
 
-  house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2024")]
+  house_prices_nowcast = house_prices_nowcast[,c("LSOA21CD","price_2025")]
   house_prices_nowcast = house_prices_nowcast |>
     dplyr::group_by(LSOA21CD) |>
-    dplyr::summarise(price_2024 = median(price_2024))
+    dplyr::summarise(price_2025 = median(price_2025))
   sub = dplyr::left_join(sub, house_prices_nowcast, by = "LSOA21CD")
 
 
@@ -127,7 +134,7 @@ select_retofit_vars = function(epc_dom_summary,
   sub = dplyr::left_join(sub, income, by = "LSOA21CD")
   #sub$house_income_ratio = round(sub$price_median / sub$total_annual_income,1)
 
-  sub$house_income_ratio = round(sub$price_2024 / sub$total_annual_income,1)
+  sub$house_income_ratio = round(sub$price_2025 / sub$total_annual_income,1)
 
   #Energy
   domestic_gas = domestic_gas[domestic_gas$year == max(domestic_gas$year),]
@@ -150,18 +157,21 @@ select_retofit_vars = function(epc_dom_summary,
 
   sub = sub[,c("LSOA21CD","epc_score_avg","floor_area_avg","modal_age","modal_wall",
                "modal_roof","modal_heat","modal_window","modal_mainheat","modal_mainfuel",
-               "modal_floord","modal_type","modal_tenure","percent_EPC","price_2024",
+               "modal_floord","modal_type","modal_tenure","percent_EPC","price_2025",
                "house_income_ratio","median_gas_kwh","median_elec_kwh","fuelcost_bivaraite" )]
 
   sub
 }
 
-#' Modal
+#' Find the most common category from a set of count columns
 #'
-#' @description Perform processing for modal.
-#' @param df Input object or parameter named `df`.
-#' @param drop Input object or parameter named `drop`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description For each row, returns the name of the column with the highest
+#'   count (first wins on ties). Used to derive "modal_*" variables from the
+#'   EPC summary count columns.
+#' @param df Data frame of count columns for one categorical variable.
+#' @param drop If TRUE, strip the prefix before the first "_" from the
+#'   returned name (e.g. "wall_good" -> "good").
+#' @return A character vector, one modal category per row.
 #' @keywords internal
 modal = function(df, drop = TRUE){
   x = apply(df, 1, function(x) names(df)[x == max(x)][1])

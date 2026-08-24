@@ -45,10 +45,10 @@ uprn_historical <- uprn_historical %>%
 house_prices_nowcast$date = as.Date(house_prices_nowcast$date)
 
 uprn_historical = left_join(uprn_historical,
-                            house_prices_nowcast[,c("uprn","price","price_2024","date","property_type","freehold","address1","address2")],
+                            house_prices_nowcast[,c("uprn","price","price_2025","date","property_type","freehold","address1","address2")],
                             by = c("UPRN" = "uprn"))
 # Non existant properties can't have a price
-uprn_historical$price_2024[!uprn_historical$exists] = NA
+uprn_historical$price_2025[!uprn_historical$exists] = NA
 
 summary(duplicated(epc_dom$UPRN))
 

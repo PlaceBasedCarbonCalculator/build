@@ -1,9 +1,11 @@
-#' Download Dft Vehicle Registrations
+#' Download DfT vehicle registration tables VEH0125/0135/0145
 #'
-#' @description Download the dft vehicle registrations resource and return the local file path.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return The local path or file name of the downloaded resource.
+#' @description Downloads the DfT licensed-vehicle (VEH0125), ULEV (VEH0135)
+#'   and plug-in vehicle (VEH0145) LSOA-level CSVs. Skipped if `path` already
+#'   holds more than 2 CSVs. The corresponding target is currently commented
+#'   out in `_targets.R` (files are kept in the inputdata repo instead).
+#' @param path Folder to store the downloads; created if missing.
+#' @return `path`.
 #' @keywords internal
 download_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
   if(!dir.exists(path)){
@@ -28,12 +30,17 @@ download_dft_vehicle_registrations <- function(path = file.path(data_path(),"veh
 }
 
 
-#' Load Dft Vehicle Registrations
+#' Load and clean DfT vehicle registrations (VEH0125) per LSOA
 #'
-#' @description Load dft vehicle registrations data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the VEH0125 table (vehicles by body type, keepership
+#'   and licence status per 2021 LSOA), keeps Q1 of each year, and repairs
+#'   the statistical disclosure control in parallel: values suppressed as
+#'   "[c]" (1-4 vehicles) or missing are reconstructed from the row/column
+#'   totals via Furness balancing in `fill_gaps()`. Used by the
+#'   `vehicle_registrations` target.
+#' @param path Folder containing `df_VEH0125.csv`.
+#' @return A wide data frame with `LSOA21CD`, `quarter` and one column per
+#'   `<BodyType>_<Keepership>_<LicenceStatus>`.
 #' @keywords internal
 load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle_registrations")){
 
@@ -72,12 +79,15 @@ load_dft_vehicle_registrations <- function(path = file.path(data_path(),"vehicle
 }
 
 
-#' Load Dft Ulev Registrations
+#' Load and clean DfT ULEV registrations (VEH0135) per LSOA
 #'
-#' @description Load dft ulev registrations data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description As `load_dft_vehicle_registrations()` but for the
+#'   ultra-low-emission vehicle table (by fuel and keepership). Suppressed
+#'   values are reconstructed with `fill_gaps_135()`. This is the ~2 hour
+#'   `ulev_registrations` target.
+#' @param path Folder containing `df_VEH0135.csv`.
+#' @return A wide data frame with `LSOA21CD`, `quarter` and one column per
+#'   `<Fuel>_<Keepership>`.
 #' @keywords internal
 load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
@@ -120,12 +130,15 @@ load_dft_ulev_registrations <- function(path = "../inputdata/vehicle_registratio
 }
 
 
-#' Load Dft Ev Registrations
+#' Load and clean DfT plug-in vehicle registrations (VEH0145) per LSOA
 #'
-#' @description Load dft ev registrations data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description As `load_dft_vehicle_registrations()` but for the plug-in
+#'   vehicle table (battery electric, plug-in hybrid, range-extended).
+#'   Suppressed values are reconstructed with `fill_gaps_145()`. Used by the
+#'   `ev_registrations` target.
+#' @param path Folder containing `df_VEH0145.csv`.
+#' @return A wide data frame with `LSOA21CD`, `quarter` and one column per
+#'   `<Fuel>_<Keepership>`.
 #' @keywords internal
 load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations"){
 
@@ -163,11 +176,19 @@ load_dft_ev_registrations <- function(path = "../inputdata/vehicle_registrations
 }
 
 
-#' Fill Gaps
+#' Reconstruct suppressed VEH0125 counts for one LSOA-quarter
 #'
-#' @description Perform processing for fill gaps.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description Worker for `load_dft_vehicle_registrations()`. DfT suppress
+#'   counts of 1-4 as "[c]" and omit some rows entirely. This rebuilds the
+#'   full body-type x keepership matrix for one LSOA-quarter-licence group:
+#'   missing rows are added (0 or NA depending on whether the marginal totals
+#'   imply hidden vehicles), and the remaining gaps are filled by Furness
+#'   balancing against the published row/column totals
+#'   (`furness_partial()`/`furness_incomplete()`). When even the overall
+#'   total is suppressed, small values are imputed heuristically.
+#' @param x Long data frame for one LSOA/quarter/licence-status group.
+#' @return The completed long data frame (totals rows removed), or NULL if
+#'   the group has no data at all.
 #' @keywords internal
 fill_gaps = function(x){
   incomplete = FALSE
@@ -233,7 +254,7 @@ fill_gaps = function(x){
       }
       if(sum(is.na(x_others$count2)) > 4){
         # If there are still too many options, sick 1 in just the first 4 options
-        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2)) - 4))
       } else {
         x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
       }
@@ -297,11 +318,14 @@ fill_gaps = function(x){
 }
 
 
-#' Fill Gaps 135
+#' Reconstruct suppressed VEH0135 (ULEV) counts for one LSOA-quarter
 #'
-#' @description Perform processing for fill gaps 135.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description As `fill_gaps()` but for the 10-fuel x 3-keepership ULEV
+#'   table. Distinguishes whether the suppressed cells sum exactly to the
+#'   published totals (plain Furness fill) or the totals imply additional
+#'   hidden vehicles (`furness_partial_integer_total()`).
+#' @param x Long data frame for one LSOA/quarter group.
+#' @return The completed long data frame, or NULL if the group has no data.
 #' @keywords internal
 fill_gaps_135 = function(x){
 
@@ -391,7 +415,7 @@ fill_gaps_135 = function(x){
       }
       if(sum(is.na(x_others$count2)) > 4){
         # If there are still too many options, sick 1 in just the first 4 options
-        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2)) - 4))
       } else {
         x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
       }
@@ -466,11 +490,12 @@ fill_gaps_135 = function(x){
 
 }
 
-#' Fill Gaps 145
+#' Reconstruct suppressed VEH0145 (plug-in vehicle) counts for one LSOA-quarter
 #'
-#' @description Perform processing for fill gaps 145.
-#' @param x){ Input object or parameter named `x){`.
-#' @return A data frame produced by the function.
+#' @description As `fill_gaps_135()` but for the 4-fuel plug-in vehicle
+#'   table.
+#' @param x Long data frame for one LSOA/quarter group.
+#' @return The completed long data frame, or NULL if the group has no data.
 #' @keywords internal
 fill_gaps_145 = function(x){
 
@@ -493,7 +518,7 @@ fill_gaps_145 = function(x){
     x_missing = x_missing[!x_missing$id %in% x$id,]
     # Special case we only have totals e.g. E01000005 2019 Q1 there are [c] Private vehicles in total but no rows about them
 
-    if(any(c(x_missing$Fuel == "Total", x_missing$BodyType == "Total"))){
+    if(any(c(x_missing$Fuel == "Total", x_missing$Keepership == "Total"))){
       x_missing$count2 = NA
     } else {
       x_total_fuel = unique(x$Fuel[x$Keepership == "Total"])
@@ -558,7 +583,7 @@ fill_gaps_145 = function(x){
       }
       if(sum(is.na(x_others$count2)) > 4){
         # If there are still too many options, sick 1 in just the first 4 options
-        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2) - 4)))
+        x_others$count2[is.na(x_others$count2)] = c(rep(1,4), rep(0, sum(is.na(x_others$count2)) - 4))
       } else {
         x_others$count2 = ifelse(is.na(x_others$count2),1,x_others$count2)
       }

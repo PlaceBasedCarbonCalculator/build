@@ -1,7 +1,9 @@
 #' Read Hhcomp Scot
 #'
-#' @description Read hhComp scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -38,10 +40,13 @@ read_hhComp_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 #' Read Hhsize Householdcomp Scot
 #'
-#' @description Read hhSize HouseholdComp scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_hhSize_HouseholdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_householdComp10_hhSize5_IntermediateZone.csv", bounds_iz22) {
@@ -97,10 +102,13 @@ read_hhSize_HouseholdComp_scot <- function(path = "../inputdata/population_scotl
 
 #' Read Hhsize Tenure Scot
 #'
-#' @description Read hhSize Tenure scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_hhSize_Tenure_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_hhSize5_IntermediateZone.csv",bounds_iz22) {
@@ -145,10 +153,13 @@ read_hhSize_Tenure_scot <- function(path = "../inputdata/population_scotland/sco
 
 #' Read Hhsize Acctype Scot
 #'
-#' @description Read hhSize AccType scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_hhSize_AccType_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_hhSize5_IntermediateZone.csv",bounds_iz22) {
@@ -200,10 +211,13 @@ read_hhSize_AccType_scot <- function(path = "../inputdata/population_scotland/sc
 
 #' Read Tenure Householdcomp Scot
 #'
-#' @description Read Tenure HouseholdComp scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_Tenure_HouseholdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_Tenure5_householdComp10_IntermediateZone.csv",bounds_iz22) {
@@ -270,8 +284,10 @@ read_Tenure_HouseholdComp_scot <- function(path = "../inputdata/population_scotl
 
 #' Read Acc Scot
 #'
-#' @description Read Acc scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -304,8 +320,10 @@ read_Acc_scot = function(path = "../inputdata/population_scotland/scotlandcenus2
 
 #' Read Carvan Scot
 #'
-#' @description Read CarVan scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -338,8 +356,10 @@ read_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 #' Read Hhsize Scot
 #'
-#' @description Read hhSize scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -358,8 +378,10 @@ read_hhSize_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 #' Read Tenure Scot
 #'
-#' @description Read Tenure scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -392,10 +414,13 @@ read_Tenure_scot = function(path = "../inputdata/population_scotland/scotlandcen
 
 #' Read Acctype Carvan Scot
 #'
-#' @description Read AccType CarVan scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22){ Input object or parameter named `bounds_iz22){`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_AccType_CarVan_scot = function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_CarVan3_IntermediateZone.csv", bounds_iz22){
@@ -451,10 +476,13 @@ read_AccType_CarVan_scot = function(path = "../inputdata/population_scotland/sco
 
 #' Read Acctype Householdcomp Scot
 #'
-#' @description Read AccType householdComp scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_AccType_householdComp_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_householdComp4_IntermediateZone.csv",bounds_iz22) {
@@ -511,10 +539,13 @@ read_AccType_householdComp_scot <- function(path = "../inputdata/population_scot
 
 #' Read Acctype Tenure Scot
 #'
-#' @description Read AccType Tenure scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_AccType_Tenure_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_AccType7_Tenure3_IntermediateZone.csv",bounds_iz22) {
@@ -561,10 +592,13 @@ read_AccType_Tenure_scot <- function(path = "../inputdata/population_scotland/sc
 
 #' Read Hhsize Carvan Scot
 #'
-#' @description Read hhSize CarVan scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
-#' @param bounds_iz22) Input object or parameter named `bounds_iz22)`.
+#' @param bounds_iz22 IZ boundaries providing IZCode/IZName; used to match
+#'   the extract's zone names to codes.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
 read_hhSize_CarVan_scot <- function(path = "../inputdata/population_scotland/scotlandcenus2022_hhSize5_CarVan5_IntermediateZone.csv",bounds_iz22) {
@@ -609,8 +643,10 @@ read_hhSize_CarVan_scot <- function(path = "../inputdata/population_scotland/sco
 
 #' Read Hhsize5 Tenure3 Scot
 #'
-#' @description Read hhSize5 Tenure3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -642,8 +678,10 @@ read_hhSize5_Tenure3_scot = function(path = "../inputdata/population_scotland/sc
 
 #' Read Hhsize5 Householdcomp4 Scot
 #'
-#' @description Read hhSize5 householdComp4 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -676,8 +714,10 @@ read_hhSize5_householdComp4_scot = function(path = "../inputdata/population_scot
 
 #' Read Hhsize5 Acctype3 Scot
 #'
-#' @description Read hhSize5 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -709,8 +749,10 @@ read_hhSize5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 #' Read Carvan5 Acctype3 Scot
 #'
-#' @description Read CarVan5 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -742,8 +784,10 @@ read_CarVan5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 #' Read Carvan5 Tenure3 Scot
 #'
-#' @description Read CarVan5 Tenure3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -777,8 +821,10 @@ read_CarVan5_Tenure3_scot = function(path = "../inputdata/population_scotland/sc
 
 #' Read Householdcomp4 Carvan3 Scot
 #'
-#' @description Read householdComp4 CarVan3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -812,8 +858,10 @@ read_householdComp4_CarVan3_scot = function(path = "../inputdata/population_scot
 
 #' Read Householdcomp4 Acctype3 Scot
 #'
-#' @description Read householdComp4 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -847,8 +895,10 @@ read_householdComp4_AccType3_scot = function(path = "../inputdata/population_sco
 
 #' Read Householdcomp4 Tenure3 Scot
 #'
-#' @description Read householdComp4 Tenure3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -882,8 +932,10 @@ read_householdComp4_Tenure3_scot = function(path = "../inputdata/population_scot
 
 #' Read Hhsize5 Carvan3 Scot
 #'
-#' @description Read hhSize5 CarVan3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -916,8 +968,10 @@ read_hhSize5_CarVan3_scot = function(path = "../inputdata/population_scotland/sc
 
 #' Read Tenure5 Acctype3 Scot
 #'
-#' @description Read Tenure5 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -947,8 +1001,10 @@ read_Tenure5_AccType3_scot = function(path = "../inputdata/population_scotland/s
 
 #' Read Tenure5 Carvan3 Scot
 #'
-#' @description Read Tenure5 CarVan3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -979,12 +1035,19 @@ read_Tenure5_CarVan3_scot = function(path = "../inputdata/population_scotland/sc
 
 }
 
-#' Sythetic Census Scot
+#' Build the Scottish synthetic household population from Census 2022
 #'
-#' @description Perform processing for sythetic census scot.
-#' @param path_data Input object or parameter named `path_data`.
-#' @param synth_pop_seed_scotland){ Input object or parameter named `synth_pop_seed_scotland){`.
-#' @return A data frame produced by the function.
+#' @description Estimates, for every 2022 Data Zone, the five-way cross-tab
+#'   of households by accommodation type x tenure x household composition x
+#'   size x car ownership. Loads fifteen Data Zone-level cross-tab extracts,
+#'   splits them per zone and runs `scot_syth_combine()` in parallel with
+#'   the national seed. This is the long-running `scot_synth_households`
+#'   target, the Scottish counterpart of `sythetic_census()`.
+#' @param path_data Folder of Scotland Census 2022 extracts.
+#' @param synth_pop_seed_scotland National seed arrays
+#'   (`synth_pop_seed_scotland` target).
+#' @return A data frame of household counts per Data Zone and attribute
+#'   combination, with convergence diagnostics.
 #' @keywords internal
 sythetic_census_scot = function(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland){
 
@@ -1083,12 +1146,17 @@ sythetic_census_scot = function(path_data = file.path(parameters$path_data,"popu
 
 }
 
-#' Array Maker
+#' Convert a long cross-tab into a named IPF constraint array
 #'
-#' @description Perform processing for array maker.
-#' @param x Input data object.
-#' @param ...){ Input object or parameter named `...){`.
-#' @return A data frame produced by the function.
+#' @description Expands the full grid of the supplied category vectors,
+#'   joins on the household counts and reshapes into an n-dimensional array
+#'   whose dimnames are the argument names. Errors if any combination is
+#'   missing from `x`.
+#' @param x Long data frame with `households` and one column per category
+#'   dimension.
+#' @param ... Named category-level vectors, one per dimension, in the order
+#'   the array should have.
+#' @return A numeric array of household counts.
 #' @keywords internal
 array_maker = function(x, ...){
   args <- substitute(list(...))[-1]  # Capture the unevaluated arguments
@@ -1104,27 +1172,18 @@ array_maker = function(x, ...){
   mat1
 }
 
-#' Scot Syth Combine
+#' IPF one Data Zone's household cross-tab from its census marginals
 #'
-#' @description Perform processing for scot syth combine.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param dz_CarVan_sub Input object or parameter named `dz_CarVan_sub`.
-#' @param dz_HouseholdComp_sub Input object or parameter named `dz_HouseholdComp_sub`.
-#' @param dz_Tenure_sub Input object or parameter named `dz_Tenure_sub`.
-#' @param dz_AccType_sub Input object or parameter named `dz_AccType_sub`.
-#' @param dz_hhSize5_Tenure3_sub Input object or parameter named `dz_hhSize5_Tenure3_sub`.
-#' @param dz_hhSize5_householdComp4_sub Input object or parameter named `dz_hhSize5_householdComp4_sub`.
-#' @param dz_hhSize5_AccType3_sub Input object or parameter named `dz_hhSize5_AccType3_sub`.
-#' @param dz_CarVan5_AccType3_sub Input object or parameter named `dz_CarVan5_AccType3_sub`.
-#' @param dz_CarVan5_Tenure3_sub Input object or parameter named `dz_CarVan5_Tenure3_sub`.
-#' @param dz_householdComp4_CarVan3_sub Input object or parameter named `dz_householdComp4_CarVan3_sub`.
-#' @param dz_householdComp4_AccType3_sub Input object or parameter named `dz_householdComp4_AccType3_sub`.
-#' @param dz_householdComp4_Tenure3_sub Input object or parameter named `dz_householdComp4_Tenure3_sub`.
-#' @param dz_hhSize5_CarVan3_sub Input object or parameter named `dz_hhSize5_CarVan3_sub`.
-#' @param dz_Tenure5_AccType3_sub Input object or parameter named `dz_Tenure5_AccType3_sub`.
-#' @param dz_Tenure5_CarVan3_sub Input object or parameter named `dz_Tenure5_CarVan3_sub`.
-#' @param seed Input object or parameter named `seed`.
-#' @return A data frame produced by the function.
+#' @description Worker for `sythetic_census_scot()`. Builds constraint
+#'   arrays from the zone's fifteen one/two-way census tables (via
+#'   `array_maker()`), reconciles their inconsistent totals, runs
+#'   `mipfp::Ipfp` on the national seed, integerises with `int_trs()` and
+#'   validates against the marginals with `vaidate_syth_pop2()`.
+#' @param dz_CarVan_sub,dz_HouseholdComp_sub,dz_Tenure_sub,dz_AccType_sub,dz_hhSize5_Tenure3_sub,dz_hhSize5_householdComp4_sub,dz_hhSize5_AccType3_sub,dz_CarVan5_AccType3_sub,dz_CarVan5_Tenure3_sub,dz_householdComp4_CarVan3_sub,dz_householdComp4_AccType3_sub,dz_householdComp4_Tenure3_sub,dz_hhSize5_CarVan3_sub,dz_Tenure5_AccType3_sub,dz_Tenure5_CarVan3_sub
+#'   One zone's rows of each census cross-tab.
+#' @param seed National seed arrays (`synth_pop_seed_scotland` target).
+#' @return A one-zone data frame of household counts per attribute
+#'   combination with convergence diagnostics.
 #' @keywords internal
 scot_syth_combine = function(dz_CarVan_sub,
                              dz_HouseholdComp_sub,
@@ -1286,14 +1345,15 @@ scot_syth_combine = function(dz_CarVan_sub,
 
 }
 
-#' Vaidate Syth Pop
+#' Mean absolute error of a synthetic population against one marginal
 #'
-#' @description Perform processing for vaidate syth pop.
-#' @param x Input data object.
-#' @param y Second input data object.
-#' @param var1 Input object or parameter named `var1`.
-#' @param var2 Input object or parameter named `var2`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Collapses the synthetic household table to a var1 x var2
+#'   matrix and compares it with the corresponding census constraint,
+#'   returning the mean absolute error over non-zero constraint cells.
+#' @param x Synthetic household data frame with `households`.
+#' @param y Census constraint matrix (var1 rows x var2 columns).
+#' @param var1,var2 Column names of the two dimensions to check.
+#' @return The mean absolute error (single numeric).
 #' @keywords internal
 vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
   x = x[,c(var1,var2,"households")]
@@ -1308,14 +1368,15 @@ vaidate_syth_pop = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "C
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
-#' Vaidate Syth Pop2
+#' Mean absolute error against a marginal, accepting >2D constraint arrays
 #'
-#' @description Perform processing for vaidate syth pop2.
-#' @param x Input data object.
-#' @param y Second input data object.
-#' @param var1 Input object or parameter named `var1`.
-#' @param var2 Input object or parameter named `var2`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description As `vaidate_syth_pop()` but `y` may be an n-dimensional
+#'   array: it is summed over the other dimensions (located by dimname) and
+#'   aligned to the synthetic table's categories before comparison.
+#' @param x Synthetic household data frame with `households`.
+#' @param y Census constraint matrix or array with named dimensions.
+#' @param var1,var2 Dimension names to compare on.
+#' @return The mean absolute error (single numeric).
 #' @keywords internal
 vaidate_syth_pop2 = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "CarVan3", var2 =  "householdComp4"){
   x = x[,c(var1,var2,"households")]
@@ -1378,472 +1439,17 @@ vaidate_syth_pop2 = function(x = result_df,y = MhouseholdComp4_CarVan3, var1 = "
   return(sum(abs(diff))/sum(y!= 0)) # Return Mean Absolute Error
 }
 
-#' Sythetic Census Scot Old
-#'
-#' @description Perform processing for sythetic census scot old.
-#' @param path_data Input object or parameter named `path_data`.
-#' @param bounds_iz22 Input object or parameter named `bounds_iz22`.
-#' @param synth_pop_seed_scotland Input object or parameter named `synth_pop_seed_scotland`.
-#' @param lookup_DataZone_2022){ Lookup table used to map area codes or classifications.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-sythetic_census_scot_old = function(path_data = file.path(parameters$path_data,"population_scotland"), bounds_iz22, synth_pop_seed_scotland, lookup_DataZone_2022){
-
-  # Intermediate Zone Data
-
-  int_hhSize_CarVan = read_hhSize_CarVan_scot(file.path(path_data,"scotlandcenus2022_hhSize5_CarVan5_IntermediateZone.csv"),bounds_iz22)
-  int_hhSize_HouseholdComp = read_hhSize_HouseholdComp_scot(file.path(path_data,"scotlandcenus2022_householdComp10_hhSize5_IntermediateZone.csv"),bounds_iz22)
-  int_hhSize_Tenure = read_hhSize_Tenure_scot(file.path(path_data,"scotlandcenus2022_Tenure5_hhSize5_IntermediateZone.csv"),bounds_iz22)
-  int_hhSize_AccType = read_hhSize_AccType_scot(file.path(path_data,"scotlandcenus2022_AccType7_hhSize5_IntermediateZone.csv"),bounds_iz22)
-  int_Tenure_HouseholdComp = read_Tenure_HouseholdComp_scot(file.path(path_data,"scotlandcenus2022_Tenure5_householdComp10_IntermediateZone.csv"),bounds_iz22)
-
-  int_hhSize_CarVan$IZName = NULL
-  int_hhSize_HouseholdComp$IZName = NULL
-  int_hhSize_Tenure$IZName = NULL
-  int_hhSize_AccType$IZName = NULL
-  int_Tenure_HouseholdComp$IZName = NULL
-
-  # Check all Zones
-  # length(unique(int_hhSize_CarVan$IZName))
-  # length(unique(int_hhSize_HouseholdComp$IZName))
-  # length(unique(int_hhSize_Tenure$IZName))
-  # length(unique(int_hhSize_AccType$IZName))
-  # length(unique(int_Tenure_HouseholdComp$IZName))
-
-  # Pivot
-  int_hhSize_CarVan = tidyr::pivot_wider(int_hhSize_CarVan, names_from = "hhSize5", values_from = "households", values_fill = 0)
-  int_hhSize_HouseholdComp = tidyr::pivot_wider(int_hhSize_HouseholdComp, names_from = "hhSize5", values_from = "households", values_fill = 0)
-  int_hhSize_Tenure = tidyr::pivot_wider(int_hhSize_Tenure, names_from = "hhSize5", values_from = "households", values_fill = 0)
-  int_hhSize_AccType = tidyr::pivot_wider(int_hhSize_AccType, names_from = "hhSize5", values_from = "households", values_fill = 0)
-  int_Tenure_HouseholdComp = tidyr::pivot_wider(int_Tenure_HouseholdComp, names_from = "tenure5", values_from = "households", values_fill = 0)
-
-  int_hhSize_CarVan    = int_hhSize_CarVan[order(int_hhSize_CarVan$IZCode),]
-  int_hhSize_HouseholdComp    = int_hhSize_HouseholdComp[order(int_hhSize_HouseholdComp$IZCode),]
-  int_hhSize_Tenure    = int_hhSize_Tenure[order(int_hhSize_Tenure$IZCode),]
-  int_hhSize_AccType    = int_hhSize_AccType[order(int_hhSize_AccType$IZCode),]
-  int_Tenure_HouseholdComp    = int_Tenure_HouseholdComp[order(int_Tenure_HouseholdComp$IZCode),]
-
-  int_hhSize_CarVan = dplyr::group_split(dplyr::ungroup(int_hhSize_CarVan), IZCode)
-  int_hhSize_HouseholdComp = dplyr::group_split(dplyr::ungroup(int_hhSize_HouseholdComp), IZCode)
-  int_hhSize_Tenure = dplyr::group_split(dplyr::ungroup(int_hhSize_Tenure), IZCode)
-  int_hhSize_AccType = dplyr::group_split(dplyr::ungroup(int_hhSize_AccType), IZCode)
-  int_Tenure_HouseholdComp = dplyr::group_split(dplyr::ungroup(int_Tenure_HouseholdComp), IZCode)
-
-  # Make the seed
-  seed_df = expand.grid(c("OnePersonOver66","OnePersonOther","FamilyOver66",
-                          "CoupleNoChildren",
-                          "CoupleChildren","CoupleNonDepChildren","LoneParent",
-                          "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66"),
-                        c("p1","p2","p3","p4","p5+"),
-                        c("car0","car1","car2","car3","car4+"),
-                        c("outright","mortgage","socialrented","privaterented","rentfree"),
-                        c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan"), stringsAsFactors = FALSE)
-  names(seed_df) = c("householdComp10","hhSize5","CarVan5","Tenure5","AccTyp7")
-
-  # Match Seed to Inputs
-  synth_pop_seed_scotland = synth_pop_seed_scotland[,c("householdComp10","hhSize5","CarVan5","Tenure5","AccTyp7","seed")]
-
-  # Create a key column by concatenating columns' values
-  seed_df$key <- apply(seed_df, 1, paste, collapse = "_")
-  synth_pop_seed_scotland$key <- apply(synth_pop_seed_scotland[,c("householdComp10","hhSize5","CarVan5","Tenure5","AccTyp7")], 1, paste, collapse = "_")
-
-  # Match rows of A to B using the key column
-  synth_pop_seed_scotland <- synth_pop_seed_scotland[match(seed_df$key, synth_pop_seed_scotland$key), ]
-
-  # Remove the key column
-  synth_pop_seed_scotland$key <- NULL
-  seed_df$key <- NULL
-
-  seed = array(synth_pop_seed_scotland$seed, dim = c(10,5,5,5,7))
-
-  future::plan("multisession")
-  res_com = furrr::future_pmap(.l = list(int_hhSize_CarVan,
-                                         int_hhSize_HouseholdComp,
-                                         int_hhSize_Tenure,
-                                         int_hhSize_AccType),
-                               .f = scot_syth_combine, seed = seed,
-                               .progress = TRUE, .options = furrr::furrr_options(seed = 1234))
-  future::plan("sequential")
-  res_com = dplyr::bind_rows(res_com)
-
-  if(FALSE){
-    int_hhSize_HouseholdComp_sub = int_hhSize_HouseholdComp[[1]]
-    int_hhSize_CarVan_sub = int_hhSize_CarVan[[1]]
-    int_hhSize_Tenure_sub = int_hhSize_Tenure[[1]]
-    int_hhSize_AccType_sub = int_hhSize_AccType[[1]]
-    int_Tenure_HouseholdComp_sub = int_Tenure_HouseholdComp[[1 ]]
-    scot_syth_combine(int_hhSize_CarVan_sub,
-                      int_hhSize_HouseholdComp_sub, int_hhSize_Tenure_sub, int_hhSize_AccType_sub,
-                      seed)
-  }
-
-  # Down Scale to Data Zone
-  dz_CarVan = read_CarVan_scot(file.path(path_data,"scotlandcenus2022_CarVan5_DataZone.csv"))
-  dz_HouseholdComp = read_hhComp_scot(file.path(path_data,"scotlandcenus2022_householdComp10_DataZone.csv"))
-  dz_Tenure = read_Tenure_scot(file.path(path_data,"scotlandcenus2022_Tenure5_DataZone.csv"))
-  dz_AccType = read_Acc_scot(file.path(path_data,"scotlandcenus2022_AccType7_DataZone.csv"))
-  dz_hhsize = read_hhSize_scot(file.path(path_data,"scotlandcenus2022_hhSize5_DataZone.csv"))
-
-
-  lookup_DataZone_2022 = lookup_DataZone_2022[,c("DZ22_Code","IZ22_Code")]
-  names(lookup_DataZone_2022) = c("DZ22_Code","IZCode")
-
-  dz_CarVan = dplyr::left_join(dz_CarVan, lookup_DataZone_2022, by = c("LSOA21CD" = "DZ22_Code"))
-  dz_HouseholdComp = dplyr::left_join(dz_HouseholdComp, lookup_DataZone_2022, by = c("LSOA21CD" = "DZ22_Code"))
-  dz_Tenure = dplyr::left_join(dz_Tenure, lookup_DataZone_2022, by = c("LSOA21CD" = "DZ22_Code"))
-  dz_AccType = dplyr::left_join(dz_AccType, lookup_DataZone_2022, by = c("LSOA21CD" = "DZ22_Code"))
-  dz_hhsize = dplyr::left_join(dz_hhsize, lookup_DataZone_2022, by = c("LSOA21CD" = "DZ22_Code"))
-
-  dz_CarVan    = dz_CarVan[order(dz_CarVan$IZCode),]
-  dz_HouseholdComp    = dz_HouseholdComp[order(dz_HouseholdComp$IZCode),]
-  dz_Tenure    = dz_Tenure[order(dz_Tenure$IZCode),]
-  dz_AccType    = dz_AccType[order(dz_AccType$IZCode),]
-  dz_hhsize    = dz_hhsize[order(dz_hhsize$IZCode),]
-  res_com = res_com[order(res_com$IZCode),]
-
-  dz_CarVan = dplyr::group_split(dplyr::ungroup(dz_CarVan), IZCode)
-  dz_HouseholdComp = dplyr::group_split(dplyr::ungroup(dz_HouseholdComp), IZCode)
-  dz_Tenure = dplyr::group_split(dplyr::ungroup(dz_Tenure), IZCode)
-  dz_AccType = dplyr::group_split(dplyr::ungroup(dz_AccType), IZCode)
-  dz_hhsize = dplyr::group_split(dplyr::ungroup(dz_hhsize), IZCode)
-  res_com = dplyr::group_split(dplyr::ungroup(res_com), IZCode)
-
-  dz_CarVan_sub = dz_CarVan[[1]]
-  dz_HouseholdComp_sub = dz_HouseholdComp[[1]]
-  dz_Tenure_sub = dz_Tenure[[1]]
-  dz_AccType_sub = dz_AccType[[1]]
-  dz_hhsize_sub = dz_hhsize[[1]]
-  res_com_sub = res_com[[1]]
-}
-
-#' Downscale To Datazone
-#'
-#' @description Prepare or summarise zone-based accessibility results.
-#' @param dz_CarVan_sub Input object or parameter named `dz_CarVan_sub`.
-#' @param dz_HouseholdComp_sub Input object or parameter named `dz_HouseholdComp_sub`.
-#' @param dz_Tenure_sub Input object or parameter named `dz_Tenure_sub`.
-#' @param dz_AccType_sub Input object or parameter named `dz_AccType_sub`.
-#' @param dz_hhsize_sub Input object or parameter named `dz_hhsize_sub`.
-#' @param res_com_sub){ Input object or parameter named `res_com_sub){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-downscale_to_datazone = function(dz_CarVan_sub,
-                                 dz_HouseholdComp_sub,
-                                 dz_Tenure_sub,
-                                 dz_AccType_sub ,
-                                 dz_hhsize_sub ,
-                                 res_com_sub){
-
-  # Check Zone match
-  if(length(unique(c(dz_CarVan_sub$IZCode,
-                     dz_HouseholdComp_sub$IZCode,
-                     dz_Tenure_sub$IZCode,
-                     dz_AccType_sub$IZCode,
-                     dz_hhsize_sub$IZCode,
-                     res_com_sub$IZCode
-
-  ))) != 1){
-    stop("More than one IZCode")
-  }
-
-  # Make arrays
-  array_df = expand.grid(c("OnePersonOver66","OnePersonOther","FamilyOver66",
-                          "CoupleNoChildren",
-                          "CoupleChildren","CoupleNonDepChildren","LoneParent",
-                          "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66"),
-                        c("p1","p2","p3","p4","p5+"),
-                        c("car0","car1","car2","car3","car4+"),
-                        c("outright","mortgage","socialrented","privaterented","rentfree"),
-                        c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan"), stringsAsFactors = FALSE)
-  names(array_df) = c("hhComp10","hhSize","CarVan5","Tenure5","AccType7")
-
-  array_df = dplyr::left_join(array_df, res_com_sub[,c("hhComp10","hhSize","CarVan5","Tenure5","AccType7","households")],
-                              by = c("hhComp10","hhSize","CarVan5","Tenure5","AccType7"))
-  array_df$households[is.na(array_df$households)] = 0
-
-  iz_array = array(array_df$households, dim = c(10,5,5,5,7))
-
-  dz_CarVan_sub = dz_CarVan_sub[order(dz_CarVan_sub$LSOA21CD),]
-  dz_HouseholdComp_sub = dz_HouseholdComp_sub[order(dz_HouseholdComp_sub$LSOA21CD),]
-  dz_Tenure_sub = dz_Tenure_sub[order(dz_Tenure_sub$LSOA21CD),]
-  dz_AccType_sub = dz_AccType_sub[order(dz_AccType_sub$LSOA21CD),]
-  dz_hhsize_sub = dz_hhsize_sub[order(dz_hhsize_sub$LSOA21CD),]
-
-  dzbycar = as.matrix(dz_CarVan_sub[,2:(ncol(dz_CarVan_sub) - 1)])
-  dzbyhhcomp = as.matrix(dz_HouseholdComp_sub[,2:(ncol(dz_HouseholdComp_sub) - 1)])
-  dzbytenure = as.matrix(dz_Tenure_sub[,2:(ncol(dz_Tenure_sub) - 1)])
-  dzbyacc = as.matrix(dz_AccType_sub[,2:(ncol(dz_AccType_sub) - 1)])
-  dzbyhhsize = as.matrix(dz_hhsize_sub[,2:(ncol(dz_hhsize_sub) - 1)])
-
-  rownames(dzbyhhcomp) = dz_CarVan_sub$LSOA21CD
-  rownames(dzbyhhsize) = dz_CarVan_sub$LSOA21CD
-  rownames(dzbycar) = dz_CarVan_sub$LSOA21CD
-  rownames(dzbytenure) = dz_CarVan_sub$LSOA21CD
-  rownames(dzbyacc) = dz_CarVan_sub$LSOA21CD
-
-  # Summaries for each variable
-  t_hhComp10 = array_df |> dplyr::group_by(hhComp10) |> dplyr::summarise(households = sum(households))
-  t_hhSize = array_df |> dplyr::group_by(hhSize) |> dplyr::summarise(households = sum(households))
-  t_CarVan5 = array_df |> dplyr::group_by(CarVan5) |> dplyr::summarise(households = sum(households))
-  t_Tenure5 = array_df |> dplyr::group_by(Tenure5) |> dplyr::summarise(households = sum(households))
-  t_AccType7 = array_df |> dplyr::group_by(AccType7) |> dplyr::summarise(households = sum(households))
-
-  t_hhComp10 = prep_for_cleaning(t_hhComp10,dzbyhhcomp)
-  t_hhSize = prep_for_cleaning(t_hhSize,dzbyhhsize)
-  t_CarVan5 = prep_for_cleaning(t_CarVan5,dzbycar)
-  t_Tenure5 = prep_for_cleaning(t_Tenure5,dzbytenure)
-  t_AccType7 = prep_for_cleaning(t_AccType7,dzbyacc)
-
-  dzbyhhcomp = match_matrix_csums(t_hhComp10, dzbyhhcomp)
-  dzbyhhsize = match_matrix_csums(t_hhSize, dzbyhhsize)
-  dzbycar = match_matrix_csums(t_CarVan5, dzbycar)
-  dzbytenure = match_matrix_csums(t_Tenure5, dzbytenure)
-  dzbyacc = match_matrix_csums(t_AccType7, dzbyacc)
-
-  seed = array(1, dim = c(10,5,5,5,7, nrow(dzbyhhcomp)))
-
-  result = try(humanleague::qisi(seed,
-                                 indices = list(c(1,2,3,4,5),c(6,1),c(6,2),c(6,3),c(6,4),c(6,5)),
-                                 marginals = list(iz_array,
-                                                  dzbyhhcomp,
-                                                  dzbyhhsize,
-                                                  dzbycar,
-                                                  dzbytenure,
-                                                  dzbyacc
-                                 )),
-               silent = TRUE)
-
-
-  humanleague::qisi(seed,
-                    indices = list(c(1,2,3,4,5),c(6,1)),
-                    marginals = list(iz_array,
-                                     dzbyhhcomp
-                    ))
-
-
-
-}
-
-#' Prep For Cleaning
-#'
-#' @description Perform processing for prep for cleaning.
-#' @param t_hhComp10 Input object or parameter named `t_hhComp10`.
-#' @param dzbyhhcomp Input object or parameter named `dzbyhhcomp`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-prep_for_cleaning = function(t_hhComp10,dzbyhhcomp ){
-  t_hhComp10_m = as.matrix(t_hhComp10[,2])
-  rownames(t_hhComp10_m) = t_hhComp10[[1]]
-  t_hhComp10_m = t_hhComp10_m[match(colnames(dzbyhhcomp), rownames(t_hhComp10_m)),,drop = FALSE]
-  t_hhComp10_m = t(t_hhComp10_m)
-  t_hhComp10_m
-}
-
-
-#' Scot Syth Combine Old
-#'
-#' @description Perform processing for scot syth combine old.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param int_hhSize_CarVan_sub Input object or parameter named `int_hhSize_CarVan_sub`.
-#' @param int_hhSize_HouseholdComp_sub Input object or parameter named `int_hhSize_HouseholdComp_sub`.
-#' @param int_hhSize_Tenure_sub Input object or parameter named `int_hhSize_Tenure_sub`.
-#' @param int_hhSize_AccType_sub Input object or parameter named `int_hhSize_AccType_sub`.
-#' @param int_Tenure_HouseholdComp_sub Input object or parameter named `int_Tenure_HouseholdComp_sub`.
-#' @param seed) Input object or parameter named `seed)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-scot_syth_combine_old = function(int_hhSize_CarVan_sub,
-                                 int_hhSize_HouseholdComp_sub,
-                                 int_hhSize_Tenure_sub,
-                                 int_hhSize_AccType_sub,
-                                 int_Tenure_HouseholdComp_sub,
-                                 seed){
-
-  # Check Zone match
-  if(length(unique(c(int_hhSize_CarVan_sub$IZCode,
-                     int_hhSize_HouseholdComp_sub$IZCode,
-                     int_hhSize_Tenure_sub$IZCode,
-                     int_hhSize_AccType_sub$IZCode,
-                     int_Tenure_HouseholdComp_sub$IZCode
-  ))) != 1){
-    stop("More than one IZCode")
-  }
-
-  CarVanByhhSize = as.matrix(int_hhSize_CarVan_sub[,3:ncol(int_hhSize_CarVan_sub)])
-  HouseholdCompByhhSize = as.matrix(int_hhSize_HouseholdComp_sub[,3:ncol(int_hhSize_HouseholdComp_sub)])
-  TenureByhhSize = as.matrix(int_hhSize_Tenure_sub[,3:ncol(int_hhSize_Tenure_sub)])
-  AccTypeByhhSize = as.matrix(int_hhSize_AccType_sub[,3:ncol(int_hhSize_AccType_sub)])
-  HouseholdCompByTenure = as.matrix(int_Tenure_HouseholdComp_sub[,3:ncol(int_Tenure_HouseholdComp_sub)])
-
-  rownames(CarVanByhhSize) = int_hhSize_CarVan_sub$CarVan5
-  rownames(HouseholdCompByhhSize) = int_hhSize_HouseholdComp_sub$hhComp10 # Use a population reference
-  rownames(TenureByhhSize) = int_hhSize_Tenure_sub$tenure5
-  rownames(AccTypeByhhSize) = int_hhSize_AccType_sub$AccType7
-  rownames(HouseholdCompByTenure) = int_Tenure_HouseholdComp_sub$hhComp10
-
-
-  # Alt Method uing mipfp
-  seed_weighted = seed * sum(CarVanByhhSize)
-
-  res <- mipfp::Ipfp(seed_weighted,
-                     list(c(1,2),c(3,2),c(4,2),c(5,2),c(1,3)),
-                     list(HouseholdCompByhhSize,
-                         TenureByhhSize,
-                         CarVanByhhSize,
-                         AccTypeByhhSize,
-                         HouseholdCompByTenure))
-
-  res2 = res$x.hat * sum(CarVanByhhSize)
-
-  result_df = expand.grid(
-    rownames(HouseholdCompByhhSize),
-    colnames(HouseholdCompByhhSize),
-    rownames(TenureByhhSize),
-    rownames(CarVanByhhSize),
-    rownames(AccTypeByhhSize)
-  )
-  names(result_df) = c("hhComp10","hhSize","Tenure5","CarVan5","AccType7")
-
-  result_df$households = int_trs(as.numeric(res2))
-  result_df$error_margins = res$error.margins
-  result_df$conv = res$conv
-  result_df = result_df[result_df$households > 0,]
-
-  # # Harmonise by household size
-  # # The number of 1 person and more than one person households should match
-  # HouseholdCompByhhSize = HouseholdCompByhhSize[c("OnePersonOther","OnePersonOver66", # Only 1
-  #                                   "CoupleNoChildren", # Only 2
-  #                                   "CoupleChildren","CoupleNonDepChildren","FamilyOver66","LoneParent", # At least 2
-  #                                   "LoneParentNonDepChildren","OtherChildren","OtherIncStudentOrOver66"),]
-  #
-  # TenureByhhSize = TenureByhhSize[c("outright","mortgage","socialrented","privaterented","rentfree"),]
-  # AccTypeByhhSize = AccTypeByhhSize[c("detached","semidetached","terraced","flatpurposebuilt","flatconverted","flatcommercial","caravan"),]
-  # #HouseholdCompByTenure = HouseholdCompByTenure[rownames(HouseholdCompByhhSize),rownames(TenureByhhSize)]
-  #
-  # CarVanByhhSize = match_matrix_csums(HouseholdCompByhhSize, CarVanByhhSize)
-  # TenureByhhSize = match_matrix_csums(HouseholdCompByhhSize, TenureByhhSize)
-  # AccTypeByhhSize = match_matrix_csums(HouseholdCompByhhSize, AccTypeByhhSize)
-  # #HouseholdCompByTenure2 = match_matrix_rsums_csums(rsum2 = rowSums(HouseholdCompByhhSize), csum2 = rowSums(TenureByhhSize), matO = HouseholdCompByTenure)
-  #
-  # #HouseholdCompByTenure2 = furness_balance(HouseholdCompByTenure, rowSums(HouseholdCompByhhSize), rowSums(TenureByhhSize), int_only = TRUE)
-  #
-  #
-  # # Pop Synth
-  # result = try(humanleague::qisi(seed,
-  #                                indices = list(c(1,2),c(3,2),c(4,2),c(5,2)),
-  #                                marginals = list(HouseholdCompByhhSize,
-  #                                                 TenureByhhSize,
-  #                                                 CarVanByhhSize,
-  #                                                 AccTypeByhhSize
-  #                                )),
-  #              silent = TRUE)
-
-  # seed2 = seed
-  # seed2[seed2 <= 1e-15] = 1e-3
-  #
-  # result = try(humanleague::qisi(seed2,
-  #                                indices = list(c(1,2),c(3,2),c(4,2),c(5,2),c(1,3)),
-  #                                marginals = list(HouseholdCompByhhSize,
-  #                                                 TenureByhhSize,
-  #                                                 CarVanByhhSize,
-  #                                                 AccTypeByhhSize,HouseholdCompByTenure2
-  #                                )),
-  #              silent = TRUE)
-
-  # if(inherits(result,"try-error")){
-  #   message("QISI failed for ",int_hhSize_CarVan_sub$IZCode[1]," ",result[1])
-  #   return(NULL)
-  # }
-
-  # result_df = expand.grid(
-  #   rownames(HouseholdCompByhhSize),
-  #   colnames(HouseholdCompByhhSize),
-  #   rownames(TenureByhhSize),
-  #   rownames(CarVanByhhSize),
-  #   rownames(AccTypeByhhSize)
-  # )
-  # names(result_df) = c("hhComp10","hhSize","Tenure5","CarVan5","AccType7")
-  #
-  #
-  # result_df$households = round(as.numeric(result$result))
-  # result_df = result_df[result_df$households > 0,]
-  # result_df$conv = result$conv
-  # result_df$pValue = result$pValue
-
-  # Integrity checks
-  # Should only be small differences in total populations
-  if(abs(sum(result_df$households[result_df$hhSize == "p1" & result_df$hhComp10 == "OnePersonOver66"]) -
-     HouseholdCompByhhSize["OnePersonOver66","p1"]) > 10){
-    warning("check 1 failed for:",int_hhSize_CarVan_sub$IZCode[1])
-  }
-  if(abs(sum(result_df$households[result_df$hhSize == "p2" & result_df$Tenure5 == "outright"]) -
-     TenureByhhSize["outright","p2"]) > 10){
-    warning("check 2 failed for:",int_hhSize_CarVan_sub$IZCode[1])
-  }
-  if(abs(sum(result_df$households[result_df$hhSize == "p3" & result_df$AccType7 == "detached"]) -
-     AccTypeByhhSize["detached","p3"]) > 10){
-    warning("check 3 failed for:",int_hhSize_CarVan_sub$IZCode[1])
-  }
-
-
-  result_df$IZCode = int_hhSize_CarVan_sub$IZCode[1]
-
-  # Validation Check
-  if(FALSE){
-    chk = result_df |>
-      dplyr::group_by(hhComp10,Tenure5) |>
-      dplyr::summarise(households = sum(households)) |>
-      tidyr::pivot_wider(names_from = "Tenure5", values_from = "households", values_fill = 0)
-    chkmat = as.matrix(chk[2:ncol(chk)])
-    round(abs(chkmat - HouseholdCompByTenure) / HouseholdCompByTenure * 100) # % error
-  }
-
-  result_df
-
-}
-
-
-#' Match Matrix Rsums Csums
-#'
-#' @description Match matrix rsums csums values between datasets.
-#' @param rsum2 Input object or parameter named `rsum2`.
-#' @param csum2 Input object or parameter named `csum2`.
-#' @param matO){ Input object or parameter named `matO){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-match_matrix_rsums_csums = function(rsum2, csum2, matO){
-
-  mat_rsum = rowSums(matO)
-  mat_csum = colSums(matO)
-
-  if(all(rsum2 == mat_rsum) & all(csum2 == mat_csum)){
-    return(matO)
-  }
-
-  # Calc Differences
-  row_diff = rsum2 - mat_rsum
-  col_diff = csum2 - mat_csum
-
-  mat = matrix(1, nrow = length(rsum2), ncol = length(csum2))
-
-  # furness_balance works poorly with zeros
-  # offset the problem by adding 1000
-
-
-
-  mat3 = furness_balance(mat, rsum = row_diff + 1000, csum = col_diff + 1000, int_only = TRUE, quiet = FALSE)
-
-  mat_new = matO + mat3
-
-  mat_new
-}
 
 # Intergerisation method
 # From https://spatial-microsim-book.robinlovelace.net/smsimr#sintegerisation
-#' Int Trs
+#' Truncate-replicate-sample integerisation
 #'
-#' @description Perform processing for int trs.
-#' @param x){ Input object or parameter named `x){`.
+#' @description Converts fractional weights/counts to integers while
+#'   preserving the total: takes the integer part of each value, then
+#'   allocates the remaining units by sampling proportional to the
+#'   fractional remainders (Lovelace & Ballas TRS method). Known issue: can
+#'   misbehave when all inputs are already integers (see TODO where called).
+#' @param x Numeric vector or array of non-negative values.
 #' @return The function result, typically a data frame or list used in the pipeline.
 #' @keywords internal
 int_trs <- function(x){

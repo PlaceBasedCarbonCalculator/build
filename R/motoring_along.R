@@ -1,9 +1,14 @@
-#' Read Motoring Along
+#' Read RAC Foundation "Motoring Along" MOT-based car/van km, 2009-2011
 #'
-#' @description Read motoring along from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the RAC Foundation LSOA outputs derived from MOT
+#'   odometer records for 2009, 2010 and 2011 (2011 LSOAs), keeping car/van
+#'   counts and total miles and converting miles to km. Used by the
+#'   `car_km_2009_2011` target, which anchors the historical end of the car-km
+#'   trend extrapolation in `extraplote_car_km_trends2()`.
+#' @param path Folder of `MOT Data RACv9.3 LSOAoutputs_YYYY.csv` files
+#'   (secure data).
+#' @return A data frame with `LSOA11` and `cars_total_09/10/11`,
+#'   `vans_total_09/10/11`, `car_km_09/10/11`, `van_km_09/10/11`.
 #' @keywords internal
 read_motoring_along = function(path = file.path(parameters$path_secure_data,"CREDS Data/Tim Share/From Tim/MOT Data RACv9.3")){
 

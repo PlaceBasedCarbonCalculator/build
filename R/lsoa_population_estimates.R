@@ -1,12 +1,15 @@
 # Build LSOA Population for ONS Data
 # https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareamidyearpopulationestimates
 
-#' Dowload Lsoa Population
+#' Download ONS LSOA mid-year population estimates, 2002-2022
 #'
-#' @description Process population data and return a summary table.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame produced by the function.
+#' @description Downloads the ONS LSOA small-area population estimate
+#'   spreadsheets (mid-2002 to mid-2022) into `path`. Skipped if the folder
+#'   already contains more than 13 files. Called by the `population_2002_2020`
+#'   target before `build_lsoa_population()`.
+#' @param path Folder to store the downloads; created if missing.
+#' @return `path` if downloads were skipped, otherwise the result of the last
+#'   `download.file()` call (used only for its side effects).
 #' @keywords internal
 dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
   if(!dir.exists(path)){
@@ -51,11 +54,18 @@ dowload_lsoa_population <- function(path = file.path(data_path(),"population")){
 
 
 
-#' Build Lsoa Population
+#' Combine ONS mid-year population estimates 2002-2020 onto 2011 LSOAs
 #'
-#' @description Build lsoa population and return the generated output.
-#' @param path File or directory path.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Reads each downloaded ONS spreadsheet (formats vary by year),
+#'   extracts single-year-of-age counts for England & Wales LSOAs, aggregates
+#'   them into 5-year age bands and stacks all years into one long table. 2011
+#'   data comes as quinary bands already. Used by the `population_2002_2020`
+#'   target. 2021 is loaded separately from Nomis (`load_population_2021()`)
+#'   and 2022-24 from `build_lsoa_population_2022_24()`.
+#' @param path Folder of downloads from `dowload_lsoa_population()`.
+#' @return A data frame with `year` (2002-2020, numeric), `LSOA11CD`,
+#'   `all_ages` and 5-year age-band columns "0-4" ... "90+", sorted by LSOA
+#'   and year.
 #' @keywords internal
 build_lsoa_population <- function(path = file.path(data_path(),"population")){
 
@@ -270,54 +280,17 @@ build_lsoa_population <- function(path = file.path(data_path(),"population")){
 }
 
 
-#' Build Lsoa Population 2022
+
+
+#' Read the mid-2022 to mid-2024 population estimates on 2021 LSOAs
 #'
-#' @description Build lsoa population 2022 and return the generated output.
-#' @param path) Input object or parameter named `path)`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
-#' @keywords internal
-build_lsoa_population_2022 = function(path) {
-  #2022
-  pop22 <- readxl::read_excel(file.path(path,"pop2022.xlsx"),
-                              sheet = "Mid-2022 LSOA 2021")
-  pop22 <- as.data.frame(pop22)
-  names(pop22) <- pop22[3,]
-  pop22 <- pop22[4:nrow(pop22),]
-  pop22[5:ncol(pop22)] <- lapply(pop22[5:ncol(pop22)], as.numeric)
-
-  for(i in 0:90){
-    pop22[paste0("A",i)] = pop22[paste0("M",i)] + pop22[paste0("F",i)]
-  }
-
-  pop22 = pop22[,c("LSOA 2021 Code","Total",paste0("A",0:90))]
-
-  bands = c("0-4","5-9","10-14","15-19","20-24","25-29",
-    "30-34","35-39","40-44","45-49",
-    "50-54","55-59","60-64","65-69",
-    "70-74","75-79","80-84","85-89")
-
-  for(i in 1:length(bands)){
-    bnd = bands[i]
-    b1 = unlist(strsplit(bnd,"-"))
-    b2 = as.numeric(b1[2])
-    b1 = as.numeric(b1[1])
-    pop22[bnd] = rowSums(pop22[paste0("A",b1:b2)], na.rm = TRUE)
-  }
-  pop22["90+"] = pop22$A90
-
-  pop22 = pop22[,c("LSOA 2021 Code","Total",bands,"90+")]
-  names(pop22)[1:2] = c("LSOA21CD","all_ages")
-
-  pop22
-
-}
-
-
-#' Build Lsoa Population 2022 24
-#'
-#' @description Build lsoa population 2022 24 and return the generated output.
-#' @param path File or directory path.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Reads the mid-2022, mid-2023 and mid-2024 sheets from
+#'   `pop2022-2024.xlsx`, sums the male/female single-year-of-age columns and
+#'   aggregates to 5-year bands. Used by the `population_2022_24` target,
+#'   which feeds `extrapolate_population_households()`.
+#' @param path Folder containing `pop2022-2024.xlsx`.
+#' @return A data frame with `LSOA21CD`, `year` (2022-2024), `all_ages` and
+#'   age-band columns "0-4" ... "90+".
 #' @keywords internal
 build_lsoa_population_2022_24 = function(path = "../inputdata/population/") {
   #2022

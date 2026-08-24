@@ -10,13 +10,23 @@ trueNA = function(x){
 }
 
 
-#' Epc Summarise Domestic
+#' Summarise domestic EPC certificates per LSOA
 #'
-#' @description Perform processing for epc summarise domestic.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param path File or directory path.
-#' @param bounds_lsoa_GB_full Input object or parameter named `bounds_lsoa_GB_full`.
-#' @return An sf object containing spatial data.
+#' @description Reads the cleaned GB domestic EPC point data, assigns each
+#'   certificate to a zone by spatial join with the GB LSOA boundaries, tidies
+#'   the free-text categories (fuel, glazing, wall/roof/floor descriptions),
+#'   and counts certificates per LSOA across ~130 categories: EPC band,
+#'   building type, tenure, construction age, and the energy-efficiency rating
+#'   and description of each element (floor, windows, water, walls, roof,
+#'   heating, controls, lighting, solar). Used by the `epc_dom_summary`
+#'   target, feeding the EPC JSONs, retrofit map data and bulk export.
+#' @param path Path to `GB_domestic_epc.Rds` (sf points, one row per
+#'   dwelling's latest certificate).
+#' @param bounds_lsoa_GB_full GB zone boundaries (`bounds_lsoa_GB_full`
+#'   target).
+#' @return A data frame with one row per LSOA and count/average columns.
+#'   Messages are emitted for any LSOAs whose category counts don't sum
+#'   back to the certificate total.
 #' @keywords internal
 epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
                                   bounds_lsoa_GB_full
@@ -289,69 +299,41 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   cert_summ$roofd_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("roofd_",names(cert_summ))])
   cert_summ$controld_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("controld_",names(cert_summ))])
 
-  # Checks
+  # Checks: category counts should sum back to the certificate total
+  check_sums_to_total = function(cols, label){
+    ok = cert_summ$epc_total == rowSums(cert_summ[,cols])
+    if(!all(ok)){
+      message(sum(!ok)," LSOAs where ",label," counts don't sum to epc_total")
+    }
+  }
 
+  check_sums_to_total(c("type_house_semi","type_house_midterrace",
+                        "type_house_endterrace","type_house_detached",
+                        "type_flat","type_bungalow_semi",
+                        "type_bungalow_midterrace","type_bungalow_endterrace",
+                        "type_bungalow_detached","type_maisonette",
+                        "type_parkhome"), "building type")
 
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("type_house_semi",
-                                                      "type_house_midterrace",
-                                                      "type_house_endterrace",
-                                                      "type_house_detached",
-                                                      "type_flat",
-                                                      "type_bungalow_semi",
-                                                      "type_bungalow_midterrace",
-                                                      "type_bungalow_endterrace",
-                                                      "type_bungalow_detached",
-                                                      "type_maisonette",
-                                                      "type_parkhome")]))
+  check_sums_to_total(c("tenure_owner","tenure_privaterent",
+                        "tenure_socialrent","tenure_unknown"), "tenure")
 
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("tenure_owner",
-                                                      "tenure_privaterent",
-                                                      "tenure_socialrent",
-                                                      "tenure_unknown")]))
+  check_sums_to_total(c("age_pre1900","age_19001929","age_19301949",
+                        "age_19501966","age_19671975","age_19761982",
+                        "age_19831990","age_19911995","age_19962002",
+                        "age_20032006","age_20072011","age_20122021",
+                        "age_post2022","age_unknown"), "construction age")
 
+  check_sums_to_total(c("waterd_mainsystem","waterd_immersion",
+                        "waterd_community","waterd_instantaneous",
+                        "waterd_gasmultipoint","waterd_other"), "hot water")
 
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("age_pre1900",
-                                                      "age_19001929",
-                                                      "age_19301949",
-                                                      "age_19501966",
-                                                      "age_19671975",
-                                                      "age_19761982",
-                                                      "age_19831990",
-                                                      "age_19911995",
-                                                      "age_19962002",
-                                                      "age_20032006",
-                                                      "age_20072011",
-                                                      "age_20122021",
-                                                      "age_post2022",
-                                                      "age_unknown"
-                                                      )]))
+  check_sums_to_total(c("glazing_single","glazing_double","glazing_triple",
+                        "glazing_secondary","glazing_unknown"), "glazing")
 
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("waterd_mainsystem",
-                                                      "waterd_immersion",
-                                                      "waterd_community",
-                                                      "waterd_instantaneous",
-                                                      "waterd_gasmultipoint",
-                                                      "waterd_other"
-  )]))
-
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("glazing_single",
-                                                      "glazing_double",
-                                                      "glazing_triple",
-                                                      "glazing_secondary",
-                                                      "glazing_unknown"
-  )]))
-
-  summary(cert_summ$epc_total == rowSums(cert_summ[,c("mainheatdesc_gasboiler",
-                                                      "mainheatdesc_oilboiler",
-                                                      "mainheatdesc_storageheater",
-                                                      "mainheatdesc_portableheater",
-                                                      "mainheatdesc_roomheater",
-                                                      "mainheatdesc_heatpump",
-                                                      "mainheatdesc_community",
-                                                      "mainheatdesc_other"
-  )]))
-
-
+  check_sums_to_total(c("mainheatdesc_gasboiler","mainheatdesc_oilboiler",
+                        "mainheatdesc_storageheater","mainheatdesc_portableheater",
+                        "mainheatdesc_roomheater","mainheatdesc_heatpump",
+                        "mainheatdesc_community","mainheatdesc_other"), "main heating")
 
   cert_summ
 

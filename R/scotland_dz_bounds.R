@@ -1,9 +1,12 @@
-#' Read Dz2022 Bounds
+#' Read 2022 Scottish Data Zone boundaries
 #'
-#' @description Read dz2022 bounds from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the 2022 Data Zone boundary shapefile (mean
+#'   high water clipped), keeps only the zone code (renamed `DataZone22`) and
+#'   makes the geometries valid. Used by the `bounds_dz22` target and combined
+#'   with E&W LSOAs in `combine_lsoa_bounds()`.
+#' @param path Boundaries folder containing `SG_DataZoneBdry_2022.zip` (the
+#'   `dl_boundaries` target).
+#' @return An sf data frame with `DataZone22` and geometry.
 #' @keywords internal
 read_dz2022_bounds = function(path = "../inputdata/boundaries/SG_DataZoneBdry_2022.zip"){
   path = file.path(path, "SG_DataZoneBdry_2022.zip")

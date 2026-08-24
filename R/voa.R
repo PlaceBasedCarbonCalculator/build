@@ -2,12 +2,16 @@
 #reported as ‘0’ and counts fewer than five reported as negligible and denoted
 #by ‘-’.
 
-#' Load Voa Ctsop1
+#' Load VOA CTSOP1.1: dwellings by council tax band per LSOA, 1993-2024
 #'
-#' @description Load voa CTSOP1 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by council tax
+#'   band" annual CSVs, keeping LSOA rows. Counts are rounded to the nearest
+#'   10 by VOA, with fewer-than-five shown as "-" (read as NA). Used by the
+#'   `dwellings_tax_band` target - the key annual dwelling-count series for
+#'   the household extrapolation and VOA JSONs.
+#' @param path Folder containing `CTSOP1-1-1993-2024.zip`.
+#' @return A data frame with `ecode` (LSOA code), `year`, `band_a` ...
+#'   `band_i` and `all_properties`.
 #' @keywords internal
 load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
@@ -49,12 +53,15 @@ load_voa_CTSOP1 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Load Voa Ctsop3
+#' Load VOA CTSOP3.1: dwellings by type and bedrooms per LSOA, 2020-2024
 #'
-#' @description Load voa CTSOP3 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by type and
+#'   number of bedrooms" CSVs (bungalow / flat-maisonette / terraced / semi /
+#'   detached x 1-6+ bedrooms, per council tax band), keeping LSOA rows.
+#'   Used by the `dwellings_type` target.
+#' @param path Folder containing `CTSOP3-1-2020-2024.zip`.
+#' @return A data frame with `ecode`, `band`, `year` and type-by-bedroom
+#'   count columns.
 #' @keywords internal
 load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
@@ -134,12 +141,14 @@ load_voa_CTSOP3 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Load Voa Ctsop4
+#' Load VOA CTSOP4.1: dwellings by build period per LSOA, 2020-2024
 #'
-#' @description Load voa CTSOP4 data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the VOA "counts of properties by build
+#'   period" CSVs (pre-1900 through 2022-2024, per council tax band), keeping
+#'   LSOA rows. Used by the `dwellings_age` target.
+#' @param path Folder containing `CTSOP4-1-2020-2024.zip`.
+#' @return A data frame with `ecode`, `band`, `year` and `bp_*` build-period
+#'   count columns.
 #' @keywords internal
 load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
@@ -202,15 +211,79 @@ load_voa_CTSOP4 = function(path = "../inputdata/voa/"){
 
 }
 
-#' Summarise Voa Post2010
+#' Convert the Scottish council-tax-band counts from 2011 to 2022 Data Zones
 #'
-#' @description Summarise voa post2010 into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param dwellings_tax_band) Input object or parameter named `dwellings_tax_band)`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Apportions each 2011 Data Zone's dwelling counts across the
+#'   2022 Data Zones it overlaps, in proportion to the postcode counts in
+#'   `lookup_dz_2011_22_pre`, then sums by 2022 zone - the same
+#'   split-and-sum used for the Scottish population and household counts in
+#'   `interpolate_population_dz11_dz22()`, written vectorised here because
+#'   this table is small enough not to need the per-zone loop.
+#' @param dwellings_tax_band_scotland Scottish council-tax-band counts per
+#'   2011 Data Zone (`dwellings_tax_band_scotland` target).
+#' @param lookup_dz_2011_22_pre 2011-to-2022 Data Zone overlap lookup with
+#'   postcode `count` weights (`lookup_dz_2011_22_pre` target).
+#' @return A data frame with `ecode` (2022 Data Zone), `year`, per-band
+#'   counts and `all_properties`.
 #' @keywords internal
-summarise_voa_post2010 = function(dwellings_tax_band) {
+scotland_tax_band_dz22 = function(dwellings_tax_band_scotland, lookup_dz_2011_22_pre) {
+
+  lookup = sf::st_drop_geometry(lookup_dz_2011_22_pre)[,c("DataZone","DataZone22","count")]
+  lookup = lookup |>
+    dplyr::group_by(DataZone) |>
+    dplyr::mutate(splitshare = count / sum(count)) |>
+    dplyr::ungroup()
+
+  bands = c("band_a","band_b","band_c","band_d","band_e","band_f","band_g",
+            "band_h","all_properties")
+
+  out = dplyr::inner_join(dwellings_tax_band_scotland, lookup[,c("DataZone","DataZone22","splitshare")],
+                          by = c("LSOA11CD" = "DataZone"),
+                          relationship = "many-to-many")
+
+  for(b in bands){
+    out[[b]] = out[[b]] * out$splitshare
+  }
+
+  out = out |>
+    dplyr::group_by(DataZone22, year) |>
+    dplyr::summarise(dplyr::across(dplyr::all_of(bands), \(x) round(sum(x, na.rm = TRUE))),
+                     .groups = "drop")
+
+  names(out)[names(out) == "DataZone22"] = "ecode"
+  out
+}
+
+#' Prepare the council-tax-band series for JSON export (2010+)
+#'
+#' @description Filters the CTSOP1 series to 2010 onwards, appends the
+#'   equivalent Scottish council-tax-band counts on 2022 Data Zones, and
+#'   shortens the column names (banda, bandb, ...) for the per-zone export.
+#'   Used by the `voa_json_2010` target.
+#'
+#'   Scotland is included because the VOA publishes England and Wales only,
+#'   and a chart that silently has no data north of the border reads as a
+#'   fault rather than as a boundary of the source. The Scottish council tax
+#'   register is the same measure on the same bands (A-H), published by
+#'   statistics.gov.scot, so the two series concatenate directly. Band I is
+#'   the one asymmetry - it exists only in Wales - and stays NA for both
+#'   Scottish and English zones.
+#' @param dwellings_tax_band CTSOP1 table (`dwellings_tax_band` target).
+#' @param dwellings_tax_band_scotland Scottish council-tax-band counts per
+#'   2011 Data Zone (`dwellings_tax_band_scotland` target).
+#' @param lookup_dz_2011_22_pre 2011-to-2022 Data Zone overlap lookup.
+#' @return A data frame with `LSOA21CD`, `year` and band counts, sorted.
+#' @keywords internal
+summarise_voa_post2010 = function(dwellings_tax_band, dwellings_tax_band_scotland,
+                                  lookup_dz_2011_22_pre) {
   dwellings_tax_band = dwellings_tax_band[dwellings_tax_band$year >= 2010,]
+
+  scot = scotland_tax_band_dz22(dwellings_tax_band_scotland, lookup_dz_2011_22_pre)
+  scot = scot[scot$year >= 2010,]
+  scot$band_i = NA_integer_
+
+  dwellings_tax_band = dplyr::bind_rows(dwellings_tax_band, scot[,names(dwellings_tax_band)])
+
   names(dwellings_tax_band) = gsub("_","",names(dwellings_tax_band))
   names(dwellings_tax_band)[1] = "LSOA21CD"
   dwellings_tax_band = dwellings_tax_band[order(dwellings_tax_band$LSOA21CD, dwellings_tax_band$year),]
@@ -219,13 +292,16 @@ summarise_voa_post2010 = function(dwellings_tax_band) {
 
 }
 
-#' Summarise Voa Post2020
+#' Combine dwelling type/bedrooms and build period for JSON export (2020+)
 #'
-#' @description Summarise voa post2020 into a compact table suitable for analysis.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param dwellings_type Input object or parameter named `dwellings_type`.
-#' @param dwellings_age) Input object or parameter named `dwellings_age)`.
-#' @return A summary data frame with aggregated metrics.
+#' @description Takes the all-bands rows of the CTSOP3 and CTSOP4 tables,
+#'   derives bedroom-count totals across dwelling types, collapses the
+#'   2009-2021 single-year build periods into one band, shortens column
+#'   names and joins the two tables. Used by the `voa_json_2020` target.
+#' @param dwellings_type CTSOP3 table (`dwellings_type` target).
+#' @param dwellings_age CTSOP4 table (`dwellings_age` target).
+#' @return A data frame per LSOA-year of dwelling type, bedroom and build
+#'   period counts.
 #' @keywords internal
 summarise_voa_post2020 = function(dwellings_type, dwellings_age) {
   dwellings_type = dwellings_type[dwellings_type$band == "All",]

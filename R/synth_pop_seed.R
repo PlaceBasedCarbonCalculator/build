@@ -1,7 +1,9 @@
 #' Read Hhcomp15 Tenure5 Size5 Carvan5 Ew
 #'
-#' @description Read hhComp15 Tenure5 Size5 CarVan5 EW from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -40,8 +42,10 @@ read_hhComp15_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"ce
 
 #' Read Hhcomp15 Tenure5 Size5 Acc5 Ew
 #'
-#' @description Read hhComp15 Tenure5 Size5 Acc5 EW from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -79,8 +83,10 @@ read_hhComp15_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"censu
 
 #' Read Hhcomp6 Tenure5 Size5 Acc5 Ew
 #'
-#' @description Read hhComp6 Tenure5 Size5 Acc5 EW from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -112,8 +118,10 @@ read_hhComp6_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census
 
 #' Read Hhcomp6 Tenure5 Size5 Carvan5 Ew
 #'
-#' @description Read hhComp6 Tenure5 Size5 CarVan5 EW from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -145,8 +153,10 @@ read_hhComp6_Tenure5_Size5_CarVan5_EW = function(path = file.path(path_data,"cen
 
 #' Read Carvan5 Tenure5 Size5 Acc5 Ew
 #'
-#' @description Read CarVan5 Tenure5 Size5 Acc5 EW from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -176,11 +186,17 @@ read_CarVan5_Tenure5_Size5_Acc5_EW = function(path = file.path(path_data,"census
 
 }
 
-#' Build Synth Pop Seed
+#' Build the national E&W seed arrays for the synthetic population
 #'
-#' @description Build synth pop seed and return the generated output.
-#' @param path_data Input object or parameter named `path_data`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Reads the England & Wales-level four-way census cross-tabs
+#'   (household composition x tenure x size x cars / accommodation type)
+#'   and combines them into the national seed arrays used by every LSOA's
+#'   IPF in `census_syth_combine_v4()`. Aggregated national tables can be
+#'   published multivariately without disclosure risk; using them as the
+#'   seed discourages locally implausible household combinations. This is
+#'   the `synth_pop_seed` target.
+#' @param path_data Folder of census 2021 EW-level extracts.
+#' @return A list of national seed arrays keyed by dimension combination.
 #' @keywords internal
 build_synth_pop_seed = function(path_data = file.path(parameters$path_data,"population")){
 

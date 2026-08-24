@@ -1,3 +1,10 @@
+# TODOs before next build build
+
+Update INSPIRE polygons - long slow load
+Add 2023/24 population data
+Speed up the json creation which is not paralleised
+
+
 # TODOs from R/
 
 This file aggregates `TODO` and `FIXME` comments found in the `R/` folder, with a short explanation of the work needed for each note.

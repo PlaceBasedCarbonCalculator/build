@@ -2,12 +2,18 @@
 # tar_load(dwellings_type)
 
 
-#' Backcast Dwelling Types
+#' Backcast dwelling-type counts to 2010-2019 from council tax bands
 #'
-#' @description Perform processing for backcast dwelling types.
-#' @param dwellings_tax_band Input object or parameter named `dwellings_tax_band`.
-#' @param dwellings_type){ Input object or parameter named `dwellings_type){`.
-#' @return A data frame produced by the function.
+#' @description Dwelling types (bungalow/flat/terraced/semi/detached etc.)
+#'   are only published from 2020 (CTSOP3), but dwellings per council tax
+#'   band go back further (CTSOP1). For each LSOA this estimates the type mix
+#'   for 2010-2019 by scaling the 2020 type-by-band matrix to match each
+#'   year's band totals (`build_backcasts_dwellings()`), then appends the
+#'   observed 2020+ data. Used by the `dwellings_type_backcast` target, an
+#'   input to `match_LCFS_synth_pop()`.
+#' @param dwellings_tax_band CTSOP1 table (`dwellings_tax_band` target).
+#' @param dwellings_type CTSOP3 table (`dwellings_type` target).
+#' @return A data frame per `lsoa21cd`-year of dwelling-type counts.
 #' @keywords internal
 backcast_dwelling_types = function(dwellings_tax_band, dwellings_type){
 
@@ -49,12 +55,15 @@ backcast_dwelling_types = function(dwellings_tax_band, dwellings_type){
 }
 
 
-#' Build Backcasts Dwellings
+#' Backcast one LSOA's dwelling types from its band totals
 #'
-#' @description Build backcasts dwellings and return the generated output.
-#' @param sub Subset object used within the function.
-#' @param sub_tax){ Input object or parameter named `sub_tax){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Worker for `backcast_dwelling_types()`. Builds the 2020
+#'   type-by-band matrix for one LSOA (adding an empty band I if absent) and,
+#'   for each year 2010-2019, rescales its columns to that year's band counts
+#'   with `match_matrix_csums()`, summing rows to get type totals.
+#' @param sub 2020 dwelling types by band for one LSOA.
+#' @param sub_tax Dwellings by band per year for the same LSOA.
+#' @return A wide data frame (`lsoa21cd`, `year`, one column per type).
 #' @keywords internal
 build_backcasts_dwellings = function(sub, sub_tax){
 

@@ -1,11 +1,13 @@
-#' Bal Func
+#' One Furness balancing pass (scale rows then columns)
 #'
-#' @description Perform processing for bal func.
-#' @param mat2 Input object or parameter named `mat2`.
-#' @param rsum2 Input object or parameter named `rsum2`.
-#' @param csum2 Input object or parameter named `csum2`.
-#' @param int_only Input object or parameter named `int_only`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Core step shared by the Furness functions: scales matrix
+#'   rows to match `rsum2` then columns to match `csum2`. Zero rows with a
+#'   non-zero target are re-seeded so a solution remains reachable, and
+#'   optional randomised integer rounding is applied.
+#' @param mat2 Numeric matrix being balanced.
+#' @param rsum2,csum2 Target row and column sums.
+#' @param int_only If TRUE, round to integers via `round_half_random()`.
+#' @return The rescaled matrix.
 #' @keywords internal
 bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   # Find ratio of rows
@@ -40,11 +42,14 @@ bal_func <- function(mat2, rsum2, csum2, int_only = FALSE){
   return(mat2)
 }
 
-#' Round Half Random
+#' Round with random jitter to avoid systematic bias
 #'
-#' @description Perform processing for round half random.
-#' @param x) Input object or parameter named `x)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Adds uniform noise of +/- 0.5 before rounding so that
+#'   repeated rounding across many cells doesn't consistently round the
+#'   same way; values below 1 are never jittered (so they aren't rounded
+#'   to 0 by the noise).
+#' @param x Numeric vector or matrix.
+#' @return Integer-rounded values.
 #' @keywords internal
 round_half_random <- function(x) {
   tweaks <- runif(length(x), min = -0.5, max = 0.5)
@@ -53,17 +58,20 @@ round_half_random <- function(x) {
 }
 
 
-# Furness method balancing
-#' Furness Partial
+#' Fill the NA cells of a matrix by Furness balancing
 #'
-#' @description Perform processing for furness partial.
-#' @param mat Input object or parameter named `mat`.
-#' @param rsum Input object or parameter named `rsum`.
-#' @param csum Input object or parameter named `csum`.
-#' @param n Input object or parameter named `n`.
-#' @param check Input object or parameter named `check`.
-#' @param int_only Input object or parameter named `int_only`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Estimates only the missing (NA) cells of `mat` so that the
+#'   completed matrix matches the target row and column sums; known cells
+#'   are never changed. The NA cells are iterated with `bal_func()` against
+#'   the residual row/column deficits, with a restart if the iteration gets
+#'   stuck. Used throughout the pipeline to reconstruct
+#'   statistically-disclosure-controlled census/DfT tables.
+#' @param mat Matrix with NA in the unknown cells.
+#' @param rsum,csum Target row and column sums for the completed matrix.
+#' @param n Maximum iterations.
+#' @param check If TRUE, report residual errors via `message()`.
+#' @param int_only If TRUE, use randomised integer rounding each pass.
+#' @return The completed matrix (known cells unchanged, NAs filled).
 #' @keywords internal
 furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = TRUE){
 
@@ -139,41 +147,19 @@ furness_partial <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = T
   return(mat_fin)
 }
 
-#' Distribute
+
+
+#' Fill missing cells by exhaustive search over integer combinations
 #'
-#' @description Perform processing for distribute.
-#' @param total Input object or parameter named `total`.
-#' @param bins) Input object or parameter named `bins)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-distribute <- function(total, bins) {
-  # Calculate the base value for each bin
-  base_value <- total %/% bins
-
-  # Calculate the remainder
-  remainder <- total %% bins
-
-  # Create a vector with the base value repeated 'bins' times
-  result <- rep(base_value, bins)
-
-  # Distribute the remainder over the first 'remainder' bins
-  if(remainder > 0){
-    result[seq(1, remainder)] <- result[seq(1, remainder)] + 1
-  }
-
-  return(result)
-}
-
-
-# Furness method balancing
-#' Furness Incomplete
-#'
-#' @description Perform processing for furness incomplete.
-#' @param mat Input object or parameter named `mat`.
-#' @param rsum Input object or parameter named `rsum`.
-#' @param csum Input object or parameter named `csum`.
-#' @param tt){ Input object or parameter named `tt){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description For matrices with only a few missing cells and a small
+#'   missing total, enumerates every composition of the missing total across
+#'   the NA cells and picks the one minimising the row/column-sum error
+#'   (random choice among ties; warns if no exact solution exists). Used by
+#'   `fill_gaps()` when the DfT totals imply hidden small values.
+#' @param mat Matrix with NA in the unknown cells.
+#' @param rsum,csum Target row and column sums.
+#' @param tt Grand total of the completed matrix.
+#' @return The completed matrix.
 #' @keywords internal
 furness_incomplete <- function(mat, rsum, csum, tt){
 
@@ -212,13 +198,16 @@ furness_incomplete <- function(mat, rsum, csum, tt){
 }
 
 
-#' Generate Combinations
+#' Enumerate all non-negative integer compositions of t into n parts
 #'
-#' @description Perform processing for generate combinations.
-#' @param t Input object or parameter named `t`.
-#' @param n Input object or parameter named `n`.
-#' @param prefix Input object or parameter named `prefix`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Recursively generates every length-`n` vector of
+#'   non-negative integers summing to `t` (order matters). Exponential in
+#'   `t` and `n`, so only suitable for small totals as used by
+#'   `furness_incomplete()`.
+#' @param t Total to compose.
+#' @param n Number of parts.
+#' @param prefix Internal accumulator for recursion.
+#' @return A list of integer vectors.
 #' @keywords internal
 generate_combinations <- function(t, n, prefix = numeric()) {
   # Generate all length-n vectors of non-negative integers that sum to t.
@@ -238,43 +227,21 @@ generate_combinations <- function(t, n, prefix = numeric()) {
   return(result)
 }
 
-#' Compositions Fast
+
+#' Classic Furness (IPF) balancing of a full seed matrix
 #'
-#' @description Perform processing for compositions fast.
-#' @param t Input object or parameter named `t`.
-#' @param n) Input object or parameter named `n)`.
-#' @return The function result, typically a data frame or list used in the pipeline.
-#' @keywords internal
-compositions_fast <- function(t, n) {
-  # number of bars to place
-  k <- n - 1L
-  m <- t + n - 1L
-
-  # list of bar placements (in C, extremely fast)
-  bars <- utils::combn(m, k)
-
-  # convert bar positions -> composition via gap lengths
-  gaps <- rbind(
-    bars[1, ] - 1L,
-    apply(bars, 2, diff) - 1L,
-    m - bars[k, ]
-  )
-
-  # return as list of integer vectors
-  lapply(seq_len(ncol(gaps)), function(i) gaps[, i])
-}
-
-#' Furness Balance
-#'
-#' @description Perform processing for furness balance.
-#' @param mat Input object or parameter named `mat`.
-#' @param rsum Input object or parameter named `rsum`.
-#' @param csum Input object or parameter named `csum`.
-#' @param n Input object or parameter named `n`.
-#' @param check Input object or parameter named `check`.
-#' @param int_only Input object or parameter named `int_only`.
-#' @param quiet Input object or parameter named `quiet`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Iteratively rescales an entire seed matrix so its row and
+#'   column sums match the targets (standard iterative proportional
+#'   fitting), stopping early on an exact match. Unlike `furness_partial()`,
+#'   every cell may change. Used by the household-type estimation
+#'   (`make_mat()`, `combine_nssec_enthinic()`).
+#' @param mat Seed matrix (all cells known; relative values act as priors).
+#' @param rsum,csum Target row and column sums.
+#' @param n Maximum iterations.
+#' @param check If TRUE, report residual errors via `message()`.
+#' @param int_only If TRUE, use randomised integer rounding each pass.
+#' @param quiet If FALSE, print first/last-pass error summaries.
+#' @return The balanced matrix with original dimnames.
 #' @keywords internal
 furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = FALSE, quiet = TRUE){
 
@@ -348,16 +315,22 @@ furness_balance <- function(mat, rsum, csum, n = 100, check = TRUE, int_only = F
 # - Uses iterative balancing on free cells only (Furness-inspired)
 # - Handles over-constrained systems by flexing unconstrained rows/columns
 
-#' Furness Partial Integer Total
+#' Fill NA cells subject to partial row/column constraints and a grand total
 #'
-#' @description Perform processing for furness partial integer total.
-#' @param mat Input object or parameter named `mat`.
-#' @param rsum Input object or parameter named `rsum`.
-#' @param csum Input object or parameter named `csum`.
-#' @param tt Input object or parameter named `tt`.
-#' @param max_iterations Input object or parameter named `max_iterations`.
-#' @param tolerance Input object or parameter named `tolerance`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Most general gap-filler: completes a matrix where some row
+#'   and column sums are unknown (NA in `rsum`/`csum`) but the grand total
+#'   `tt` is known. Known cells are never modified. Free cells in the
+#'   constrained rows/columns are IPF-scaled, then correction passes move
+#'   values through unconstrained rows/columns until all specified
+#'   constraints and the grand total hold, warning on any violation. Used
+#'   by `fill_gaps_135()`/`fill_gaps_145()` when the DfT totals imply
+#'   vehicles hidden outside the published marginals.
+#' @param mat Matrix with NA in the unknown cells.
+#' @param rsum,csum Target sums; NA where the marginal is unknown.
+#' @param tt Known grand total of the completed matrix.
+#' @param max_iterations Maximum IPF iterations.
+#' @param tolerance Unused (kept for API compatibility).
+#' @return The completed matrix.
 #' @keywords internal
 furness_partial_integer_total <- function(mat, rsum, csum, tt, max_iterations = 1000, tolerance = 1e-3) {
 

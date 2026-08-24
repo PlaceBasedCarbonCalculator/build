@@ -1,9 +1,14 @@
-#' Load Income Scotland
+#' Load Scottish small-area household income estimates (CHMA/LLHIE)
 #'
-#' @description Load income scotland data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the Scottish Government local-level household income
+#'   estimates for 2014, 2015, 2017 and 2018 (2011 Data Zones). Mean gross
+#'   weekly income is annualised (x 365/7) to match the E&W ONS estimates,
+#'   and approximate 95% confidence limits are derived from the cumulative
+#'   income-band proportions via `income_limit_estimator()`. Used by the
+#'   `income_scot_dz11` target.
+#' @param path Folder of the CHMA/LLHIE xlsx files.
+#' @return A data frame with `2011 Data Zone`, `year`, `lower_limit`,
+#'   `upper_limit` and `total_annual_income`.
 #' @keywords internal
 load_income_scotland = function(path = "../inputdata/income/scotland/"){
 
@@ -131,27 +136,16 @@ load_income_scotland = function(path = "../inputdata/income/scotland/"){
 
 }
 
-#' Income Limit Estimator
+#' Estimate 95% income limits from cumulative band proportions
 #'
-#' @description Use income band data to estimate upper and lower income
-#'   confidence limits
-#' @param u50 Input object or parameter named `u50`.
-#' @param u100 Input object or parameter named `u100`.
-#' @param u150 Input object or parameter named `u150`.
-#' @param u200 Input object or parameter named `u200`.
-#' @param u250 Input object or parameter named `u250`.
-#' @param u300 Input object or parameter named `u300`.
-#' @param u350 Input object or parameter named `u350`.
-#' @param u400 Input object or parameter named `u400`.
-#' @param u500 Input object or parameter named `u500`.
-#' @param u600 Input object or parameter named `u600`.
-#' @param u700 Input object or parameter named `u700`.
-#' @param u800 Input object or parameter named `u800`.
-#' @param u900 Input object or parameter named `u900`.
-#' @param u1000 Input object or parameter named `u1000`.
-#' @param u1200 Input object or parameter named `u1200`.
-#' @param u2000 Input object or parameter named `u2000`.
-#' @return A data frame produced by the function.
+#' @description Given the cumulative proportion of households with weekly
+#'   income below each threshold (50 to 2000 pounds), returns the band
+#'   thresholds nearest the 2.5th and 97.5th percentiles as approximate
+#'   lower/upper limits.
+#' @param u50,u100,u150,u200,u250,u300,u350,u400,u500,u600,u700,u800,u900,u1000,u1200,u2000
+#'   Cumulative proportions of households below each weekly income threshold.
+#' @return A one-row data frame with `lower_limit` and `upper_limit`
+#'   (pounds per week).
 #' @keywords internal
 income_limit_estimator = function(u50, u100, u150, u200, u250, u300, u350, u400, u500, u600, u700, u800, u900, u1000, u1200, u2000){
 
@@ -174,13 +168,18 @@ income_limit_estimator = function(u50, u100, u150, u200, u250, u300, u350, u400,
 }
 
 
-#' Esimate Income Scotland Dz22
+#' Convert Scottish income estimates to 2022 Data Zones and extend to 2020
 #'
-#' @description Perform processing for esimate income scotland dz22.
-#' @param income_scot_dz11 Input object or parameter named `income_scot_dz11`.
-#' @param lookup_dz_2011_22_pre Lookup table used to map area codes or classifications.
-#' @param path File or directory path.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Re-averages the 2011 Data Zone income estimates onto 2022
+#'   Data Zones using UPRN-count weights from `make_dz_11_22_lookup()`, then
+#'   projects the 2018 values to 2019 and 2020 using a national income trend
+#'   workbook. Used by the `income_scot_dz22` target, feeding the retrofit
+#'   map and the Scottish synthetic population income matching.
+#' @param income_scot_dz11 Output of `load_income_scotland()`.
+#' @param lookup_dz_2011_22_pre The `lookup_dz_2011_22_pre` target.
+#' @param path Path to `Scotland Income Trends.xlsx`.
+#' @return A data frame with `DataZone22`, `year` (2014-2020),
+#'   `lower_limit`, `upper_limit` and `total_annual_income`.
 #' @keywords internal
 esimate_income_scotland_dz22 = function(income_scot_dz11, lookup_dz_2011_22_pre, path = "../inputdata/income/scotland/Scotland Income Trends.xlsx"){
 

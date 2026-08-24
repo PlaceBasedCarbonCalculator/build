@@ -1,9 +1,11 @@
-#' Load Oa Population
+#' Load 2021 census population by age for Output Areas
 #'
-#' @description Load oa population data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the Nomis RM011 extract of 2021 census population by
+#'   broad age group for 2021 Output Areas. Used by the `population_oa21`
+#'   target, which weights the accessibility analysis (`access_counts()`).
+#' @param path Folder containing `nomis_RM011_OA2021_Age.csv`.
+#' @return A data frame with `OA21CD`, `total_pop` and age-group columns
+#'   (`pop_U16` ... `pop_O65`).
 #' @keywords internal
 load_oa_population = function(path){
   pop = readr::read_csv(file.path(path, "nomis_RM011_OA2021_Age.csv"), skip = 8)

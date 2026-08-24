@@ -1,10 +1,19 @@
-#' Make Dz 11 22 Lookup
+#' Build a spatial lookup between 2011 and 2022 Scottish Data Zones
 #'
-#' @description Build dz 11 22 lookup and return the generated output.
-#' @param bounds_dz11 Input object or parameter named `bounds_dz11`.
-#' @param bounds_dz22 Input object or parameter named `bounds_dz22`.
-#' @param uprn_bng){ Input object or parameter named `uprn_bng){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Intersects the 2011 and 2022 Data Zone boundaries to work out
+#'   which 2011 zones each 2022 zone is made from. Sliver polygons from
+#'   imperfectly aligned boundaries are removed with `slither_detection()`,
+#'   and overlaps covering less than 1% of the 2011 zone (and under 25,000 m2)
+#'   are dropped. Each remaining intersection area is then given a weight by
+#'   counting the UPRNs (addresses) that fall inside it, which is a better
+#'   proxy for population than area. Used by the `lookup_dz_2011_22_pre`
+#'   target; this is slow (spatial join against ~40M UPRN points).
+#' @param bounds_dz11 sf 2011 Data Zone boundaries (`bounds_dz11` target).
+#' @param bounds_dz22 sf 2022 Data Zone boundaries (`bounds_dz22` target).
+#' @param uprn_bng sf UPRN points in EPSG:27700 (`uprn_bng` target).
+#' @return An sf data frame with one row per 2011-2022 zone intersection:
+#'   `DataZone` (2011), `DataZone22`, areas, `pInter` (share of the 2011 zone),
+#'   `areaID` and `count` (UPRNs in the intersection).
 #' @keywords internal
 make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
@@ -104,11 +113,17 @@ make_dz_11_22_lookup = function(bounds_dz11, bounds_dz22, uprn_bng){
 
 
 
-#' Make Dz 11 22 Lookup Simple
+#' Simplify the Data Zone 2011-2022 lookup to split shares
 #'
-#' @description Build dz 11 22 lookup simple and return the generated output.
-#' @param lookup_dz_2011_22_pre){ Lookup table used to map area codes or classifications.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Converts the detailed intersection lookup from
+#'   `make_dz_11_22_lookup()` into a simple weight table: for each 2011 Data
+#'   Zone, the share of its UPRNs that fall in each 2022 Data Zone. Columns
+#'   are renamed to `LSOA11CD`/`LSOA21CD` so the same conversion code can be
+#'   used for Scotland as for England & Wales. Used by the `lookup_dz_2011_22`
+#'   target.
+#' @param lookup_dz_2011_22_pre Output of `make_dz_11_22_lookup()`.
+#' @return A data frame with `LSOA11CD` (2011 DZ), `LSOA21CD` (2022 DZ) and
+#'   `splitshare` (sums to 1 within each 2011 zone).
 #' @keywords internal
 make_dz_11_22_lookup_simple = function(lookup_dz_2011_22_pre){
   # Scotland
@@ -124,13 +139,18 @@ make_dz_11_22_lookup_simple = function(lookup_dz_2011_22_pre){
   lookup_dz_2011_22_pre
 }
 
-#' Slither Detection
+#' Remove sliver polygons from an intersection result
 #'
-#' @description Perform processing for slither detection.
-#' @param x Input data object.
-#' @param apratio Input object or parameter named `apratio`.
-#' @param min_area Input object or parameter named `min_area`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Drops thin sliver polygons created when two nearly identical
+#'   boundaries are intersected. Polygons are removed if they are smaller than
+#'   `min_area` or if their perimeter-to-area ratio exceeds `apratio` (long
+#'   thin shapes have high ratios).
+#' @param x sf data frame of intersection results (geometry collections are
+#'   reduced to polygons and multipolygons cast to single polygons).
+#' @param apratio Maximum allowed perimeter/area ratio.
+#' @param min_area Minimum polygon area in square metres.
+#' @return `x` with slivers removed, plus `area_inter`, `perimiter_inter` and
+#'   `apratio` columns.
 #' @keywords internal
 slither_detection = function(x, apratio = 0.5, min_area = 100){
   x = sf::st_collection_extract(x, "POLYGON")
@@ -144,16 +164,24 @@ slither_detection = function(x, apratio = 0.5, min_area = 100){
 }
 
 
-# Convert Population 2011 to Population 22
-
-#' Interpolate Population Dz11 Dz22
+#' Re-apportion Scottish population and households onto 2022 Data Zones
 #'
-#' @description Process population data and return a summary table.
-#' @param lookup_dz_2011_22_pre Lookup table used to map area codes or classifications.
-#' @param households_scotland Input object or parameter named `households_scotland`.
-#' @param population_scot Input object or parameter named `population_scot`.
-#' @param dwellings_tax_band_scotland){ Input object or parameter named `dwellings_tax_band_scotland){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Converts the historical Scottish population estimates (by age
+#'   band) and household/dwelling counts from 2011 Data Zones to 2022 Data
+#'   Zones, splitting each 2011 zone by its UPRN-weighted `splitshare` from
+#'   `make_dz_11_22_lookup()`. Household counts before 2014 come from the
+#'   council-tax dwelling counts (used as a proxy for households). Used by the
+#'   `population_scot_dz22` target, which is combined with the E&W series in
+#'   `combine_populations2()`.
+#' @param lookup_dz_2011_22_pre Output of `make_dz_11_22_lookup()`.
+#' @param households_scotland Household estimates per 2011 DZ
+#'   (`households_scotland` target).
+#' @param population_scot Population by age band per 2011 DZ
+#'   (`population_scot` target).
+#' @param dwellings_tax_band_scotland Council-tax dwelling counts per 2011 DZ
+#'   (`dwellings_tax_band_scotland` target).
+#' @return A data frame with one row per 2022 Data Zone and year (2005+):
+#'   age-band populations, `all_properties` and `households`, all rounded.
 #' @keywords internal
 interpolate_population_dz11_dz22 = function(lookup_dz_2011_22_pre, households_scotland, population_scot, dwellings_tax_band_scotland){
 

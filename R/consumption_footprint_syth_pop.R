@@ -1,21 +1,17 @@
-#' Consumption Footprint Syth Pop
+#' Aggregate household-level LCFS spending to zones for every base year
 #'
-#' @description Compute a carbon emission or footprint summary.
-#' @param synth_households_lcfs_2022 Input object or parameter named `synth_households_lcfs_2022`.
-#' @param synth_households_lcfs_2020 Input object or parameter named `synth_households_lcfs_2020`.
-#' @param synth_households_lcfs_2018 Input object or parameter named `synth_households_lcfs_2018`.
-#' @param synth_households_lcfs_2016 Input object or parameter named `synth_households_lcfs_2016`.
-#' @param synth_households_lcfs_2014 Input object or parameter named `synth_households_lcfs_2014`.
-#' @param synth_households_lcfs_2012 Input object or parameter named `synth_households_lcfs_2012`.
-#' @param synth_households_lcfs_2010 Input object or parameter named `synth_households_lcfs_2010`.
-#' @param synth_households_lcfs_2022_scotland Input object or parameter named `synth_households_lcfs_2022_scotland`.
-#' @param synth_households_lcfs_2020_scotland Input object or parameter named `synth_households_lcfs_2020_scotland`.
-#' @param synth_households_lcfs_2018_scotland Input object or parameter named `synth_households_lcfs_2018_scotland`.
-#' @param synth_households_lcfs_2016_scotland Input object or parameter named `synth_households_lcfs_2016_scotland`.
-#' @param synth_households_lcfs_2014_scotland Input object or parameter named `synth_households_lcfs_2014_scotland`.
-#' @param synth_households_lcfs_2012_scotland Input object or parameter named `synth_households_lcfs_2012_scotland`.
-#' @param synth_households_lcfs_2010_scotland Input object or parameter named `synth_households_lcfs_2010_scotland`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Summarises each of the 14 synthetic-household spending
+#'   datasets (E&W and Scotland, LCFS base years 2010/11 to 2022/23) to zone
+#'   level via `consumption_lsoa_summary()` and stacks them with an even
+#'   `year` label (2010-2022). The 2010 datasets predate the `flight_other`
+#'   variable, which is added as 0. Used by the `consumption_syth_pop`
+#'   target, input to `calculate_consumption_lsoa()`.
+#' @param synth_households_lcfs_2022,synth_households_lcfs_2020,synth_households_lcfs_2018,synth_households_lcfs_2016,synth_households_lcfs_2014,synth_households_lcfs_2012,synth_households_lcfs_2010
+#'   E&W matched household datasets (`synth_households_lcfs_*` targets).
+#' @param synth_households_lcfs_2022_scotland,synth_households_lcfs_2020_scotland,synth_households_lcfs_2018_scotland,synth_households_lcfs_2016_scotland,synth_households_lcfs_2014_scotland,synth_households_lcfs_2012_scotland,synth_households_lcfs_2010_scotland
+#'   Scottish equivalents.
+#' @return A data frame per zone-year of household counts, income and
+#'   spending totals by category, vehicle purchases and flight counts.
 #' @keywords internal
 consumption_footprint_syth_pop = function(synth_households_lcfs_2022,
                                           synth_households_lcfs_2020,
@@ -81,15 +77,18 @@ consumption_footprint_syth_pop = function(synth_households_lcfs_2022,
   res
 }
 
-#' Consumption Lsoa Summary
+#' Sum household spending and flights to zone level
 #'
-#' @description Perform processing for consumption lsoa summary.
-#' @param synth_households_lcfs_2020){ Input object or parameter named `synth_households_lcfs_2020){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Aggregates one synthetic-household dataset to zones:
+#'   household count, income statistics, spending totals per COICOP
+#'   category (negative values excluded except rebates), vehicle purchases
+#'   and flight counts.
+#' @param synth_households_lcfs_2020 One matched household dataset.
+#' @return A data frame per zone of summed spending and counts.
 #' @keywords internal
 consumption_lsoa_summary = function(synth_households_lcfs_2020){
 
-  sub = dplyr::group_by(synth_households_lcfs_2020, by = LSOA21CD) |>
+  sub = dplyr::group_by(synth_households_lcfs_2020, LSOA21CD) |>
     dplyr::summarise(households = dplyr::n(),
 
                      income_total = sum(annual_income),

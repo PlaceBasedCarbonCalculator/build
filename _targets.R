@@ -103,13 +103,30 @@ tar_target(household_clusters_scot,{
   make_community_photo_scotland(path = "../inputdata/population_scotland/", bounds_iz22, lookup_DataZone_2022)
 }),
 
+# E&W and Scotland household-type clusters combined into one GB table (shared by
+# the per-LSOA community photo and the area-level community photos below).
+tar_target(household_clusters_gb,{
+  scot = household_clusters_scot[,c("NSSEC5","DataZone","householdComp10","ethnic3","households")]
+  names(scot) = c("NSSEC5","LSOA21CD","householdComposition","ethnic","households")
+  scot$ethnic = as.character(scot$ethnic)
+  scot$ethnic = paste0(toupper(substr(scot$ethnic, 1, 1)), substr(scot$ethnic, 2, nchar(scot$ethnic)))
+  rbind(household_clusters, scot)
+}),
+
 tar_target(household_pics_json,{
-  household_clusters_scot2 = household_clusters_scot[,c("NSSEC5","DataZone","householdComp10","ethnic3","households")]
-  names(household_clusters_scot2) = c("NSSEC5","LSOA21CD","householdComposition","ethnic","households")
-  household_clusters_scot2$ethnic = as.character(household_clusters_scot2$ethnic)
-  household_clusters_scot2$ethnic = paste0(toupper(substr(as.character(household_clusters_scot2$ethnic), 1, 1)), substr(household_clusters_scot2$ethnic, 2, nchar(household_clusters_scot2$ethnic)))
-  sub = select_household_pics(rbind(household_clusters,household_clusters_scot2))
-  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 0, path = "outputdata/json/community_pics", dataframe = "columns", zip = FALSE)
+  sub = select_household_pics(household_clusters_gb)
+  export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 0, name = "community_pics", dataframe = "columns")
+}),
+
+# Community photos aggregated to LA / ward / parish / constituency: sum each
+# household archetype across the area's LSOAs, then allocate the 48 picture
+# slots (see R/family_portraits.R). Powers the demographics tab community photo
+# on the area report cards. Deploy the {level}_community_pics bins to the blob.
+tar_target(area_household_pics,{
+  agg_all_levels(agg_area_household_pics, household_clusters_gb, lsoa_admin)
+}),
+tar_target(area_household_pics_json,{
+  export_area_bins(area_household_pics, "community_pics", rounddp = 0)
 }),
 
 
@@ -164,14 +181,19 @@ tar_target(bills_other_heating,{
 }),
 tar_target(geojson_postcode,{
   sub = prep_postcode_gas_electic(postcode_gas_electricity_emissions, bounds_postcodes_2024)
+  # Carry each postcode's byte range from the postcode .bin into the pmtiles, so
+  # the website reads a postcode's energy record by range request without ever
+  # downloading the ~1.5M-record index. The dependency on build_postcode_jsons
+  # (which returns read_bin_index()) keeps the .bin and postcodes.pmtiles in
+  # lockstep - the offsets are only valid for the .bin they were packed from.
+  sub = dplyr::left_join(sub, build_postcode_jsons, by = c("postcode" = "id"))
   make_geojson(sub, "outputdata/postcodes.geojson")
 }, format = "file"),
 
 tar_target(build_historical_domestic_gas_elec_jsons,{
   sub = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors, bills_gas_electric, bills_other_heating,other_heating_emissions)
-  export_zone_json(sub, idcol = "LSOA21CD", path = "outputdata/json/historical_domestic_gas_elec",
-                   dataframe = "columns",
-                   zip = FALSE, rounddp = 0)
+  export_zone_bin(sub, idcol = "LSOA21CD", name = "historical_domestic_gas_elec",
+                  dataframe = "columns", rounddp = 0)
 }),
 
 # EPC Points
@@ -181,8 +203,8 @@ tar_target(epc_dom_summary,{
 }),
 
 tar_target(build_epc_dom_jsons,{
-  export_zone_json(epc_dom_summary, idcol = "LSOA21CD",
-                   path = "outputdata/json/epc_dom", rounddp = 2, dataframe = "rows")
+  export_zone_bin(epc_dom_summary, idcol = "LSOA21CD",
+                  name = "epc_dom", rounddp = 2, dataframe = "rows")
 }),
 
 tar_target(retrofit_lsoa_data,{
@@ -297,9 +319,9 @@ tar_target(bounds_postcodes_2015,{
 tar_target(postcode_points,{
   read_postcode_points(path = file.path(parameters$path_secure_data,"Postcodes/codepo_20251101/codepo_gpkg_gb.zip"))
 }),
-tar_target(bounds_postcode_area,{
-  make_postcode_areas(bounds_postcodes_2024)
-}),
+# tar_target(bounds_postcode_area,{ # Failing with topological error not currently in use.
+#   make_postcode_areas(bounds_postcodes_2024)
+# }),
 tar_target(lookup_lsoa_2011_21,{
   load_LSOA_2011_2021_lookup(dl_boundaries)
 }),
@@ -379,16 +401,17 @@ tar_target(bounds_lsoa_GB_generalised,{
 tar_target(bounds_lsoa_GB_super_generalised,{
   combine_lsoa_bounds(bounds_lsoa21_super_generalised, bounds_dz22, keep = 0.05)
 }),
-tar_target(uprn,{
-  load_uprn(path = file.path(parameters$path_data,"os_uprn"))
-}),
+# tar_target(uprn,{
+#   load_uprn(path = file.path(parameters$path_data,"os_uprn"))
+# }),
 tar_target(uprn_bng,{
   load_uprn_27700(path = file.path(parameters$path_data,"os_uprn"))
 }),
 
-tar_target(uprn_historical,{
-  load_uprn_historical(path = file.path(parameters$path_data,"os_uprn/osopenuprn_2020_2025_all.zip"))
-}),
+# uprn_historical is built by the LandOwnership repo (it owns all UPRN /
+# address work as of July 2026). Nothing in this pipeline needs it directly
+# any more - it reaches us inside the objects read by
+# R/landownership_resources.R. The EPC repo reads LandOwnership's copy.
 
 # Points of Interest
 tar_target(poi,{
@@ -423,8 +446,11 @@ tar_target(bounds_lsoa_GB_full_landuse,{
 
 
 # Inspire polygons
+# England & Wales parcels are cleaned by the LandOwnership repo (2026 release,
+# loaded in parallel) - see R/landownership_resources.R. Scotland is not
+# covered there, so it is still loaded here.
 tar_target(inspire,{
-  load_inspire(path = file.path(parameters$path_data,"INSPIRE"))
+  load_lo_inspire()
 }),
 
 tar_target(inspire_scotland,{
@@ -511,9 +537,8 @@ tar_target(vehicle_summary,{
 }),
 
 tar_target(vehicle_summary_json,{
-  export_zone_json(vehicle_summary, idcol = "LSOA21CD", rounddp = 2,
-                   path = "outputdata/json/vehicle_summary", dataframe = "columns",
-                   reduce = FALSE, zip = FALSE)
+  export_zone_bin(vehicle_summary, idcol = "LSOA21CD", rounddp = 2,
+                  name = "vehicle_summary", dataframe = "columns")
 }),
 # tar_target(vehicle_registrations_21,{
 #   vehicle_reg_to_21(vehicle_registrations,lsoa_11_21_tools,lookup_dz_2011_22,"vehicle_registrations")
@@ -565,20 +590,25 @@ tar_target(car_km_lsoa_21,{
 
 # Public Transport Frequency
 tar_target(pt_frequency,{
-  load_pt_frequency(parameters$path_data)
+  load_pt_frequency("../PublicTransportAnalysis/data")
 }),
 
 tar_target(pt_json,{
   ptf = pt_frequency[!is.na(pt_frequency$zone_id),]
   names(ptf) = gsub("Morning_Peak","MorningPeak",names(ptf))
   names(ptf) = gsub("Afternoon_Peak","AfternoonPeak",names(ptf))
-  ptf = tidyr::pivot_longer(ptf, cols = tph_weekday_MorningPeak_2004_2:tph_daytime_avg_2023_4,
+  # Select the tph_ columns by name, not by a first:last range. The range used
+  # to end at tph_daytime_avg_2023_4, which was the last column when the series
+  # ended in 2023; once 2024 and 2025 were added their tph_daytime_avg_* columns
+  # (6 and 7 of them) sorted after that endpoint and were silently dropped from
+  # the export, while the rest of those two years came through.
+  ptf = tidyr::pivot_longer(ptf, cols = tidyselect::starts_with("tph_"),
                             names_prefix = "tph_",
                             names_sep = "_",
                             names_to = c("day","time","year","mode"))
   ptf = tidyr::pivot_wider(ptf, names_from = c("day","time","mode"), values_from = "value", id_cols = c("zone_id","year"))
-  export_zone_json(ptf, idcol = "zone_id", rounddp = 2, path = "outputdata/json/pt_frequency", dataframe = "columns",
-                   reduce = FALSE, zip = FALSE)
+  ptf = ptf[order(ptf$zone_id, ptf$year),]
+  export_zone_bin(ptf, idcol = "zone_id", rounddp = 2, name = "pt_frequency", dataframe = "columns")
 }),
 
 tar_target(transport_lsoa_data,{
@@ -591,20 +621,13 @@ tar_target(building_age_2011,{
   load_building_age_2011(path = file.path(parameters$path_secure_data,"CDRC/building age price"))
 }),
 
-tar_target(house_price_lr,{
-  load_lr_price_paid(path = file.path(parameters$path_data,"house prices/land registry"))
-}),
-
-tar_target(house_prices_ubdc,{
-  load_ubdc_house_prices(path = file.path(parameters$path_data,"house prices/ppdid_uprn_usrn.zip"))
-}),
-
+# Land Registry Price Paid, and the UPRN classification built on top of it,
+# are produced by the LandOwnership repo - see R/landownership_resources.R.
+# We read its `_final` variants (post fuzzy rematch) rather than rebuilding
+# house_price_lr / house_prices_ubdc / the matching cascade here. The LSOA
+# summary below was never ported, so it stays.
 tar_target(house_price_lr_uprn,{
-  land_registry_add_uprn(house_price_lr,house_prices_ubdc,uprn_historical,
-                       lookup_postcode_OA_LSOA_MSOA_2021,
-                       bounds_lsoa_GB_full,
-                       path_epc = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
-                       path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  load_lo_house_price_lr_uprn()
 }),
 
 tar_target(house_prices_lsoa,{
@@ -612,14 +635,11 @@ tar_target(house_prices_lsoa,{
 }),
 
 tar_target(house_prices_nowcast,{
-  house_price_extrapolate(house_price_lr_uprn, lsoa_admin)
+  load_lo_house_prices_nowcast()
 }),
 
 tar_target(uprn_historical_epc_lr,{
-  combine_uprn_epc_lr(uprn_historical,
-                      house_prices_nowcast,
-                      path_epc_dom = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
-                      path_epc_nondom = file.path(parameters$path_data,"epc/GB_nondomestic_epc.Rds"))
+  load_lo_uprn_historical_epc_lr()
 }),
 
 tar_target(housing_type_2021,{
@@ -692,31 +712,153 @@ tar_target(dwellings_type_backcast,{
 }),
 
 tar_target(prices_json,{
-  export_zone_json(house_prices_lsoa, idcol = "LSOA21CD", rounddp = 0, path = "outputdata/json/prices", dataframe = "columns",
-                   reduce = FALSE, zip = FALSE)
+  export_zone_bin(house_prices_lsoa, idcol = "LSOA21CD", rounddp = 0, name = "prices", dataframe = "columns")
 }),
 
 
 tar_target(la_emissions_summary_json,{
-  export_zone_json(la_emissions_all, idcol = "LAD25CD", rounddp = 0, path = "outputdata/json/la_emissions", dataframe = "columns",
-                   reduce = FALSE, zip = FALSE)
+  export_zone_bin(la_emissions_all, idcol = "LAD25CD", rounddp = 0, name = "la_emissions", dataframe = "columns")
 }),
 
 tar_target(oac_emissions_summary_json,{
-  export_zone_json(oac_emissions_all, idcol = "lsoa_class_code", rounddp = 0, path = "outputdata/json/oac_emissions", dataframe = "columns",
-                   reduce = FALSE, zip = FALSE)
+  export_zone_bin(oac_emissions_all, idcol = "lsoa_class_code", rounddp = 0, name = "oac_emissions", dataframe = "columns")
+}),
+
+# Aggregated per-capita emissions summaries for ward / parish / constituency,
+# mirroring la_emissions_all. These power the /reports/ ward, parish and
+# constituency pages. Deploy the date-stamped data_<level>_emissions_*.bin and
+# index_<level>_emissions_*.json(.gz) files from outputdata/jsonbin to the blob
+# store alongside la_emissions.
+tar_target(ward_emissions_all,{
+  make_ward_summary(lsoa_emissions_all, lsoa_admin, population)
+}),
+tar_target(ward_emissions_summary_json,{
+  export_zone_bin(ward_emissions_all, idcol = "WD25CD", rounddp = 0, name = "ward_emissions", dataframe = "columns")
+}),
+
+tar_target(parish_emissions_all,{
+  make_parish_summary(lsoa_emissions_all, lsoa_admin, population)
+}),
+tar_target(parish_emissions_summary_json,{
+  export_zone_bin(parish_emissions_all, idcol = "PAR23CD", rounddp = 0, name = "parish_emissions", dataframe = "columns")
+}),
+
+tar_target(constituency_emissions_all,{
+  make_westminter_summary(lsoa_emissions_all, lsoa_admin, population)
+}),
+tar_target(constituency_emissions_summary_json,{
+  export_zone_bin(constituency_emissions_all, idcol = "PCON24CD", rounddp = 0, name = "constituency_emissions", dataframe = "columns")
+}),
+
+# Transport & retrofit datasets aggregated to LA / ward / parish / constituency
+# (see R/area_summaries.R for methods). These power the tool report cards on
+# the website's area report pages. Deploy the date-stamped {level}_{name} bin
+# and index files from outputdata/jsonbin to the blob store.
+tar_target(area_vehicle_summaries,{
+  agg_all_levels(agg_area_vehicle_summary, vehicle_summary, lsoa_admin, population)
+}),
+tar_target(area_vehicle_summaries_json,{
+  export_area_bins(area_vehicle_summaries, "vehicle_summary")
+}),
+
+tar_target(area_pt_frequencies,{
+  agg_all_levels(agg_area_pt_frequency, pt_frequency, lsoa_admin, population)
+}),
+tar_target(area_pt_frequencies_json,{
+  export_area_bins(area_pt_frequencies, "pt_frequency")
+}),
+
+tar_target(area_access,{
+  agg_all_levels(agg_area_access, access_proximity, lsoa_admin, population)
+}),
+tar_target(area_access_json,{
+  export_area_bins(area_access, "access")
+}),
+
+tar_target(area_epc_dom,{
+  agg_all_levels(agg_area_epc, epc_dom_summary, lsoa_admin, population)
+}),
+tar_target(area_epc_dom_json,{
+  # dataframe = "rows" to match the per-LSOA epc_dom export (build_epc_dom_jsons)
+  export_area_bins(area_epc_dom, "epc_dom", dataframe = "rows")
+}),
+
+tar_target(area_gas_electric,{
+  ge = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors,
+                                             bills_gas_electric, bills_other_heating, other_heating_emissions)
+  agg_all_levels(agg_area_gas_electric, ge, lsoa_admin, population)
+}),
+tar_target(area_gas_electric_json,{
+  export_area_bins(area_gas_electric, "gas_electric")
+}),
+
+tar_target(area_prices,{
+  agg_all_levels(agg_area_prices, house_prices_lsoa, lsoa_admin, population)
+}),
+tar_target(area_prices_json,{
+  # rounddp = 0 to match the per-LSOA prices_json export (whole pounds)
+  export_area_bins(area_prices, "prices", rounddp = 0)
+}),
+
+tar_target(area_population,{
+  agg_all_levels(agg_area_population, population_summary, lsoa_admin, population)
+}),
+tar_target(area_population_json,{
+  # dataframe = "columns" (export_area_bins default) to match the per-LSOA
+  # population export (build_population_jsons)
+  export_area_bins(area_population, "population")
+}),
+
+# Per-area simplified boundary GeoJSONs for the report-page locator maps
+# (see R/boundary_jsons.R). Deploy each outputdata/json/bounds_{level}
+# directory to the blob store as bounds_{level}/v1.
+tar_target(boundary_jsons_lsoa,{
+  export_boundary_geojsons(bounds_lsoa_GB_generalised, "LSOA21CD", "outputdata/json/bounds_lsoa")
+}),
+tar_target(boundary_jsons_ward,{
+  export_boundary_geojsons(bounds_wards, "WD25CD", "outputdata/json/bounds_ward")
+}),
+tar_target(boundary_jsons_parish,{
+  export_boundary_geojsons(bounds_parish, "PAR23CD", "outputdata/json/bounds_parish")
+}),
+tar_target(boundary_jsons_constituency,{
+  export_boundary_geojsons(bounds_westminster, "PCON24CD", "outputdata/json/bounds_constituency")
+}),
+tar_target(boundary_jsons_la,{
+  export_boundary_geojsons(bounds_la, "LAD25CD", "outputdata/json/bounds_la")
+}),
+
+# Single-binary versions of the boundary GeoJSONs (see export_boundary_bin in
+# R/boundary_jsons.R): date-stamped data_bounds_{level}_*.bin + index in
+# outputdata/jsonbin, for range-request access. Kept alongside the per-file
+# targets above until the website has switched over.
+tar_target(boundary_bin_lsoa,{
+  export_boundary_bin(bounds_lsoa_GB_generalised, "LSOA21CD", name = "bounds_lsoa")
+}),
+tar_target(boundary_bin_ward,{
+  export_boundary_bin(bounds_wards, "WD25CD", name = "bounds_ward")
+}),
+tar_target(boundary_bin_parish,{
+  export_boundary_bin(bounds_parish, "PAR23CD", name = "bounds_parish")
+}),
+tar_target(boundary_bin_constituency,{
+  export_boundary_bin(bounds_westminster, "PCON24CD", name = "bounds_constituency")
+}),
+tar_target(boundary_bin_la,{
+  export_boundary_bin(bounds_la, "LAD25CD", name = "bounds_la")
 }),
 
 tar_target(voa_json_2010,{
-  sub = summarise_voa_post2010(dwellings_tax_band)
-  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 1, path = "outputdata/json/voa_2010", dataframe = "columns",
-                   reduce = FALSE)
+  # GB, not just E&W: the Scottish council tax register carries the same
+  # bands and is folded in on 2022 Data Zones - see summarise_voa_post2010().
+  sub = summarise_voa_post2010(dwellings_tax_band, dwellings_tax_band_scotland,
+                               lookup_dz_2011_22_pre)
+  export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 1, name = "voa_2010", dataframe = "columns")
 }),
 
 tar_target(voa_json_2020,{
   sub = summarise_voa_post2020(dwellings_type, dwellings_age)
-  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 1, path = "outputdata/json/voa_2020", dataframe = "columns",
-                   reduce = FALSE)
+  export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 1, name = "voa_2020", dataframe = "columns")
 }),
 
 
@@ -904,9 +1046,9 @@ tar_target(oac_emissions_all,{
 }),
 
 # PLEF Forecasts
-tar_target(PLEF,{
-  load_plef(path = file.path(parameters$path_data,"PLEF"))
-}),
+# tar_target(PLEF,{
+#   load_plef(path = file.path(parameters$path_data,"PLEF"))
+# }),
 
 # tar_target(PLEF_emissions,{
 #   forcast_emissions_plef(lsoa_emissions_all, PLEF)
@@ -932,6 +1074,10 @@ tar_target(os_10k_grid,{
 tar_target(buildings,{
   combine_os_osm_buildings(osm_buildings, os_buildings, inspire, inspire_scotland)
 }),
+
+# tar_target(buildings_v2,{
+#   combine_os_osm_buildings_v2(osm_buildings, os_buildings, inspire, inspire_scotland)
+# }),
 
 #TODO: Make reproducible
 tar_target(buildings_heights,{
@@ -963,9 +1109,18 @@ tar_target(buildings_lsoa_4326_med,{
 }),
 
 tar_target(buildings_lsoa_4326_high,{
-  # Long running target ~ 32 hours
+  # Long running target ~ 52 hours
   process_buildings_high(buildings_heights, bounds_lsoa_GB_full)
 }),
+
+# tar_target(buildings_lsoa_4326_high_v2,{
+#   process_buildings_high_v2(buildings_heights, bounds_lsoa_GB_full)
+# }),
+
+# tar_target(buildings_lsoa_4326_med_v2,{
+#   process_buildings_generic_v2(path = file.path(parameters$path_data,"os_zoomstack/OS_Open_Zoomstack/OS_Open_Zoomstack.gpkg"),
+#                                bounds_lsoa_GB_full, scale = "med")
+# }),
 
 # Scenarios
 
@@ -973,7 +1128,10 @@ tar_target(buildings_lsoa_4326_high,{
 
 # Build GeoJSON
 tar_target(lsoa_map_data,{
-  select_map_outputs(lsoa_emissions_all, area_classifications_11_21, year = 2019)
+  # The latest year in lsoa_emissions_all (max_year above). Was 2019, chosen as
+  # the last pre-COVID year, which left the map two years behind the report
+  # cards - those read the last year in the data and label it.
+  select_map_outputs(lsoa_emissions_all, area_classifications_11_21, year = 2022)
 }),
 
 tar_target(geojson_wards,{
@@ -1010,11 +1168,11 @@ tar_target(synth_pop_seed_scotland,{
 }),
 
 tar_target(census21_synth_households,{
-  sythetic_census(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
+  sythetic_census_v2(path = file.path(parameters$path_data,"population"), synth_pop_seed) # Long running ~ 3.5 days
 }),
 
 tar_target(scot_synth_households,{
-  sythetic_census_scot(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland) # Long running ~ 3.5 days
+  sythetic_census_scot_v2(path_data = file.path(parameters$path_data,"population_scotland"), synth_pop_seed_scotland) # Long running ~ 3.5 days
 }),
 
 tar_target(lcfs,{
@@ -1159,19 +1317,19 @@ tar_target(pmtiles_uprn_unknown,{
 # }),
 
 tar_target(build_historical_emissions_jsons,{
-  export_zone_json(lsoa_emissions_all, path = "outputdata/json/historical_emission", dataframe = "columns",
-                   zip = FALSE, rounddp = 0)
+  export_zone_bin(lsoa_emissions_all, name = "historical_emission", dataframe = "columns",
+                  rounddp = 0)
 }),
 
 tar_target(build_population_jsons,{
-  export_zone_json(population_summary, path = "outputdata/json/population", dataframe = "columns")
+  export_zone_bin(population_summary, name = "population", dataframe = "columns")
 }),
 
 tar_target(build_access_jsons,{
   sub = access_proximity[,c("LSOA21CD","categoryname","classname","access_15",
                             "proximity_15","access_30","proximity_30","access_45",
                             "proximity_45","access_60","proximity_60")]
-  export_zone_json(sub, idcol = "LSOA21CD", rounddp = 2, path = "outputdata/json/access", dataframe = "columns")
+  export_zone_bin(sub, idcol = "LSOA21CD", rounddp = 2, name = "access", dataframe = "columns")
 }),
 
 tar_target(build_postcode_jsons,{
@@ -1181,12 +1339,23 @@ tar_target(build_postcode_jsons,{
                                               "elec_meankwh_std","elec_meankwh_eco7","gas_mediankwh","elec_mediankwh_std",
                                               "elec_mediankwh_all","elec_mediankwh_eco7","gas_totalkgco2e","gas_mediankgco2e",
                                               "gas_meankgco2e","elec_totalkgco2e_all","elec_meankgco2e_all","elec_mediankgco2e_all")]
-  export_zone_json(x, idcol = "postcode", zip = FALSE, parallel = TRUE,
-                   path = "outputdata/json/postcode", rounddp = 0, dataframe = "columns")
+  # ~1.5M postcodes: use a lower brotli quality so compression time stays sane
+  paths = export_zone_bin(x, idcol = "postcode", name = "postcode",
+                          rounddp = 0, dataframe = "columns", quality = 5)
+  # Return the record byte ranges (postcode/bin_offset/bin_clen) so geojson_postcode
+  # can bake them into postcodes.pmtiles (see there). paths[2] is the index JSON.
+  read_bin_index(paths[2])
 }),
 
 tar_target(build_overview_jsons,{
   make_lsoa_overview_json(lsoa_admin, area_classifications_11_21, lsoa_warnings)
+}),
+
+# Combined LSOA/Data Zone centroid lookup used by the website to pan/zoom the
+# map to a deep-linked (?report=) or postcode-resolved report target.
+# Output: outputdata/json/lsoa_centroids.json -> deploy to site data/ folder.
+tar_target(build_lsoa_centroids_json,{
+  make_lsoa_centroids_json(centroids_lsoa21, centroids_dz22)
 }),
 
 

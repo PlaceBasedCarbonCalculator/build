@@ -1,10 +1,18 @@
-#' Make Lsoa Warnings
+#' Build data-quality warning codes for each zone
 #'
-#' @description Build lsoa warnings and return the generated output.
-#' @param lookup_lsoa_2011_21 LSOA lookup table spanning 2011 and 2021 boundaries.
-#' @param lookup_dz_2011_22 DZ-to-DZ lookup table across 2011 and 2022 zones.
-#' @param population){ Input object or parameter named `population){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Flags zones whose historical data should be interpreted with
+#'   caution, for display on the website. Warning codes: 1 = Scottish Data
+#'   Zone (2011 data estimated onto 2022 zones); 2/3/4 = 2021 LSOA was
+#'   fragmented (X) / merged (M) / split (S) relative to 2011; 5 = zone has
+#'   zero population in some year. Bespoke warnings are appended from
+#'   `data/lsoa_warnings.csv`. Used by the `lsoa_warnings` target, which feeds
+#'   `make_lsoa_overview_json()`.
+#' @param lookup_lsoa_2011_21 ONS 2011-to-2021 LSOA lookup with `CHGIND`.
+#' @param lookup_dz_2011_22 Simplified Data Zone 2011-to-2022 lookup (all its
+#'   zones get warning code 1).
+#' @param population GB population table with `LSOA21CD` and `all_ages`.
+#' @return A data frame with `LSOA21CD` and `warningcode`, one row per
+#'   zone/warning, sorted by zone code.
 #' @keywords internal
 make_lsoa_warnings = function(lookup_lsoa_2011_21,lookup_dz_2011_22, population){
 

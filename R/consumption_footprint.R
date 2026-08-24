@@ -1,9 +1,10 @@
-#' Download Consumption Footprint
+#' Download the DEFRA UK consumption emissions spreadsheet
 #'
-#' @description Download the consumption footprint resource and return the local file path.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return The local path or file name of the downloaded resource.
+#' @description Downloads the DEFRA UK carbon footprint results ODS into
+#'   `path`; skipped if any .ods already exists there. This is the
+#'   `dl_consumption` target.
+#' @param path Folder to store the download; created if missing.
+#' @return The path of the ODS file.
 #' @keywords internal
 download_consumption_footprint <- function(path){
   if(!dir.exists(path)){
@@ -27,13 +28,18 @@ download_consumption_footprint <- function(path){
 
 }
 
-#' Load Consumption Footprint
+#' Load DEFRA consumption emissions by COICOP product group
 #'
-#' @description Load consumption footprint data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @param sheet Input object or parameter named `sheet`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the summary-by-product sheet of a DEFRA carbon
+#'   footprint ODS (UK or England edition), keeps the first data block,
+#'   pivots long and attaches product descriptions plus the PBCC grouping
+#'   (nutrition, consumables, gas_electric, mobility, recreation, services,
+#'   other_shelter). Used by the `consumption_uk` and `consumption_england`
+#'   targets.
+#' @param path Path to the DEFRA results ODS.
+#' @param sheet Sheet name (differs between UK and England editions).
+#' @return A long data frame with `year`, `name` (COICOP code), `value`
+#'   (ktCO2e), `desc` and `group`.
 #' @keywords internal
 load_consumption_footprint <- function(path, sheet = "Summary_product_90-22"){
   cons = readODS::read_ods(path, sheet = sheet)
@@ -134,12 +140,13 @@ load_consumption_footprint <- function(path, sheet = "Summary_product_90-22"){
 }
 
 
-#' Load Consumption Income
+#' Load the income-vs-energy-footprint reference table
 #'
-#' @description Load consumption income data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads `income_energy_fooprint.csv`, a small reference table
+#'   relating income levels to consumption footprints. Used by the
+#'   `consumption_income` target.
+#' @param path Folder containing the CSV.
+#' @return The CSV contents as a data frame.
 #' @keywords internal
 load_consumption_income = function(path){
   income = read.csv(file.path(path,"income_energy_fooprint.csv"))
@@ -147,12 +154,14 @@ load_consumption_income = function(path){
 }
 
 
-#' Load La Consumption Accounts
+#' Load the local/devolved-authority consumption accounts workbook
 #'
-#' @description Load la consumption accounts data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the devolved-nation rows (UK, England, Scotland,
+#'   Wales, Northern Ireland) of each annual sheet of the local authority
+#'   consumption accounts workbook, 2001-2022. Used by the `consumption_la`
+#'   target to split the non-England footprint between nations.
+#' @param path Path to the `laca_data-*.xlsx` workbook.
+#' @return A data frame per nation-year of total and category emissions.
 #' @keywords internal
 load_la_consumption_accounts = function(path = "../inputdata/consumption/laca_data-c524b8f66272a734d87238602a7cef41.xlsx"){
 
@@ -189,13 +198,20 @@ load_la_consumption_accounts = function(path = "../inputdata/consumption/laca_da
 
 }
 
-#' Make Consumption Scot Wales
+#' Estimate national consumption footprints for Scotland, Wales and NI
 #'
-#' @description Build consumption scot wales and return the generated output.
-#' @param consumption_uk Input object or parameter named `consumption_uk`.
-#' @param consumption_england Input object or parameter named `consumption_england`.
-#' @param consumption_la){ Input object or parameter named `consumption_la){`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description DEFRA publish product-level footprints for the UK and
+#'   England only. This subtracts England from the UK and splits the
+#'   remainder between Scotland, Wales and NI in proportion to their total
+#'   consumption emissions from the LA consumption accounts (product
+#'   categories don't align, so a single overall share per year is used).
+#'   Used by the `consumption_nations` target, an input to
+#'   `calculate_consumption_lsoa()`.
+#' @param consumption_uk UK footprint by product (`consumption_uk` target).
+#' @param consumption_england England footprint (`consumption_england`).
+#' @param consumption_la Devolved-nation accounts (`consumption_la` target).
+#' @return A data frame per year and product with `value_uk`,
+#'   `value_england`, `value_scotland`, `value_wales`, `value_ni`.
 #' @keywords internal
 make_consumption_scot_wales = function(consumption_uk, consumption_england, consumption_la){
 
@@ -235,41 +251,17 @@ make_consumption_scot_wales = function(consumption_uk, consumption_england, cons
 }
 
 
-# Convert incomes into ventiles
-#' Income Bands
+
+
+
+#' Load DEFRA GHG-per-pound multipliers by COICOP product
 #'
-#' @description Perform processing for income bands.
-#' @param dat){ Input object or parameter named `dat){`.
-#' @return A data frame produced by the function.
-#' @keywords internal
-income_bands <- function(dat){
-
-  pt1 <- quantile(dat, probs = seq(0, 1, by = 0.05), type = 7, na.rm = TRUE)
-  pt2 <- unique(as.data.frame(pt1), fromLast = TRUE)
-  pt3 <- rownames(pt2)
-  pt4 <- as.integer(strsplit(pt3, "%"))
-
-  if(0 %in% pt2$pt1){
-    cts <- c(-0.000001, pt2$pt1)
-  } else {
-    cts <- c(0, pt2$pt1)
-  }
-  datp <- pt4[as.integer(cut(dat, cts, labels = 1:length(pt3)))]
-  datp <- datp/5 - 1
-  datp[datp < 0]= 0
-
-  datp
-
-}
-
-
-
-#' Load Consumption Multipliers
-#'
-#' @description Load consumption multipliers data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the `ghg_coicop_mult` sheet of the DEFRA results ODS:
+#'   kgCO2e per pound spent, per product, per year. Used by the
+#'   `consumption_multipliers_uk` target to convert LCFS spending into
+#'   emissions.
+#' @param path Path to `Defra22_results_UK.ods`.
+#' @return A long data frame with `product`, `year` and `ghg_pound`.
 #' @keywords internal
 load_consumption_multipliers = function(path = "../inputdata/consumption/Defra22_results_UK.ods"){
     cons = readODS::read_ods(path, sheet = "ghg_coicop_mult")

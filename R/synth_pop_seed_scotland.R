@@ -3,11 +3,14 @@
 # multivariate without being disclosive. Nationally representative seed is then
 # used as input to local synthetic populations which discourages the generation of
 # usual household combinations
-#' Build Synth Pop Seed Scotland
+#' Build the national Scottish seed arrays for the synthetic population
 #'
-#' @description Build synth pop seed scotland and return the generated output.
-#' @param path_data Input object or parameter named `path_data`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Reads the Scotland-level multi-way Census 2022 cross-tabs
+#'   and combines them into the national seed arrays used by every Data
+#'   Zone's IPF in `scot_syth_combine()`, discouraging implausible
+#'   household combinations. This is the `synth_pop_seed_scotland` target.
+#' @param path_data Folder of Scotland Census 2022 national extracts.
+#' @return A list of national seed arrays keyed by dimension combination.
 #' @keywords internal
 build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_data,"population_scotland")){
 
@@ -130,8 +133,10 @@ build_synth_pop_seed_scotland = function(path_data = file.path(parameters$path_d
 
 #' Read Hhsize5 Acctype7 Householdcomp10 Tenure5 Scot
 #'
-#' @description Read hhSize5 AccType7 householdComp10 Tenure5 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -186,11 +191,13 @@ read_hhSize5_AccType7_householdComp10_Tenure5_scot = function(path = "../inputda
 
 
 
-#' Rep Lables
+#' Fill down merged-cell labels in a census extract column
 #'
-#' @description Perform processing for rep lables.
-#' @param x){ Input object or parameter named `x){`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description The Scotland census extracts leave repeated category labels
+#'   blank (merged cells); this fills each NA with the last non-NA value
+#'   above it.
+#' @param x Character vector with NA for repeated labels.
+#' @return `x` with labels filled down.
 #' @keywords internal
 rep_lables = function(x){
   for(i in seq_len(length(x))){
@@ -204,8 +211,10 @@ rep_lables = function(x){
 
 #' Read Hhsize5 Acctype7 Householdcomp10 Carvan3 Scot
 #'
-#' @description Read hhSize5 AccType7 householdComp10 CarVan3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -259,8 +268,10 @@ read_hhSize5_AccType7_householdComp10_CarVan3_scot = function(path = "../inputda
 
 #' Read Householdcomp10 Householdcomp4 Acctype7 Acctype3 Scot
 #'
-#' @description Read householdComp10 householdComp4 AccType7 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -312,8 +323,10 @@ read_householdComp10_householdComp4_AccType7_AccType3_scot = function(path = "..
 
 #' Read Householdcomp10 Carvan5 Tenure5 Hhsize5 Scot
 #'
-#' @description Read householdComp10 CarVan5 Tenure5 hhSize5 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -374,8 +387,10 @@ read_householdComp10_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputda
 
 #' Read Acctyp7 Carvan5 Tenure5 Hhsize5 Scot
 #'
-#' @description Read AccTyp7 CarVan5 Tenure5 hhSize5 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -441,8 +456,10 @@ read_AccTyp7_CarVan5_Tenure5_hhSize5_scot <- function(path = "../inputdata/popul
 
 #' Read Householdcomp10 Hhsize5 Carvan3 Tenure3 Acctype3 Scot
 #'
-#' @description Read householdComp10 hhSize5 CarVan3 Tenure3 AccType3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -533,8 +550,10 @@ read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot <- function(path = ".
 
 #' Read Acctype7 Carvan5 Carvan3 Tenure5 Tenure3 Scot
 #'
-#' @description Read AccType7 CarVan5 CarVan3 Tenure5 Tenure3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal
@@ -621,8 +640,10 @@ read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot <- function(path = "../inputd
 
 #' Read Acctype7 Acctyp3 Scot
 #'
-#' @description Read AccType7 AccTyp3 scot from disk into an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
+#' @description Reads the census cross-tabulation extract at `path` - household
+#'   counts by the categories named in the function name - drops 'Does not
+#'   apply' rows and shortens the category labels. One of the marginal/seed
+#'   tables for the synthetic population IPF (see sythetic_census functions).
 #' @param path File or directory path.
 #' @return A data frame containing the loaded dataset.
 #' @keywords internal

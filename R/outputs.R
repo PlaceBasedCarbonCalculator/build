@@ -1,12 +1,22 @@
-#' Select Map Outputs
+#' Select the emissions grade columns shown on the main map
 #'
-#' @description Perform processing for select map outputs.
-#' @param lsoa_emissions_all Input object or parameter named `lsoa_emissions_all`.
-#' @param area_classifications_11_21 Input object or parameter named `area_classifications_11_21`.
-#' @param year Year value used for filtering or loading.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Builds the attribute table for the main PBCC map tiles
+#'   (`lsoa_map_data` target, consumed by `pmtiles_pbcc`). Takes the per-LSOA
+#'   emissions grades for `year`, computes the percentage reduction in total
+#'   per-capita emissions between 2010 and `year` (graded via `value2grade()`),
+#'   and joins on the LSOA area classification code.
+#' @param lsoa_emissions_all Output of `combine_lsoa_emissions()`: per-LSOA,
+#'   per-year emissions with grade columns.
+#' @param area_classifications_11_21 Output of
+#'   `match_2011_classifications_2021()`, with `LSOA21CD` and `lsoa_class_code`.
+#' @param year The year of emissions data to map (2019 in `_targets.R`).
+#' @return A data frame with one row per LSOA: grade columns for each emissions
+#'   domain, a `reduction_grade`, and the `lsoa_class_code`.
 #' @keywords internal
 select_map_outputs = function(lsoa_emissions_all, area_classifications_11_21, year = 2020) {
+  if(year == 2010){
+    stop("year must differ from the 2010 baseline used for the reduction grade")
+  }
   lsoa_savings = lsoa_emissions_all[lsoa_emissions_all$year %in% c(2010,year),]
   lsoa_savings = lsoa_savings[,c("LSOA21CD","total_kgco2e_percap","year")]
   lsoa_savings = lsoa_savings |>
@@ -27,12 +37,14 @@ select_map_outputs = function(lsoa_emissions_all, area_classifications_11_21, ye
 }
 
 
-#' Join For Geojson
+#' Join map attribute data onto LSOA boundaries
 #'
-#' @description Combine for geojson inputs into a single consolidated result.
-#' @param lsoa_map_data Input object or parameter named `lsoa_map_data`.
-#' @param bounds) Input object or parameter named `bounds)`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Left-joins per-LSOA map data (e.g. from
+#'   `select_map_outputs()`) onto an sf boundary layer by `LSOA21CD`, ready for
+#'   GeoJSON/PMTiles export.
+#' @param lsoa_map_data Data frame with an `LSOA21CD` column.
+#' @param bounds sf data frame of LSOA boundaries with an `LSOA21CD` column.
+#' @return The `bounds` sf data frame with the attribute columns joined on.
 #' @keywords internal
 join_for_geojson = function(lsoa_map_data, bounds) {
   bounds = dplyr::left_join(bounds, lsoa_map_data, by = "LSOA21CD")

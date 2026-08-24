@@ -1,9 +1,10 @@
-#' Load Cenus11 Households
+#' Load 2011 census household counts (QS402UK) for LSOAs
 #'
-#' @description Load cenus11 households data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File or directory path.
-#' @return A data frame containing the loaded dataset.
+#' @description Reads total households per 2011 LSOA from the census 2011
+#'   accommodation-type table. Used by the `households_cenus11` target, one of
+#'   the two census anchor points for the household extrapolation.
+#' @param path Path to the QS402UK CSV.
+#' @return A data frame with `LSOA11CD`, `households_total` and `year` (2011).
 #' @keywords internal
 load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS402UK_LSOA_Households_AcommodationType.csv"){
   cenus11 = read.csv(path, skip = 7)
@@ -20,17 +21,28 @@ load_cenus11_households = function(path = "../inputdata/population/cenus2011_QS4
 
 #TODO: Check odd LSOA results E01033274 E01024150 E01024301 E01016129 E01024504 W01001971
 
-#' Extrapolate Population Households
+#' Build the E&W population and household series on 2021 LSOAs
 #'
-#' @description Process population data and return a summary table.
-#' @param households_cenus11 Input object or parameter named `households_cenus11`.
-#' @param households_cenus21 Input object or parameter named `households_cenus21`.
-#' @param lookup_lsoa_2011_21 LSOA lookup table spanning 2011 and 2021 boundaries.
-#' @param dwellings_tax_band Input object or parameter named `dwellings_tax_band`.
-#' @param population_2002_2020 Input object or parameter named `population_2002_2020`.
-#' @param population_2021 Input object or parameter named `population_2021`.
-#' @param population_2022_24 Input object or parameter named `population_2022_24`.
-#' @return The function result, typically a data frame or list used in the pipeline.
+#' @description Produces annual population (by age band) and estimated
+#'   household counts per 2021 LSOA for 2002-2024, handling 2011-to-2021
+#'   boundary changes. Household counts are only observed at the 2011 and 2021
+#'   censuses, so intermediate years are estimated in
+#'   `extrapolate_households()` from a linear trend in adults-per-household
+#'   applied to the annual adult population, with VOA council-tax dwelling
+#'   counts (`all_properties`) carried alongside. Unchanged (U) and
+#'   near-unchanged (X) LSOAs pass straight through; merged (M) 2011 zones are
+#'   summed; split (S) 2011 zones are apportioned using dwelling counts and
+#'   the 2021 census. Used by the `population_households_historical` target.
+#' @param households_cenus11 2011 census households (`load_cenus11_households()`).
+#' @param households_cenus21 2021 census households (`load_census_2021_households()`).
+#' @param lookup_lsoa_2011_21 ONS 2011-to-2021 LSOA lookup with `CHGIND`.
+#' @param dwellings_tax_band VOA CTSOP1 dwelling counts per LSOA per year.
+#' @param population_2002_2020 Mid-year estimates on 2011 LSOAs.
+#' @param population_2021 2021 census population on 2021 LSOAs.
+#' @param population_2022_24 Mid-2022/23/24 estimates on 2021 LSOAs.
+#' @return A data frame with one row per 2021 LSOA per year: age-band
+#'   populations, `adults`, `adults_per_household`, `households_est` and
+#'   `all_properties`.
 #' @keywords internal
 extrapolate_population_households = function(households_cenus11,
                                              households_cenus21,
@@ -220,15 +232,24 @@ extrapolate_population_households = function(households_cenus11,
 }
 
 
-#' Extrapolate Households
+#' Estimate annual household counts for one LSOA (or one split group)
 #'
-#' @description Perform processing for extrapolate households.
-#' @param p Input object or parameter named `p`.
-#' @param d Input object or parameter named `d`.
-#' @param hh21 Input object or parameter named `hh21`.
-#' @param hh11 Input object or parameter named `hh11`.
-#' @param pn Input object or parameter named `pn`.
-#' @return A data frame produced by the function.
+#' @description Worker for `extrapolate_population_households()`. Fits a
+#'   linear model of adults-per-household through the 2011 and 2021 census
+#'   points (floored at 1 adult/household) and divides the annual adult
+#'   population by the predicted ratio to estimate households each year. When
+#'   `pn` is supplied the function instead handles a 2011 LSOA that was split:
+#'   pre-2021 populations are shared between the new 2021 zones in proportion
+#'   to dwellings x adults-per-household, then the same trend approach is
+#'   applied per new zone.
+#' @param p Population time series: one 2021 LSOA (U/M case) or the parent
+#'   2011 LSOA (split case).
+#' @param d VOA dwelling counts for the zone(s).
+#' @param hh21 2021 census household count row(s).
+#' @param hh11 2011 census household count row(s); multiple rows for merges.
+#' @param pn For the split case only: 2021+ populations of the new zones.
+#' @return A data frame per zone-year with age bands, `adults`,
+#'   `adults_per_household`, `households_est` and `all_properties`.
 #' @keywords internal
 extrapolate_households = function(p, d, hh21, hh11, pn = NULL){
   # Initial check

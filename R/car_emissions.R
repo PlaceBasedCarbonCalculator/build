@@ -1,9 +1,12 @@
-#' Load Car Emissions
+#' Load historical average car CO2 intensity per 2011 LSOA
 #'
-#' @description Load car emissions data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path){ Input object or parameter named `path){`.
-#' @return A data frame containing the loaded dataset.
+#' @description Unzips and reads the historical car emissions dataset (secure
+#'   data, E&W 2011 LSOAs, 2002-2018) and summarises per zone-year: total
+#'   cars, fleet-average gCO2/km and average car age (weighted by car
+#'   counts). Used by the `car_emissions_11` target.
+#' @param path Path to `Historical_Car_Emissions_LSOA.zip`.
+#' @return A data frame with `year`, `LSOA`, `total_cars`, `AvgCO2_cars`
+#'   (g/km) and `AvgAge_cars`.
 #' @keywords internal
 load_car_emissions <- function(path){
   dir.create(file.path(tempdir(),"car_emissions"))
@@ -29,12 +32,17 @@ load_car_emissions <- function(path){
   emissions_gp
 }
 
-#' Car Emissions To 21
+#' Convert historical car fleet data to 2021 LSOA boundaries
 #'
-#' @description Compute a carbon emission or footprint summary.
-#' @param car_emissions_11 Input object or parameter named `car_emissions_11`.
-#' @param lsoa_11_21_tools) Input object or parameter named `lsoa_11_21_tools)`.
-#' @return A data frame produced by the function.
+#' @description Standard 2011-to-2021 conversion for the car fleet table:
+#'   unchanged zones pass through, merged zones get count-weighted means of
+#'   CO2/age and summed cars, split zones apportion car counts by household
+#'   ratio (average CO2/age kept unchanged as there is no obvious way to
+#'   split them). Applied within the `car_emissions_11` target.
+#' @param car_emissions_11 Output of `load_car_emissions()`.
+#' @param lsoa_11_21_tools Conversion lookups (`lsoa_11_21_tools` target).
+#' @return A data frame per 2021 LSOA-year with `total_cars`, `AvgCO2_cars`
+#'   and `AvgAge_cars`.
 #' @keywords internal
 car_emissions_to_21 = function(car_emissions_11, lsoa_11_21_tools) {
 
@@ -87,13 +95,22 @@ car_emissions_to_21 = function(car_emissions_11, lsoa_11_21_tools) {
 
 }
 
-#' Car Emissions Post2018
+#' Extend fleet-average CO2 intensity beyond 2018 using ULEV uptake
 #'
-#' @description Compute a carbon emission or footprint summary.
-#' @param car_emissions_11 Input object or parameter named `car_emissions_11`.
-#' @param vehicle_registrations Input object or parameter named `vehicle_registrations`.
-#' @param ulev_registrations) Input object or parameter named `ulev_registrations)`.
-#' @return A data frame produced by the function.
+#' @description The historical car emissions data ends in 2018, so later
+#'   years (and Scotland, which the historical data never covered) are
+#'   estimated from DfT registrations: each zone's fleet is split into
+#'   zero-tailpipe (BEV/fuel cell), <=75 g/km ULEVs and conventional
+#'   vehicles, the 2018 non-ULEV average is back-calculated, and the shares
+#'   are recombined per year. Missing zones fall back to national medians.
+#'   Used by the `car_emissions_perkm` target.
+#' @param car_emissions_11 Fleet data on 2021 zones (`car_emissions_11`
+#'   target).
+#' @param vehicle_registrations DfT registrations (`vehicle_registrations`).
+#' @param ulev_registrations DfT ULEV registrations (`ulev_registrations`).
+#' @return A data frame per zone-year with `all_vehicles`, `AvgCO2` (g/km)
+#'   and `AvgAge` (NA for estimated years), combining observed E&W 2002-2018
+#'   with estimates for 2019+ and Scotland.
 #' @keywords internal
 car_emissions_post2018 = function(car_emissions_11,
                                   vehicle_registrations,
@@ -214,14 +231,19 @@ car_emissions_post2018 = function(car_emissions_11,
   final
 }
 
-#' Calculate Car Emissions
+#' Calculate total and per-capita car/van driving emissions per zone
 #'
-#' @description Calculate car emissions and return the computed result.
-#' @param car_km_lsoa_21 Input object or parameter named `car_km_lsoa_21`.
-#' @param car_emissions_perkm Input object or parameter named `car_emissions_perkm`.
-#' @param population Population dataset.
-#' @param years Year values used for filtering or loading.
-#' @return A data frame or numeric summary containing the computed results.
+#' @description Multiplies estimated annual km driven (car, van and
+#'   company/bike) by the zone's fleet-average CO2 intensity, and divides by
+#'   population for per-capita rates. Used by the `car_emissions` target
+#'   (2010-2023 in `_targets.R`), which feeds `combine_lsoa_emissions()`.
+#' @param car_km_lsoa_21 Estimated km per zone-year
+#'   (`car_km_lsoa_21` target from `extraplote_car_km_trends2()`).
+#' @param car_emissions_perkm Fleet CO2 intensity (`car_emissions_perkm`).
+#' @param population GB population (`population` target).
+#' @param years Years to include.
+#' @return A data frame per zone-year with km, kgCO2e totals and per-capita
+#'   emissions for cars, vans and company vehicles/bikes.
 #' @keywords internal
 calculate_car_emissions = function(car_km_lsoa_21, car_emissions_perkm, population, years = 2010:2021){
 

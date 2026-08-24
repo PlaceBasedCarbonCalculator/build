@@ -1,13 +1,18 @@
 
-#' Combine OS and OSM Buildings
+#' Build the national building footprint layer from OSM, OS and INSPIRE
 #'
-#' @description Combine OS and OSM buildings inputs into a single consolidated result.
-#' @details This function is used to prepare intermediate analysis tables for later pipeline targets.
-#' @param osm_buildings Input object or parameter named `osm_buildings`.
-#' @param os_buildings Input object or parameter named `os_buildings`.
-#' @param inspire Input object or parameter named `inspire`.
-#' @param inspire_scotland Input object or parameter named `inspire_scotland`.
-#' @return A combined data frame or table merging the provided inputs.
+#' @description Combines OSM building footprints with OS Zoomstack buildings
+#'   (only where they don't overlap OSM), then splits the footprints along
+#'   INSPIRE cadastral parcel boundaries so terraces become individual
+#'   properties. Slivers (area < 1 m2 or perimeter/area > 10) and duplicate
+#'   geometries are removed. Used by the `buildings` target, input to
+#'   `add_building_heights()`. Memory-hungry (~35M polygons).
+#' @param osm_buildings OSM footprints (`osm_buildings` target).
+#' @param os_buildings OS Zoomstack local buildings (`os_buildings` target).
+#' @param inspire E&W INSPIRE parcels (`inspire` target).
+#' @param inspire_scotland Scottish INSPIRE parcels (`inspire_scotland`).
+#' @return An sf POLYGON data frame with `osm_id`, `building`,
+#'   `building_part` and `INSPIREID`.
 #' @keywords internal
 combine_os_osm_buildings = function(osm_buildings, os_buildings, inspire, inspire_scotland){
 
@@ -79,13 +84,19 @@ combine_os_osm_buildings = function(osm_buildings, os_buildings, inspire, inspir
 
 }
 
-#' Add Building Heights
+#' Add LiDAR-derived heights to building footprints
 #'
-#' @description Add building heights to an existing dataset.
-#' @param buildings Input object or parameter named `buildings`.
-#' @param os_10k_grid Input object or parameter named `os_10k_grid`.
-#' @param path_raster Path to the raster file or folder.
-#' @return A data frame produced by the function.
+#' @description Assigns each building to a 10 km OS grid tile (by centroid)
+#'   and, in parallel, extracts min/max height and volume from the
+#'   DSM-minus-DTM difference rasters via `building_height_internal()`.
+#'   Buildings outside the available tiles (e.g. Northern Ireland) are
+#'   dropped. Used by the `buildings_heights` target; note the raster path
+#'   defaults to a local drive so this target is not fully reproducible.
+#' @param buildings Building footprints (`buildings` target).
+#' @param os_10k_grid OS 10 km grid squares (`os_10k_grid` target).
+#' @param path_raster Folder of `<tile>.tiff` height-difference rasters.
+#' @return An sf data frame of buildings with `height_max`, `height_min`
+#'   and `volume`.
 #' @keywords internal
 add_building_heights = function(buildings, os_10k_grid, path_raster = "F:/DTM_DSM/GB_10k/Difference/"){
 
@@ -124,12 +135,13 @@ add_building_heights = function(buildings, os_10k_grid, path_raster = "F:/DTM_DS
 
 }
 
-#' Load Os 10k Grid
+#' Load the OS British National Grid 10 km squares
 #'
-#' @description Load os 10k grid data from the source path and return it as an R object.
-#' @details This function is used as part of the pipeline input ingestion stage.
-#' @param path File path to OS data
-#' @return A data frame containing the loaded dataset.
+#' @description Reads the 10 km grid layer from the OS BNG grids GeoPackage.
+#'   Used by the `os_10k_grid` target to tile the building-heights raster
+#'   extraction.
+#' @param path Path to `os_bng_grids.gpkg`.
+#' @return An sf data frame of 10 km grid squares with `tile_name`.
 #' @keywords internal
 load_os_10k_grid = function(path){
   sf::read_sf(path, layer = "10km_grid")
@@ -137,12 +149,14 @@ load_os_10k_grid = function(path){
 
 
 
-#' Building Height Internal
+#' Extract heights for one grid tile's buildings
 #'
-#' @description Perform processing for building height internal.
-#' @param buildings_sub Input object or parameter named `buildings_sub`.
-#' @param path_raster Input object or parameter named `path_raster`.
-#' @return A generated data object, usually a data frame or spatial feature collection.
+#' @description Worker for `add_building_heights()`: loads the tile's
+#'   height-difference raster and uses `exactextractr` to compute each
+#'   building's min/max height and area-weighted volume.
+#' @param buildings_sub Buildings whose centroids fall in one 10 km tile.
+#' @param path_raster Folder of `<tile>.tiff` rasters.
+#' @return `buildings_sub` with `height_max`, `height_min`, `volume`.
 #' @keywords internal
 building_height_internal = function(buildings_sub, path_raster){
 
