@@ -1,7 +1,7 @@
-#' Load the ONS walking isochrones for Output Areas
+#' Load the ONS walking and PT isochrones for Output Areas
 #'
 #' @description Unzips and reads each ONS isochrone shapefile (15/30/45/60
-#'   minute walking areas around OA centroids; `iso_cutoff` in seconds) and
+#'   minute walking/PT areas around OA centroids; `iso_cutoff` in seconds) and
 #'   binds them into one layer. Files keyed on 2011 OAs are relabelled to the
 #'   common `OA21CD` column so binding is order-independent; their codes
 #'   simply won't match the 2021 lookups downstream. Used by the
