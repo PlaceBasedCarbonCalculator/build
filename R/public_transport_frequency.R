@@ -294,7 +294,7 @@ select_transport_vars = function(pt_frequency, vehicle_summary, year = 2024, yea
   # Round
   for(i in 1:ncol(join)){
     if(inherits(join[[i]], "numeric")){
-      join[[col]] = round(join[[col]], rounddp)
+      join[[i]] = round(join[[i]], rounddp)
     }
   }
 
