@@ -52,11 +52,18 @@ select_retofit_vars = function(epc_dom_summary,
   bills_other_heating$year = NULL
 
   sub = epc_dom_summary[,c("LSOA21CD","epc_total","epc_score_avg","floor_area_avg")]
+  # Every modal_* set below lists the variable's full set of categories,
+  # residual included. Omitting the residual doesn't hide it, it just relabels
+  # the runner-up as "most common" in the zones where the residual wins:
+  # measured against epc_dom_summary_20260825, that was 2,408 zones for
+  # modal_floord, 654 for modal_age, 294 for modal_mainfuel, 70 for
+  # modal_mainheat and 4 for modal_type.
   sub$modal_age = modal(epc_dom_summary[,c("age_pre1900",
                                            "age_19001929","age_19301949","age_19501966",
                                            "age_19671975","age_19761982","age_19831990",
                                            "age_19911995","age_19962002","age_20032006",
-                                           "age_20072011","age_20122021","age_post2022")])
+                                           "age_20072011","age_20122021","age_post2022",
+                                           "age_unknown")])
   sub$modal_wall = modal(epc_dom_summary[,c("wall_verygood","wall_good",
                                             "wall_average","wall_poor","wall_verypoor","wall_other")])
   sub$modal_roof = modal(epc_dom_summary[,c("roof_verygood","roof_good",
@@ -69,16 +76,18 @@ select_retofit_vars = function(epc_dom_summary,
 
 
   sub$modal_mainheat = modal(epc_dom_summary[,c("mainheatdesc_gasboiler","mainheatdesc_oilboiler","mainheatdesc_storageheater","mainheatdesc_portableheater",
-                                            "mainheatdesc_roomheater","mainheatdesc_heatpump","mainheatdesc_community")])
+                                            "mainheatdesc_roomheater","mainheatdesc_heatpump","mainheatdesc_community",
+                                            "mainheatdesc_other")])
   sub$modal_mainfuel = modal(epc_dom_summary[,c("mainfuel_mainsgas",
                                                 "mainfuel_electric","mainfuel_oil","mainfuel_coal","mainfuel_lpg",
-                                                "mainfuel_biomass","mainfuel_dualfuel")])
+                                                "mainfuel_biomass","mainfuel_dualfuel","mainfuel_other")])
   sub$modal_floord = modal(epc_dom_summary[,c("floord_soliduninsulated","floord_solidinsulated","floord_solidlimitedinsulated",
-                                              "floord_suspendeduninsulated","floord_suspendedinsualted","floord_suspendedlimitedinsulated","floord_below")])
+                                              "floord_suspendeduninsulated","floord_suspendedinsualted","floord_suspendedlimitedinsulated",
+                                              "floord_external","floord_below","floord_other")])
 
   type = epc_dom_summary[,c("type_house_semi","type_house_midterrace","type_house_endterrace","type_house_detached","type_flat",
                             "type_bungalow_semi","type_bungalow_midterrace","type_bungalow_endterrace","type_bungalow_detached",
-                            "type_maisonette","type_parkhome")]
+                            "type_maisonette","type_parkhome","type_other")]
   names(type) = gsub("type_","",names(type))
 
   sub$modal_type = modal(type, drop = FALSE)
@@ -168,16 +177,34 @@ select_retofit_vars = function(epc_dom_summary,
 #' @description For each row, returns the name of the column with the highest
 #'   count (first wins on ties). Used to derive "modal_*" variables from the
 #'   EPC summary count columns.
+#'
+#'   Pass every category the variable has, including its "_other" residual:
+#'   leaving one out does not remove it from the data, it just makes the
+#'   runner-up be labelled "most common" wherever the omitted category
+#'   actually won.
+#'
+#'   A row with nothing to be modal of - no certificates, or none that record
+#'   this variable - returns NA rather than the first column name. The map
+#'   draws NA with the same fallback it uses for a zone with no EPC data at
+#'   all, which is what such a zone is.
 #' @param df Data frame of count columns for one categorical variable.
 #' @param drop If TRUE, strip the prefix before the first "_" from the
 #'   returned name (e.g. "wall_good" -> "good").
-#' @return A character vector, one modal category per row.
+#' @return A character vector, one modal category per row; NA where every
+#'   count is zero, negative or missing.
 #' @keywords internal
 modal = function(df, drop = TRUE){
-  x = apply(df, 1, function(x) names(df)[x == max(x)][1])
+  x = apply(df, 1, function(x){
+    # Residual "_other" columns are epc_total minus the named categories, so
+    # they go negative when categories overlap; treat that as nothing to pick.
+    if(all(is.na(x)) || max(x, na.rm = TRUE) <= 0){
+      return(NA_character_)
+    }
+    names(df)[which.max(x)]
+  })
   if(drop){
-    x = strsplit(x,"_")
-    x = sapply(x,`[[`,2)
+    x = vapply(strsplit(x, "_"), function(p) if(length(p) < 2) NA_character_ else p[2],
+               character(1))
   }
   x
 }
