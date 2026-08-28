@@ -5,10 +5,15 @@
 #'   categories from the synthetic population) into one table per zone-year
 #'   up to `max_year`, derives combined goods-and-services and grand totals
 #'   (per-capita and absolute), and grades every per-capita measure A+ to
-#'   F- within each year via `value2grade()`. Zones with implausible company
-#'   car rates (>2000 kgCO2e/person) have that component excluded from
-#'   their total. This is the `lsoa_emissions_all` target - the core output
-#'   behind the map, JSONs, LA/OAC summaries and bulk download.
+#'   F- within each year via `value2grade()`. Zone-years with implausible
+#'   company car rates (>2000 kgCO2e/person, almost always a fleet registered
+#'   at one address) have `company_bike_kgco2e_percap` and
+#'   `company_bike_emissions` set to NA before the totals are built, so the
+#'   totals, the grade and every downstream aggregate exclude them
+#'   consistently; `company_bike_suppressed` flags those rows and drives
+#'   warning code 6 in `make_lsoa_warnings()`. This is the
+#'   `lsoa_emissions_all` target - the core output behind the map, JSONs,
+#'   LA/OAC summaries and bulk download.
 #' @param flights_lsoa_emissions `flights_lsoa_emissions` target.
 #' @param consumption_emissions `consumption_emissions` target.
 #' @param car_emissions `car_emissions` target.
@@ -17,7 +22,8 @@
 #' @param other_heating_emissions `other_heating_emissions` target.
 #' @param max_year Latest year to include (2022 in `_targets.R`).
 #' @return A data frame per LSOA-year with per-capita and total emissions
-#'   for every domain plus `*_grade` columns.
+#'   for every domain, `*_grade` columns, and a logical
+#'   `company_bike_suppressed`.
 #' @keywords internal
 combine_lsoa_emissions = function(flights_lsoa_emissions,
                                   consumption_emissions,
@@ -96,6 +102,33 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                                                "emissions_restaurant",
                                                                "emissions_misc")], na.rm = TRUE)
 
+  # Bad Data Checks
+  # Company Cars
+  # A few zones record a leasing company's or a large employer's whole fleet at
+  # a single address, so their company/motorbike emissions have nothing to do
+  # with the people who live there.
+  #
+  # Blank the component itself, before the totals are built, rather than
+  # subtracting it from the total afterwards. Doing it here means everything
+  # downstream agrees without further special-casing:
+  #   * both totals drop it (the rowSums below use na.rm = TRUE);
+  #   * value2grade() returns "NA" for the company/bike grade, and the zone no
+  #     longer distorts the percentile breaks used to grade every other zone;
+  #   * the website's stacked chart leaves a gap instead of drawing a bar that
+  #     the headline total excludes;
+  #   * the LA / ward / parish / constituency aggregates inherit the same
+  #     suppression, because they are summed from these columns.
+  # The estimated km driven (company_km) is left alone: it is what the source
+  # data records, and only the attribution of the emissions to residents is
+  # being rejected here.
+  company_bike_max_kgco2e_percap = 2000 # 99.7% of zone-years are below this
+
+  lsoa$company_bike_suppressed = !is.na(lsoa$company_bike_kgco2e_percap) &
+    lsoa$company_bike_kgco2e_percap > company_bike_max_kgco2e_percap
+
+  lsoa$company_bike_kgco2e_percap[lsoa$company_bike_suppressed] = NA_real_
+  lsoa$company_bike_emissions[lsoa$company_bike_suppressed] = NA_real_
+
   lsoa$total_kgco2e_percap = rowSums(lsoa[,c("dom_gas_kgco2e_percap",
                                              "dom_elec_kgco2e_percap",
                                              "car_kgco2e_percap",
@@ -119,16 +152,6 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                          "emissions_transport_pt",
                                          "emissions_transport_optranequip_other",
                                          "goods_services_combined_total")], na.rm = TRUE)
-
-  # Bad Data Checks
-  # Company Cars
-  # A few LSOAs have a crazy number of company cars, so exclude from emissions total and NA the grade
-
-  lsoa$total_kgco2e_percap = ifelse(lsoa$company_bike_kgco2e_percap > 2000, #99.7% below
-                                    lsoa$total_kgco2e_percap - lsoa$company_bike_kgco2e_percap,
-                                    lsoa$total_kgco2e_percap)
-
-
 
   lsoa = lsoa |>
     dplyr::group_by(year) |>

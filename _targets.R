@@ -388,8 +388,12 @@ tar_target(lsoa_admin,{
   lsoa_admin_summary(bounds_wards, bounds_parish, bounds_westminster, bounds_la, centroids_lsoa21, centroids_dz22)
 }),
 
+# Depends on lsoa_emissions_all (defined further down) for warning code 6:
+# the company-car warning is derived from the same suppression the emissions
+# table applies, so the two can't drift apart. targets resolves the order.
 tar_target(lsoa_warnings,{
-  make_lsoa_warnings(lookup_lsoa_2011_21,lookup_dz_2011_22, population)
+  make_lsoa_warnings(lookup_lsoa_2011_21,lookup_dz_2011_22, population,
+                     lsoa_emissions_all)
 }),
 
 tar_target(bounds_lsoa_GB_full,{

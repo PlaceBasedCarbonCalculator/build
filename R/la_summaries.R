@@ -68,10 +68,16 @@ summarise_emissions_by = function(lsoa_emissions_all, lookup, population, by, gr
     lsoa_emissions_all = lsoa_emissions_all[!is.na(lsoa_emissions_all[[by]]), ]
   }
 
+  # na.rm = TRUE: combine_lsoa_emissions() NAs the company/bike columns of the
+  # handful of zones whose fleet registrations are implausible, and a plain
+  # sum() would propagate that single NA to the whole area's figure. Dropping
+  # it instead carries the same suppression up to the area, which is what the
+  # per-LSOA and per-area numbers have to agree on.
   summ = lsoa_emissions_all |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(by, "year")))) |>
     dplyr::summarise(
-      dplyr::across(dplyr::all_of(c(unname(percap_source_cols), "all_ages")), sum),
+      dplyr::across(dplyr::all_of(c(unname(percap_source_cols), "all_ages")),
+                    \(x) sum(x, na.rm = TRUE)),
       .groups = "drop"
     )
 
