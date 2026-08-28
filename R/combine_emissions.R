@@ -41,8 +41,7 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
 
   other_heating_emissions = other_heating_emissions[other_heating_emissions$year <= max_year,]
 
-  #names(consumption_emissions) = gsub("emisions","emissions",names(consumption_emissions)) #TODO Fix typo
-
+  
   consumption_emissions = consumption_emissions[,c("LSOA21CD","year",
                                                    "emissions_percap_food","emissions_percap_alcohol","emissions_percap_clothing",
                                                    "emissions_percap_communication","emissions_percap_housing_other",
@@ -118,7 +117,7 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                          "heating_other_emissions_total",
                                          "emissions_transport_vehiclepurchase",
                                          "emissions_transport_pt",
-                                         "emissions_transport_optranequip",
+                                         "emissions_transport_optranequip_other",
                                          "goods_services_combined_total")], na.rm = TRUE)
 
   # Bad Data Checks
