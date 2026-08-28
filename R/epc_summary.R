@@ -238,7 +238,10 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
               roofd_pitched = length(roof_d[grepl("pitched",roof_d)]),
               roofd_flat = length(roof_d[grepl("flat",roof_d)]),
-              roofd_room = length(roof_d[grepl("roof room(s)",roof_d) & !grepl("thatched",roof_d)]),
+              # fixed = TRUE matters: without it "(s)" is a regex group and the
+              # pattern becomes "roof rooms", which never appears in the data,
+              # so this category was always empty and roof rooms fell into other.
+              roofd_room = length(roof_d[grepl("roof room(s)",roof_d, fixed = TRUE) & !grepl("thatched",roof_d, fixed = TRUE)]),
               roofd_thatched = length(roof_d[grepl("thatched",roof_d)]),
               roofd_above = length(roof_d[roof_d == "(another dwelling above)"]),
 
@@ -262,7 +265,10 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               mainfuel_oil = length(fuel[fuel == "oil" | grepl("b30",fuel)] ),
               mainfuel_coal = length(fuel[grepl("coal",fuel) | grepl("anthracite",fuel)]),
               mainfuel_lpg = length(fuel[grepl("lpg",fuel)]),
-              mainfuel_biomass = length(fuel[grepl("wood",fuel) | grepl("biomass",fuel)]),
+              # Dual fuel is mineral + wood, so it matched "wood" as well and was
+              # counted twice. Excluding it here keeps the categories disjoint,
+              # which mainfuel_other below relies on.
+              mainfuel_biomass = length(fuel[(grepl("wood",fuel) | grepl("biomass",fuel)) & !grepl("dual fuel",fuel)]),
               mainfuel_dualfuel = length(fuel[grepl("dual fuel",fuel)]),
 
               mainheatcontrol_verygood = length(con_ee[con_ee == "Very Good"]),
@@ -298,6 +304,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   cert_summ$walld_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("walld_",names(cert_summ))])
   cert_summ$roofd_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("roofd_",names(cert_summ))])
   cert_summ$controld_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("controld_",names(cert_summ))])
+  cert_summ$mainfuel_other <- cert_summ$epc_total - rowSums(cert_summ[,grepl("mainfuel_",names(cert_summ))])
 
   # Checks: category counts should sum back to the certificate total
   check_sums_to_total = function(cols, label){
@@ -334,6 +341,21 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
                         "mainheatdesc_storageheater","mainheatdesc_portableheater",
                         "mainheatdesc_roomheater","mainheatdesc_heatpump",
                         "mainheatdesc_community","mainheatdesc_other"), "main heating")
+
+  # The checks above are near-tautological where the last category is a
+  # residual: it is defined as the remainder, so it always makes the total.
+  # What a residual cannot survive is overlapping categories, which push the
+  # sum past epc_total and drive the residual negative. That is the failure
+  # mode that hid the duplicate counting of dual fuel as biomass, so check for
+  # it directly on every residual.
+  residual_cols <- grep("_other$", names(cert_summ), value = TRUE)
+  for (col in residual_cols) {
+    neg <- sum(cert_summ[[col]] < 0, na.rm = TRUE)
+    if (neg > 0) {
+      message(neg, " LSOAs where ", col, " is negative - the categories it is ",
+              "the remainder of overlap, so some certificates are counted twice")
+    }
+  }
 
   cert_summ
 
