@@ -250,25 +250,30 @@ get_flights_lsoa_emissions = function(flights_total_emissions, consumption_emiss
 #' @param dat Numeric vector.
 #' @param zeroNA If TRUE, zeros are treated as NA (excluded from break
 #'   calculation and returned as NA).
-#' @return An integer vector of percentiles (0-100), NA where `dat` is NA.
+#' @return An integer vector of percentile bands (0-99, each one hundredth of
+#'   the distribution), NA where `dat` is NA.
 #' @keywords internal
 percentile <- function(dat, zeroNA = FALSE){
   if(zeroNA){
     dat[dat == 0] = NA
-    pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
-  } else {
-    pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
   }
+  pt1 <- quantile(dat, probs = seq(0, 1, by = 0.01), type = 7, na.rm = TRUE)
   pt2 <- unique(as.data.frame(pt1), fromLast = TRUE)
   pt3 <- rownames(pt2)
   pt4 <- as.integer(strsplit(pt3, "%"))
-  if(0 %in% pt2$pt1){
-    cts <- c(-0.000001, pt2$pt1)
-  } else {
-    cts <- c(0, pt2$pt1)
-  }
-  datp <- pt4[as.integer(cut(dat, cts, labels = 1:length(pt3)))]
-  return(datp)
-  foo = data.frame(data = dat,
-                   datp = datp)
+
+  # 101 quantile breaks bound 100 intervals, so there are 100 bands, numbered
+  # 0-99: band j is the slice (q_j, q_j+1], with include.lowest putting the
+  # minimum in band 0.
+  #
+  # This used to prepend an extra break - hard-coded 0 - to make a 101st band,
+  # which caused two problems. Band 0 then spanned (0, min] and so held only
+  # the single lowest zone rather than a percent of them, and the 0 is only
+  # below the data for a non-negative variable: for one that can go negative
+  # (preduction, the fall in emissions since 2010, negative wherever emissions
+  # rose) it sorted into the middle of the quantiles, displacing every value
+  # below it by a band and leaving a step discontinuity at zero.
+  datp <- pt4[-length(pt4)][as.integer(
+    cut(dat, pt2$pt1, labels = seq_len(length(pt3) - 1), include.lowest = TRUE))]
+  datp
 }
