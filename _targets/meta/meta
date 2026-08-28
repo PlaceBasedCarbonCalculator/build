@@ -224,20 +224,16 @@ vehicle_summary|stem|b3f7d57ae6d1667f|b4bd786425831265|0d92dc29523a369d|33480600
 domestic_gas_emissions|stem|e5b9ad05fc55c53d|73da3b1b7576339e|4f67022a7187f7d7|467753552||t20555.3953145138s|s10809484b|10809484|rds|local|vector|||0.38||
 car_emissions_perkm|stem|5b4456f73e3d156c|3557ca5278b0881a|fc044a4fd6b27ee0|-1788554599||t20555.3956010193s|s6015449b|6015449|rds|local|vector|||14.66||
 car_emissions|stem|9d39141beea53a91|fb0bfd5cadce4642|ddf4a41817cbffc7|-621909212||t20555.3956901301s|s38797941b|38797941|rds|local|vector|||0.87||
-pt_frequency|stem|b2eb9df366b2a68e|037109e991acbce7|18c0cc132328fe5f|971799777||t20555.5556234975s|s24455801b|24455801|rds|local|vector|||16.82||
-transport_lsoa_data|stem|ef2bec17215c4318|bb074ea221b92e67|ffc54196e960664a|-1134730169||t20555.5556906796s|s1036910b|1036910|rds|local|vector|||1.17||
 postcode_gas_electricity_emissions|stem|f10604499b24dffd|8d951eeb48cb3b49|d705c7b67016f6b7|361552183||t20555.5614330293s|s1316540156b|1316540156|rds|local|vector|||102.24||
 geojson_parish|stem|90ee612ae36a1e36|e93520cfbcbfbf3d|baf695f519b02af0|-1441095983|outputdata/parish.geojson|t20555.563252166s|s424488857b|424488857|file|local|vector|||153.64||
 geojson_wards|stem|20790d6a7d11f870|d290fca16730f18e|de7154c8e94dacf9|2025176598|outputdata/wards.geojson|t20555.5656528413s|s475525412b|475525412|file|local|vector|||204.02||
 geojson_la|stem|906da4cd84908ec9|b20c287a17cd0095|ed98977a928d3ce5|1656481300|outputdata/la.geojson|t20555.5666101353s|s194662168b|194662168|file|local|vector|||81.55||
 geojson_westminster|stem|f2748f3001561bd7|9cff201b30203348|fb8a79bca3061add|-1642132512|outputdata/westminster.geojson|t20555.5676304081s|s228625356b|228625356|file|local|vector|||87||
 consumption_multipliers_uk|stem|6e4492908449e44f|a2319578fbc91bf5|eb29efccf5eef492|2011612631||t20555.5832119459s|s17956b|17956|rds|local|vector|||0.9||
-bulk_pt_frequency|stem|3dcf7585547f995b|dff2d3ea2fb7687a|b625031c82ab9541|1972409404|outputdata/bulk/pt_frequency_20260412.zip|t20555.5857986186s|s18759371b|18759371|file|local|vector|||37.34||
 lcfs_clean|stem|202124f0b35fc181|0ab72633912ba003|add90060fb2f7fd1|-2061081377||t20556.8809500509s|s6374511b|6374511|rds|local|vector|||1.66||
 dwellings_type_backcast|stem|cdcd3a99c5d741c4|60ae4282f0c89862|b27356d0aef32939|161296538||t20556.8931964543s|s3711144b|3711144|rds|local|vector|||389.75||
 household_clusters_scot|stem|d96c8f3217a7ce95|881494e0c351e7a7|10efe1715c2e05e9|-1756352325||t20556.8939546702s|s604382b|604382|rds|local|vector|||64.85|One or more parsing issues, call `problems()` on your data frame for details, e.g.:   dat <- vroom(...)   problems(dat). One or more parsing issues, call `problems()` on your data frame for details, e.g.:   dat <- vroom(...)   problems(dat). One or more parsing issues, call `problems()` on your data frame for details, e.g.:   dat <- vroom(...)   problems(dat). Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2))  See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.. Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2))  See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.. Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2))  See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.. Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2))  See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.. Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2))  See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.. Using an external vector in selections was deprecated in tidyselect 1.1.0. ℹ Please use `all_of()` or `any_of()` instead.   # Was:   data %>% select(var2)    # Now:   data %>% select(all_of(var2|
 bulk_household_clusters|stem|a6ee8534bc106c9c|b5438e0a9113cc92|d42784cf24cb79ca|-1209036009|outputdata/bulk/household_clusters_20260414.zip|t20557.4981862973s|s10145638b|10145638|file|local|vector|||33.66||
-bulk_epc_dom_summary|stem|ea3ddd8a5047ccdc|fe8407cd08f949c1|9ed7b451deb823ed|143664269|outputdata/bulk/epc_dom_summary_20260414.zip|t20557.5059551951s|s6854355b|6854355|file|local|vector|||33.07|'C:\Users\earmmor\AppData\Local\Temp\RtmpKsbQWO\bulkexport' already exists|
 bulk_access_proximity|stem|07073db9d102f893|8d14acfad8ed8605|835a5a6b9df075ee|-975987884|outputdata/bulk/access_proximity_20260414.zip|t20557.508132903s|s479979984b|479979984|file|local|vector|||116.78|'C:\Users\earmmor\AppData\Local\Temp\RtmpKsbQWO\bulkexport' already exists|
 population_summary|stem|0772ef24ee765c6c|e80cdf4b10c7c33d|0661bce71a6fc4f2|-1271921199||t20557.5503469693s|s18114427b|18114427|rds|local|vector|||0.09||
 lsoa_warnings|stem|846f6e7945d62f94|b425bc6930e67926|9478e5eea8e27d40|-740085556||t20557.5503742991s|s24778b|24778|rds|local|vector|||0.59||
@@ -285,60 +281,32 @@ boundary_jsons_ward|stem|92a914389c545e10|0c808ad22ae12613|c438584915847008|9432
 boundary_jsons_parish|stem|2de7512f466615eb|7df73d3c5438884f|824b0e733b8e97b3|764450685||t20643.7182730433s|s82b|82|rds|local|vector|||212.79||
 boundary_jsons_lsoa|stem|146cf8ab082bb265|1d896a00a28c944b|05b7e6e71ee12edb|1405205903||t20643.7566118125s|s80b|80|rds|local|vector|||1318.11||
 bounds_postcode_area|stem|105664a918f20f4e|2a332b1f0a890cad|6a2dc588a87ad576|1317654448||t19938.5686908459s||39454557|rds|local|vector|||500.74||TopologyException: Ring edge missing at 504471.80897323112 307514.45295355655
-bulk_buildings_heights|stem|23aff2af58284fe8|4340cad27bb67613|34976e57d673be58|-705482265|outputdata/bulk/buildings_heights_20260710.zip|t20643.9740218561s|s3873544791b|3873544791|file|local|vector|||1055.53||
-build_access_jsons|stem|2457ad77332b527d|4f9c60d5aad0edc4|01da6442e7ff8a04|1370075298||t20646.3182466262s|s115b|115|rds|local|vector|||13340.88||
 domestic_electricity|stem|84c6cd2701117fd4|91588494c075fb40|c6e2bd660e42f6fb|1613811675||t20646.455253935s|s15214615b|15214615|rds|local|vector|||8.71||
-area_pt_frequencies_json|stem|e77a28538e829a39|e7acdcb52be293b9|057f3e339470152a|469078411||t20646.4995862878s|s44b|44|rds|local|vector|||3825.47||
-area_vehicle_summaries|stem|a916125abed9fd39|92d3499fd9442d84|14d19619846e2881|-100933756||t20646.5009409844s|s15566839b|15566839|rds|local|vector|||111.17||
-vehicle_summary_json|stem|5630bba07dec217a|fe27dd1f47e20f56|405198525d2508bf|-1875494818||t20646.5809528295s|s124b|124|rds|local|vector|||6911.43||
-build_population_jsons|stem|3b92c2166137719a|5a972723a57811ac|f8a5aed55dabfff1|-842498390||t20646.6446289303s|s119b|119|rds|local|vector|||5500.58||
-area_access_json|stem|e77a28538e829a39|906bdbf601fa1bea|4da8d3b4e08514fc|-1689825890||t20646.7120324541s|s44b|44|rds|local|vector|||5816.58||
 bills_gas_electric|stem|0e917af91f311287|ceb934f5ef2ceb3b|60b288e2287aaca5|-399170320||t20646.7355675445s|s14804395b|14804395|rds|local|vector|||1.51||
 domestic_electricity_emissions|stem|572c32beec9b3a96|58f227b1b4b00d02|be1e47433fa4d105|1639887079||t20646.7356044825s|s11135658b|11135658|rds|local|vector|||0.77||
 other_heating_emissions|stem|26ca8b23fc7b7166|7aee01959b031e95|4bc67b36e6b3f788|809116377||t20646.7876907115s|s14475215b|14475215|rds|local|vector|||599.3||
-pmtiles_transport|stem|fa00ba29467f28e9|f5e3e43dbccfebe5|e478adccc529f170|50855935|outputdata/transport/zones_transport.pmtiles*outputdata/transport/buildings_transport.pmtiles|t20646.9403205145s|s2060709576b|2060709576|file|local|vector|||12927.33||
-area_vehicle_summaries_json|stem|e77a28538e829a39|115d1dc54f5a320a|6f8d1804265add62|-1478181231||t20646.9757853892s|s44b|44|rds|local|vector|||3052.43||
 consumption_emissions|stem|05ec7b10bab354e1|195d609e2c1e4cf3|7c60c129a491f464|-1836254043||t20646.9762208205s|s196991239b|196991239|rds|local|vector|||23.58||
 bills_other_heating|stem|22fa2bdf030a39f8|aa82358b4c5e9e2c|5a2a09f37f32ae18|-333798051||t20646.9762526503s|s6192576b|6192576|rds|local|vector|||0.68||
 flights_lsoa_emissions|stem|8176e07a47e7e583|2b092991c3dc5f58|64d08c2216c4abb9|1167197279||t20646.9763087753s|s10701124b|10701124|rds|local|vector|||2.07||
-build_historical_domestic_gas_elec_jsons|stem|18b3609a4af63e29|19224c03ef247a59|d0c606b60bff1aa1|-1944609059||t20647.0600466768s|s138b|138|rds|local|vector|||7095.88|NAs introduced by coercion to integer range. NAs introduced by coercion to integer range. NAs introduced by coercion to integer range|
 lsoa_emissions_all|stem|5dd234069518434c|451c684d240cef56|28230616a564dd34|1303375064||t20647.0623149311s|s226808899b|226808899|rds|local|vector|||173.64||
-pmtiles_retrofit|stem|c45049f95713e6f3|fe0818c5bf6f8046|3648026cb1758745|-1193630741|outputdata/retrofit/zones_retrofit.pmtiles*outputdata/retrofit/buildings_retrofit.pmtiles|t20647.2053824312s|s2196558742b|2196558742|file|local|vector|||11987.89|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
-build_historical_emissions_jsons|stem|ecf28a446473b596|fbd862969e0d62f8|26682b9bda876cbe|1811032421||t20647.3418850354s|s129b|129|rds|local|vector|||11715.21|NAs introduced by coercion to integer range|
-lsoa_map_data|stem|7a3b10b3707b552a|c5f0e04c40a4f1d5|e263c6164ac59d74|1195666468||t20647.3420193535s|s453379b|453379|rds|local|vector|||4.69||
 bulk_pbcc|stem|c225e6bd622dfb93|ec02c8977d58262e|e851299053a6a240|2096282106|outputdata/bulk/pbcc_lsoa_20260713.zip|t20647.3432513156s|s132036544b|132036544|file|local|vector|||59.72||
-la_emissions_summary_json|stem|0f4c401e3ba24740|d986c5c19b177b5b|03c10cca79a39abd|-545267571||t20570.5055706883s||81|rds|local|vector|||0.17||idcol 'LAD25CD' contains NA values
 geojson_postcode|stem|02ea4828bcebb902|8203bcc45a26d433|450a3a2df4133c87|1560777580|outputdata/postcodes.geojson|t20647.5582522892s|s4350642094b|4350642094|file|local|vector|||1367.03||
-pmtiles_postcode|stem|a7bfd3ddde3bb2b4|40040a3f04114a3d|d6196065b26710e5|-1011986628|outputdata/postcodes.pmtiles|t20647.5735772067s|s692047082b|692047082|file|local|vector|||1322.07||
 lsoa_admin|stem|8031aa69911c2dc2|57fefdcd4bb48473|6b5d94d8bd993b7f|-1485952592||t20647.7260602652s|s875753b|875753|rds|local|vector|||16.83||
-parish_emissions_all|stem|2b1792915bcdd3ac|9f3411d61b1d668d|210fad209911ff82|1255518012||t20647.8001959924s|s13301516b|13301516|rds|local|vector|||15.86||
 parish_emissions_summary_json|stem|b5b06b104cdcb23b|335a58858023c530|0cc77837ca85eef3|138843859||t20647.8033066952s|s126b|126|rds|local|vector|||267.95||
-voa_json_2010|stem|0936ade051ac0cb4|cb4b337677863737|53514a500067d9d6|-1161495879||t20647.8190180434s|s116b|116|rds|local|vector|||515.27||
-pt_json|stem|3b5238401617d29e|2e7822f8bed1e95c|0b57abbd28c1cc35|372774427||t20647.8569727402s|s121b|121|rds|local|vector|||3276.87||
 voa_json_2020|stem|28900c5a162a0f88|0ab6317fe78ae58d|44aaebd227a68044|-577594970||t20647.8630098277s|s115b|115|rds|local|vector|||517.88||
-build_postcode_jsons|stem|878d41cd7ccfa0d9|1b6a34cfdb248ba0|a5351ab33912c870|-1252984890||t20647.5414628549s||10748859|rds|local|vector|||24587.86||Caught an unexpected error of class FutureError when trying to launch future (<unnamed-130>) on backend of class MultisessionFutureBackend. The reason was: MultisessionFuture (<unnamed-130>) failed to launch future on cluster RichSOCKnode #22 (PID 2732 on localhost 'localhost'). The reason reported was 'error writing to connection'. Post-mortem diagnostic: No process exists with this PID, i.e. the localhost worker is no longer alive. The total size of the 8 globals exported is 6.54 GiB The three largest globals are '...furrr_fn' (6.49 GiB of class 'function'), '...furrr_chunk_args' (58.13 MiB of class 'character') and '...furrr_map_fn' (987 bytes of class 'function') [future <unnamed-130> (1cf6e026e15f8193be3f80dad12d3b92-130); on 1cf6e026e15f8193be3f80dad12d3b92@UOL-PC-211077<21892>] [future <unnamed-130> (1cf6e026e15f8193be3f80dad12d3b92-130); on 1cf6e026e15f8193be3f80dad12d3b92@UOL-PC-211077<21892>]
 boundary_bin_parish|stem|f4f5d87c22645579|477aaebc02902ac5|af1e6504b6e881d2|891145558||t20648.1546595469s|s122b|122|rds|local|vector|||587.06||
 boundary_bin_la|stem|c7dc9478733a4ba4|3f6fb14ba16fb814|abe0a9dec1905591|532149451||t20648.155842123s|s118b|118|rds|local|vector|||101.27||
 boundary_bin_ward|stem|89b678a2638e9dbb|b3818307838c4092|c6e8532ca6561e28|517141703||t20648.161601952s|s120b|120|rds|local|vector|||495.55||
 boundary_bin_constituency|stem|88d49c7d19f7f44e|d2e8e11bcf9f2e91|6f562497faef2fda|1423244255||t20648.1629618305s|s129b|129|rds|local|vector|||116.33||
 boundary_bin_lsoa|stem|7231758fe2523101|fc2163228895b849|23cd1613a1288209|818022554||t20648.1777441956s|s120b|120|rds|local|vector|||1276.39||
-build_epc_dom_jsons|stem|d8469ba247aaf8c7|8ca9bdca00b0de59|70195d1f0b8827cb|974314826||t20648.2086153347s|s116b|116|rds|local|vector|||2666.94||
-household_pics_json|stem|3ea434fae2daca58|336a659e43384765|e05acfcf1adc13f4|-995134782||t20648.2262738677s|s123b|123|rds|local|vector|||666.14||
-area_pt_frequencies|stem|699e418f2ad243d2|d397a871c1c8e7fb|897d5d876bf66e1f|358498176||t20648.2501893365s|s23999651b|23999651|rds|local|vector|||414.35||
 area_access|stem|8db1095b4a67b198|d9c1fd5672a4098c|170251805328616a|-495401497||t20648.2606654158s|s193429052b|193429052|rds|local|vector|||854.92||
 build_overview_jsons|stem|96c4e6f5a3dc21dd|1b402675d41bfdb0|6c418723ccb4a0f2|2061583066||t20649.8977894702s|s122b|122|rds|local|vector|||290.47||
-la_emissions_all|stem|92176d66546916bc|5f52fc4b2a6062da|9eacbbf2687fe1bb|-1503602655||t20649.8986424644s|s861821b|861821|rds|local|vector|||2.79||
 oac_emissions_summary_json|stem|ff5f23f11c107b53|d1f7977223cb8336|0cdf77c5bdc6729e|-213870537||t20649.8987059086s|s122b|122|rds|local|vector|||5.39||
-area_epc_dom|stem|9bbf23d203d02e0e|a2f4c31d5c51278b|c0b68d65934904d0|-523609739||t20649.9064578185s|s3583628b|3583628|rds|local|vector|||17.38||
-area_prices|stem|7136726412160c5c|759520e711644821|6889dee7bb692fb3|1889529891||t20649.907327312s|s5982525b|5982525|rds|local|vector|||70.62||
-area_prices_json|stem|e77a28538e829a39|90e44916c86d78c0|912d3ceae4f502f7|805557412||t20649.9199588671s|s44b|44|rds|local|vector|||271.44||
 area_gas_electric|stem|9a647164d1e0e93e|c747d4224010b5e2|730f00bc5c859858|307232984||t20649.9208896841s|s25676093b|25676093|rds|local|vector|||72.43||
 constituency_emissions_all|stem|ff9733d1c47ffedf|115fde967eaa36c5|5e504b8f5360a812|-1625475849||t20649.9209903862s|s1543505b|1543505|rds|local|vector|||2.08||
 ward_emissions_all|stem|d3ad853c21f97e00|95fec2d983dcc1f2|81afe015f254962b|928812505||t20649.9212559201s|s19291913b|19291913|rds|local|vector|||14.93||
-area_gas_electric_json|stem|e77a28538e829a39|88a8fee0e08e5625|a95b2ae7c88774f0|2143681352||t20649.9289969527s|s44b|44|rds|local|vector|||668.51||
 constituency_emissions_summary_json|stem|0c75e8733dd0074a|b3c1f7ac6c4b1b10|2bf409f5f579b690|-637796240||t20649.9293869041s|s131b|131|rds|local|vector|||33.61||
 ward_emissions_summary_json|stem|d35354611b07e590|6b9f571e5a985c83|9f789c3b80aad9d8|-1061033388||t20649.9339022852s|s123b|123|rds|local|vector|||389.22||
-area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|524830be9319bf6e|375468698||t20649.9481179468s|s44b|44|rds|local|vector|||747.07||
 area_population|stem|94088d5247fbe4aa|1dd85250c9209cf8|fe8fcdc04ee080a7|-10508676||t20658.6312150476s|s8520524b|8520524|rds|local|vector|||34||
 area_population_json|stem|e77a28538e829a39|d00457070f01b773|08eca467209b5a70|-1891545668||t20658.6377532441s|s44b|44|rds|local|vector|||564.52||
 load_inspire_one|function|37b56a85605d2af1|||||||||||||||
@@ -358,8 +326,6 @@ area_household_pics_json|stem|e77a28538e829a39|70066f31c3a8f891|b43db6f6b86a09ca
 house_prices_nowcast|stem|c87fb1f790d1bdb9|662660be995cd109|ab1825f4885178f1|-124497076||t20658.97842306s|s1124646038b|1124646038|rds|local|vector|||160.72||
 house_price_lr_uprn|stem|ee35cfa62dacca87|0938b60937575540|c48ebbfd8af8e6df|-2033827051||t20658.9850516069s|s2117776023b|2117776023|rds|local|vector|||222.51||
 house_prices_lsoa|stem|ecc1bee1a2f19a92|775bc14800d5325e|d1071631baa8fe4b|-1775882900||t20658.9940293307s|s17635721b|17635721|rds|local|vector|||630.65||
-epc_dom_summary|stem|fc39906a51e08ed3|63e14babb6ac197f|662a6825240dd6d9|-698757306||t20659.0058764794s|s7299904b|7299904|rds|local|vector|||1018.56|invalid factor level, NA generated. invalid factor level, NA generated|
-retrofit_lsoa_data|stem|d4a183838cd4b600|129aacab6d126a3d|289d335850804f1c|-2108320529||t20659.0068713754s|s975739b|975739|rds|local|vector|||5.56||
 inspire|stem|5339f59b5399246d|f724d6678e3134e4|6e4a77c87b083808|-601057096||t20659.2657843822s|s4979273552b|4979273552|rds|local|vector|||329.1||
 uprn_historical_epc_lr|stem|09a14e8d56070663|a46e39cad41f4abb|6db917a16b2b3873|1849407745||t20659.2712467227s|s1469766878b|1469766878|rds|local|vector|||128.94||
 geojson_uprn_unknown|stem|e0c343a1d985253d|c5e903ae5ccbbc55|3d31211cbefaf83a|761190457|outputdata/uprn_unknown.geojson|t20659.279878434s|s2841265408b|2841265408|file|local|vector|||618.05||
@@ -372,6 +338,13 @@ buildings_heights|stem|5a990bdfdc7a9b7d|a965000c0d1f0b33|7031e3516962c50b|435184
 buildings_lsoa_4326_high|stem|517a9ce86150f128|91961b239ab3f0b3|9ef23af26ec8da3e|-1392638135||t20662.2311056449s|s2711419404b|2711419404|rds|local|vector|||178106.12||
 zoomstack_buildings_lst_4326|stem|6b12231466372997|d3d917c77eee95a6|de104756cbae5637|594570010||t20662.2378269344s|s3500324956b|3500324956|rds|local|vector|||0||
 oac_emissions_all|stem|533cce7fc5933abf|0e22a8cfce01ab2a|eb0108d85ebb4c9f|2042129683||t20662.237925884s|s54919b|54919|rds|local|vector|||1.72||
+pmtiles_uprn_unknown|stem|153bc52d2c8bf222|8a280ad7774c0b90|6e5c11360ca3f61c|-1447060186|outputdata/uprn_unknown_20260728.pmtiles|t20662.4383752604s|s329721474b|329721474|file|local|vector|||353.78||
+pmtiles_epc_dom|stem|95650ea58ecebee1|e65eaeefe5238f89|d56339ad1ecb9a7d|-1313422490|outputdata/epc_dom_20260728.pmtiles|t20662.4508983228s|s1858444215b|1858444215|file|local|vector|||1080.22||
+pmtiles_epc_nondom|stem|5f132dc091c1358e|25095b8d2d96d376|774dc5b1b2310014|-832145070|outputdata/epc_nondom_20260728.pmtiles|t20662.452194015s|s112358119b|112358119|file|local|vector|||109.63||
+pmtiles_westminster|stem|eaef293f67d6e2ab|a223d96aa8471e2a|a66df1c040e26e77|2003519876|outputdata/westminster_20260728.pmtiles|t20662.4525916282s|s6302036b|6302036|file|local|vector|||33.24||
+pmtiles_la|stem|b80ce561c644e0ba|b58b65d10089eacd|7d43c8707f0c494e|2059785649|outputdata/la_20260728.pmtiles|t20662.4529604846s|s5134041b|5134041|file|local|vector|||31.81||
+pmtiles_wards|stem|ce35d123d2887b37|87cfdf232ff9e9e1|5fe726505c9ababf|-1064363007|outputdata/wards_20260728.pmtiles|t20662.4534747564s|s14202365b|14202365|file|local|vector|||44.34||
+pmtiles_parish|stem|55b261a91a9f51e1|cacaf3cefbffcf27|33f332e8ff6001af|100742970|outputdata/parish_20260728.pmtiles|t20662.4539625308s|s13635250b|13635250|file|local|vector|||42.09||
 read_bounds_shp|function|92c07670d7e85bff
 top_architypes|function|097f4ad996863485
 summarise_population|function|3f60779d9cfd6aea
@@ -428,7 +401,7 @@ distribute_other_heating|function|9a637bfb76a462e7
 split_for_arrays3|function|a83405e1b2e94258
 simplify_AccType5|function|a3bac859419d2b31
 simplify_household15|function|7c455fd3d546609b
-select_transport_vars|function|78cb90ff747ed1db
+select_transport_vars|function|3fb1c94baa01086e
 join_for_geojson|function|0d6d11dd42f5eb46
 join_pmtiles|function|86d93aa92ef6c365
 make_geojson|function|304b0af2acbe00e2
@@ -450,7 +423,7 @@ read_bounds|function|cbe86eadd469e9bb
 sumNA|function|10c89e2493881a21
 load_postcode_OA_LSOA_MSOA_class_2021_lookup|function|9160358e5c5b906c
 load_consumption_footprint|function|55154b1ecb0e8138
-load_pt_frequency|function|f117ae84651cdb68
+load_pt_frequency|function|b06ce4fbb8a3dcd3
 calculate_lsoa_gas_electric_emissions|function|a2bce095b515565b
 match_income_lsoa_msoa|function|8c6fc3613524586c
 car_km_11_to_21|function|2498450d59413a50
@@ -598,6 +571,7 @@ OAC11_lsoa21|function|780fb8ed85212542
 make_lsoa_to_dno_lookup|function|d21bf2d19a617dae
 dowload_nomis|function|4956d0dc746b8d33
 lsoa_electric_to_2021|function|b3f9fbbc18707d7e
+scotland_tax_band_dz22|function|2d28c9d41520dfa4
 income_limit_estimator|function|6269afb9b7cdc508
 load_msoa_gas_nondom|function|103a7a497bb0a8e1
 read_Tenure_NSSEC|function|37f3503f38b6118a
@@ -636,7 +610,6 @@ read_hhComp_NSSEC|function|84c85d7c3158a113
 load_oa_population|function|aee6c48139ed794d
 combine_os_osm_buildings|function|4e5bf4c5b59f4c4a
 load_OA_LSOA_MSOA_class_2011_lookup|function|293780508c170f70
-summarise_voa_post2010|function|99095f8309238d54
 load_la_consumption_accounts|function|2e96c59121771763
 distribute|function|67ad3c1b896b90b2
 load_uprn_27700|function|5eddb70c48b2b2b1
@@ -727,7 +700,7 @@ process_buildings_high_v2|function|692c48ebec39cedb
 combine_os_osm_buildings_v2|function|e24cb1ba82155951
 export_zone_json|function|1d2c2b2af22ec130
 load_landownership_target|function|ebac3befaaae344e
-epc_summarise_domestic|function|4e40ec90db4a4212
+epc_summarise_domestic|function|22c752b3ba6d5a3b
 bulk_export_epc_nondom|function|20b19d0af2d3ff43
 bulk_export_epc_dom|function|846e0a0589ed4974
 bulk_export_buildings|function|a8088429a23bdb91
@@ -745,6 +718,7 @@ match_LCFS_synth_pop|function|c90f7a1fcfd66c2f
 extrapolate_population_households|function|5f84d9864144601f
 value2grade|function|d26e79fc2835f83b
 split_merge|function|3b185d66825cd3d5
+summarise_voa_post2010|function|78c187e9c172f392
 load_income_scotland|function|5f03bda96ed43422
 load_postcode_gas_electricity|function|76efb46ccfdb8971
 summarise_household_composition|function|2f0dfc5271927d84
@@ -800,11 +774,38 @@ make_oac_summary|function|a60d5dba0fafebf0
 make_parish_summary|function|bd921f01caa448df
 make_ward_summary|function|e597627bd96fc60d
 read_household_nssec|function|f9eb8ce85ed2650f
-pmtiles_uprn_unknown|stem|153bc52d2c8bf222|8a280ad7774c0b90|6e5c11360ca3f61c|-1447060186|outputdata/uprn_unknown_20260728.pmtiles|t20662.4383752604s|s329721474b|329721474|file|local|vector|||353.78||
-pmtiles_epc_dom|stem|95650ea58ecebee1|e65eaeefe5238f89|d56339ad1ecb9a7d|-1313422490|outputdata/epc_dom_20260728.pmtiles|t20662.4508983228s|s1858444215b|1858444215|file|local|vector|||1080.22||
-pmtiles_epc_nondom|stem|5f132dc091c1358e|25095b8d2d96d376|774dc5b1b2310014|-832145070|outputdata/epc_nondom_20260728.pmtiles|t20662.452194015s|s112358119b|112358119|file|local|vector|||109.63||
-pmtiles_westminster|stem|eaef293f67d6e2ab|a223d96aa8471e2a|a66df1c040e26e77|2003519876|outputdata/westminster_20260728.pmtiles|t20662.4525916282s|s6302036b|6302036|file|local|vector|||33.24||
-pmtiles_la|stem|b80ce561c644e0ba|b58b65d10089eacd|7d43c8707f0c494e|2059785649|outputdata/la_20260728.pmtiles|t20662.4529604846s|s5134041b|5134041|file|local|vector|||31.81||
-pmtiles_wards|stem|ce35d123d2887b37|87cfdf232ff9e9e1|5fe726505c9ababf|-1064363007|outputdata/wards_20260728.pmtiles|t20662.4534747564s|s14202365b|14202365|file|local|vector|||44.34||
-pmtiles_parish|stem|55b261a91a9f51e1|cacaf3cefbffcf27|33f332e8ff6001af|100742970|outputdata/parish_20260728.pmtiles|t20662.4539625308s|s13635250b|13635250|file|local|vector|||42.09||
-pmtiles_pbcc|stem|281113475aeee41f|1fe6186963515fd9|b7768c871cf7095b|-800414012|outputdata/pbcc/zones_pbcc_20260728.pmtiles*outputdata/pbcc/buildings_pbcc_20260728.pmtiles|t20662.5621547571s|s2051573761b|2051573761|file|local|vector|||9141.05||
+pt_frequency|stem|10f82d6dd9ef8989|fc857b1ada22aa85|2369b9567a0705b1|971799777||t20690.2992448673s|s25364700b|25364700|rds|local|vector|||327.08||
+bulk_pt_frequency|stem|fb5ea03312ac3d1e|dff2d3ea2fb7687a|1095f1119af7fe55|1972409404|outputdata/bulk/pt_frequency_20260825.zip|t20690.2994981797s|s15755967b|15755967|file|local|vector|||20.81||
+pt_json|stem|4f6827e20c0a5cad|ad2b27ca25bd9cc9|abde967de1b0f14e|372774427||t20690.3247750295s|s121b|121|rds|local|vector|||2182.83||
+build_postcode_jsons|stem|878d41cd7ccfa0d9|1b6a34cfdb248ba0|a5351ab33912c870|-1252984890||t20690.7324449737s|s10748859b|10748859|rds|local|vector|||35194.55||
+epc_dom_summary|stem|33748db733029902|63e14babb6ac197f|acfe1e653124d9b7|-698757306||t20690.7494212865s|s7379634b|7379634|rds|local|vector|||1459.06|invalid factor level, NA generated. invalid factor level, NA generated|
+voa_json_2010|stem|05f37c25c7fa9fb5|4b499d05aff63107|0222876da6a832e1|-1161495879||t20690.7600004847s|s116b|116|rds|local|vector|||908.61||
+build_epc_dom_jsons|stem|c780c70fff684351|8ca9bdca00b0de59|b2532f7e85cb8f96|974314826||t20690.7873787275s|s116b|116|rds|local|vector|||2363.8||
+bulk_epc_dom_summary|stem|0a6968576c4de49a|fe8407cd08f949c1|671ee1dbd23ff7ac|143664269|outputdata/bulk/epc_dom_summary_20260825.zip|t20690.7877767921s|s6880474b|6880474|file|local|vector|||35.87|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
+bulk_buildings_heights|stem|a83e84f18abb17a1|4340cad27bb67613|57f7bb2b0232dded|-705482265|outputdata/bulk/buildings_heights_20260825.zip|t20690.8105569169s|s3901057318b|3901057318|file|local|vector|||1538.16|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
+pmtiles_postcode|stem|0e4a836e50e27b5f|40040a3f04114a3d|4b50644838a93eb9|-1011986628|outputdata/postcodes_20260825.pmtiles|t20690.8316241413s|s692047089b|692047089|file|local|vector|||1809.5||
+build_access_jsons|stem|954440978ec9ae5d|4f9c60d5aad0edc4|f72d49a4763cfc6d|1370075298||t20690.9594546821s|s115b|115|rds|local|vector|||11017.42||
+area_pt_frequencies|stem|9e0ece2e07d4a44b|d397a871c1c8e7fb|d1d5f0eb287a1169|358498176||t20690.9673478926s|s25143716b|25143716|rds|local|vector|||675||
+area_epc_dom|stem|a0dbfce04531c195|a2f4c31d5c51278b|ce2b938db097653c|-523609739||t20690.9675336246s|s3524753b|3524753|rds|local|vector|||13.39||
+area_prices|stem|3ed0d0c900b0ba2f|759520e711644821|5419ef2f158796d5|1889529891||t20690.9682056113s|s6174871b|6174871|rds|local|vector|||54.55||
+household_pics_json|stem|23d3c6e229445d97|859ff9ba69b0f6df|387a44d524bf0b86|-995134782||t20690.9778460758s|s123b|123|rds|local|vector|||830.3||
+area_pt_frequencies_json|stem|e77a28538e829a39|e7acdcb52be293b9|dbb0e48ddd096060|469078411||t20690.9963812433s|s44b|44|rds|local|vector|||1600.57||
+area_access_json|stem|e77a28538e829a39|906bdbf601fa1bea|3d9de53aea9d1f58|-1689825890||t20691.0451588849s|s44b|44|rds|local|vector|||4208.9||
+area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|5d77c635d70ce18d|375468698||t20691.0528276918s|s44b|44|rds|local|vector|||662.42||
+area_prices_json|stem|e77a28538e829a39|90e44916c86d78c0|f2f7e266e537d08a|805557412||t20691.0567891044s|s44b|44|rds|local|vector|||341.87||
+transport_lsoa_data|stem|6b56f4e65f2b0dc3|bb074ea221b92e67|188d28c64584911b|-1134730169||t20691.0568949123s|s1036040b|1036040|rds|local|vector|||3.89||
+area_vehicle_summaries|stem|0c2d1c8bc03891a6|92d3499fd9442d84|48cc8eb09d71c973|-100933756||t20691.0577990841s|s15567338b|15567338|rds|local|vector|||69.52||
+vehicle_summary_json|stem|c72d6207d86c8de8|fe27dd1f47e20f56|2167ac5a7ce71e1c|-1875494818||t20691.0893162138s|s124b|124|rds|local|vector|||2722.06||
+build_population_jsons|stem|bddf0dea8e591801|5a972723a57811ac|b138bb31eeaa078e|-842498390||t20691.1058964156s|s119b|119|rds|local|vector|||1431.84||
+pmtiles_transport|stem|a9713e9b1234abe2|f5e3e43dbccfebe5|36e31b577352d19e|50855935|outputdata/transport/zones_transport_20260826.pmtiles*outputdata/transport/buildings_transport_20260826.pmtiles|t20691.2072289108s|s2072050572b|2072050572|file|local|vector|||8509.25||
+area_vehicle_summaries_json|stem|e77a28538e829a39|115d1dc54f5a320a|5c15d66407a2c232|-1478181231||t20691.2220907335s|s44b|44|rds|local|vector|||1275.77||
+retrofit_lsoa_data|stem|d4a183838cd4b600|129aacab6d126a3d|85c5b796d25ae0bb|-2108320529||t20691.2230982026s|s975739b|975739|rds|local|vector|||10.21||
+build_historical_domestic_gas_elec_jsons|stem|c96d647bbadb91b9|19224c03ef247a59|4528c23d4012975a|-1944609059||t20691.2374172314s|s138b|138|rds|local|vector|||1234.75|NAs introduced by coercion to integer range. NAs introduced by coercion to integer range. NAs introduced by coercion to integer range|
+la_emissions_all|stem|92176d66546916bc|5f52fc4b2a6062da|f73adb98bb3b14f4|-1503602655||t20691.2375021414s|s861821b|861821|rds|local|vector|||2.17||
+lsoa_map_data|stem|19292157a422b19f|a6b4acb7da4d8ed7|e263c6164ac59d74|1195666468||t20691.2375576898s|s452794b|452794|rds|local|vector|||0.23||
+parish_emissions_all|stem|2b1792915bcdd3ac|9f3411d61b1d668d|2dbaa2dbb1290f61|1255518012||t20691.2377322304s|s13301516b|13301516|rds|local|vector|||9.48||
+build_historical_emissions_jsons|stem|6180df9cd43e198c|fbd862969e0d62f8|5ec11f34adb18644|1811032421||t20691.2751115369s|s129b|129|rds|local|vector|||3225.67|NAs introduced by coercion to integer range|
+area_gas_electric_json|stem|e77a28538e829a39|88a8fee0e08e5625|dbb3945b00d1ab99|2143681352||t20691.2835149006s|s44b|44|rds|local|vector|||725.38||
+pmtiles_retrofit|stem|4ef53001e8420d54|fe0818c5bf6f8046|1f27d0587fd475e7|-1193630741|outputdata/retrofit/zones_retrofit_20260826.pmtiles*outputdata/retrofit/buildings_retrofit_20260826.pmtiles|t20691.3856398248s|s2208862275b|2208862275|file|local|vector|||8610.16|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
+la_emissions_summary_json|stem|011555ad775b5302|d986c5c19b177b5b|259d083939252d24|-545267571||t20691.3861396515s|s121b|121|rds|local|vector|||35.66||
+pmtiles_pbcc|stem|d129b1dfd4f7539e|1fe6186963515fd9|4ebb1f1916db4a3c|-800414012|outputdata/pbcc/zones_pbcc_20260826.pmtiles*outputdata/pbcc/buildings_pbcc_20260826.pmtiles|t20691.4825175523s|s2051394283b|2051394283|file|local|vector|||8202.34||
