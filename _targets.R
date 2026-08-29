@@ -1418,10 +1418,10 @@ tar_target(bulk_epc_dom_summary,{
   bulk_export_epc_dom_summary(epc_dom_summary)
 }, format = "file"),
 
-#TODO: Error parsing JSON file 'F:\GitHub\PlaceBasedCarbonCalculator\build\outputdata\epc_dom.geojson': unexpected end of data code: 5 at position: 407782137
-# tar_target(bulk_epc_dom,{
-#   bulk_export_epc_dom(geojson_epc_dom)
-# }, format = "file"),
+
+tar_target(bulk_epc_dom,{
+  bulk_export_epc_dom(geojson_epc_dom)
+}, format = "file"),
 
 tar_target(bulk_epc_nondom,{
   bulk_export_epc_nondom(geojson_epc_nondom)

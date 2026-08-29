@@ -155,6 +155,90 @@ bulk_export_geojson_generic = function(x, name = NULL, date = Sys.Date(), path =
 
 }
 
+#' Convert a large GeoJSON file to a zipped GeoPackage via GDAL
+#'
+#' @description Streaming alternative to `bulk_export_geojson_generic()` for
+#'   GeoJSON files that are too large to parse into memory. GDAL translates the
+#'   GeoJSON straight to a GeoPackage without materialising it as an R object,
+#'   then the result is zipped into `path` as `<name>_<yyyymmdd>.zip`.
+#'
+#'   `bulk_export_geojson_generic()` uses `yyjsonr::read_geojson_file()`, whose
+#'   file reader truncates the file length to 32 bits on Windows. Any input
+#'   larger than 4 GB is therefore read as only `size %% 2^32` bytes: when that
+#'   remainder is under `INT_MAX` the parse fails with "unexpected end of data",
+#'   and when it is over `INT_MAX` the length goes negative and the R process
+#'   segfaults (killing the whole `tar_make()` run rather than one target).
+#'   GDAL uses 64-bit file offsets throughout and has no such limit.
+#'
+#'   Unlike `bulk_export_geojson_generic()` this does not round numeric columns,
+#'   as that would require reading the data into R. `make_geojson()` already
+#'   caps coordinate precision at 6 decimal places via `sf::st_precision()`.
+#' @param x Path to an existing GeoJSON file.
+#' @param name Base name for the output file and the GeoPackage layer (required).
+#' @param date Date stamp used in the file name; defaults to today.
+#' @param path Output directory, created if missing.
+#' @return The path of the zip file created.
+#' @keywords internal
+bulk_export_geojson_gdal = function(x, name = NULL, date = Sys.Date(), path = "outputdata/bulk"){
+
+  if(!dir.exists(path)){
+    dir.create(path, recursive = TRUE)
+  }
+
+  if(is.null(name)){
+    stop("name not specified")
+  }
+
+  if(!file.exists(x)){
+    stop(x," does not exist")
+  }
+
+  dir_temp = file.path(tempdir(),"bulkexport")
+  dir.create(dir_temp, showWarnings = FALSE)
+
+  date = gsub("-","",as.character(date))
+
+  path_temp_out = file.path(dir_temp, paste0(name,"_",date,".gpkg"))
+  path_final_out = file.path(path, paste0(name,"_",date,".zip"))
+  # Resolved before setwd() so `path` may be relative (as in the targets
+  # pipeline) or absolute; the relative form is still what gets returned.
+  path_final_abs = file.path(normalizePath(path, winslash = "/"),
+                             paste0(name,"_",date,".zip"))
+
+  if(file.exists(path_temp_out)){
+    unlink(path_temp_out)
+  }
+
+  message("Translating GeoJSON to gpkg with GDAL")
+  ok = sf::gdal_utils("vectortranslate",
+                      source = x,
+                      destination = path_temp_out,
+                      options = c("-f","GPKG","-nln",name))
+
+  if(!isTRUE(ok) || !file.exists(path_temp_out)){
+    stop("GDAL failed to translate ",x," to ",path_temp_out)
+  }
+
+  message("Zipping gpkg")
+  my_wd <- getwd()
+  on.exit(setwd(my_wd), add = TRUE)
+  setwd(dir_temp)
+
+  if(file.exists(path_final_abs)){
+    unlink(path_final_abs)
+  }
+
+  utils::zip(path_final_abs,
+             paste0(name,"_",date,".gpkg"),
+             flags="-q")
+  setwd(my_wd)
+
+  unlink(dir_temp, recursive = TRUE)
+
+  return(path_final_out)
+
+}
+
 #' Export an sf object as a zipped GeoPackage for bulk download
 #'
 #' @description Writes an in-memory sf data frame to a GeoPackage (numeric
@@ -273,15 +357,17 @@ bulk_export_epc_dom_summary = function(x = epc_dom_summary){
 
 #' Bulk export domestic EPC points as zipped GeoPackage
 #'
-#' @description Wrapper for `bulk_export_geojson_generic()`. The corresponding
-#'   `bulk_epc_dom` target is currently commented out in `_targets.R` due to a
-#'   JSON parsing error on the large epc_dom.geojson file.
+#' @description Wrapper for `bulk_export_geojson_gdal()` used by the
+#'   `bulk_epc_dom` target. Uses the streaming GDAL exporter rather than
+#'   `bulk_export_geojson_generic()` because epc_dom.geojson is over 4 GB (24 GB
+#'   as of 2026-08) and trips the 32-bit file-size truncation in
+#'   `yyjsonr::read_geojson_file()`.
 #' @param geojson_epc_dom Path to the domestic EPC GeoJSON (`geojson_epc_dom`
 #'   target).
 #' @return The path of the zip file created.
 #' @keywords internal
 bulk_export_epc_dom = function(geojson_epc_dom){
-  bulk_export_geojson_generic(geojson_epc_dom, "epc_domestic")
+  bulk_export_geojson_gdal(geojson_epc_dom, "epc_domestic")
 }
 
 #' Bulk export non-domestic EPC points as zipped GeoPackage
