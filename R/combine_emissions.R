@@ -3,8 +3,9 @@
 #' @description Joins every emissions domain (domestic gas/electricity,
 #'   other heating, car/van/company driving, flights and the consumption
 #'   categories from the synthetic population) into one table per zone-year
-#'   up to `max_year`, derives combined goods-and-services and grand totals
-#'   (per-capita and absolute), and grades every per-capita measure A+ to
+#'   up to `max_year`, derives combined goods-and-services (the consumption
+#'   categories only - housing costs are counted under housing, not here) and
+#'   grand totals (per-capita and absolute), and grades every per-capita A+ to
 #'   F- within each year via `value2grade()`. Zone-years with implausible
 #'   company car rates (>2000 kgCO2e/person, almost always a fleet registered
 #'   at one address) have `company_bike_kgco2e_percap` and
@@ -78,12 +79,20 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
   lsoa = dplyr::left_join(lsoa, consumption_emissions, by = c("LSOA21CD","year"))
   lsoa = dplyr::left_join(lsoa, flights_lsoa_emissions, by = c("LSOA21CD","year"))
 
-  # Total Goods and Services
+  # Total Goods and Services.
+  #
+  # housing_other is deliberately NOT in here. It is COICOP ACR/IMR/DIY/WAT -
+  # actual and imputed rentals, dwelling maintenance and water supply - which is
+  # a housing cost, not a purchase of goods or services. Including it put the
+  # same figure in two places at once: its own "Other Housing" row in the
+  # Housing section of the report card, and again inside this subtotal, which
+  # is what the map's Goods & Services layer is graded on. It was a median 8%
+  # of the figure that layer shows. The grand totals below add it directly
+  # instead, so they are unchanged by moving it out of here.
   lsoa$goods_services_combined_kgco2e_percap = rowSums(lsoa[,c("food_kgco2e_percap",
                                                                "alcohol_kgco2e_percap",
                                                                "clothing_kgco2e_percap",
                                                                "communication_kgco2e_percap",
-                                                               "housing_other_kgco2e_percap",
                                                                "furnish_kgco2e_percap",
                                                                "recreation_kgco2e_percap",
                                                                "health_kgco2e_percap",
@@ -94,7 +103,6 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
                                                                "emissions_alcohol",
                                                                "emissions_clothing",
                                                                "emissions_communication",
-                                                               "emissions_housing_other",
                                                                "emissions_furnish",
                                                                "emissions_recreation",
                                                                "emissions_health",
@@ -129,13 +137,17 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
   lsoa$company_bike_kgco2e_percap[lsoa$company_bike_suppressed] = NA_real_
   lsoa$company_bike_emissions[lsoa$company_bike_suppressed] = NA_real_
 
+  # housing_other is listed here in its own right because it is no longer part
+  # of goods_services_combined (see above); the grand total is the same as it
+  # was before that move.
   lsoa$total_kgco2e_percap = rowSums(lsoa[,c("dom_gas_kgco2e_percap",
                                              "dom_elec_kgco2e_percap",
+                                             "heating_other_kgco2e_percap",
+                                             "housing_other_kgco2e_percap",
                                              "car_kgco2e_percap",
                                              "van_kgco2e_percap",
                                              "company_bike_kgco2e_percap",
                                              "flights_kgco2e_percap",
-                                             "heating_other_kgco2e_percap",
                                              "transport_vehiclepurchase_kgco2e_percap",
                                              "transport_pt_kgco2e_percap",
                                              "transport_optranequip_other_kgco2e_percap",
@@ -143,11 +155,12 @@ combine_lsoa_emissions = function(flights_lsoa_emissions,
 
   lsoa$emissions_total = rowSums(lsoa[,c("dom_gas_total_emissions",
                                          "dom_elec_total_emissions",
+                                         "heating_other_emissions_total",
+                                         "emissions_housing_other",
                                          "car_emissions",
                                          "van_emissions",
                                          "company_bike_emissions",
                                          "flights_emissions_total",
-                                         "heating_other_emissions_total",
                                          "emissions_transport_vehiclepurchase",
                                          "emissions_transport_pt",
                                          "emissions_transport_optranequip_other",

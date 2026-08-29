@@ -236,7 +236,6 @@ household_clusters_scot|stem|d96c8f3217a7ce95|881494e0c351e7a7|10efe1715c2e05e9|
 bulk_household_clusters|stem|a6ee8534bc106c9c|b5438e0a9113cc92|d42784cf24cb79ca|-1209036009|outputdata/bulk/household_clusters_20260414.zip|t20557.4981862973s|s10145638b|10145638|file|local|vector|||33.66||
 bulk_access_proximity|stem|07073db9d102f893|8d14acfad8ed8605|835a5a6b9df075ee|-975987884|outputdata/bulk/access_proximity_20260414.zip|t20557.508132903s|s479979984b|479979984|file|local|vector|||116.78|'C:\Users\earmmor\AppData\Local\Temp\RtmpKsbQWO\bulkexport' already exists|
 population_summary|stem|0772ef24ee765c6c|e80cdf4b10c7c33d|0661bce71a6fc4f2|-1271921199||t20557.5503469693s|s18114427b|18114427|rds|local|vector|||0.09||
-lsoa_warnings|stem|846f6e7945d62f94|b425bc6930e67926|9478e5eea8e27d40|-740085556||t20557.5503742991s|s24778b|24778|rds|local|vector|||0.59||
 lsoa21_OAC21_summary|stem|df00e998a6577040|d74b2c4ed83f362f|fd9f39f88c114547|71114060||t20561.3233627219s|s909427b|909427|rds|local|vector|||54||
 oac11lsoa21|stem|9f36d34683b2923f|0701f400c3f3dc9f|0e9664ab326c12aa|1678745832||t20561.3280661559s|s448384b|448384|rds|local|vector|||401.74||
 landcover|stem|25f320a6620fc7c2|e5451a38874ac04d|09649543f19a391d|-1687245806||t20561.4268485745s|s400707818b|400707818|rds|local|vector|||8449.32|repeating attributes for all sub-geometries for which they may not be constant. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to be spatially constant throughout all geometries. attribute variables are assumed to b|
@@ -288,11 +287,7 @@ other_heating_emissions|stem|26ca8b23fc7b7166|7aee01959b031e95|4bc67b36e6b3f788|
 consumption_emissions|stem|05ec7b10bab354e1|195d609e2c1e4cf3|7c60c129a491f464|-1836254043||t20646.9762208205s|s196991239b|196991239|rds|local|vector|||23.58||
 bills_other_heating|stem|22fa2bdf030a39f8|aa82358b4c5e9e2c|5a2a09f37f32ae18|-333798051||t20646.9762526503s|s6192576b|6192576|rds|local|vector|||0.68||
 flights_lsoa_emissions|stem|8176e07a47e7e583|2b092991c3dc5f58|64d08c2216c4abb9|1167197279||t20646.9763087753s|s10701124b|10701124|rds|local|vector|||2.07||
-lsoa_emissions_all|stem|5dd234069518434c|451c684d240cef56|28230616a564dd34|1303375064||t20647.0623149311s|s226808899b|226808899|rds|local|vector|||173.64||
-bulk_pbcc|stem|c225e6bd622dfb93|ec02c8977d58262e|e851299053a6a240|2096282106|outputdata/bulk/pbcc_lsoa_20260713.zip|t20647.3432513156s|s132036544b|132036544|file|local|vector|||59.72||
-geojson_postcode|stem|02ea4828bcebb902|8203bcc45a26d433|450a3a2df4133c87|1560777580|outputdata/postcodes.geojson|t20647.5582522892s|s4350642094b|4350642094|file|local|vector|||1367.03||
 lsoa_admin|stem|8031aa69911c2dc2|57fefdcd4bb48473|6b5d94d8bd993b7f|-1485952592||t20647.7260602652s|s875753b|875753|rds|local|vector|||16.83||
-parish_emissions_summary_json|stem|b5b06b104cdcb23b|335a58858023c530|0cc77837ca85eef3|138843859||t20647.8033066952s|s126b|126|rds|local|vector|||267.95||
 voa_json_2020|stem|28900c5a162a0f88|0ab6317fe78ae58d|44aaebd227a68044|-577594970||t20647.8630098277s|s115b|115|rds|local|vector|||517.88||
 boundary_bin_parish|stem|f4f5d87c22645579|477aaebc02902ac5|af1e6504b6e881d2|891145558||t20648.1546595469s|s122b|122|rds|local|vector|||587.06||
 boundary_bin_la|stem|c7dc9478733a4ba4|3f6fb14ba16fb814|abe0a9dec1905591|532149451||t20648.155842123s|s118b|118|rds|local|vector|||101.27||
@@ -300,13 +295,7 @@ boundary_bin_ward|stem|89b678a2638e9dbb|b3818307838c4092|c6e8532ca6561e28|517141
 boundary_bin_constituency|stem|88d49c7d19f7f44e|d2e8e11bcf9f2e91|6f562497faef2fda|1423244255||t20648.1629618305s|s129b|129|rds|local|vector|||116.33||
 boundary_bin_lsoa|stem|7231758fe2523101|fc2163228895b849|23cd1613a1288209|818022554||t20648.1777441956s|s120b|120|rds|local|vector|||1276.39||
 area_access|stem|8db1095b4a67b198|d9c1fd5672a4098c|170251805328616a|-495401497||t20648.2606654158s|s193429052b|193429052|rds|local|vector|||854.92||
-build_overview_jsons|stem|96c4e6f5a3dc21dd|1b402675d41bfdb0|6c418723ccb4a0f2|2061583066||t20649.8977894702s|s122b|122|rds|local|vector|||290.47||
-oac_emissions_summary_json|stem|ff5f23f11c107b53|d1f7977223cb8336|0cdf77c5bdc6729e|-213870537||t20649.8987059086s|s122b|122|rds|local|vector|||5.39||
 area_gas_electric|stem|9a647164d1e0e93e|c747d4224010b5e2|730f00bc5c859858|307232984||t20649.9208896841s|s25676093b|25676093|rds|local|vector|||72.43||
-constituency_emissions_all|stem|ff9733d1c47ffedf|115fde967eaa36c5|5e504b8f5360a812|-1625475849||t20649.9209903862s|s1543505b|1543505|rds|local|vector|||2.08||
-ward_emissions_all|stem|d3ad853c21f97e00|95fec2d983dcc1f2|81afe015f254962b|928812505||t20649.9212559201s|s19291913b|19291913|rds|local|vector|||14.93||
-constituency_emissions_summary_json|stem|0c75e8733dd0074a|b3c1f7ac6c4b1b10|2bf409f5f579b690|-637796240||t20649.9293869041s|s131b|131|rds|local|vector|||33.61||
-ward_emissions_summary_json|stem|d35354611b07e590|6b9f571e5a985c83|9f789c3b80aad9d8|-1061033388||t20649.9339022852s|s123b|123|rds|local|vector|||389.22||
 area_population|stem|94088d5247fbe4aa|1dd85250c9209cf8|fe8fcdc04ee080a7|-10508676||t20658.6312150476s|s8520524b|8520524|rds|local|vector|||34||
 area_population_json|stem|e77a28538e829a39|d00457070f01b773|08eca467209b5a70|-1891545668||t20658.6377532441s|s44b|44|rds|local|vector|||564.52||
 load_inspire_one|function|37b56a85605d2af1|||||||||||||||
@@ -337,7 +326,6 @@ buildings|stem|d3b69d68e8a11824|17c11f19173e88a0|4ca2027ca8376024|462642683||t20
 buildings_heights|stem|5a990bdfdc7a9b7d|a965000c0d1f0b33|7031e3516962c50b|435184220||t20660.1632421345s|s2653055329b|2653055329|rds|local|vector|||22759.02|st_centroid assumes attributes are constant over geometries|
 buildings_lsoa_4326_high|stem|517a9ce86150f128|91961b239ab3f0b3|9ef23af26ec8da3e|-1392638135||t20662.2311056449s|s2711419404b|2711419404|rds|local|vector|||178106.12||
 zoomstack_buildings_lst_4326|stem|6b12231466372997|d3d917c77eee95a6|de104756cbae5637|594570010||t20662.2378269344s|s3500324956b|3500324956|rds|local|vector|||0||
-oac_emissions_all|stem|533cce7fc5933abf|0e22a8cfce01ab2a|eb0108d85ebb4c9f|2042129683||t20662.237925884s|s54919b|54919|rds|local|vector|||1.72||
 pmtiles_uprn_unknown|stem|153bc52d2c8bf222|8a280ad7774c0b90|6e5c11360ca3f61c|-1447060186|outputdata/uprn_unknown_20260728.pmtiles|t20662.4383752604s|s329721474b|329721474|file|local|vector|||353.78||
 pmtiles_epc_dom|stem|95650ea58ecebee1|e65eaeefe5238f89|d56339ad1ecb9a7d|-1313422490|outputdata/epc_dom_20260728.pmtiles|t20662.4508983228s|s1858444215b|1858444215|file|local|vector|||1080.22||
 pmtiles_epc_nondom|stem|5f132dc091c1358e|25095b8d2d96d376|774dc5b1b2310014|-832145070|outputdata/epc_nondom_20260728.pmtiles|t20662.452194015s|s112358119b|112358119|file|local|vector|||109.63||
@@ -345,6 +333,31 @@ pmtiles_westminster|stem|eaef293f67d6e2ab|a223d96aa8471e2a|a66df1c040e26e77|2003
 pmtiles_la|stem|b80ce561c644e0ba|b58b65d10089eacd|7d43c8707f0c494e|2059785649|outputdata/la_20260728.pmtiles|t20662.4529604846s|s5134041b|5134041|file|local|vector|||31.81||
 pmtiles_wards|stem|ce35d123d2887b37|87cfdf232ff9e9e1|5fe726505c9ababf|-1064363007|outputdata/wards_20260728.pmtiles|t20662.4534747564s|s14202365b|14202365|file|local|vector|||44.34||
 pmtiles_parish|stem|55b261a91a9f51e1|cacaf3cefbffcf27|33f332e8ff6001af|100742970|outputdata/parish_20260728.pmtiles|t20662.4539625308s|s13635250b|13635250|file|local|vector|||42.09||
+pt_frequency|stem|10f82d6dd9ef8989|fc857b1ada22aa85|2369b9567a0705b1|971799777||t20690.2992448673s|s25364700b|25364700|rds|local|vector|||327.08||
+bulk_pt_frequency|stem|fb5ea03312ac3d1e|dff2d3ea2fb7687a|1095f1119af7fe55|1972409404|outputdata/bulk/pt_frequency_20260825.zip|t20690.2994981797s|s15755967b|15755967|file|local|vector|||20.81||
+pt_json|stem|4f6827e20c0a5cad|ad2b27ca25bd9cc9|abde967de1b0f14e|372774427||t20690.3247750295s|s121b|121|rds|local|vector|||2182.83||
+build_postcode_jsons|stem|878d41cd7ccfa0d9|1b6a34cfdb248ba0|a5351ab33912c870|-1252984890||t20690.7324449737s|s10748859b|10748859|rds|local|vector|||35194.55||
+epc_dom_summary|stem|33748db733029902|63e14babb6ac197f|acfe1e653124d9b7|-698757306||t20690.7494212865s|s7379634b|7379634|rds|local|vector|||1459.06|invalid factor level, NA generated. invalid factor level, NA generated|
+voa_json_2010|stem|05f37c25c7fa9fb5|4b499d05aff63107|0222876da6a832e1|-1161495879||t20690.7600004847s|s116b|116|rds|local|vector|||908.61||
+build_epc_dom_jsons|stem|c780c70fff684351|8ca9bdca00b0de59|b2532f7e85cb8f96|974314826||t20690.7873787275s|s116b|116|rds|local|vector|||2363.8||
+bulk_epc_dom_summary|stem|0a6968576c4de49a|fe8407cd08f949c1|671ee1dbd23ff7ac|143664269|outputdata/bulk/epc_dom_summary_20260825.zip|t20690.7877767921s|s6880474b|6880474|file|local|vector|||35.87|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
+bulk_buildings_heights|stem|a83e84f18abb17a1|4340cad27bb67613|57f7bb2b0232dded|-705482265|outputdata/bulk/buildings_heights_20260825.zip|t20690.8105569169s|s3901057318b|3901057318|file|local|vector|||1538.16|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
+pmtiles_postcode|stem|0e4a836e50e27b5f|40040a3f04114a3d|4b50644838a93eb9|-1011986628|outputdata/postcodes_20260825.pmtiles|t20690.8316241413s|s692047089b|692047089|file|local|vector|||1809.5||
+build_access_jsons|stem|954440978ec9ae5d|4f9c60d5aad0edc4|f72d49a4763cfc6d|1370075298||t20690.9594546821s|s115b|115|rds|local|vector|||11017.42||
+area_pt_frequencies|stem|9e0ece2e07d4a44b|d397a871c1c8e7fb|d1d5f0eb287a1169|358498176||t20690.9673478926s|s25143716b|25143716|rds|local|vector|||675||
+area_epc_dom|stem|a0dbfce04531c195|a2f4c31d5c51278b|ce2b938db097653c|-523609739||t20690.9675336246s|s3524753b|3524753|rds|local|vector|||13.39||
+area_prices|stem|3ed0d0c900b0ba2f|759520e711644821|5419ef2f158796d5|1889529891||t20690.9682056113s|s6174871b|6174871|rds|local|vector|||54.55||
+household_pics_json|stem|23d3c6e229445d97|859ff9ba69b0f6df|387a44d524bf0b86|-995134782||t20690.9778460758s|s123b|123|rds|local|vector|||830.3||
+area_pt_frequencies_json|stem|e77a28538e829a39|e7acdcb52be293b9|dbb0e48ddd096060|469078411||t20690.9963812433s|s44b|44|rds|local|vector|||1600.57||
+area_access_json|stem|e77a28538e829a39|906bdbf601fa1bea|3d9de53aea9d1f58|-1689825890||t20691.0451588849s|s44b|44|rds|local|vector|||4208.9||
+area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|5d77c635d70ce18d|375468698||t20691.0528276918s|s44b|44|rds|local|vector|||662.42||
+area_prices_json|stem|e77a28538e829a39|90e44916c86d78c0|f2f7e266e537d08a|805557412||t20691.0567891044s|s44b|44|rds|local|vector|||341.87||
+area_vehicle_summaries|stem|0c2d1c8bc03891a6|92d3499fd9442d84|48cc8eb09d71c973|-100933756||t20691.0577990841s|s15567338b|15567338|rds|local|vector|||69.52||
+vehicle_summary_json|stem|c72d6207d86c8de8|fe27dd1f47e20f56|2167ac5a7ce71e1c|-1875494818||t20691.0893162138s|s124b|124|rds|local|vector|||2722.06||
+build_population_jsons|stem|bddf0dea8e591801|5a972723a57811ac|b138bb31eeaa078e|-842498390||t20691.1058964156s|s119b|119|rds|local|vector|||1431.84||
+area_vehicle_summaries_json|stem|e77a28538e829a39|115d1dc54f5a320a|5c15d66407a2c232|-1478181231||t20691.2220907335s|s44b|44|rds|local|vector|||1275.77||
+build_historical_domestic_gas_elec_jsons|stem|c96d647bbadb91b9|19224c03ef247a59|4528c23d4012975a|-1944609059||t20691.2374172314s|s138b|138|rds|local|vector|||1234.75|NAs introduced by coercion to integer range. NAs introduced by coercion to integer range. NAs introduced by coercion to integer range|
+area_gas_electric_json|stem|e77a28538e829a39|88a8fee0e08e5625|dbb3945b00d1ab99|2143681352||t20691.2835149006s|s44b|44|rds|local|vector|||725.38||
 read_bounds_shp|function|92c07670d7e85bff
 top_architypes|function|097f4ad996863485
 summarise_population|function|3f60779d9cfd6aea
@@ -401,7 +414,7 @@ distribute_other_heating|function|9a637bfb76a462e7
 split_for_arrays3|function|a83405e1b2e94258
 simplify_AccType5|function|a3bac859419d2b31
 simplify_household15|function|7c455fd3d546609b
-select_transport_vars|function|3fb1c94baa01086e
+select_transport_vars|function|6a323ed0466dcca7
 join_for_geojson|function|0d6d11dd42f5eb46
 join_pmtiles|function|86d93aa92ef6c365
 make_geojson|function|304b0af2acbe00e2
@@ -411,7 +424,7 @@ add_component_costs|function|6ea61649d656b3f3
 convert2json|function|aa3214af3886ded1
 write_json_bin|function|e278c9cc5dccf2f7
 read_bounds_dz11|function|95f3adcbc9d62d88
-modal|function|2b184bba45e63487
+modal|function|f81e33327a15e747
 unzip_nomis|function|3673456bb849b567
 count_weekday_runs|function|b41c427b353a6d5d
 internal_trips_per_zone|function|4e00007b94e726db
@@ -546,7 +559,7 @@ extrapolate_households|function|ded2dcfa78a3f9ba
 combine_land_use|function|4a0f62682edcda38
 get_flights_total_emissions|function|9e3051403dd0eaa3
 download_pct|function|de3116bbbd5744ce
-percentile|function|98e84d8f995daaa2
+percentile|function|696d0e293eb600e9
 load_house_prices|function|27d211da841f291f
 read_AccType7_CarVan5_CarVan3_Tenure5_Tenure3_scot|function|114f65bcb3ab640a
 read_householdComp10_hhSize5_CarVan3_Tenure3_AccType3_scot|function|a59b24b5eaf878a7
@@ -593,7 +606,7 @@ zoomstack_sites|function|1f3031696629970d
 download_area_classifications|function|c5ed9189b89ade89
 download_consumption_footprint|function|6741153cba24b156
 bulk_export_inspire|function|aa14bdc81a65f8cb
-make_lsoa_warnings|function|f563f61cf6eec057
+make_lsoa_warnings|function|5e835eda7b884c6b
 load_voa_CTSOP1|function|9d3f27ae2828e06f
 estimate_other_heating_bills|function|17ed5795c324187e
 load_OA_DZ_IZ_2022_lookup|function|7cebcf364e5093e4
@@ -662,7 +675,7 @@ read_hhComp15_Tenure5_Size5_CarVan5_EW|function|956a3cd194d4ecb1
 make_pmtiles_stack|function|16f7c85b9a6f937c
 export_zone_bin|function|cd30eb36dc7f9b86
 export_boundary_bin|function|e1b2d86447385e8c
-select_retofit_vars|function|13ab8e22a63d4ade
+select_retofit_vars|function|fbb4e64e4fef913d
 load_population_2021|function|054a524c6c3d0708
 load_census_2021_households|function|805742dc11cc3cc8
 load_census_2021_vehicles|function|e576556f54f3db19
@@ -716,7 +729,7 @@ wiggle_points|function|1d2771db9df349df
 bal_func|function|85a5a074fc872392
 match_LCFS_synth_pop|function|c90f7a1fcfd66c2f
 extrapolate_population_households|function|5f84d9864144601f
-value2grade|function|d26e79fc2835f83b
+value2grade|function|ec3053b7cc4a9ebc
 split_merge|function|3b185d66825cd3d5
 summarise_voa_post2010|function|78c187e9c172f392
 load_income_scotland|function|5f03bda96ed43422
@@ -743,10 +756,10 @@ sythetic_census|function|039c5517b2416918
 selected_lcfs|function|fbc6b4be319b745f
 furness_partial|function|e510c2f4e6483e27
 furness_balance|function|bd1b6a592320dfbc
-grade_percap_by_year|function|a1fe1b699aa7e6e9
-select_map_outputs|function|5c40117afd7e961c
-prep_postcode_gas_electic|function|6a3b43d583c70c5b
-combine_lsoa_emissions|function|e51d810ee4d2988f
+grade_percap_by_year|function|6d3181931a74918a
+select_map_outputs|function|5673c915f6a0a50c
+prep_postcode_gas_electic|function|457116ba95b1b1f4
+combine_lsoa_emissions|function|356abc10b434ea34
 process_buildings_high|function|53d7b1d819804cc4
 zoomstack_buildings_lsoa|function|b5672250804d0b38
 process_buildings_generic|function|f500a2c2b1d05f4b
@@ -760,7 +773,7 @@ balance_nssec|function|4d998962b6ad886a
 make_mat|function|481b5cb6f94ef847
 combine_nssec_enthinic|function|b64bd0efda0ede69
 match_matrix_rsums_csums|function|1dacfb0728bfe58a
-summarise_emissions_by|function|05d262e41f86fc09
+summarise_emissions_by|function|dadceeedee6ea8a1
 load_LCFS|function|a5a251f431e5f278
 load_dft_vehicle_registrations|function|b68fa7b942a5620f
 load_dft_ev_registrations|function|ea725ddbdc844a89
@@ -768,44 +781,31 @@ load_dft_ulev_registrations|function|98d9d9c1f84daf20
 read_household_nssec_old|function|bf84f4ecdb741d71
 balance_nssec2|function|5c7eaf3a1cca6342
 build_household_types|function|a8e93fa9c74dad41
-make_westminter_summary|function|3a01e8b8e28b32a5
-make_la_summary|function|3aaa3547668ab2fe
-make_oac_summary|function|a60d5dba0fafebf0
-make_parish_summary|function|bd921f01caa448df
-make_ward_summary|function|e597627bd96fc60d
+make_westminter_summary|function|77079b6039601328
+make_la_summary|function|0fd5aa20835ac05d
+make_oac_summary|function|5ff9641330c198af
+make_parish_summary|function|437f0beea9d90701
+make_ward_summary|function|9cd79dd45792c7e3
 read_household_nssec|function|f9eb8ce85ed2650f
-pt_frequency|stem|10f82d6dd9ef8989|fc857b1ada22aa85|2369b9567a0705b1|971799777||t20690.2992448673s|s25364700b|25364700|rds|local|vector|||327.08||
-bulk_pt_frequency|stem|fb5ea03312ac3d1e|dff2d3ea2fb7687a|1095f1119af7fe55|1972409404|outputdata/bulk/pt_frequency_20260825.zip|t20690.2994981797s|s15755967b|15755967|file|local|vector|||20.81||
-pt_json|stem|4f6827e20c0a5cad|ad2b27ca25bd9cc9|abde967de1b0f14e|372774427||t20690.3247750295s|s121b|121|rds|local|vector|||2182.83||
-build_postcode_jsons|stem|878d41cd7ccfa0d9|1b6a34cfdb248ba0|a5351ab33912c870|-1252984890||t20690.7324449737s|s10748859b|10748859|rds|local|vector|||35194.55||
-epc_dom_summary|stem|33748db733029902|63e14babb6ac197f|acfe1e653124d9b7|-698757306||t20690.7494212865s|s7379634b|7379634|rds|local|vector|||1459.06|invalid factor level, NA generated. invalid factor level, NA generated|
-voa_json_2010|stem|05f37c25c7fa9fb5|4b499d05aff63107|0222876da6a832e1|-1161495879||t20690.7600004847s|s116b|116|rds|local|vector|||908.61||
-build_epc_dom_jsons|stem|c780c70fff684351|8ca9bdca00b0de59|b2532f7e85cb8f96|974314826||t20690.7873787275s|s116b|116|rds|local|vector|||2363.8||
-bulk_epc_dom_summary|stem|0a6968576c4de49a|fe8407cd08f949c1|671ee1dbd23ff7ac|143664269|outputdata/bulk/epc_dom_summary_20260825.zip|t20690.7877767921s|s6880474b|6880474|file|local|vector|||35.87|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
-bulk_buildings_heights|stem|a83e84f18abb17a1|4340cad27bb67613|57f7bb2b0232dded|-705482265|outputdata/bulk/buildings_heights_20260825.zip|t20690.8105569169s|s3901057318b|3901057318|file|local|vector|||1538.16|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
-pmtiles_postcode|stem|0e4a836e50e27b5f|40040a3f04114a3d|4b50644838a93eb9|-1011986628|outputdata/postcodes_20260825.pmtiles|t20690.8316241413s|s692047089b|692047089|file|local|vector|||1809.5||
-build_access_jsons|stem|954440978ec9ae5d|4f9c60d5aad0edc4|f72d49a4763cfc6d|1370075298||t20690.9594546821s|s115b|115|rds|local|vector|||11017.42||
-area_pt_frequencies|stem|9e0ece2e07d4a44b|d397a871c1c8e7fb|d1d5f0eb287a1169|358498176||t20690.9673478926s|s25143716b|25143716|rds|local|vector|||675||
-area_epc_dom|stem|a0dbfce04531c195|a2f4c31d5c51278b|ce2b938db097653c|-523609739||t20690.9675336246s|s3524753b|3524753|rds|local|vector|||13.39||
-area_prices|stem|3ed0d0c900b0ba2f|759520e711644821|5419ef2f158796d5|1889529891||t20690.9682056113s|s6174871b|6174871|rds|local|vector|||54.55||
-household_pics_json|stem|23d3c6e229445d97|859ff9ba69b0f6df|387a44d524bf0b86|-995134782||t20690.9778460758s|s123b|123|rds|local|vector|||830.3||
-area_pt_frequencies_json|stem|e77a28538e829a39|e7acdcb52be293b9|dbb0e48ddd096060|469078411||t20690.9963812433s|s44b|44|rds|local|vector|||1600.57||
-area_access_json|stem|e77a28538e829a39|906bdbf601fa1bea|3d9de53aea9d1f58|-1689825890||t20691.0451588849s|s44b|44|rds|local|vector|||4208.9||
-area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|5d77c635d70ce18d|375468698||t20691.0528276918s|s44b|44|rds|local|vector|||662.42||
-area_prices_json|stem|e77a28538e829a39|90e44916c86d78c0|f2f7e266e537d08a|805557412||t20691.0567891044s|s44b|44|rds|local|vector|||341.87||
-transport_lsoa_data|stem|6b56f4e65f2b0dc3|bb074ea221b92e67|188d28c64584911b|-1134730169||t20691.0568949123s|s1036040b|1036040|rds|local|vector|||3.89||
-area_vehicle_summaries|stem|0c2d1c8bc03891a6|92d3499fd9442d84|48cc8eb09d71c973|-100933756||t20691.0577990841s|s15567338b|15567338|rds|local|vector|||69.52||
-vehicle_summary_json|stem|c72d6207d86c8de8|fe27dd1f47e20f56|2167ac5a7ce71e1c|-1875494818||t20691.0893162138s|s124b|124|rds|local|vector|||2722.06||
-build_population_jsons|stem|bddf0dea8e591801|5a972723a57811ac|b138bb31eeaa078e|-842498390||t20691.1058964156s|s119b|119|rds|local|vector|||1431.84||
-pmtiles_transport|stem|a9713e9b1234abe2|f5e3e43dbccfebe5|36e31b577352d19e|50855935|outputdata/transport/zones_transport_20260826.pmtiles*outputdata/transport/buildings_transport_20260826.pmtiles|t20691.2072289108s|s2072050572b|2072050572|file|local|vector|||8509.25||
-area_vehicle_summaries_json|stem|e77a28538e829a39|115d1dc54f5a320a|5c15d66407a2c232|-1478181231||t20691.2220907335s|s44b|44|rds|local|vector|||1275.77||
-retrofit_lsoa_data|stem|d4a183838cd4b600|129aacab6d126a3d|85c5b796d25ae0bb|-2108320529||t20691.2230982026s|s975739b|975739|rds|local|vector|||10.21||
-build_historical_domestic_gas_elec_jsons|stem|c96d647bbadb91b9|19224c03ef247a59|4528c23d4012975a|-1944609059||t20691.2374172314s|s138b|138|rds|local|vector|||1234.75|NAs introduced by coercion to integer range. NAs introduced by coercion to integer range. NAs introduced by coercion to integer range|
-la_emissions_all|stem|92176d66546916bc|5f52fc4b2a6062da|f73adb98bb3b14f4|-1503602655||t20691.2375021414s|s861821b|861821|rds|local|vector|||2.17||
-lsoa_map_data|stem|19292157a422b19f|a6b4acb7da4d8ed7|e263c6164ac59d74|1195666468||t20691.2375576898s|s452794b|452794|rds|local|vector|||0.23||
-parish_emissions_all|stem|2b1792915bcdd3ac|9f3411d61b1d668d|2dbaa2dbb1290f61|1255518012||t20691.2377322304s|s13301516b|13301516|rds|local|vector|||9.48||
-build_historical_emissions_jsons|stem|6180df9cd43e198c|fbd862969e0d62f8|5ec11f34adb18644|1811032421||t20691.2751115369s|s129b|129|rds|local|vector|||3225.67|NAs introduced by coercion to integer range|
-area_gas_electric_json|stem|e77a28538e829a39|88a8fee0e08e5625|dbb3945b00d1ab99|2143681352||t20691.2835149006s|s44b|44|rds|local|vector|||725.38||
-pmtiles_retrofit|stem|4ef53001e8420d54|fe0818c5bf6f8046|1f27d0587fd475e7|-1193630741|outputdata/retrofit/zones_retrofit_20260826.pmtiles*outputdata/retrofit/buildings_retrofit_20260826.pmtiles|t20691.3856398248s|s2208862275b|2208862275|file|local|vector|||8610.16|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
-la_emissions_summary_json|stem|011555ad775b5302|d986c5c19b177b5b|259d083939252d24|-545267571||t20691.3861396515s|s121b|121|rds|local|vector|||35.66||
-pmtiles_pbcc|stem|d129b1dfd4f7539e|1fe6186963515fd9|4ebb1f1916db4a3c|-800414012|outputdata/pbcc/zones_pbcc_20260826.pmtiles*outputdata/pbcc/buildings_pbcc_20260826.pmtiles|t20691.4825175523s|s2051394283b|2051394283|file|local|vector|||8202.34||
+geojson_postcode|stem|02ea4828bcebb902|8203bcc45a26d433|1f323620341d37b2|1560777580|outputdata/postcodes.geojson|t20693.6932468403s|s4350642094b|4350642094|file|local|vector|||978||
+transport_lsoa_data|stem|256fe79a0cda4cad|bb074ea221b92e67|6086b92f6e322fa5|-1134730169||t20693.6933136294s|s778418b|778418|rds|local|vector|||1.11||
+pmtiles_transport|stem|738831c78d6b4d8a|f5e3e43dbccfebe5|7ec89025d1434699|50855935|outputdata/transport/zones_transport_20260828.pmtiles*outputdata/transport/buildings_transport_20260828.pmtiles|t20693.8047909511s|s2059789531b|2059789531|file|local|vector|||9392.81||
+lsoa_emissions_all|stem|7214b89889ff42c6|451c684d240cef56|e0dadff3a9598ce2|1303375064||t20693.8056482021s|s226804585b|226804585|rds|local|vector|||36.23||
+retrofit_lsoa_data|stem|e4e3e65e2d64a9d6|129aacab6d126a3d|e9e74eb91eb6a0d6|-2108320529||t20693.8077563277s|s979225b|979225|rds|local|vector|||12.66||
+lsoa_warnings|stem|c8a9f61ba5e9acfb|c68b251219359142|c992f637781b62d4|-740085556||t20693.8079179831s|s24915b|24915|rds|local|vector|||0.29||
+la_emissions_all|stem|afa032110bad470e|5f52fc4b2a6062da|ddfb1f3dce542933|-1503602655||t20693.8084992552s|s861972b|861972|rds|local|vector|||42||
+ward_emissions_all|stem|5c8164a0dcb08e6c|95fec2d983dcc1f2|bf4020acd4ed6f93|928812505||t20693.8089060271s|s19294001b|19294001|rds|local|vector|||25.09||
+lsoa_map_data|stem|90cd818814c4e6df|a6b4acb7da4d8ed7|0e15f4bb252798d0|1195666468||t20693.808989883s|s452437b|452437|rds|local|vector|||1.02||
+parish_emissions_all|stem|f7b1deaae7fcdb1c|9f3411d61b1d668d|95bd55daf07ec432|1255518012||t20693.8094935112s|s13300923b|13300923|rds|local|vector|||35.35||
+build_historical_emissions_jsons|stem|5ca4e10268d1c9a0|fbd862969e0d62f8|92f262e72d9c2e6c|1811032421||t20693.8540379114s|s129b|129|rds|local|vector|||3842.94|NAs introduced by coercion to integer range|
+oac_emissions_all|stem|60dcaa16a833b450|0e22a8cfce01ab2a|e4b108ab56bfefcf|2042129683||t20693.8541303571s|s54917b|54917|rds|local|vector|||1.41||
+bulk_pbcc|stem|043f7401d353884a|ec02c8977d58262e|7ee4df7d32edbdac|2096282106|outputdata/bulk/pbcc_lsoa_20260828.zip|t20693.8547198159s|s132985549b|132985549|file|local|vector|||45.72||
+constituency_emissions_all|stem|b4ee22e8c9effcfc|115fde967eaa36c5|bf73bdd04d5fbd08|-1625475849||t20693.8548628231s|s1543564b|1543564|rds|local|vector|||5.98||
+pmtiles_retrofit|stem|29366bcfd40ffe35|fe0818c5bf6f8046|84fe2ad05b0280b7|-1193630741|outputdata/retrofit/zones_retrofit_20260828.pmtiles*outputdata/retrofit/buildings_retrofit_20260829.pmtiles|t20693.9733804025s|s2208799108b|2208799108|file|local|vector|||10004.49|Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?. Thats a lot of columns for the GeoJSON, are they all needed?|
+build_overview_jsons|stem|165d7b937ce7fe68|1b402675d41bfdb0|1ee71d13a0b3157e|2061583066||t20693.9785582672s|s122b|122|rds|local|vector|||440.7||
+la_emissions_summary_json|stem|c0ce7aada607bd1d|d986c5c19b177b5b|16ddc6daf67ac7e6|-545267571||t20693.9833684861s|s121b|121|rds|local|vector|||415.49||
+ward_emissions_summary_json|stem|e7d602e5b4f2ef30|6b9f571e5a985c83|2da173541157465e|-1061033388||t20693.9884799058s|s123b|123|rds|local|vector|||440.83||
+pmtiles_pbcc|stem|211a9f8c4d6ef485|1fe6186963515fd9|13b6e06012de382f|-800414012|outputdata/pbcc/zones_pbcc_20260829.pmtiles*outputdata/pbcc/buildings_pbcc_20260829.pmtiles|t20694.0805089002s|s2051281494b|2051281494|file|local|vector|||7784.68||
+parish_emissions_summary_json|stem|97cee0502a7261da|335a58858023c530|f56f8ddbf522bcb1|138843859||t20694.088405021s|s126b|126|rds|local|vector|||674.51||
+oac_emissions_summary_json|stem|a12f21c0da6d4afe|d1f7977223cb8336|fa025225980612be|-213870537||t20694.0884834475s|s122b|122|rds|local|vector|||6.67||
+constituency_emissions_summary_json|stem|fa646b28eb2ce18d|b3c1f7ac6c4b1b10|15710b4055bbe65f|-637796240||t20694.0890149274s|s131b|131|rds|local|vector|||45.78||
