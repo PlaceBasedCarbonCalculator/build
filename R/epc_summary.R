@@ -10,33 +10,33 @@ trueNA = function(x){
 }
 
 
-#' Summarise domestic EPC certificates per LSOA
+#' Read the cleaned GB domestic EPC certificate points
 #'
-#' @description Reads the cleaned GB domestic EPC point data, assigns each
-#'   certificate to a zone by spatial join with the GB LSOA boundaries, tidies
-#'   the free-text categories (fuel, glazing, wall/roof/floor descriptions),
-#'   and counts certificates per LSOA across ~130 categories: EPC band,
-#'   building type, tenure, construction age, and the energy-efficiency rating
-#'   and description of each element (floor, windows, water, walls, roof,
-#'   heating, controls, lighting, solar). Used by the `epc_dom_summary`
-#'   target, feeding the EPC JSONs, retrofit map data and bulk export.
-#' @param path Path to `GB_domestic_epc.Rds` (sf points, one row per
-#'   dwelling's latest certificate).
-#' @param bounds_lsoa_GB_full GB zone boundaries (`bounds_lsoa_GB_full`
-#'   target).
-#' @return A data frame with one row per LSOA and count/average columns.
-#'   Messages are emitted for any LSOAs whose category counts don't sum
-#'   back to the certificate total.
+#' @description Loads `GB_domestic_epc.Rds` (one row per dwelling's latest
+#'   certificate) and puts it on British National Grid so it can be joined to
+#'   any of the boundary layers. Shared by `epc_summarise_domestic()` and
+#'   `epc_summarise_domestic_areas()`.
+#' @param path Path to `GB_domestic_epc.Rds`.
+#' @return An sf points data frame in EPSG 27700.
 #' @keywords internal
-epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
-                                  bounds_lsoa_GB_full
-                                  ){
+epc_read_domestic = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds")){
   certs <- readRDS(path)
   certs <- sf::st_transform(certs, 27700)
+  certs
+}
 
-  certs <- sf::st_join(certs, bounds_lsoa_GB_full)
-  certs <- sf::st_drop_geometry(certs)
-
+#' Tidy the free-text EPC certificate categories
+#'
+#' @description Collapses and standardises the certificate columns the counts
+#'   are built from: building type, fuel, glazing, the wall/roof/floor
+#'   descriptions (including flagging dwellings above and below), and the
+#'   energy-efficiency ratings, filling missing values with "unknown". Split
+#'   out of `epc_summarise_domestic()` so every geography counts certificates
+#'   from identically tidied categories.
+#' @param certs Certificates as a plain data frame (geometry dropped).
+#' @return `certs` with the category columns tidied.
+#' @keywords internal
+epc_clean_certs = function(certs){
   certs$b_type = as.character(certs$b_type)
   certs$b_type[is.na(certs$b_type)] = ""
   certs$buidling_type <- paste0(certs$b_type," ",certs$p_type)
@@ -121,9 +121,26 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   certs$buidling_type[is.na(certs$buidling_type)] = "unknown"
   certs$age[is.na(certs$age)] = "unknown"
 
-  certs = certs[!is.na(certs$LSOA21CD),]
+  certs
+}
 
-  cert_summ <- dplyr::group_by(certs, LSOA21CD) |>
+#' Count domestic EPC certificates per zone
+#'
+#' @description Counts tidied certificates across ~130 categories: EPC band,
+#'   building type, tenure, construction age, and the energy-efficiency rating
+#'   and description of each element (floor, windows, water, walls, roof,
+#'   heating, controls, lighting, solar), plus average EPC score and floor
+#'   area. The zone can be any area code the certificates have been joined to,
+#'   so LSOAs, wards and parishes all get the same set of columns.
+#' @param certs Tidied certificates (`epc_clean_certs()`), with a zone code
+#'   column and no missing zone codes.
+#' @param zone_col Name of the zone code column (e.g. "LSOA21CD", "WD25CD").
+#' @return A data frame with one row per zone and count/average columns.
+#'   Messages are emitted for any zones whose category counts don't sum back
+#'   to the certificate total.
+#' @keywords internal
+epc_summarise_certs = function(certs, zone_col){
+  cert_summ <- dplyr::group_by(certs, dplyr::across(dplyr::all_of(zone_col))) |>
   dplyr::summarise(
               epc_total = dplyr::n(),
               epc_A = length(cur_rate[cur_rate == "A"]),
@@ -237,7 +254,11 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
               roof_other = length(roof_ee[!roof_ee %in% c("Very Good","Good","Average","Poor","Very Poor","dwelling above")]),
 
               roofd_pitched = length(roof_d[grepl("pitched",roof_d)]),
-              roofd_flat = length(roof_d[grepl("flat",roof_d)]),
+              # A pitched roof whose description also mentions flat roof
+              # insulation ("pitched, flat roof insulation loft insulation", 5
+              # certificates) matched both categories and was counted twice.
+              # Pitched wins: it is what the roof is.
+              roofd_flat = length(roof_d[grepl("flat",roof_d) & !grepl("pitched",roof_d)]),
               # fixed = TRUE matters: without it "(s)" is a regex group and the
               # pattern becomes "roof rooms", which never appears in the data,
               # so this category was always empty and roof rooms fell into other.
@@ -254,10 +275,23 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
 
               mainheatdesc_gasboiler = length(heat_d[heat_d %in% c("boiler, underfloor heating, mains gas", "boiler, radiators, mains gas","boiler, mains gas","boiler, radiators, mains gas, boiler, underfloor heating, mains gas","boiler, radiators, mains gas, boiler, radiators, mains gas","boiler, underfloor heating, mains gas, boiler, radiators, mains gas","boiler with radiators, underfloor heating, mains gas","boiler, radiators, mains gas, electric underfloor heating") ]),
               mainheatdesc_oilboiler = length(heat_d[heat_d %in% c("boiler, underfloor heating, oil","boiler, radiators, oil")]),
-              mainheatdesc_storageheater = length(heat_d[grepl("electric storage heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)",heat_d)]),
-              mainheatdesc_portableheater = length(heat_d[grepl("electric heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)",heat_d)]),
+              # The exclusions below make the categories disjoint, which the
+              # mainheatdesc_other residual relies on. Precedence, following
+              # what mainheatdesc_roomheater already did: community beats
+              # everything, then heat pump, then storage heaters, then the
+              # assumed portable heaters. Without "heat pump" and "storage" in
+              # these lists, 610 certificates whose heat_d names two systems
+              # ("electric storage heaters, air source heat pump, warm air,
+              # electric", "portable electric heaters assumed for most rooms,
+              # electric storage heaters") were counted in both categories.
+              mainheatdesc_storageheater = length(heat_d[grepl("electric storage heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)|(heat pump)",heat_d)]),
+              mainheatdesc_portableheater = length(heat_d[grepl("electric heaters",heat_d) & !grepl("(mains gas)|(room heaters)|(oil)|(wood)|(lpg)|(community)|(heat pump)|(storage)",heat_d)]),
               mainheatdesc_roomheater = length(heat_d[grepl("room heaters",heat_d) & !grepl("(boiler)|(storage)|(heat pump)|(community)",heat_d)]),
-              mainheatdesc_heatpump = length(heat_d[grepl("heat pump",heat_d)]),
+              # Community heat pump schemes ("community scheme, air source heat
+              # pump, underfloor heating, electric") match both this and
+              # mainheatdesc_community; community wins, as it does for every
+              # other heating category.
+              mainheatdesc_heatpump = length(heat_d[grepl("heat pump",heat_d) & !grepl("community",heat_d)]),
               mainheatdesc_community = length(heat_d[grepl("community",heat_d)]),
 
               mainfuel_mainsgas = length(fuel[fuel == "mains gas"]),
@@ -310,7 +344,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   check_sums_to_total = function(cols, label){
     ok = cert_summ$epc_total == rowSums(cert_summ[,cols])
     if(!all(ok)){
-      message(sum(!ok)," LSOAs where ",label," counts don't sum to epc_total")
+      message(sum(!ok)," ",zone_col," zones where ",label," counts don't sum to epc_total")
     }
   }
 
@@ -352,7 +386,7 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   for (col in residual_cols) {
     neg <- sum(cert_summ[[col]] < 0, na.rm = TRUE)
     if (neg > 0) {
-      message(neg, " LSOAs where ", col, " is negative - the categories it is ",
+      message(neg, " ", zone_col, " zones where ", col, " is negative - the categories it is ",
               "the remainder of overlap, so some certificates are counted twice")
     }
   }
@@ -360,4 +394,74 @@ epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_
   cert_summ
 
 
+}
+
+#' Summarise domestic EPC certificates per LSOA
+#'
+#' @description Assigns each certificate to a zone by spatial join with the GB
+#'   LSOA boundaries, tidies the free-text categories and counts certificates
+#'   per LSOA. Used by the `epc_dom_summary` target, feeding the EPC JSONs,
+#'   retrofit map data and bulk export.
+#' @param path Path to `GB_domestic_epc.Rds` (sf points, one row per
+#'   dwelling's latest certificate).
+#' @param bounds_lsoa_GB_full GB zone boundaries (`bounds_lsoa_GB_full`
+#'   target).
+#' @return A data frame with one row per LSOA and count/average columns.
+#' @keywords internal
+epc_summarise_domestic = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                                  bounds_lsoa_GB_full
+                                  ){
+  certs <- epc_read_domestic(path)
+
+  certs <- sf::st_join(certs, bounds_lsoa_GB_full)
+  certs <- sf::st_drop_geometry(certs)
+
+  certs <- epc_clean_certs(certs)
+
+  certs = certs[!is.na(certs$LSOA21CD),]
+
+  epc_summarise_certs(certs, "LSOA21CD")
+}
+
+#' Summarise domestic EPC certificates per ward and parish
+#'
+#' @description Counts certificates for wards and parishes straight from the
+#'   certificate points, rather than aggregating the per-LSOA summary with the
+#'   population weights in `area_weights` (see R/area_weights.R). Weighting is
+#'   only needed where the source data is already tied to LSOAs: EPCs are
+#'   points, so each certificate can simply be placed in the ward and parish it
+#'   actually falls in. That removes the approximation for the small areas the
+#'   weights were built for - a rural LSOA covering several parishes gives each
+#'   parish its own certificates instead of a share of the LSOA's.
+#'
+#'   Both joins are made in one pass so the 1 GB certificate file is read once.
+#'   Certificates outside any area of a type (Scotland and Northern Ireland
+#'   have no parishes; the EPC data has no Northern Irish certificates) are
+#'   dropped from that geography, so unparished land contributes to no parish -
+#'   matching how `join_area_and_weight()` drops the "Unparished" pseudo-parish.
+#' @param path Path to `GB_domestic_epc.Rds`.
+#' @param bounds_wards Ward boundaries (`bounds_wards` target).
+#' @param bounds_parish Parish boundaries (`bounds_parish` target).
+#' @return A named list of two data frames, `ward` and `parish`, each with the
+#'   area code column followed by the same columns as `epc_dom_summary`.
+#' @keywords internal
+epc_summarise_domestic_areas = function(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                                        bounds_wards,
+                                        bounds_parish
+                                        ){
+  certs <- epc_read_domestic(path)
+
+  bounds_wards <- sf::st_transform(bounds_wards[,"WD25CD"], 27700)
+  bounds_parish <- sf::st_transform(bounds_parish[,"PAR23CD"], 27700)
+
+  certs <- sf::st_join(certs, bounds_wards)
+  certs <- sf::st_join(certs, bounds_parish)
+  certs <- sf::st_drop_geometry(certs)
+
+  certs <- epc_clean_certs(certs)
+
+  list(
+    ward = epc_summarise_certs(certs[!is.na(certs$WD25CD),], "WD25CD"),
+    parish = epc_summarise_certs(certs[!is.na(certs$PAR23CD),], "PAR23CD")
+  )
 }

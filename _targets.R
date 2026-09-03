@@ -202,6 +202,14 @@ tar_target(epc_dom_summary,{
                          bounds_lsoa_GB_full)
 }),
 
+# Ward and parish EPC counts built straight from the certificate points (see
+# R/epc_summary.R). EPCs carry a location, so unlike the LSOA-based datasets
+# they need no population weighting to reach small areas.
+tar_target(epc_dom_area_summary,{
+  epc_summarise_domestic_areas(path = file.path(parameters$path_data,"epc/GB_domestic_epc.Rds"),
+                               bounds_wards, bounds_parish)
+}),
+
 tar_target(build_epc_dom_jsons,{
   export_zone_bin(epc_dom_summary, idcol = "LSOA21CD",
                   name = "epc_dom", rounddp = 2, dataframe = "rows")
@@ -797,8 +805,17 @@ tar_target(area_access_json,{
   export_area_bins(area_access, "access")
 }),
 
+# EPC is the one area dataset not built by weighting the per-LSOA summary:
+# certificates are points, so wards and parishes are counted directly from the
+# points that fall in them (epc_dom_area_summary), with no LSOA-splitting
+# approximation. LA and constituency are large enough that whole-LSOA
+# assignment holds, and keep the aggregation from epc_dom_summary.
 tar_target(area_epc_dom,{
-  agg_all_levels(agg_area_epc, epc_dom_summary, area_weights, population)
+  list(la = agg_area_epc(epc_dom_summary, area_weights$la, population, "LAD25CD"),
+       ward = epc_dom_area_summary$ward,
+       parish = epc_dom_area_summary$parish,
+       constituency = agg_area_epc(epc_dom_summary, area_weights$constituency,
+                                   population, "PCON24CD"))
 }),
 tar_target(area_epc_dom_json,{
   # dataframe = "rows" to match the per-LSOA epc_dom export (build_epc_dom_jsons)

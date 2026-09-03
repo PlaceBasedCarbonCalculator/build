@@ -14,6 +14,12 @@
 #                         median requires unit-level data); flagged on the
 #                         website wherever shown
 #  * isochrones        -> excluded (point-based; not meaningful for areas)
+#
+# The exception is the domestic EPC summary: certificates are points, so wards
+# and parishes are counted directly from the certificates falling in them
+# (`epc_summarise_domestic_areas()` in R/epc_summary.R) and skip this file
+# entirely. `agg_area_epc()` below is still used for local authorities and
+# constituencies, which keep the whole-LSOA assignment.
 
 # The four supported area levels: level name -> area code column
 area_levels <- function() {
@@ -159,7 +165,10 @@ agg_area_access <- function(access_proximity, area_weights, population, area_col
 #' Aggregate the domestic EPC summary (retrofit tool) to an area level
 #'
 #' @description All dwelling counts are summed; `epc_score_avg` and
-#'   `floor_area_avg` are recomputed as EPC-count-weighted means.
+#'   `floor_area_avg` are recomputed as EPC-count-weighted means. Used for
+#'   local authorities and constituencies only: wards and parishes are counted
+#'   from the certificate points instead (see `epc_summarise_domestic_areas()`),
+#'   which needs no weighting and so has no small-area approximation.
 #' @return Data frame per area with the same columns as `epc_dom_summary`.
 #' @keywords internal
 agg_area_epc <- function(epc_dom_summary, area_weights, population, area_col) {
