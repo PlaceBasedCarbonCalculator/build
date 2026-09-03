@@ -145,22 +145,28 @@ select_household_pics = function(combined_long, idcol = "LSOA21CD"){
 #'   `select_household_pics()` picture allocation keyed by the area code. Drops
 #'   LSOAs with no code for this area type and the "Unparished" pseudo-parish
 #'   (as `join_area_and_weight()` does). Called for every level by
-#'   `agg_all_levels()`.
+#'   `agg_all_levels()`, so wards and parishes get the population weighted
+#'   lookup and larger areas the whole-LSOA one.
 #' @param combined_long GB household-type table (`household_clusters_gb`), with
 #'   `LSOA21CD`, `NSSEC5`, `householdComposition`, `ethnic`, `households`.
-#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param area_weights One level of the `area_weights` target: `LSOA21CD`, the
+#'   area code column and `weight`. Household counts are scaled by the weight
+#'   so an LSOA straddling a boundary gives each area its share.
 #' @param area_col The area code column to aggregate to (e.g. "WD25CD").
 #' @return A data frame with the `area_col` column, `id` and `pic` - the same
 #'   shape as the per-LSOA `select_household_pics()` output.
 #' @keywords internal
-agg_area_household_pics = function(combined_long, lsoa_admin, area_col){
-  admin = lsoa_admin[, c("LSOA21CD", area_col)]
-  x = dplyr::left_join(combined_long, admin, by = "LSOA21CD")
+agg_area_household_pics = function(combined_long, area_weights, area_col){
+  lookup = area_weights[, c("LSOA21CD", area_col, "weight")]
+  x = dplyr::left_join(combined_long, lookup, by = "LSOA21CD",
+                       relationship = "many-to-many")
   x = x[!is.na(x[[area_col]]) & x[[area_col]] != "Unparished", ]
+  x$weight[is.na(x$weight)] = 1
   x = x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(
       c(area_col, "NSSEC5", "householdComposition", "ethnic")))) |>
-    dplyr::summarise(households = sum(households, na.rm = TRUE), .groups = "drop")
+    dplyr::summarise(households = sum(households * weight, na.rm = TRUE),
+                     .groups = "drop")
   select_household_pics(x, idcol = area_col)
 }
 

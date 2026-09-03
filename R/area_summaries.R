@@ -15,7 +15,7 @@
 #                         website wherever shown
 #  * isochrones        -> excluded (point-based; not meaningful for areas)
 
-# The four supported area levels: level name -> lsoa_admin code column
+# The four supported area levels: level name -> area code column
 area_levels <- function() {
   c(la = "LAD25CD", ward = "WD25CD", parish = "PAR23CD", constituency = "PCON24CD")
 }
@@ -43,25 +43,44 @@ weighted_median <- function(x, w) {
   x[which(cw >= 0.5)[1]]
 }
 
-#' Attach an area code and a static population weight to an LSOA dataset
+#' Attach an area code, its population share and a static population weight
 #'
-#' @description Joins the `lsoa_admin` area code column and a time-invariant
-#'   population weight (the mean of `all_ages` across available years) onto a
-#'   per-LSOA data frame. A static weight is used because the tool datasets
-#'   span different year ranges than the population series.
+#' @description Joins one level of the `area_weights` lookup onto a per-LSOA
+#'   data frame, together with a time-invariant population weight (the mean of
+#'   `all_ages` across available years). A static weight is used because the
+#'   tool datasets span different year ranges than the population series.
+#'
+#'   The lookup may hold several rows per LSOA, one for each area it overlaps
+#'   (see `lsoa_area_weights()`), so an LSOA straddling a boundary appears once
+#'   per area with `share` giving the fraction of its residents living there.
+#'   Callers must therefore scale anything they sum by `share`: a count column
+#'   becomes `sum(x * share)`, and any count used to weight a mean or a median
+#'   becomes `w * share`. `pop_weight` already has the share folded in, so
+#'   population-weighted means need no further change.
+#' @param x A per-LSOA data frame with an `LSOA21CD` column.
+#' @param area_weights One level of the `area_weights` target: `LSOA21CD`, the
+#'   area code column and `weight`.
+#' @param population GB population (`population` target).
+#' @param area_col Name of the area code column (e.g. "WD25CD").
+#' @return `x` with the area code, `share` and `pop_weight` columns added, and
+#'   rows outside this area type dropped.
 #' @keywords internal
-join_area_and_weight <- function(x, lsoa_admin, population, area_col) {
-  admin <- lsoa_admin[, c("LSOA21CD", area_col)]
-  x <- dplyr::left_join(x, admin, by = "LSOA21CD")
+join_area_and_weight <- function(x, area_weights, population, area_col) {
+  lookup <- area_weights[, c("LSOA21CD", area_col, "weight")]
+  # One row per (LSOA, area) pair against many rows per LSOA in x
+  x <- dplyr::left_join(x, lookup, by = "LSOA21CD", relationship = "many-to-many")
   popw <- population |>
     dplyr::group_by(LSOA21CD) |>
     dplyr::summarise(pop_weight = mean(all_ages, na.rm = TRUE))
   x <- dplyr::left_join(x, popw, by = "LSOA21CD")
   x$pop_weight[is.na(x$pop_weight) | x$pop_weight <= 0] <- 1
-  # Drop LSOAs whose centroid fell outside any area of this type, and the
-  # catch-all "Unparished" pseudo-parish (aggregating all unparished LSOAs
-  # nationally would be meaningless)
+  # Drop LSOAs with no area of this type, and the catch-all "Unparished"
+  # pseudo-parish (aggregating all unparished LSOAs nationally is meaningless)
   x <- x[!is.na(x[[area_col]]) & x[[area_col]] != "Unparished", ]
+  x$share <- x$weight
+  x$share[is.na(x$share)] <- 1
+  x$pop_weight <- x$pop_weight * x$share
+  x$weight <- NULL
   x
 }
 
@@ -71,15 +90,15 @@ join_area_and_weight <- function(x, lsoa_admin, population, area_col) {
 #'   percentage columns (`p...`, `vehiclesP...`) are population-weighted means.
 #' @return Data frame per (area, year) with the same columns as `vehicle_summary`.
 #' @keywords internal
-agg_area_vehicle_summary <- function(vehicle_summary, lsoa_admin, population, area_col) {
-  x <- join_area_and_weight(vehicle_summary, lsoa_admin, population, area_col)
-  num_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("year", "pop_weight"))
+agg_area_vehicle_summary <- function(vehicle_summary, area_weights, population, area_col) {
+  x <- join_area_and_weight(vehicle_summary, area_weights, population, area_col)
+  num_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("year", "pop_weight", "share"))
   rate_cols <- grep("^p[A-Z]|^vehiclesP", num_cols, value = TRUE)
   count_cols <- setdiff(num_cols, rate_cols)
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "year")))) |>
     dplyr::summarise(
-      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x, na.rm = TRUE)),
+      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x * share, na.rm = TRUE)),
       dplyr::across(dplyr::all_of(rate_cols), ~ stats::weighted.mean(.x, w = pop_weight, na.rm = TRUE)),
       .groups = "drop"
     )
@@ -92,7 +111,7 @@ agg_area_vehicle_summary <- function(vehicle_summary, lsoa_admin, population, ar
 #'   result is the service frequency experienced by the average resident.
 #' @return Data frame per (area, year) matching the per-LSOA PTfrequency JSON.
 #' @keywords internal
-agg_area_pt_frequency <- function(pt_frequency, lsoa_admin, population, area_col) {
+agg_area_pt_frequency <- function(pt_frequency, area_weights, population, area_col) {
   ptf <- pt_frequency[!is.na(pt_frequency$zone_id), ]
   names(ptf) <- gsub("Morning_Peak", "MorningPeak", names(ptf))
   names(ptf) <- gsub("Afternoon_Peak", "AfternoonPeak", names(ptf))
@@ -104,8 +123,8 @@ agg_area_pt_frequency <- function(pt_frequency, lsoa_admin, population, area_col
     names_from = c("day", "time", "mode"), values_from = "value",
     id_cols = c("zone_id", "year"))
   names(ptf)[names(ptf) == "zone_id"] <- "LSOA21CD"
-  x <- join_area_and_weight(ptf, lsoa_admin, population, area_col)
-  freq_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("pop_weight"))
+  x <- join_area_and_weight(ptf, area_weights, population, area_col)
+  freq_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("pop_weight", "share"))
   freq_cols <- setdiff(freq_cols, "year")
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "year")))) |>
@@ -122,12 +141,12 @@ agg_area_pt_frequency <- function(pt_frequency, lsoa_admin, population, area_col
 #'   has no access data, so Scottish-only areas produce NA rows.
 #' @return Data frame per (area, categoryname, classname).
 #' @keywords internal
-agg_area_access <- function(access_proximity, lsoa_admin, population, area_col) {
+agg_area_access <- function(access_proximity, area_weights, population, area_col) {
   keep <- c("LSOA21CD", "categoryname", "classname",
             "access_15", "proximity_15", "access_30", "proximity_30",
             "access_45", "proximity_45", "access_60", "proximity_60")
   x <- access_proximity[, keep]
-  x <- join_area_and_weight(x, lsoa_admin, population, area_col)
+  x <- join_area_and_weight(x, area_weights, population, area_col)
   score_cols <- grep("^(access|proximity)_", names(x), value = TRUE)
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "categoryname", "classname")))) |>
@@ -143,9 +162,9 @@ agg_area_access <- function(access_proximity, lsoa_admin, population, area_col) 
 #'   `floor_area_avg` are recomputed as EPC-count-weighted means.
 #' @return Data frame per area with the same columns as `epc_dom_summary`.
 #' @keywords internal
-agg_area_epc <- function(epc_dom_summary, lsoa_admin, population, area_col) {
-  x <- join_area_and_weight(epc_dom_summary, lsoa_admin, population, area_col)
-  num_cols <- setdiff(names(x)[sapply(x, is.numeric)], "pop_weight")
+agg_area_epc <- function(epc_dom_summary, area_weights, population, area_col) {
+  x <- join_area_and_weight(epc_dom_summary, area_weights, population, area_col)
+  num_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("pop_weight", "share"))
   avg_cols <- intersect(c("epc_score_avg", "floor_area_avg"), num_cols)
   count_cols <- setdiff(num_cols, avg_cols)
   # summarise() evaluates sequentially: the weighted means must be computed
@@ -154,8 +173,8 @@ agg_area_epc <- function(epc_dom_summary, lsoa_admin, population, area_col) {
   out <- x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(area_col))) |>
     dplyr::summarise(
-      dplyr::across(dplyr::all_of(avg_cols), ~ stats::weighted.mean(.x, w = epc_total, na.rm = TRUE)),
-      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x, na.rm = TRUE)),
+      dplyr::across(dplyr::all_of(avg_cols), ~ stats::weighted.mean(.x, w = epc_total * share, na.rm = TRUE)),
+      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x * share, na.rm = TRUE)),
       .groups = "drop"
     )
   # Restore the per-LSOA export's column order
@@ -171,29 +190,29 @@ agg_area_epc <- function(epc_dom_summary, lsoa_admin, population, area_col) {
 #' @return Data frame per (area, year) with the same columns as the per-LSOA
 #'   gas/electric JSON export.
 #' @keywords internal
-agg_area_gas_electric <- function(gas_electric_lsoa, lsoa_admin, population, area_col) {
-  x <- join_area_and_weight(gas_electric_lsoa, lsoa_admin, population, area_col)
+agg_area_gas_electric <- function(gas_electric_lsoa, area_weights, population, area_col) {
+  x <- join_area_and_weight(gas_electric_lsoa, area_weights, population, area_col)
   # summarise() evaluates sequentially, so everything weighted by the per-LSOA
   # meter counts (medians, bills) must be computed BEFORE meters_gas/meters_elec
   # are replaced by their sums; the means come last, derived from summed totals
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "year")))) |>
     dplyr::summarise(
-      median_gas_kwh = weighted_median(median_gas_kwh, meters_gas),
-      median_elec_kwh = weighted_median(median_elec_kwh, meters_elec),
-      median_gas_kgco2e = weighted_median(median_gas_kgco2e, meters_gas),
-      median_elec_kgco2e = weighted_median(median_elec_kgco2e, meters_elec),
-      gas_average_bill = stats::weighted.mean(gas_average_bill, w = meters_gas, na.rm = TRUE),
-      elec_average_bill = stats::weighted.mean(elec_average_bill, w = meters_elec, na.rm = TRUE),
-      energy_average_bill = stats::weighted.mean(energy_average_bill, w = meters_elec, na.rm = TRUE),
+      median_gas_kwh = weighted_median(median_gas_kwh, meters_gas * share),
+      median_elec_kwh = weighted_median(median_elec_kwh, meters_elec * share),
+      median_gas_kgco2e = weighted_median(median_gas_kgco2e, meters_gas * share),
+      median_elec_kgco2e = weighted_median(median_elec_kgco2e, meters_elec * share),
+      gas_average_bill = stats::weighted.mean(gas_average_bill, w = meters_gas * share, na.rm = TRUE),
+      elec_average_bill = stats::weighted.mean(elec_average_bill, w = meters_elec * share, na.rm = TRUE),
+      energy_average_bill = stats::weighted.mean(energy_average_bill, w = meters_elec * share, na.rm = TRUE),
       otherheating_average_bill = stats::weighted.mean(otherheating_average_bill, w = pop_weight, na.rm = TRUE),
       mean_other_kgco2e = stats::weighted.mean(mean_other_kgco2e, w = pop_weight, na.rm = TRUE),
-      meters_gas = sum(meters_gas, na.rm = TRUE),
-      meters_elec = sum(meters_elec, na.rm = TRUE),
-      total_gas_kwh = sum(total_gas_kwh, na.rm = TRUE),
-      total_elec_kwh = sum(total_elec_kwh, na.rm = TRUE),
-      total_gas_kgco2e = sum(total_gas_kgco2e, na.rm = TRUE),
-      total_elec_kgco2e = sum(total_elec_kgco2e, na.rm = TRUE),
+      meters_gas = sum(meters_gas * share, na.rm = TRUE),
+      meters_elec = sum(meters_elec * share, na.rm = TRUE),
+      total_gas_kwh = sum(total_gas_kwh * share, na.rm = TRUE),
+      total_elec_kwh = sum(total_elec_kwh * share, na.rm = TRUE),
+      total_gas_kgco2e = sum(total_gas_kgco2e * share, na.rm = TRUE),
+      total_elec_kgco2e = sum(total_elec_kgco2e * share, na.rm = TRUE),
       mean_gas_kwh = total_gas_kwh / meters_gas,
       mean_elec_kwh = total_elec_kwh / meters_elec,
       mean_gas_kgco2e = total_gas_kgco2e / meters_gas,
@@ -220,17 +239,17 @@ agg_area_gas_electric <- function(gas_electric_lsoa, lsoa_admin, population, are
 #' @return Data frame per (area, year) with the same columns as the per-LSOA
 #'   prices export (`house_prices_lsoa`).
 #' @keywords internal
-agg_area_prices <- function(house_prices_lsoa, lsoa_admin, population, area_col) {
-  x <- join_area_and_weight(house_prices_lsoa, lsoa_admin, population, area_col)
+agg_area_prices <- function(house_prices_lsoa, area_weights, population, area_col) {
+  x <- join_area_and_weight(house_prices_lsoa, area_weights, population, area_col)
   # summarise() evaluates sequentially: the weighted quantiles must come
   # BEFORE transactions is replaced by its sum (see agg_area_gas_electric)
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "year")))) |>
     dplyr::summarise(
-      price_25 = weighted_median(price_25, transactions),
-      price_median = weighted_median(price_median, transactions),
-      price_75 = weighted_median(price_75, transactions),
-      transactions = sum(transactions, na.rm = TRUE),
+      price_25 = weighted_median(price_25, transactions * share),
+      price_median = weighted_median(price_median, transactions * share),
+      price_75 = weighted_median(price_75, transactions * share),
+      transactions = sum(transactions * share, na.rm = TRUE),
       price_min = min(price_min, na.rm = TRUE),
       price_max = max(price_max, na.rm = TRUE),
       .groups = "drop"
@@ -250,13 +269,13 @@ agg_area_prices <- function(house_prices_lsoa, lsoa_admin, population, area_col)
 #' @return Data frame per (area, year) with the same columns as the per-LSOA
 #'   population export (`population_summary`).
 #' @keywords internal
-agg_area_population <- function(population_summary, lsoa_admin, population, area_col) {
-  x <- join_area_and_weight(population_summary, lsoa_admin, population, area_col)
-  count_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("year", "pop_weight"))
+agg_area_population <- function(population_summary, area_weights, population, area_col) {
+  x <- join_area_and_weight(population_summary, area_weights, population, area_col)
+  count_cols <- setdiff(names(x)[sapply(x, is.numeric)], c("year", "pop_weight", "share"))
   x |>
     dplyr::group_by(dplyr::across(dplyr::all_of(c(area_col, "year")))) |>
     dplyr::summarise(
-      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x, na.rm = TRUE)),
+      dplyr::across(dplyr::all_of(count_cols), ~ sum(.x * share, na.rm = TRUE)),
       .groups = "drop"
     ) |>
     # Restore the per-LSOA export's column order
@@ -265,12 +284,23 @@ agg_area_population <- function(population_summary, lsoa_admin, population, area
 
 #' Run one dataset's aggregation for all four area levels
 #'
+#' @description Each level gets its own LSOA-to-area lookup from
+#'   `area_weights`, so wards and parishes are population weighted while local
+#'   authorities and constituencies keep the whole-LSOA assignment (see
+#'   `build_area_weights()`).
 #' @param agg_fun One of the agg_area_* functions above.
-#' @param ... Passed through to `agg_fun` (dataset, lsoa_admin, population).
+#' @param dataset The per-LSOA dataset to aggregate.
+#' @param area_weights The `area_weights` target: one lookup per level.
+#' @param ... Passed through to `agg_fun` after the lookup (e.g. `population`).
 #' @return Named list of data frames: la, ward, parish, constituency.
 #' @keywords internal
-agg_all_levels <- function(agg_fun, ...) {
-  lapply(area_levels(), function(area_col) agg_fun(..., area_col = area_col))
+agg_all_levels <- function(agg_fun, dataset, area_weights, ...) {
+  levels <- area_levels()
+  out <- lapply(names(levels), function(level) {
+    agg_fun(dataset, area_weights[[level]], ..., area_col = levels[[level]])
+  })
+  names(out) <- names(levels)
+  out
 }
 
 #' Export a list of per-level aggregations as website binary files

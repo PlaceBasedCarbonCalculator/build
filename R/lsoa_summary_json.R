@@ -6,12 +6,14 @@
 #'   date-stamped `lsoa_overview` bin + index in `outputdata/jsonbin` via
 #'   `export_zone_bin()`. Used by the `build_overview_jsons` target.
 #' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param area_names Canonical ward and parish names (`area_names` target).
 #' @param area_classifications_11_21 Classifications on 2021 zones
 #'   (`area_classifications_11_21` target).
 #' @param lsoa_warnings Warning codes (`lsoa_warnings` target).
 #' @return The output paths from `export_zone_bin()`.
 #' @keywords internal
-make_lsoa_overview_json = function(lsoa_admin, area_classifications_11_21, lsoa_warnings){
+make_lsoa_overview_json = function(lsoa_admin, area_names, area_classifications_11_21,
+                                   lsoa_warnings){
 
   
   # Include the administrative-area *codes* as well as names, so the website can
@@ -22,6 +24,14 @@ make_lsoa_overview_json = function(lsoa_admin, area_classifications_11_21, lsoa_
                              "PAR23CD","PAR23NM",
                              "PCON24CD","PCON24NM",
                              "LAD25CD","LAD25NM")]
+
+  # An LSOA is shown the ward and parish holding its centroid, but under the
+  # name the ward and parish reports themselves use, so the link text matches
+  # the page it opens (see build_area_names())
+  wd = area_names$ward$name[match(lsoa_admin$WD25CD, area_names$ward$id)]
+  lsoa_admin$WD25NM[!is.na(wd)] = wd[!is.na(wd)]
+  par = area_names$parish$name[match(lsoa_admin$PAR23CD, area_names$parish$id)]
+  lsoa_admin$PAR23NM[!is.na(par)] = par[!is.na(par)]
   lsoa = dplyr::left_join(lsoa_admin, area_classifications_11_21, by = "LSOA21CD")
 
 

@@ -49,23 +49,45 @@ percap_source_cols = c(
 #' @param by Character, the area code column to group by (e.g. "LAD25CD");
 #'   `character(0)` gives a single national row per year.
 #' @param grades Logical, add `*_grade` columns (default TRUE).
+#' @param weight Name of a column in `lookup` holding the share of each LSOA
+#'   belonging to the area, or NULL for a whole-LSOA lookup. Where given,
+#'   `lookup` may hold several rows per LSOA (see `lsoa_area_weights()`) and
+#'   both the emissions and the population of each LSOA are split between them
+#'   in proportion to where its residents live. Per-capita figures are then the
+#'   population-weighted mean of the LSOA values, which is what lets small
+#'   areas such as parishes have their own numbers.
 #' @return A data frame per area-year of per-capita emissions by domain,
 #'   plus grades if requested.
 #' @keywords internal
-summarise_emissions_by = function(lsoa_emissions_all, lookup, population, by, grades = TRUE){
+summarise_emissions_by = function(lsoa_emissions_all, lookup, population, by,
+                                  grades = TRUE, weight = NULL){
 
   population = population[,c("LSOA21CD","year","all_ages")]
 
   lsoa_emissions_all = lsoa_emissions_all[,!grepl("grade",names(lsoa_emissions_all))]
   lsoa_emissions_all = lsoa_emissions_all[,!grepl("kgco2e_percap",names(lsoa_emissions_all))]
 
-  lsoa_emissions_all = dplyr::left_join(lsoa_emissions_all, lookup, by = "LSOA21CD")
+  # A weighted lookup holds one row per (LSOA, area) pair and the emissions
+  # table one per (LSOA, year), so the join is deliberately many-to-many
+  lsoa_emissions_all = dplyr::left_join(lsoa_emissions_all, lookup, by = "LSOA21CD",
+                                        relationship = "many-to-many")
   lsoa_emissions_all = dplyr::left_join(lsoa_emissions_all, population, by = c("LSOA21CD","year"))
 
   # Drop LSOAs with no code for this area type (e.g. missing from the lookup):
   # they would otherwise form an NA group, which export_zone_bin() rejects
   if(length(by) > 0){
     lsoa_emissions_all = lsoa_emissions_all[!is.na(lsoa_emissions_all[[by]]), ]
+  }
+
+  # Split each LSOA's totals between the areas it overlaps. Both the emissions
+  # and the population are scaled by the same share, so an area's per-capita
+  # figure is unaffected by the size of the share and only its contribution to
+  # the area total changes.
+  if(!is.null(weight)){
+    shares = lsoa_emissions_all[[weight]]
+    for(col in c(unname(percap_source_cols), "all_ages")){
+      lsoa_emissions_all[[col]] = lsoa_emissions_all[[col]] * shares
+    }
   }
 
   # na.rm = TRUE: combine_lsoa_emissions() NAs the company/bike columns of the
@@ -177,17 +199,19 @@ make_westminter_summary = function(lsoa_emissions_all, lsoa_admin, population){
 #'
 #' @description As `make_la_summary()` but grouped by parish (`PAR23CD`),
 #'   without a GB row. Grades are relative to other parishes in the same year.
-#'   Used by the `parish_emissions_all` target, exported by
-#'   `parish_emissions_summary_json`.
+#'   A parish is usually much smaller than an LSOA, so this uses the population
+#'   weighted lookup (`area_weights$parish`) rather than assigning each LSOA
+#'   wholly to one parish: see `lsoa_area_weights()` for why. Used by the
+#'   `parish_emissions_all` target, exported by `parish_emissions_summary_json`.
 #' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
-#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param area_weights Weighted LSOA-to-area lookups (`area_weights` target).
 #' @param population GB population (`population` target).
 #' @return A data frame per PAR23CD-year of per-capita emissions plus grades.
 #' @keywords internal
-make_parish_summary = function(lsoa_emissions_all, lsoa_admin, population){
+make_parish_summary = function(lsoa_emissions_all, area_weights, population){
 
-  summarise_emissions_by(lsoa_emissions_all, lsoa_admin[,c("LSOA21CD","PAR23CD")],
-                         population, by = "PAR23CD")
+  summarise_emissions_by(lsoa_emissions_all, area_weights$parish,
+                         population, by = "PAR23CD", weight = "weight")
 
 }
 
@@ -195,17 +219,20 @@ make_parish_summary = function(lsoa_emissions_all, lsoa_admin, population){
 #'
 #' @description As `make_la_summary()` but grouped by ward (`WD25CD`),
 #'   without a GB row. Grades are relative to other wards in the same year.
+#'   Uses the population weighted lookup (`area_weights$ward`), which splits
+#'   LSOAs between the wards they straddle and covers the small wards no LSOA
+#'   centroid falls inside (see `lsoa_area_weights()`).
 #'   Used by the `ward_emissions_all` target, exported by
 #'   `ward_emissions_summary_json`.
 #' @param lsoa_emissions_all Master emissions table (`lsoa_emissions_all`).
-#' @param lsoa_admin Zone-to-admin lookup (`lsoa_admin` target).
+#' @param area_weights Weighted LSOA-to-area lookups (`area_weights` target).
 #' @param population GB population (`population` target).
 #' @return A data frame per WD25CD-year of per-capita emissions plus grades.
 #' @keywords internal
-make_ward_summary = function(lsoa_emissions_all, lsoa_admin, population){
+make_ward_summary = function(lsoa_emissions_all, area_weights, population){
 
-  summarise_emissions_by(lsoa_emissions_all, lsoa_admin[,c("LSOA21CD","WD25CD")],
-                         population, by = "WD25CD")
+  summarise_emissions_by(lsoa_emissions_all, area_weights$ward,
+                         population, by = "WD25CD", weight = "weight")
 
 }
 

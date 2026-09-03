@@ -1,32 +1,35 @@
 # Make Search JSONs
+#
+# The website's report pages search these lists, so they must offer exactly the
+# areas that have a report behind them, under the same name the report itself
+# shows. Wards and parishes therefore come from `area_names`, which is built
+# from the areas the population weighting reaches (see R/area_weights.R).
+# Local authorities and constituencies come from their boundary layers, minus
+# Northern Ireland: the boundary layers are UK-wide but every dataset behind
+# the reports is GB-only, so an NI council or constituency in the search box
+# only ever leads to an empty report.
 
 library(targets)
 library(sf)
 library(jsonlite)
 
+site = "../PlaceBasedCarbonCalculator.github.io/reports/"
+
+tar_load(area_names)
+
+write_json(area_names$ward, paste0(site, "wards.json"))
+write_json(area_names$parish, paste0(site, "parish.json"))
+
+as_search_list = function(x){
+  x = st_drop_geometry(x)
+  names(x) = c("id","name")
+  # N-prefixed ONS codes are Northern Ireland
+  x = x[!grepl("^N", x$id),]
+  x[order(x$name),]
+}
+
 tar_load(bounds_la)
-
-bounds_la  = st_drop_geometry(bounds_la)
-names(bounds_la) = c("id","name")
-bounds_la = bounds_la[order(bounds_la$name),]
-write_json(bounds_la, "../PlaceBasedCarbonCalculator.github.io/reports/la.json")
-
-tar_load(bounds_wards)
-bounds_wards  = st_drop_geometry(bounds_wards)
-names(bounds_wards) = c("id","name")
-bounds_wards = bounds_wards[order(bounds_wards$name),]
-write_json(bounds_wards, "../PlaceBasedCarbonCalculator.github.io/reports/wards.json")
-
-tar_load(bounds_parish)
-bounds_parish  = st_drop_geometry(bounds_parish)
-names(bounds_parish) = c("id","name")
-bounds_parish = bounds_parish[order(bounds_parish$name),]
-write_json(bounds_parish, "../PlaceBasedCarbonCalculator.github.io/reports/parish.json")
+write_json(as_search_list(bounds_la), paste0(site, "la.json"))
 
 tar_load(bounds_westminster)
-bounds_westminster  = st_drop_geometry(bounds_westminster)
-names(bounds_westminster) = c("id","name")
-bounds_westminster = bounds_westminster[order(bounds_westminster$name),]
-write_json(bounds_westminster, "../PlaceBasedCarbonCalculator.github.io/reports/westminster.json")
-
-
+write_json(as_search_list(bounds_westminster), paste0(site, "westminster.json"))

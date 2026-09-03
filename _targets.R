@@ -123,7 +123,7 @@ tar_target(household_pics_json,{
 # slots (see R/family_portraits.R). Powers the demographics tab community photo
 # on the area report cards. Deploy the {level}_community_pics bins to the blob.
 tar_target(area_household_pics,{
-  agg_all_levels(agg_area_household_pics, household_clusters_gb, lsoa_admin)
+  agg_all_levels(agg_area_household_pics, household_clusters_gb, area_weights)
 }),
 tar_target(area_household_pics_json,{
   export_area_bins(area_household_pics, "community_pics", rounddp = 0)
@@ -386,6 +386,24 @@ tar_target(lsoa21_OAC21_summary,{
 
 tar_target(lsoa_admin,{
   lsoa_admin_summary(bounds_wards, bounds_parish, bounds_westminster, bounds_la, centroids_lsoa21, centroids_dz22)
+}),
+
+# How much of each LSOA belongs to each ward / parish, from the 2021 census
+# population of Output Areas spread over their postcodes (see R/area_weights.R).
+# lsoa_admin puts a whole LSOA in one area, which leaves thousands of parishes
+# and dozens of small wards with no data at all; these weights split LSOAs
+# between the areas they cover instead. LA and constituency keep the whole-LSOA
+# assignment, so their published figures are unchanged.
+tar_target(area_weights,{
+  build_area_weights(lsoa_admin, bounds_wards, bounds_parish, postcode_points,
+                     lookup_postcode_OA_LSOA_MSOA_2021, population_oa21)
+}),
+
+# One display name per ward / parish, used by the search JSONs, the report
+# titles and the LSOA report's links, so all three agree. Built from the areas
+# that have data, since that is what the search box may offer.
+tar_target(area_names,{
+  build_area_names(area_weights, bounds_wards, bounds_parish, lsoa_admin)
 }),
 
 # Depends on lsoa_emissions_all (defined further down) for warning code 6:
@@ -734,14 +752,14 @@ tar_target(oac_emissions_summary_json,{
 # index_<level>_emissions_*.json(.gz) files from outputdata/jsonbin to the blob
 # store alongside la_emissions.
 tar_target(ward_emissions_all,{
-  make_ward_summary(lsoa_emissions_all, lsoa_admin, population)
+  make_ward_summary(lsoa_emissions_all, area_weights, population)
 }),
 tar_target(ward_emissions_summary_json,{
   export_zone_bin(ward_emissions_all, idcol = "WD25CD", rounddp = 0, name = "ward_emissions", dataframe = "columns")
 }),
 
 tar_target(parish_emissions_all,{
-  make_parish_summary(lsoa_emissions_all, lsoa_admin, population)
+  make_parish_summary(lsoa_emissions_all, area_weights, population)
 }),
 tar_target(parish_emissions_summary_json,{
   export_zone_bin(parish_emissions_all, idcol = "PAR23CD", rounddp = 0, name = "parish_emissions", dataframe = "columns")
@@ -759,28 +777,28 @@ tar_target(constituency_emissions_summary_json,{
 # the website's area report pages. Deploy the date-stamped {level}_{name} bin
 # and index files from outputdata/jsonbin to the blob store.
 tar_target(area_vehicle_summaries,{
-  agg_all_levels(agg_area_vehicle_summary, vehicle_summary, lsoa_admin, population)
+  agg_all_levels(agg_area_vehicle_summary, vehicle_summary, area_weights, population)
 }),
 tar_target(area_vehicle_summaries_json,{
   export_area_bins(area_vehicle_summaries, "vehicle_summary")
 }),
 
 tar_target(area_pt_frequencies,{
-  agg_all_levels(agg_area_pt_frequency, pt_frequency, lsoa_admin, population)
+  agg_all_levels(agg_area_pt_frequency, pt_frequency, area_weights, population)
 }),
 tar_target(area_pt_frequencies_json,{
   export_area_bins(area_pt_frequencies, "pt_frequency")
 }),
 
 tar_target(area_access,{
-  agg_all_levels(agg_area_access, access_proximity, lsoa_admin, population)
+  agg_all_levels(agg_area_access, access_proximity, area_weights, population)
 }),
 tar_target(area_access_json,{
   export_area_bins(area_access, "access")
 }),
 
 tar_target(area_epc_dom,{
-  agg_all_levels(agg_area_epc, epc_dom_summary, lsoa_admin, population)
+  agg_all_levels(agg_area_epc, epc_dom_summary, area_weights, population)
 }),
 tar_target(area_epc_dom_json,{
   # dataframe = "rows" to match the per-LSOA epc_dom export (build_epc_dom_jsons)
@@ -790,14 +808,14 @@ tar_target(area_epc_dom_json,{
 tar_target(area_gas_electric,{
   ge = calculate_lsoa_gas_electric_emissions(domestic_gas, domestic_electricity, emissions_factors,
                                              bills_gas_electric, bills_other_heating, other_heating_emissions)
-  agg_all_levels(agg_area_gas_electric, ge, lsoa_admin, population)
+  agg_all_levels(agg_area_gas_electric, ge, area_weights, population)
 }),
 tar_target(area_gas_electric_json,{
   export_area_bins(area_gas_electric, "gas_electric")
 }),
 
 tar_target(area_prices,{
-  agg_all_levels(agg_area_prices, house_prices_lsoa, lsoa_admin, population)
+  agg_all_levels(agg_area_prices, house_prices_lsoa, area_weights, population)
 }),
 tar_target(area_prices_json,{
   # rounddp = 0 to match the per-LSOA prices_json export (whole pounds)
@@ -805,7 +823,7 @@ tar_target(area_prices_json,{
 }),
 
 tar_target(area_population,{
-  agg_all_levels(agg_area_population, population_summary, lsoa_admin, population)
+  agg_all_levels(agg_area_population, population_summary, area_weights, population)
 }),
 tar_target(area_population_json,{
   # dataframe = "columns" (export_area_bins default) to match the per-LSOA
@@ -1352,7 +1370,7 @@ tar_target(build_postcode_jsons,{
 }),
 
 tar_target(build_overview_jsons,{
-  make_lsoa_overview_json(lsoa_admin, area_classifications_11_21, lsoa_warnings)
+  make_lsoa_overview_json(lsoa_admin, area_names, area_classifications_11_21, lsoa_warnings)
 }),
 
 # Combined LSOA/Data Zone centroid lookup used by the website to pan/zoom the
