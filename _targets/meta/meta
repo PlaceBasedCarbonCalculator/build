@@ -331,8 +331,6 @@ bulk_pt_frequency|stem|fb5ea03312ac3d1e|dff2d3ea2fb7687a|1095f1119af7fe55|197240
 pt_json|stem|4f6827e20c0a5cad|ad2b27ca25bd9cc9|abde967de1b0f14e|372774427||t20690.3247750295s|s121b|121|rds|local|vector|||2182.83||
 build_postcode_jsons|stem|878d41cd7ccfa0d9|1b6a34cfdb248ba0|a5351ab33912c870|-1252984890||t20690.7324449737s|s10748859b|10748859|rds|local|vector|||35194.55||
 voa_json_2010|stem|05f37c25c7fa9fb5|4b499d05aff63107|0222876da6a832e1|-1161495879||t20690.7600004847s|s116b|116|rds|local|vector|||908.61||
-build_epc_dom_jsons|stem|c780c70fff684351|8ca9bdca00b0de59|b2532f7e85cb8f96|974314826||t20690.7873787275s|s116b|116|rds|local|vector|||2363.8||
-bulk_epc_dom_summary|stem|0a6968576c4de49a|fe8407cd08f949c1|671ee1dbd23ff7ac|143664269|outputdata/bulk/epc_dom_summary_20260825.zip|t20690.7877767921s|s6880474b|6880474|file|local|vector|||35.87|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
 bulk_buildings_heights|stem|a83e84f18abb17a1|4340cad27bb67613|57f7bb2b0232dded|-705482265|outputdata/bulk/buildings_heights_20260825.zip|t20690.8105569169s|s3901057318b|3901057318|file|local|vector|||1538.16|'C:\Users\earmmor\AppData\Local\Temp\RtmpY5ZkrQ\bulkexport' already exists|
 pmtiles_postcode|stem|0e4a836e50e27b5f|40040a3f04114a3d|4b50644838a93eb9|-1011986628|outputdata/postcodes_20260825.pmtiles|t20690.8316241413s|s692047089b|692047089|file|local|vector|||1809.5||
 build_access_jsons|stem|954440978ec9ae5d|4f9c60d5aad0edc4|f72d49a4763cfc6d|1370075298||t20690.9594546821s|s115b|115|rds|local|vector|||11017.42||
@@ -344,7 +342,6 @@ geojson_postcode|stem|02ea4828bcebb902|8203bcc45a26d433|1f323620341d37b2|1560777
 transport_lsoa_data|stem|256fe79a0cda4cad|bb074ea221b92e67|6086b92f6e322fa5|-1134730169||t20693.6933136294s|s778418b|778418|rds|local|vector|||1.11||
 pmtiles_transport|stem|738831c78d6b4d8a|f5e3e43dbccfebe5|7ec89025d1434699|50855935|outputdata/transport/zones_transport_20260828.pmtiles*outputdata/transport/buildings_transport_20260828.pmtiles|t20693.8047909511s|s2059789531b|2059789531|file|local|vector|||9392.81||
 lsoa_emissions_all|stem|7214b89889ff42c6|451c684d240cef56|e0dadff3a9598ce2|1303375064||t20693.8056482021s|s226804585b|226804585|rds|local|vector|||36.23||
-retrofit_lsoa_data|stem|e4e3e65e2d64a9d6|129aacab6d126a3d|e9e74eb91eb6a0d6|-2108320529||t20693.8077563277s|s979225b|979225|rds|local|vector|||12.66||
 lsoa_warnings|stem|c8a9f61ba5e9acfb|c68b251219359142|c992f637781b62d4|-740085556||t20693.8079179831s|s24915b|24915|rds|local|vector|||0.29||
 lsoa_map_data|stem|90cd818814c4e6df|a6b4acb7da4d8ed7|0e15f4bb252798d0|1195666468||t20693.808989883s|s452437b|452437|rds|local|vector|||1.02||
 build_historical_emissions_jsons|stem|5ca4e10268d1c9a0|fbd862969e0d62f8|92f262e72d9c2e6c|1811032421||t20693.8540379114s|s129b|129|rds|local|vector|||3842.94|NAs introduced by coercion to integer range|
@@ -529,7 +526,7 @@ load_other_heating_prices|function|925f75ae43e0d05b
 calculate_electricity_emissions|function|d64527144fba0793
 match_matrix_rsums|function|8617dae978898b8f
 epc_read_domestic|function|b0a845bb72de62c6
-epc_summarise_certs|function|bfb1ba1c025880d0
+epc_summarise_certs|function|f862af6951104215
 simplify_ethnic6|function|fa4df3a9eac22889
 read_os_poi|function|56ff06077b3f9c3b
 build_lsoa_population_2022_24|function|f7b24d86ade5e25b
@@ -777,8 +774,8 @@ load_lo_house_prices_nowcast|function|a499c077881c1c32
 load_lo_house_price_lr_uprn|function|26afeff5e1890889
 load_lo_uprn_historical_epc_lr|function|398827b577b2af01
 load_lo_inspire|function|3aca09e2c08e915b
-epc_summarise_domestic|function|d25fe5dbc76bf8b1
-epc_summarise_domestic_areas|function|b213f58661f65b17
+epc_summarise_domestic|function|0507b8fb1ed99f0c
+epc_summarise_domestic_areas|function|37cd2be2e4a0dee6
 build_synth_pop_seed_scotland|function|3375968e8ae8a0ba
 sythetic_census_scot_old|function|68149b3c0f5c291f
 sythetic_census_scot|function|0998d49566bbd971
@@ -818,7 +815,10 @@ make_oac_summary|function|96fcc6cad49ccbab
 make_parish_summary|function|dd2e8476bd7a8ad2
 make_ward_summary|function|056bcdd89d959f72
 read_household_nssec|function|f9eb8ce85ed2650f
-epc_dom_area_summary|stem|a2bb2d4a50734d7c|dc6ac068fa01ae9c|98374b69c614f67d|-863704427||t20699.3928273585s|s3990537b|3990537|rds|local|vector|||2036.21|invalid factor level, NA generated. invalid factor level, NA generated|
-epc_dom_summary|stem|33748db733029902|63e14babb6ac197f|aeb2b336fac2d79b|-698757306||t20699.4195125258s|s7379634b|7379634|rds|local|vector|||2297.3|invalid factor level, NA generated. invalid factor level, NA generated|
-area_epc_dom|stem|95466ac594763aeb|dc79f40f93913aaa|0b278f221fc32532|-523609739||t20699.4199131065s|s4377895b|4377895|rds|local|vector|||5.86||
-area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|f623f15386e673ad|375468698||t20699.4336637025s|s44b|44|rds|local|vector|||1187.72||
+epc_dom_area_summary|stem|1b2cdc00b8b57243|dc6ac068fa01ae9c|d49d2cb5070a9a9e|-863704427||t20702.6317205763s|s3979557b|3979557|rds|local|vector|||1411.37|invalid factor level, NA generated. invalid factor level, NA generated|
+epc_dom_summary|stem|c287b56542aa58f7|63e14babb6ac197f|00bed51a4a49925e|-698757306||t20702.6501950584s|s7347502b|7347502|rds|local|vector|||1591.3|invalid factor level, NA generated. invalid factor level, NA generated|
+build_epc_dom_jsons|stem|04a23257a7431d54|8ca9bdca00b0de59|02ba6643f36ea8cb|974314826||t20702.6786577221s|s116b|116|rds|local|vector|||2458.78||
+bulk_epc_dom_summary|stem|c14dc96a74ef3e87|fe8407cd08f949c1|655f95b8372feddf|143664269|outputdata/bulk/epc_dom_summary_20260906.zip|t20702.6789115285s|s6857645b|6857645|file|local|vector|||21.81||
+area_epc_dom|stem|390d037b9133b3aa|dc79f40f93913aaa|8d47fd42f90f30fc|-523609739||t20702.6789900801s|s4364450b|4364450|rds|local|vector|||3.08||
+area_epc_dom_json|stem|e77a28538e829a39|42eb05a3b275da92|6880f4af4ac6a350|375468698||t20702.6820952042s|s44b|44|rds|local|vector|||268.13||
+retrofit_lsoa_data|stem|e4e3e65e2d64a9d6|129aacab6d126a3d|ccd023cc751b8653|-2108320529||t20702.6837899768s|s979225b|979225|rds|local|vector|||16.24||
