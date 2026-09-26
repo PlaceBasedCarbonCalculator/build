@@ -619,8 +619,25 @@ tar_target(car_km_lsoa_21,{
 # }),
 
 # Public Transport Frequency
+#
+# Tracked as files, for the same reason as the EPC and LandOwnership inputs at
+# the top of this file: the path used to be a plain string inside the command,
+# so tar_make() hashed the CODE and never noticed new data. The
+# PublicTransportAnalysis pipeline rebuilt every year of this series in
+# September 2026 - three conversion defects, see that repo's
+# reports/rebuild_comparison_2026-09.md - and nothing here would have rebuilt.
+#
+# 20 files, ~110 MB to hash, against 5 GB for inspire_clean alone.
+tar_target(pt_frequency_files,
+           file.path("../PublicTransportAnalysis/data",
+                     paste0("trips_per_lsoa21_22_by_mode_",
+                            c(2004:2011, 2014:2025), ".Rds")),
+           format = "file"),
 tar_target(pt_frequency,{
-  load_pt_frequency("../PublicTransportAnalysis/data")
+  # dirname() of the tracked paths, not the literal folder, so the dependency
+  # on pt_frequency_files is real rather than decorative - referencing the
+  # symbol is what makes targets rebuild this when the data changes
+  load_pt_frequency(unique(dirname(pt_frequency_files)))
 }),
 
 tar_target(pt_json,{
